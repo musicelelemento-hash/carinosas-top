@@ -1,59 +1,104 @@
 "use client";
 
 import React from "react";
-import { MessageCircle } from "lucide-react";
+import HeroSection from "@/components/HeroSection";
+import ProfileCard from "@/components/ProfileCard";
+import Navbar from "@/components/Navbar";
+import RecommendationSection from "@/components/RecommendationSection";
+import PanicButton from "@/components/PanicButton";
+import AvailabilityChat from "@/components/AvailabilityChat";
+import LiveCountBanner from "@/components/LiveCountBanner";
+import GhostNotifications from "@/components/GhostNotifications";
+import Footer from "@/components/Footer";
+import StoriesBar from "@/components/StoriesBar";
+import LiveMap from "@/components/LiveMap";
 
-export default function ComingSoon() {
+// In a real app, this would be fetched from Supabase
+const MODELS = [
+  { id: '1', name: 'Valentina', age: 21, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800', isBoosted: true },
+  { id: '2', name: 'Camila', age: 23, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800' },
+  { id: '3', name: 'Luciana', age: 22, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800' },
+  { id: '4', name: 'Alessandra', age: 25, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1503105391650-704fd6827a88?auto=format&fit=crop&q=80&w=800', isBoosted: true },
+  { id: '5', name: 'Isabella', age: 24, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=800' },
+  { id: '6', name: 'Antonella', age: 26, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800' },
+];
+
+export default function Home() {
+  const [displayModels, setDisplayModels] = React.useState(MODELS);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+        setIsLoading(true);
+        setTimeout(() => {
+          const extraModels = [
+            { id: Math.random().toString(), name: 'Elena', age: 22, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800' },
+            { id: Math.random().toString(), name: 'Sofía', age: 23, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true },
+            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800' },
+          ];
+          setDisplayModels(prev => [...prev, ...extraModels]);
+          setIsLoading(false);
+        }, 1500);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading]);
+
   return (
-    <main className="min-h-screen bg-brand-black flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Radial Gradient Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.1)_0%,_transparent_70%)]" />
+    <main className="min-h-screen bg-brand-black pb-0">
+      <Navbar />
+      
+      {/* Social Proof Header */}
+      <LiveCountBanner />
 
-      <div className="max-w-3xl w-full text-center relative z-10 animate-in fade-in duration-1000">
-        {/* Logo and Pulse Animation */}
-        <div className="mb-12 relative inline-block">
-          <div className="text-6xl md:text-8xl animate-pulse-subtle">
-            👑
+      {/* Instagram-style Stories */}
+      <StoriesBar />
+
+      <HeroSection />
+
+      {/* Uber-style Live Map */}
+      <LiveMap />
+      
+      {/* Smart Recommendations */}
+      <RecommendationSection />
+
+      {/* Main Directory Grid with Infinite Scroll */}
+      <section className="max-w-7xl mx-auto px-4 py-10">
+        <div className="flex items-center gap-4 mb-20 px-4">
+          <div className="h-px bg-brand-gold/10 flex-1" />
+          <div className="flex flex-col items-center gap-1">
+            <h2 className="text-2xl font-serif text-brand-gold uppercase tracking-[0.4em] text-center">ELITE DIRECTORY</h2>
+            <span className="text-[10px] text-brand-white/30 uppercase tracking-[0.5em] font-black">Luxury Access Only</span>
           </div>
-          <div className="absolute inset-0 bg-brand-gold/20 blur-3xl rounded-full" />
+          <div className="h-px bg-brand-gold/10 flex-1" />
         </div>
 
-        {/* Text Section */}
-        <h1 className="text-4xl md:text-7xl font-serif text-brand-gold mb-8 tracking-tighter leading-tight">
-          La nueva era del <br />
-          <span className="text-brand-white">placer en Ecuador</span>
-        </h1>
-        
-        <p className="text-xl md:text-2xl font-serif text-brand-gold/80 mb-16 tracking-wide">
-          Inauguración exclusiva Marzo 2026
-        </p>
-
-        {/* CTA Button */}
-        <div className="flex justify-center">
-          <a
-            href="https://wa.me/593"
-            className="group relative bg-brand-gold hover:bg-brand-gold/90 text-brand-black px-12 py-5 rounded-full font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-gold flex items-center gap-3"
-          >
-            <MessageCircle size={24} fill="currentColor" />
-            <span>¿Eres modelo? Regístrate aquí</span>
-            <div className="absolute inset-0 rounded-full bg-brand-gold/20 animate-ping opacity-0 group-hover:opacity-100 transition-opacity" />
-          </a>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
+          {displayModels.map((model) => (
+            <ProfileCard key={model.id} {...model} />
+          ))}
         </div>
-      </div>
 
-      {/* Decorative Blur */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-brand-pink/5 blur-[120px] rounded-full" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-gold/5 blur-[120px] rounded-full" />
+        {/* Infinite Scroll Loader */}
+        {isLoading && (
+          <div className="mt-20 flex justify-center py-10 animate-in fade-in duration-500">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-10 h-10 border-2 border-brand-gold/10 border-t-brand-gold rounded-full animate-spin" />
+              <span className="text-[10px] text-brand-gold/40 uppercase tracking-[0.4em] font-black">Cargando Élite Adicional...</span>
+            </div>
+          </div>
+        )}
+      </section>
 
-      <style jsx global>{`
-        @keyframes pulse-subtle {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.8; }
-        }
-        .animate-pulse-subtle {
-          animation: pulse-subtle 4s infinite ease-in-out;
-        }
-      `}</style>
+      {/* Futuristic Floating Elements */}
+      <PanicButton />
+      <AvailabilityChat />
+      <GhostNotifications />
+
+      <Footer />
     </main>
   );
 }
