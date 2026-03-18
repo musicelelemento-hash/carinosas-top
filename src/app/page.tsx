@@ -44,6 +44,8 @@ export default function Home() {
           name: m.name,
           age: m.age,
           location: m.sector ? `${m.sector}, ${m.city}` : m.city,
+          // Pass full images array so ProfileCard can do slideshow between all photos
+          images: m.images && m.images.length > 0 ? m.images : [STATIC_MODELS[0].imageUrl],
           imageUrl: m.images && m.images[0] ? m.images[0] : STATIC_MODELS[0].imageUrl,
           isBoosted: m.plan_type === 'Diamante',
           description: m.description,

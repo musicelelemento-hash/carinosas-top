@@ -9,30 +9,62 @@ interface ProfileCardProps {
   name: string;
   age: number;
   location: string;
-  imageUrl: string;
+  imageUrl?: string;
+  images?: string[];
   isVip?: boolean;
   isBoosted?: boolean;
   sector?: string;
+  whatsapp?: string;
 }
 
 export default function ProfileCard({ 
   name, 
   age, 
   location, 
-  imageUrl, 
+  imageUrl,
+  images,
   isVip = true,
   isBoosted = false,
-  sector
+  sector,
+  whatsapp
 }: ProfileCardProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+
+  // Build final image array from either images[] or imageUrl fallback
+  const allImages = React.useMemo(() => {
+    if (images && images.length > 0) return images;
+    if (imageUrl) return [imageUrl];
+    return ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'];
+  }, [images, imageUrl]);
+
+  // Slideshow: cycle through images on hover
+  React.useEffect(() => {
+    if (!isHovered || allImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+    }, 1200);
+    return () => clearInterval(interval);
+  }, [isHovered, allImages.length]);
+
+  // Reset to first image when hover ends
+  React.useEffect(() => {
+    if (!isHovered) setCurrentImageIndex(0);
+  }, [isHovered]);
 
   const handleContact = () => {
     setIsTransitioning(true);
-    setTimeout(() => {
-      window.location.href = "#";
-      setIsTransitioning(false);
-    }, 1500);
+    if (whatsapp) {
+      const phone = whatsapp.replace(/\D/g, '');
+      const fullPhone = phone.startsWith('593') ? phone : `593${phone.replace(/^0/, '')}`;
+      setTimeout(() => {
+        window.open(`https://wa.me/${fullPhone}?text=Hola%20${encodeURIComponent(name)}%2C%20vi%20tu%20perfil%20en%20Cari%C3%B1osas.top%20%F0%9F%94%A5`, '_blank');
+        setIsTransitioning(false);
+      }, 1200);
+    } else {
+      setTimeout(() => setIsTransitioning(false), 1500);
+    }
   };
 
   return (
@@ -67,14 +99,36 @@ export default function ProfileCard({
           )}
         </div>
 
+        {/* Image Counter Dots (only if multiple images) */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-24 left-0 right-0 z-30 flex justify-center gap-1.5 pointer-events-none">
+            {allImages.map((_, i) => (
+              <div 
+                key={i} 
+                className={`rounded-full transition-all duration-300 ${
+                  i === currentImageIndex 
+                    ? 'w-4 h-1.5 bg-brand-gold' 
+                    : 'w-1.5 h-1.5 bg-white/30'
+                }`} 
+              />
+            ))}
+          </div>
+        )}
+
         {/* Image Container */}
         <div className="relative aspect-[4/5] overflow-hidden bg-brand-black">
-          <Image
-            src={imageUrl}
-            alt={name}
-            fill
-            className={`object-cover transition-all duration-[1.5s] ease-out-expo ${isHovered ? 'scale-110 blur-[2px] brightness-50' : 'scale-100'}`}
-          />
+          {allImages.map((img, i) => (
+            <Image
+              key={i}
+              src={img}
+              alt={`${name} ${i + 1}`}
+              fill
+              className={`object-cover transition-all duration-700 absolute inset-0 ${
+                i === currentImageIndex ? 'opacity-100' : 'opacity-0'
+              } ${isHovered ? 'scale-110 blur-[2px] brightness-50' : 'scale-100'} ease-out-expo`}
+              priority={i === 0}
+            />
+          ))}
           
           {/* Elite Pattern Overlay */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)] opacity-60 pointer-events-none" />

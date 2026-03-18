@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { StitchEngine } from "@/lib/stitch";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
+import LocationPickerMap from "@/components/LocationPickerMap";
 import { 
   Plus, 
   Zap, 
   Trash2, 
   CheckCircle2, 
   Loader2, 
-  Copy, 
-  MessageCircle, 
   Phone, 
   MapPin,
   Sparkles,
-  Navigation
+  Map
 } from "lucide-react";
 
 export default function AdminQuickUpload() {
@@ -24,35 +23,53 @@ export default function AdminQuickUpload() {
   const [whatsapp, setWhatsapp] = useState("");
   const [city, setCity] = useState("Quito");
   const [sector, setSector] = useState("");
-  const [lat, setLat] = useState<number | null>(-0.1807);
-  const [lng, setLng] = useState<number | null>(-78.4678);
+  const [lat, setLat] = useState<number>(-0.1807);
+  const [lng, setLng] = useState<number>(-78.4678);
   const [age, setAge] = useState("21");
   const [rawDesc, setRawDesc] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [tempTransformed, setTempTransformed] = useState("");
+  const [showMap, setShowMap] = useState(false);
 
   const provinces = getProvinces();
 
-  // Simple city to approximate coordinate mapper
+  // City center coordinates for map navigation
+  const CITY_CENTERS: Record<string, [number, number]> = {
+    'Quito': [-0.1807, -78.4678],
+    'Guayaquil': [-2.1894, -79.8891],
+    'Cuenca': [-2.9001, -79.0059],
+    'Manta': [-0.9621, -80.7127],
+    'Machala': [-3.2581, -79.9161],
+    'Santo Domingo': [-0.2520, -79.1714],
+    'Ambato': [-1.2417, -78.6197],
+    'Portoviejo': [-1.0544, -80.4544],
+    'Pasaje': [-3.3283, -79.8067],
+    'Loja': [-3.9931, -79.2042],
+    'Esmeraldas': [0.9592, -79.6517],
+    'Ibarra': [0.3517, -78.1220],
+    'Tulcán': [0.8120, -77.7172],
+    'Riobamba': [-1.6636, -78.6543],
+    'Babahoyo': [-1.8012, -79.5339],
+    'Quevedo': [-1.0225, -79.4621],
+    'Milagro': [-2.1342, -79.5870],
+  };
+
   const updateCoordsFromCity = (cityName: string) => {
-    const coords: Record<string, [number, number]> = {
-      'Quito': [-0.1807, -78.4678],
-      'Guayaquil': [-2.1894, -79.8891],
-      'Cuenca': [-2.9001, -79.0059],
-      'Manta': [-0.9621, -80.7127],
-      'Machala': [-3.2581, -79.9161],
-      'Santo Domingo': [-0.2520, -79.1714],
-      'Ambato': [-1.2417, -78.6197],
-      'Portoviejo': [-1.0544, -80.4544],
-      'Pasaje': [-3.3283, -79.8067]
-    };
-    if (coords[cityName]) {
-       setLat(coords[cityName][0] + (Math.random() - 0.5) * 0.01); // Small jitter
-       setLng(coords[cityName][1] + (Math.random() - 0.5) * 0.01);
+    const coords = CITY_CENTERS[cityName];
+    if (coords) {
+      setLat(coords[0]);
+      setLng(coords[1]);
+      setSector(""); // Reset sector when city changes
     }
   };
+
+  const handleLocationChange = useCallback((newLat: number, newLng: number, address?: string) => {
+    setLat(newLat);
+    setLng(newLng);
+    if (address) setSector(address);
+  }, []);
 
   // Live transformation effect
   React.useEffect(() => {
@@ -155,21 +172,7 @@ export default function AdminQuickUpload() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Ubicación Precisa / Sector / Calles (Referencia para el mapa)</label>
-              <div className="relative">
-                <MapPin size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-gold/40" />
-                <input 
-                  type="text" 
-                  value={sector}
-                  onChange={(e) => setSector(e.target.value)}
-                  placeholder="Ej: Sector La Carolina, Av. Amazonas y Eloy Alfaro"
-                  className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all"
-                />
-              </div>
-              <p className="text-[8px] text-brand-gold/40 uppercase font-black ml-1">Esto ayudará al usuario a ubicarte mejor en el mapa.</p>
-            </div>
-
+            {/* Ciudad y Edad */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Ciudad Destino</label>
@@ -202,34 +205,53 @@ export default function AdminQuickUpload() {
               </div>
             </div>
 
-            <div className="space-y-4 p-6 glass-premium border-brand-gold/5 rounded-3xl">
-              <label className="text-[10px] text-brand-gold/50 uppercase font-black tracking-widest ml-1 flex items-center gap-2">
-                <Navigation size={12} /> Coordenadas GPS (Auto-generadas)
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <span className="text-[8px] text-white/20 uppercase font-black ml-1">Latitud</span>
-                  <input 
-                    type="number" 
-                    step="any"
-                    value={lat || ""} 
-                    onChange={(e) => setLat(parseFloat(e.target.value))}
-                    className="w-full bg-brand-black/60 border border-white/5 rounded-xl py-3 px-4 text-white text-xs outline-none focus:border-brand-gold/40"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-[8px] text-white/20 uppercase font-black ml-1">Longitud</span>
-                  <input 
-                    type="number" 
-                    step="any"
-                    value={lng || ""} 
-                    onChange={(e) => setLng(parseFloat(e.target.value))}
-                    className="w-full bg-brand-black/60 border border-white/5 rounded-xl py-3 px-4 text-white text-xs outline-none focus:border-brand-gold/40"
-                  />
-                </div>
+            {/* Sector manual + mapa toggle */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Sector / Referencia de Ubicación</label>
+                <button
+                  type="button"
+                  onClick={() => setShowMap(!showMap)}
+                  className={`flex items-center gap-2 text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border transition-all ${
+                    showMap
+                      ? 'bg-brand-gold/20 border-brand-gold/50 text-brand-gold'
+                      : 'border-brand-gold/20 text-brand-gold/50 hover:border-brand-gold/40 hover:text-brand-gold'
+                  }`}
+                >
+                  <Map size={10} />
+                  {showMap ? 'Ocultar Mapa' : 'Abrir Mapa GPS'}
+                </button>
               </div>
-              <p className="text-[8px] text-brand-white/20 italic ml-1">* El sistema asigna coordenadas aleatorias dentro de la ciudad para proteger la privacidad.</p>
+              <div className="relative">
+                <MapPin size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-gold/40" />
+                <input 
+                  type="text" 
+                  value={sector}
+                  onChange={(e) => setSector(e.target.value)}
+                  placeholder="Ej: Sector La Carolina, Av. Amazonas y Eloy Alfaro (se llena automático desde el mapa)"
+                  className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all placeholder:text-white/10"
+                />
+              </div>
             </div>
+
+            {/* Interactive GPS Map */}
+            {showMap && (
+              <div className="p-5 glass-premium border-brand-gold/10 rounded-3xl animate-in slide-in-from-top-4 duration-300">
+                <div className="flex items-center gap-2 mb-4">
+                  <Map size={14} className="text-brand-gold" />
+                  <span className="text-[10px] text-brand-gold uppercase font-black tracking-widest">Posicionamiento GPS Interactivo</span>
+                </div>
+                <LocationPickerMap
+                  lat={lat}
+                  lng={lng}
+                  onChange={handleLocationChange}
+                  cityCenter={CITY_CENTERS[city] || [-1.8312, -78.1834]}
+                />
+                <p className="text-[8px] text-brand-white/20 italic mt-3 ml-1">
+                  * Haz clic en cualquier punto del mapa para asignar la ubicación exacta. La dirección se carga automáticamente.
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
