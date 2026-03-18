@@ -15,7 +15,11 @@ import {
   Phone, 
   MapPin,
   Sparkles,
-  Map
+  Map,
+  ShieldCheck,
+  Crown,
+  Star,
+  Diamond
 } from "lucide-react";
 
 export default function AdminQuickUpload() {
@@ -32,10 +36,10 @@ export default function AdminQuickUpload() {
   const [success, setSuccess] = useState(false);
   const [tempTransformed, setTempTransformed] = useState("");
   const [showMap, setShowMap] = useState(false);
+  const [planType, setPlanType] = useState("Diamante");
 
   const provinces = getProvinces();
 
-  // City center coordinates for map navigation
   const CITY_CENTERS: Record<string, [number, number]> = {
     'Quito': [-0.1807, -78.4678],
     'Guayaquil': [-2.1894, -79.8891],
@@ -61,7 +65,7 @@ export default function AdminQuickUpload() {
     if (coords) {
       setLat(coords[0]);
       setLng(coords[1]);
-      setSector(""); // Reset sector when city changes
+      setSector("");
     }
   };
 
@@ -71,7 +75,6 @@ export default function AdminQuickUpload() {
     if (address) setSector(address);
   }, []);
 
-  // Live transformation effect
   React.useEffect(() => {
     if (rawDesc) {
       const { text } = StitchEngine.quickTransform(rawDesc, city);
@@ -90,7 +93,6 @@ export default function AdminQuickUpload() {
     setLoading(true);
     const { text, tags } = StitchEngine.quickTransform(rawDesc || "Acompañante VIP de alto nivel", city);
     
-    // Placeholder image if none provided
     const finalImages = images.length > 0 ? images : ["https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop"];
 
     try {
@@ -102,7 +104,7 @@ export default function AdminQuickUpload() {
           description: text, 
           tags, 
           images: finalImages, 
-          plan_type: 'Diamante', 
+          plan_type: planType, 
           age: parseInt(age) || 21,
           lat,
           lng,
@@ -128,6 +130,13 @@ export default function AdminQuickUpload() {
       setLoading(false);
     }
   };
+
+  const plans = [
+    { id: 'Básico', icon: <Star size={16} />, color: 'text-brand-white/40', desc: 'Listing Estándar' },
+    { id: 'Premium', icon: <ShieldCheck size={16} />, color: 'text-brand-gold/60', desc: 'Destacado Ambar' },
+    { id: 'Diamante', icon: <Diamond size={16} />, color: 'text-brand-pink', desc: 'Acceso Privado' },
+    { id: 'VIP Elite', icon: <Crown size={16} />, color: 'text-brand-gold', desc: 'Máxima Exclusividad' },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8 animate-in fade-in duration-700">
@@ -173,17 +182,17 @@ export default function AdminQuickUpload() {
             </div>
 
             {/* Ciudad y Edad */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2 lg:col-span-1">
                 <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Ciudad Destino</label>
                 <div className="relative">
                    <MapPin size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-gold/40" />
                    <select 
                     value={city}
                     onChange={(e) => {
-                  setCity(e.target.value);
-                  updateCoordsFromCity(e.target.value);
-                }}
+                      setCity(e.target.value);
+                      updateCoordsFromCity(e.target.value);
+                    }}
                     className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer"
                    >
                      {provinces.map(prov => (
@@ -194,7 +203,7 @@ export default function AdminQuickUpload() {
                    </select>
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 lg:col-span-1">
                 <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Edad</label>
                 <input 
                   type="number" 
@@ -203,6 +212,37 @@ export default function AdminQuickUpload() {
                   className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all"
                 />
               </div>
+              <div className="space-y-2 lg:col-span-1">
+                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Plan de Visibilidad</label>
+                <select 
+                  value={planType}
+                  onChange={(e) => setPlanType(e.target.value)}
+                  className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer capitalize"
+                >
+                  <option value="Básico">Básico</option>
+                  <option value="Premium">Premium</option>
+                  <option value="Diamante">Diamante</option>
+                  <option value="VIP Elite">VIP Elite</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Selector de Plan Visual */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {plans.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPlanType(p.id)}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${
+                    planType === p.id 
+                    ? 'bg-brand-gold/10 border-brand-gold text-brand-gold' 
+                    : 'bg-transparent border-white/5 text-brand-white/40 hover:border-white/20'
+                  }`}
+                >
+                  {p.icon}
+                  <span className="text-[9px] font-black uppercase tracking-widest">{p.id}</span>
+                </button>
+              ))}
             </div>
 
             {/* Sector manual + mapa toggle */}
@@ -228,7 +268,7 @@ export default function AdminQuickUpload() {
                   type="text" 
                   value={sector}
                   onChange={(e) => setSector(e.target.value)}
-                  placeholder="Ej: Sector La Carolina, Av. Amazonas y Eloy Alfaro (se llena automático desde el mapa)"
+                  placeholder="Ej: Sector La Carolina, Av. Amazonas y Eloy Alfaro"
                   className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all placeholder:text-white/10"
                 />
               </div>
@@ -247,9 +287,6 @@ export default function AdminQuickUpload() {
                   onChange={handleLocationChange}
                   cityCenter={CITY_CENTERS[city] || [-1.8312, -78.1834]}
                 />
-                <p className="text-[8px] text-brand-white/20 italic mt-3 ml-1">
-                  * Haz clic en cualquier punto del mapa para asignar la ubicación exacta. La dirección se carga automáticamente.
-                </p>
               </div>
             )}
 
@@ -305,12 +342,6 @@ export default function AdminQuickUpload() {
                   onUploadError={(err) => alert(`Error: ${err.message}`)}
                 />
               </div>
-
-              {images.length === 0 && (
-                <p className="text-[8px] text-brand-white/20 uppercase text-center mt-2 italic">
-                  * Se usará imagen temporal si no subes fotos.
-                </p>
-              )}
             </div>
 
             <button 
@@ -333,9 +364,6 @@ export default function AdminQuickUpload() {
         .uploadthing-admin .ut-button { background-color: #D4AF37; color: #050505; border-radius: 1rem; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; }
         .uploadthing-admin .ut-allowed-content { display: none; }
         .uploadthing-admin [data-ut-element="label"] { color: #D4AF37 !important; }
-        @media (max-width: 640px) {
-          .admin-quick-upload-container { padding-left: 1rem; padding-right: 1rem; }
-        }
       `}</style>
     </div>
   );

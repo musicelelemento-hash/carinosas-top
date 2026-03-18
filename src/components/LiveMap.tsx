@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Navigation, Loader2, MapPin, ChevronRight, Star, Users } from "lucide-react";
+import { Navigation, Loader2, MapPin, ChevronRight, Star, Users, Zap } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
@@ -29,18 +29,12 @@ const Circle = dynamic(
 );
 
 // FlyToHandler - renders inside MapContainer so useMap works safely
-function FlyToHandler({ target }: { target: { center: [number, number]; zoom: number } | null }) {
-  const lastKey = useRef("");
-  
-  useEffect(() => {
-    if (!target) return;
-    const key = `${target.center[0].toFixed(4)},${target.center[1].toFixed(4)},${target.zoom}`;
-    if (key === lastKey.current) return;
-    lastKey.current = key;
-  }, [target]);
-
-  return null; // The actual flyTo is handled via mapRef
-}
+const FlyToHandler = ({ target }: { target: { center: [number, number]; zoom: number } | null }) => {
+  // We handle FlyTo inside the component that has access to useMap
+  // but react-leaflet's useMap requires being a child of MapContainer.
+  // Since we are using dynamic imports, we'll define a local component for it.
+  return null; 
+};
 
 // ECUADOR CITY PRESETS
 const ECUADOR_CITIES: Record<string, { center: [number, number]; zoom: number; label: string }> = {
@@ -65,6 +59,23 @@ export default function LiveMap() {
   const [mapTarget, setMapTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
   const mapRef = useRef<any>(null);
 
+  // Dynamic useMap component
+  const MapNavigation = dynamic(
+    () => import("react-leaflet").then((m) => {
+      const { useMap } = m;
+      return function Nav({ target }: { target: { center: [number, number]; zoom: number } | null }) {
+        const map = useMap();
+        useEffect(() => {
+          if (target) {
+            map.flyTo(target.center, target.zoom, { animate: true, duration: 1.5 });
+          }
+        }, [target, map]);
+        return null;
+      };
+    }),
+    { ssr: false }
+  );
+
   useEffect(() => {
     import("leaflet").then((leaflet) => setL(leaflet.default || leaflet));
   }, []);
@@ -80,7 +91,6 @@ export default function LiveMap() {
     }
     fetchLocations();
 
-    // Try to detect user location for auto city detection
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -89,7 +99,6 @@ export default function LiveMap() {
           setMapTarget({ center: coords, zoom: 14 });
         },
         () => {
-          // Default to Quito if denied
           setMapTarget({ center: ECUADOR_CITIES.Quito.center, zoom: 13 });
         }
       );
@@ -98,7 +107,6 @@ export default function LiveMap() {
     }
   }, []);
 
-  // Models in selected city
   const cityModels = models.filter(
     (m) => m.city?.toLowerCase() === selectedCity?.toLowerCase()
   );
@@ -108,7 +116,6 @@ export default function LiveMap() {
     const city = ECUADOR_CITIES[cityKey];
     if (city) {
       setMapTarget({ center: city.center, zoom: city.zoom });
-      if (mapRef.current) mapRef.current.flyTo(city.center, city.zoom, { animate: true, duration: 1.5 });
     }
     setSelectedModel(null);
   };
@@ -118,32 +125,17 @@ export default function LiveMap() {
     if (model.lat && model.lng) {
       const coords: [number, number] = [model.lat, model.lng];
       setMapTarget({ center: coords, zoom: 16 });
-      if (mapRef.current) mapRef.current.flyTo(coords, 16, { animate: true, duration: 1.2 });
     }
   };
 
   // Gold pulsing marker icon
   const goldIcon = L
     ? new L.DivIcon({
-        html: `<div style="
-          position: relative;
-          width: 32px; height: 32px;
-        ">
-          <div style="
-            position: absolute; inset: 0;
-            background: radial-gradient(circle, rgba(212,175,55,0.8) 0%, rgba(212,175,55,0.1) 70%, transparent 100%);
-            border-radius: 50%;
-            animation: mapPulse 2s ease-in-out infinite;
-          "></div>
-          <div style="
-            position: absolute; inset: 6px;
-            background: #D4AF37;
-            border-radius: 50%;
-            border: 2px solid #fff3;
-            box-shadow: 0 0 12px rgba(212,175,55,0.8);
-          "></div>
+        html: `<div class="live-pin">
+          <div class="pin-pulse"></div>
+          <div class="pin-core"></div>
         </div>`,
-        className: "live-model-icon",
+        className: "custom-div-icon",
         iconSize: [32, 32],
         iconAnchor: [16, 16],
       })
@@ -151,24 +143,11 @@ export default function LiveMap() {
 
   const selectedIcon = L
     ? new L.DivIcon({
-        html: `<div style="
-          position: relative; width: 44px; height: 44px;
-        ">
-          <div style="
-            position: absolute; inset: 0;
-            background: radial-gradient(circle, rgba(255,0,110,0.6) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: mapPulse 1s ease-in-out infinite;
-          "></div>
-          <div style="
-            position: absolute; inset: 6px;
-            background: #FF006E;
-            border-radius: 50%;
-            border: 2px solid #fff5;
-            box-shadow: 0 0 20px rgba(255,0,110,0.9);
-          "></div>
+        html: `<div class="live-pin-selected">
+          <div class="pin-pulse-red"></div>
+          <div class="pin-core-red"></div>
         </div>`,
-        className: "live-model-icon-selected",
+        className: "custom-div-icon-selected",
         iconSize: [44, 44],
         iconAnchor: [22, 22],
       })
@@ -176,92 +155,106 @@ export default function LiveMap() {
 
   const userIcon = L
     ? new L.DivIcon({
-        html: `<div style="position: relative; width: 20px; height: 20px;">
-          <div style="
-            position: absolute; inset: -10px;
-            border: 1px solid rgba(59,130,246,0.3);
-            border-radius: 50%;
-            animation: mapPulse 1.5s ease-in-out infinite;
-          "></div>
-          <div style="
-            position: absolute; inset: 0;
-            background: #3B82F6;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 10px rgba(59,130,246,0.8);
-          "></div>
-        </div>`,
+        html: `<div class="user-pin"><div class="user-pulse"></div><div class="user-core"></div></div>`,
         className: "user-loc-icon",
         iconSize: [20, 20],
         iconAnchor: [10, 10],
       })
     : null;
 
-  const initialCenter = ECUADOR_CITIES[selectedCity]?.center || [-0.1807, -78.4678];
+  const initialCenter = ECUADOR_CITIES.Quito.center;
 
   return (
-    <section className="relative w-full overflow-hidden" style={{ background: '#050505' }}>
-      {/* Header */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-16 pb-8">
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 text-brand-gold text-[10px] font-black uppercase tracking-[0.4em]">
-              <Navigation size={14} className="animate-pulse" />
-              Live Access Ecuador
+    <section className="relative w-full overflow-hidden bg-brand-black">
+      {/* Premium Header */}
+      <div className="relative z-20 max-w-7xl mx-auto px-6 pt-24 pb-12">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">
+              <Zap size={14} className="animate-pulse" />
+              Proximity Live Dashboard
             </div>
-            <h2 className="text-4xl md:text-5xl font-serif text-brand-white leading-tight">
-              Mapa de <span className="text-brand-gold">Proximidad VIP</span>
+            <h2 className="text-5xl md:text-7xl font-serif text-white tracking-tighter italic">
+              Elite <span className="text-brand-gold">Discovery</span>
             </h2>
-            <p className="text-brand-white/40 text-sm leading-relaxed max-w-lg">
-              Explora las modelos más exclusivas cerca de ti. Selecciona una ciudad y navega el mapa para descubrir perfiles verificados.
+            <p className="text-brand-white/40 text-xs uppercase tracking-[0.3em] font-black max-w-sm">
+              Encuentra compañía premium a pocos minutos de tu ubicación actual.
             </p>
           </div>
 
-          {/* Live count badge */}
-          <div className="flex items-center gap-3 bg-brand-gold/10 border border-brand-gold/20 px-5 py-3 rounded-2xl">
-            <div className="w-2 h-2 rounded-full bg-brand-pink animate-pulse" />
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-brand-gold uppercase tracking-widest">
-                {loading ? "Cargando..." : `${models.length} Activas`}
-              </span>
-              <span className="text-[8px] text-brand-white/30 uppercase tracking-widest">En vivo ahora</span>
-            </div>
+          <div className="flex gap-3">
+             <div className="bg-white/5 border border-white/10 px-6 py-4 rounded-3xl flex flex-col items-center">
+                <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Activas</span>
+                <span className="text-2xl font-serif text-brand-gold">{models.length}</span>
+             </div>
+             <div className="bg-white/5 border border-white/10 px-6 py-4 rounded-3xl flex flex-col items-center">
+                <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Cercanas</span>
+                <span className="text-2xl font-serif text-brand-pink">{cityModels.length}</span>
+             </div>
           </div>
         </div>
 
-        {/* City Pills */}
-        <div className="flex gap-2 flex-wrap mb-0">
-          {Object.entries(ECUADOR_CITIES).map(([key, val]) => {
-            const count = models.filter(m => m.city?.toLowerCase() === key.toLowerCase()).length;
-            return (
-              <button
-                key={key}
-                onClick={() => handleCitySelect(key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all duration-300 ${
-                  selectedCity === key
-                    ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-                    : "border-white/10 text-white/40 hover:border-brand-gold/30 hover:text-brand-gold/70"
-                }`}
-              >
-                {val.label}
-                {count > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-black ${
-                    selectedCity === key ? 'bg-brand-black/20' : 'bg-brand-gold/20 text-brand-gold'
-                  }`}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        {/* City Filter Layout */}
+        <div className="mt-12 flex gap-3 overflow-x-auto no-scrollbar pb-4">
+          {Object.entries(ECUADOR_CITIES).map(([key, val]) => (
+            <button
+              key={key}
+              onClick={() => handleCitySelect(key)}
+              className={`flex-shrink-0 flex items-center gap-3 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all duration-500 active:scale-95 ${
+                selectedCity === key
+                  ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_15px_30px_rgba(212,175,55,0.2)]"
+                  : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
+              }`}
+            >
+              <MapPin size={12} />
+              {val.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Map + Sidebar Layout */}
-      <div className="flex flex-col lg:flex-row gap-0 relative" style={{ height: '70vh', minHeight: '500px' }}>
+      {/* Main Map Experience */}
+      <div className="flex flex-col lg:flex-row h-[70vh] min-h-[600px] border-t border-white/5">
         
-        {/* === THE MAP === */}
-        <div className="flex-1 relative">
+        {/* === Sidebar (Uber style) === */}
+        <div className="w-full lg:w-96 bg-brand-black border-r border-white/5 overflow-y-auto custom-scrollbar z-20">
+          <div className="sticky top-0 bg-brand-black/90 backdrop-blur-md p-6 border-b border-white/5 z-10">
+             <div className="flex items-center justify-between">
+                <span className="text-[10px] text-brand-gold font-black uppercase tracking-widest">Modelos en {selectedCity}</span>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+             </div>
+          </div>
+          
+          <div className="divide-y divide-white/5">
+            {cityModels.map((model) => (
+              <button
+                key={model.id}
+                onClick={() => handleModelSelect(model)}
+                className={`w-full p-6 text-left flex items-center gap-4 transition-all hover:bg-white/5 group ${
+                  selectedModel?.id === model.id ? 'bg-brand-gold/10' : ''
+                }`}
+              >
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-brand-gold/50 transition-colors">
+                  <img src={model.images?.[0]} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-black/60 to-transparent" />
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <h4 className="text-white font-serif text-lg leading-tight">{model.name}</h4>
+                  <p className="text-[9px] text-white/40 uppercase tracking-widest font-black truncate">
+                    {model.age} Años · {model.sector || 'Exclusivo'}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[8px] text-brand-gold font-black uppercase tracking-widest">A 5 min de distancia</span>
+                  </div>
+                </div>
+                <ChevronRight size={16} className={`text-white/20 group-hover:text-brand-gold transition-all ${selectedModel?.id === model.id ? 'translate-x-1 text-brand-gold' : ''}`} />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* === MAP ENGINE === */}
+        <div className="flex-1 relative z-10">
           {!loading && typeof window !== "undefined" && (
             <MapContainer
               center={initialCenter}
@@ -269,208 +262,92 @@ export default function LiveMap() {
               scrollWheelZoom={true}
               className="w-full h-full"
               zoomControl={false}
-              style={{ height: '70vh', minHeight: '500px' }}
               ref={mapRef}
             >
-              {/* Dark premium tile */}
               <TileLayer
-                attribution='&copy; <a href="https://carto.com">CARTO</a>'
+                attribution='&copy; CARTO'
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               />
+              
+              <MapNavigation target={mapTarget} />
 
-              {/* Fly-to is handled via mapRef.current.flyTo() calls above */}
-
-              {/* User location */}
+              {/* User marker */}
               {userLocation && userIcon && (
-                <>
-                  <Marker position={userLocation} icon={userIcon} />
-                  <Circle
-                    center={userLocation}
-                    radius={800}
-                    pathOptions={{
-                      color: "#3B82F6",
-                      fillColor: "#3B82F6",
-                      fillOpacity: 0.04,
-                      weight: 1,
-                      opacity: 0.3,
-                    }}
-                  />
-                </>
+                <Marker position={userLocation} icon={userIcon} />
               )}
 
-              {/* Model markers */}
-              {models.map((model) =>
-                model.lat && model.lng && goldIcon && selectedIcon ? (
+              {/* Models */}
+              {models.map((model) => (
+                model.lat && model.lng && (
                   <Marker
                     key={model.id}
                     position={[model.lat, model.lng]}
                     icon={selectedModel?.id === model.id ? selectedIcon : goldIcon}
                     eventHandlers={{ click: () => handleModelSelect(model) }}
                   >
-                    <Popup className="premium-popup">
-                      <div className="min-w-[160px] p-1">
-                        {model.images?.[0] && (
-                          <div className="w-full h-24 rounded-lg overflow-hidden mb-2">
-                            <img
-                              src={model.images[0]}
-                              alt={model.name}
-                              className="w-full h-full object-cover"
-                            />
+                    <Popup className="premium-map-popup">
+                       <div className="p-3 w-48 space-y-3">
+                          <div className="aspect-video rounded-xl overflow-hidden bg-brand-black">
+                             <img src={model.images?.[0]} className="w-full h-full object-cover" />
                           </div>
-                        )}
-                        <p className="font-serif text-brand-gold text-base mb-0.5">{model.name}</p>
-                        <p className="text-[9px] text-white/60 font-black uppercase tracking-widest mb-1">
-                          {model.age} años · {model.city}
-                        </p>
-                        {model.sector && (
-                          <p className="text-[8px] text-brand-gold/50 italic">{model.sector}</p>
-                        )}
-                        {model.whatsapp && (
-                          <a
-                            href={`https://wa.me/593${model.whatsapp.replace(/\D/g, '').replace(/^0/, '')}?text=Hola%20${encodeURIComponent(model.name)}%2C%20vi%20tu%20perfil%20en%20Cariñosas.top`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-2 block w-full text-center bg-brand-gold text-brand-black text-[9px] font-black uppercase tracking-wider py-1.5 rounded-lg"
-                          >
-                            Contactar
-                          </a>
-                        )}
-                      </div>
+                          <div>
+                             <h5 className="text-brand-gold font-serif text-lg">{model.name}</h5>
+                             <p className="text-[8px] text-white/50 uppercase tracking-widest font-black">{model.age} Años · {model.city}</p>
+                          </div>
+                          <a href={`/profile/${model.id}`} className="block w-full py-2 bg-brand-gold text-brand-black text-[10px] font-black uppercase text-center rounded-lg tracking-widest">Ver Perfil VIP</a>
+                       </div>
                     </Popup>
                   </Marker>
-                ) : null
-              )}
+                )
+              ))}
             </MapContainer>
           )}
 
-          {loading && (
-            <div className="w-full h-full flex items-center justify-center bg-brand-black">
-              <div className="flex flex-col items-center gap-4">
-                <Loader2 size={32} className="text-brand-gold animate-spin" />
-                <span className="text-[10px] text-brand-gold/50 uppercase font-black tracking-widest">
-                  Cargando mapa...
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Corner vignette overlay */}
-          <div className="absolute inset-0 pointer-events-none z-10"
-            style={{
-              background: 'linear-gradient(to right, transparent 70%, #050505 100%), linear-gradient(to bottom, #05050520 0%, transparent 15%, transparent 85%, #050505 100%)'
-            }}
-          />
-        </div>
-
-        {/* === SIDEBAR - Models in this city === */}
-        <div className="w-full lg:w-80 bg-[#07070A] border-t lg:border-t-0 lg:border-l border-white/5 overflow-y-auto flex flex-col" style={{ maxHeight: '70vh' }}>
-          <div className="p-4 border-b border-white/5 sticky top-0 bg-[#07070A] z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users size={14} className="text-brand-gold" />
-                <span className="text-[10px] font-black text-brand-gold uppercase tracking-widest">
-                  {selectedCity}
-                </span>
-              </div>
-              <span className="text-[9px] text-white/30 font-black uppercase">
-                {cityModels.length} disponibles
-              </span>
-            </div>
+          {/* Vignette elements */}
+          <div className="absolute inset-0 pointer-events-none z-20 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
+          <div className="absolute top-8 right-8 z-30 glass-premium px-6 py-4 rounded-3xl border-brand-gold/20 flex items-center gap-4">
+             <div className="flex flex-col items-end">
+                <span className="text-[8px] text-white/40 uppercase font-black tracking-widest">Sincronización</span>
+                <span className="text-[10px] text-brand-gold font-black uppercase tracking-widest">Satélite Activo</span>
+             </div>
+             <div className="w-8 h-8 rounded-full border border-brand-gold/30 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-brand-gold animate-ping" />
+             </div>
           </div>
-
-          {cityModels.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-3">
-              <MapPin size={24} className="text-brand-gold/20" />
-              <p className="text-[10px] text-white/20 uppercase font-black tracking-widest">
-                Sin modelos en esta ciudad aún
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-white/5">
-              {cityModels.map((model) => (
-                <button
-                  key={model.id}
-                  onClick={() => handleModelSelect(model)}
-                  className={`w-full flex items-center gap-3 p-4 text-left transition-all hover:bg-white/5 ${
-                    selectedModel?.id === model.id ? "bg-brand-gold/10 border-l-2 border-brand-gold" : ""
-                  }`}
-                >
-                  {/* Thumbnail */}
-                  <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-white/10">
-                    {model.images?.[0] ? (
-                      <img
-                        src={model.images[0]}
-                        alt={model.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-brand-gold/10 flex items-center justify-center">
-                        <Star size={16} className="text-brand-gold/40" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-serif text-brand-white text-sm truncate">{model.name}</p>
-                    <p className="text-[9px] text-brand-gold/60 uppercase font-black tracking-wider truncate">
-                      {model.age} años
-                      {model.sector && ` · ${model.sector}`}
-                    </p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                      <span className="text-[8px] text-white/30 uppercase font-black tracking-widest">Disponible</span>
-                    </div>
-                  </div>
-
-                  <ChevronRight size={14} className="text-white/20 flex-shrink-0" />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
       <style jsx global>{`
         .leaflet-container { background: #050505 !important; }
-        .premium-popup .leaflet-popup-content-wrapper {
-          background: rgba(7, 7, 10, 0.95) !important;
+        .premium-map-popup .leaflet-popup-content-wrapper {
+          background: rgba(10, 10, 12, 0.95) !important;
           backdrop-filter: blur(20px);
-          border: 1px solid rgba(212, 175, 55, 0.25);
-          border-radius: 1rem;
+          border: 1px solid rgba(212, 175, 55, 0.2);
+          border-radius: 1.5rem;
           color: white;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(212,175,55,0.08);
-          padding: 4px;
-        }
-        .premium-popup .leaflet-popup-tip-container { display: none; }
-        .premium-popup .leaflet-popup-content { margin: 0; }
-        .leaflet-control-zoom {
-          border: 1px solid rgba(212,175,55,0.2) !important;
-          border-radius: 0.75rem !important;
+          padding: 0;
           overflow: hidden;
-          margin: 16px !important;
         }
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-          background: rgba(7,7,10,0.9) !important;
-          color: #D4AF37 !important;
-          border-bottom: 1px solid rgba(212,175,55,0.15) !important;
-          width: 36px !important;
-          height: 36px !important;
-          line-height: 36px !important;
-          font-size: 18px !important;
+        .premium-map-popup .leaflet-popup-content { margin: 0; width: auto !important; }
+        .premium-map-popup .leaflet-popup-tip { background: rgba(10, 10, 12, 0.95); }
+        
+        .live-pin { position: relative; width: 32px; height: 32px; }
+        .pin-pulse { position: absolute; inset: 0; background: #D4AF37; border-radius: 50%; opacity: 0.4; animation: pinPulse 2s infinite; }
+        .pin-core { position: absolute; inset: 10px; background: #D4AF37; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px #D4AF37; }
+        
+        .live-pin-selected { position: relative; width: 44px; height: 44px; }
+        .pin-pulse-red { position: absolute; inset: 0; background: #FF006E; border-radius: 50%; opacity: 0.6; animation: pinPulse 1s infinite; }
+        .pin-core-red { position: absolute; inset: 12px; background: #FF006E; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 20px #FF006E; }
+
+        @keyframes pinPulse {
+          0% { transform: scale(1); opacity: 0.6; }
+          100% { transform: scale(2.5); opacity: 0; }
         }
-        .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
-          background: rgba(212,175,55,0.15) !important;
-          color: #D4AF37 !important;
-        }
-        .live-model-icon, .live-model-icon-selected, .user-loc-icon {
-          background: transparent !important;
-          border: none !important;
-        }
-        @keyframes mapPulse {
-          0%, 100% { opacity: 0.8; transform: scale(1); }
-          50% { opacity: 0.4; transform: scale(1.3); }
-        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.2); border-radius: 10px; }
       `}</style>
     </section>
   );

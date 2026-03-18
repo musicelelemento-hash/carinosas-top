@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { MessageCircle, MapPin, Star, ShieldCheck } from "lucide-react";
+import { MessageCircle, MapPin, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 
 interface ProfileCardProps {
+  id?: string;
   name: string;
   age: number;
   location: string;
@@ -15,9 +16,12 @@ interface ProfileCardProps {
   isBoosted?: boolean;
   sector?: string;
   whatsapp?: string;
+  tags?: string[];
+  plan_type?: string;
 }
 
 export default function ProfileCard({ 
+  id,
   name, 
   age, 
   location, 
@@ -26,31 +30,55 @@ export default function ProfileCard({
   isVip = true,
   isBoosted = false,
   sector,
-  whatsapp
+  whatsapp,
+  tags = [],
+  plan_type
 }: ProfileCardProps) {
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isTransitioning, setIsTransitioning] = React.useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
 
-  // Build final image array from either images[] or imageUrl fallback
-  const allImages = React.useMemo(() => {
+  // Build final image array
+  const allImages = useMemo(() => {
     if (images && images.length > 0) return images;
     if (imageUrl) return [imageUrl];
     return ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'];
   }, [images, imageUrl]);
 
-  // Slideshow: cycle through images on hover
-  React.useEffect(() => {
-    if (!isHovered || allImages.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentImageIndex(prev => (prev + 1) % allImages.length);
-    }, 1200);
-    return () => clearInterval(interval);
-  }, [isHovered, allImages.length]);
+  // Instagram-style Story Progress Logic
+  useEffect(() => {
+    if (!isHovered || allImages.length <= 1) {
+      setProgress(0);
+      return;
+    }
 
-  // Reset to first image when hover ends
-  React.useEffect(() => {
-    if (!isHovered) setCurrentImageIndex(0);
+    const duration = 2000; // 2 seconds per image
+    const startTime = Date.now();
+    
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const newProgress = (elapsed / duration) * 100;
+      
+      if (newProgress >= 100) {
+        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+        setProgress(0);
+        // This effect will re-run because currentImageIndex/startTime changes? 
+        // Actually, we need a better way to handle the continuous loop.
+      } else {
+        setProgress(newProgress);
+      }
+    }, 30);
+
+    return () => clearInterval(interval);
+  }, [isHovered, currentImageIndex, allImages.length]);
+
+  // Reset when hover ends
+  useEffect(() => {
+    if (!isHovered) {
+      setCurrentImageIndex(0);
+      setProgress(0);
+    }
   }, [isHovered]);
 
   const handleContact = () => {
@@ -68,128 +96,182 @@ export default function ProfileCard({
   };
 
   return (
-    <>
+    <div className="relative group">
+      {/* Premium Border Glow Layer */}
+      {isBoosted && (
+        <div className="absolute -inset-[2px] bg-gradient-to-r from-brand-gold via-brand-pink to-brand-gold bg-[length:200%_auto] animate-gradient-slow rounded-[2.2rem] opacity-30 blur-sm group-hover:opacity-100 transition-opacity duration-700" />
+      )}
+
       <div 
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`group relative glass rounded-[2rem] overflow-hidden transition-all duration-700 active:scale-[0.98] cursor-pointer border ${
-          isBoosted 
-            ? 'border-brand-pink/30 shadow-[0_0_40px_rgba(255,0,110,0.1)]' 
-            : 'border-white/5 shadow-2xl'
-        } ${isHovered ? 'border-brand-gold/40 -translate-y-2' : ''}`}
+        className={`relative glass-dark rounded-[2.1rem] overflow-hidden transition-all duration-700 active:scale-[0.98] cursor-pointer border ${
+          isHovered ? 'border-brand-gold/50 -translate-y-3' : 'border-white/5'
+        } shadow-2xl`}
       >
-        {/* Proximity Tag */}
-        <div className="absolute top-6 left-6 z-30 flex items-center gap-2 glass-dark px-3 py-1.5 rounded-full border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="w-1.5 h-1.5 rounded-full bg-brand-pink animate-pulse" />
-          <span className="text-[8px] text-white/80 font-black uppercase tracking-[0.2em]">Cerca de ti</span>
-        </div>
-
-        {/* Status Badges */}
-        <div className="absolute top-6 right-6 z-30 flex flex-col items-end gap-2">
-          {isBoosted && (
-            <div className="bg-brand-pink text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-tighter shadow-lg shadow-brand-pink/20 animate-bounce-subtle">
-              ULTRA ÉLITE
-            </div>
-          )}
-          {isVip && (
-            <div className="glass-premium text-brand-gold border-brand-gold/20 px-3 py-1.5 rounded-full text-[9px] font-black tracking-[0.2em] uppercase flex items-center gap-1.5 shadow-xl">
-              <Star size={10} fill="currentColor" />
-              Verificada
-            </div>
-          )}
-        </div>
-
-        {/* Image Counter Dots (only if multiple images) */}
-        {allImages.length > 1 && (
-          <div className="absolute bottom-24 left-0 right-0 z-30 flex justify-center gap-1.5 pointer-events-none">
-            {allImages.map((_, i) => (
+        {/* Instagram Story-style Bars */}
+        <div className="absolute top-3 left-4 right-4 z-40 flex gap-1.5 h-[2px]">
+          {allImages.map((_, i) => (
+            <div key={i} className="flex-1 bg-white/20 rounded-full overflow-hidden">
               <div 
-                key={i} 
-                className={`rounded-full transition-all duration-300 ${
-                  i === currentImageIndex 
-                    ? 'w-4 h-1.5 bg-brand-gold' 
-                    : 'w-1.5 h-1.5 bg-white/30'
-                }`} 
+                className="h-full bg-brand-gold transition-all duration-300 ease-linear"
+                style={{ 
+                  width: i < currentImageIndex ? '100%' : (i === currentImageIndex ? `${progress}%` : '0%') 
+                }}
               />
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
 
-        {/* Image Container */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-brand-black">
+        {/* Tiered Plan Badges & Status */}
+        <div className="absolute top-8 left-6 z-30 flex flex-col gap-2">
+          {plan_type === 'VIP Elite' ? (
+            <div className="flex items-center gap-2 bg-brand-gold/20 backdrop-blur-xl border border-brand-gold/40 px-3 py-1.5 rounded-full scale-100 origin-left shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+              <Crown size={12} className="text-brand-gold fill-brand-gold" />
+              <span className="text-[9px] text-brand-gold font-black uppercase tracking-[0.3em]">VIP ELITE ALPHA</span>
+            </div>
+          ) : plan_type === 'Diamante' ? (
+            <div className="flex items-center gap-2 bg-brand-pink/20 backdrop-blur-xl border border-brand-pink/40 px-3 py-1.5 rounded-full scale-100 origin-left shadow-[0_0_20px_rgba(255,0,110,0.3)]">
+              <Diamond size={12} className="text-brand-pink fill-brand-pink" />
+              <span className="text-[9px] text-brand-pink font-black uppercase tracking-[0.3em]">DIAMOND STATUS</span>
+            </div>
+          ) : plan_type === 'Premium' ? (
+            <div className="flex items-center gap-2 glass-premium px-3 py-1.5 rounded-full border-brand-gold/20 scale-90 origin-left">
+              <Star size={12} className="text-brand-gold fill-brand-gold" />
+              <span className="text-[8px] text-white font-black uppercase tracking-[0.2em]">PREMIUM</span>
+            </div>
+          ) : null}
+
+          <div className="flex items-center gap-2 bg-green-500/10 backdrop-blur-md border border-green-500/30 px-3 py-1.5 rounded-full scale-90 origin-left">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+            <span className="text-[8px] text-green-500 font-black uppercase tracking-[0.2em]">LIVE AHORA</span>
+          </div>
+        </div>
+
+        {/* Action Buttons (Visible on Hover) */}
+        <div className="absolute top-8 right-6 z-30 flex flex-col gap-3 transition-all duration-500 group-hover:translate-x-0 translate-x-12 opacity-0 group-hover:opacity-100">
+          <button className="p-2.5 glass-premium rounded-full text-white/60 hover:text-brand-pink hover:scale-110 transition-all">
+            <Heart size={16} />
+          </button>
+          <button className="p-2.5 glass-premium rounded-full text-white/60 hover:text-brand-gold hover:scale-110 transition-all">
+            <Share2 size={16} />
+          </button>
+        </div>
+
+        {/* Main Image Container */}
+        <div className="relative aspect-[3/4] overflow-hidden bg-brand-black">
           {allImages.map((img, i) => (
             <Image
               key={i}
               src={img}
-              alt={`${name} ${i + 1}`}
+              alt={`${name} photo`}
               fill
-              className={`object-cover transition-all duration-700 absolute inset-0 ${
-                i === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              } ${isHovered ? 'scale-110 blur-[2px] brightness-50' : 'scale-100'} ease-out-expo`}
+              className={`object-cover transition-all duration-1000 absolute inset-0 ${
+                i === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
+              } ${isHovered ? 'brightness-[0.4] scale-105' : 'brightness-100'}`}
               priority={i === 0}
             />
           ))}
           
-          {/* Elite Pattern Overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)] opacity-60 pointer-events-none" />
+          {/* Overlay Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent opacity-90" />
+          <div className={`absolute inset-0 bg-brand-gold/10 mix-blend-overlay transition-opacity duration-700 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
 
-          {/* Info Overlay (Static) */}
-          <div className={`absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-brand-black via-brand-black/40 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-3xl font-serif text-white tracking-tight">{name}</h3>
-                <ShieldCheck size={18} className="text-brand-gold" />
-              </div>
-              <div className="flex items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.2em]">
-                <span>{age} Años</span>
-                <div className="w-1 h-1 rounded-full bg-brand-gold/30" />
-                <div className="flex items-center gap-1">
-                  <MapPin size={10} className="text-brand-pink" />
-                  <span>{location}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Expanded Info (Hover) */}
-          <div className={`absolute inset-0 p-8 flex flex-col justify-center items-center text-center space-y-6 transition-all duration-700 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} pointer-events-none`}>
-            <div className="space-y-2">
-              <h3 className="text-4xl font-serif text-brand-gold-light italic tracking-tight">{name}</h3>
-              <p className="text-[10px] text-white/60 uppercase tracking-[0.4em] font-black">Elite Model VIP</p>
-              {sector && <p className="text-[8px] text-brand-gold/60 uppercase tracking-widest font-black">{sector}</p>}
+          {/* Bottom Info - Static Appearance */}
+          <div className={`absolute inset-x-0 bottom-0 p-8 space-y-3 transition-all duration-700 ${isHovered ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <div className="flex items-center gap-3">
+              <h3 className="text-3xl font-serif text-white tracking-tight">{name}</h3>
+              <ShieldCheck size={20} className="text-brand-gold" />
             </div>
             
-            <div className="flex gap-4">
-               {[
-                 { label: 'Estatura', val: '1.70' },
-                 { label: 'Busto', val: '95' },
-                 { label: 'Cintura', val: '60' }
-               ].map(stat => (
-                 <div key={stat.label} className="flex flex-col">
-                   <span className="text-[7px] text-brand-gold/40 uppercase font-black tracking-widest">{stat.label}</span>
-                   <span className="text-sm text-white font-serif italic">{stat.val}</span>
-                 </div>
-               ))}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5 text-[10px] text-white/60 font-black uppercase tracking-widest">
+                <MapPin size={12} className="text-brand-pink" />
+                {location}
+              </div>
+              <div className="w-1 h-1 rounded-full bg-white/20" />
+              <div className="text-[10px] text-white/60 font-black uppercase tracking-widest">
+                {age} Años
+              </div>
             </div>
 
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-brand-gold/20 to-transparent" />
+            {/* Tags preview */}
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {tags.slice(0, 2).map(tag => (
+                  <span key={tag} className="text-[7px] text-brand-gold/60 border border-brand-gold/20 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
 
-            <div className="bg-brand-gold text-brand-black px-10 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.3em] shadow-[0_10px_30px_rgba(212,175,55,0.3)] transform hover:scale-105 transition-transform active:scale-95 flex items-center gap-3">
-              Ver Detalles VIP
+          {/* Detailed Info - Hover Appearance */}
+          <div className={`absolute inset-0 p-8 flex flex-col justify-center items-center text-center space-y-8 transition-all duration-700 ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-90'} pointer-events-none`}>
+            <div className="space-y-3">
+               {isBoosted ? (
+                 <div className="flex items-center justify-center gap-2 mb-2">
+                   <Star size={12} className="text-brand-gold fill-brand-gold" />
+                   <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">Diamond Selection</span>
+                   <Star size={12} className="text-brand-gold fill-brand-gold" />
+                 </div>
+               ) : (
+                 <p className="text-[10px] text-brand-gold-light uppercase tracking-[0.4em] font-black">Elite Member</p>
+               )}
+               <h3 className="text-5xl font-serif text-white italic tracking-tighter">{name}</h3>
+               <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-medium max-w-[200px] leading-relaxed mx-auto">
+                 Disponibilidad inmediata en el sector de {sector || location}.
+               </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-6 w-full">
+              {[
+                { label: 'Estatura', val: '1.72' },
+                { label: 'Ojos', val: 'Café' },
+                { label: 'Plan', val: isBoosted ? 'Elite' : 'Vip' }
+              ].map(stat => (
+                <div key={stat.label} className="flex flex-col gap-1">
+                  <span className="text-[8px] text-brand-gold/50 uppercase font-black tracking-widest">{stat.label}</span>
+                  <span className="text-sm text-white font-serif">{stat.val}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3 w-full animate-in slide-in-from-bottom-4 duration-500">
+               <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 flex flex-col items-center">
+                  <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Citas Hoy</span>
+                  <span className="text-lg font-serif text-brand-gold">12</span>
+               </div>
+               <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 flex flex-col items-center">
+                  <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Rating</span>
+                  <div className="flex items-center gap-1 text-brand-gold">
+                    <Star size={12} fill="currentColor" />
+                    <span className="text-lg font-serif">4.9</span>
+                  </div>
+               </div>
+            </div>
+            
+            <div className="w-full flex items-center justify-center gap-4">
+              <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]" />
+              <span className="text-[9px] text-white/70 uppercase font-black tracking-[0.3em] inline-block">Online Ahora</span>
             </div>
           </div>
         </div>
 
-        {/* Floating WhatsApp Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleContact();
-          }}
-          className={`absolute bottom-8 right-8 bg-[#25D366] text-white p-4 rounded-full shadow-[0_10px_40px_rgba(37,211,102,0.3)] transition-all duration-500 hover:scale-110 active:scale-95 z-40 transform ${isHovered ? 'translate-y-0 scale-100' : 'translate-y-2 scale-90'}`}
-        >
-          <MessageCircle size={24} fill="currentColor" />
-        </button>
+        {/* Global Action Bar */}
+        <div className={`p-5 flex items-center justify-between border-t border-white/5 transition-colors duration-500 ${isHovered ? 'bg-brand-gold/5' : 'bg-transparent'}`}>
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleContact(); }}
+              className="px-8 py-3.5 bg-brand-gold text-brand-black rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 shadow-lg shadow-brand-gold/10 hover:scale-[1.05] active:scale-95 transition-all pointer-events-auto"
+            >
+              <MessageCircle size={14} fill="currentColor" />
+              WhatsApp VIP
+            </button>
+            
+            <div className="flex flex-col items-end opacity-40 group-hover:opacity-100 transition-opacity">
+               <span className="text-[7px] text-white/40 uppercase font-black tracking-widest">Disponibilidad</span>
+               <span className="text-[10px] text-white font-black tracking-widest italic uppercase">Alta</span>
+            </div>
+        </div>
       </div>
 
       <WhatsAppTransition 
@@ -199,17 +281,15 @@ export default function ProfileCard({
       />
 
       <style jsx global>{`
-        .ease-out-expo {
-          transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+        @keyframes gradient-slow {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
-        .animate-bounce-subtle {
-          animation: bounce-subtle 4s infinite ease-in-out;
+        .animate-gradient-slow {
+          animation: gradient-slow 6s infinite linear;
         }
       `}</style>
-    </>
+    </div>
   );
 }

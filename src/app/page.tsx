@@ -18,12 +18,12 @@ import { supabase } from "@/lib/supabase";
 
 // In a real app, this would be fetched from Supabase, now we connect it!
 const STATIC_MODELS = [
-  { id: '1', name: 'Valentina', age: 21, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800', isBoosted: true },
-  { id: '2', name: 'Camila', age: 23, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800' },
-  { id: '3', name: 'Luciana', age: 22, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800' },
-  { id: '4', name: 'Alessandra', age: 25, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1503105391650-704fd6827a88?auto=format&fit=crop&q=80&w=800', isBoosted: true },
-  { id: '5', name: 'Isabella', age: 24, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=800' },
-  { id: '6', name: 'Antonella', age: 26, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800' },
+  { id: '1', name: 'Valentina', age: 21, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200'], isBoosted: true, plan_type: 'VIP Elite' },
+  { id: '2', name: 'Camila', age: 23, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Diamante' },
+  { id: '3', name: 'Luciana', age: 22, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Premium' },
+  { id: '4', name: 'Alessandra', age: 25, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1503105391650-704fd6827a88?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1503105391650-704fd6827a88?auto=format&fit=crop&q=80&w=1200'], isBoosted: true, plan_type: 'VIP Elite' },
+  { id: '5', name: 'Isabella', age: 24, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Básico' },
+  { id: '6', name: 'Antonella', age: 26, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Premium' },
 ];
 
 export default function Home() {
@@ -47,14 +47,31 @@ export default function Home() {
           // Pass full images array so ProfileCard can do slideshow between all photos
           images: m.images && m.images.length > 0 ? m.images : [STATIC_MODELS[0].imageUrl],
           imageUrl: m.images && m.images[0] ? m.images[0] : STATIC_MODELS[0].imageUrl,
-          isBoosted: m.plan_type === 'Diamante',
+          isBoosted: m.plan_type === 'Diamante' || m.plan_type === 'VIP Elite',
           description: m.description,
           whatsapp: m.whatsapp,
-          sector: m.sector
+          sector: m.sector,
+          tags: m.tags,
+          plan_type: m.plan_type
         }));
         
-        // Merge live models with static ones in the beginning for a full directory
-        setDisplayModels([...mappedLiveModels, ...STATIC_MODELS]);
+        const allModels = [...mappedLiveModels, ...STATIC_MODELS];
+        
+        // Sort by plan priority
+        const PLAN_PRIORITY: Record<string, number> = {
+          'VIP Elite': 0,
+          'Diamante': 1,
+          'Premium': 2,
+          'Básico': 3
+        };
+        
+        allModels.sort((a, b) => {
+          const pA = PLAN_PRIORITY[a.plan_type as string] ?? 99;
+          const pB = PLAN_PRIORITY[b.plan_type as string] ?? 99;
+          return pA - pB;
+        });
+
+        setDisplayModels(allModels);
       }
     }
     
