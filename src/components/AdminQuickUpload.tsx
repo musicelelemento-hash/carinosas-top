@@ -12,9 +12,11 @@ import {
   CheckCircle2, 
   Loader2, 
   Copy, 
+  MessageCircle, 
   Phone, 
   MapPin,
-  Sparkles
+  Sparkles,
+  Navigation
 } from "lucide-react";
 
 export default function AdminQuickUpload() {
