@@ -35,7 +35,7 @@ export default function Navbar() {
           
           <div className="flex items-center gap-8">
             <Link 
-              href="/ciudades" 
+              href="/" 
               className="hidden md:block text-[10px] text-white/60 hover:text-brand-gold uppercase tracking-[0.3em] font-black transition-colors"
             >
               Explorar

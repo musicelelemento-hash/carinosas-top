@@ -71,6 +71,12 @@ export default function ModelProfile({ model }: ModelProfileProps) {
   const services = model.services || ['VIP Escort', 'Masajes Elite', 'Acompañante de viajes', 'Citas de Lujo'];
   const allTags = model.tags || ['#EliteQuito', '#LuxuryLife', '#Discreción'];
 
+  const MOCK_REVIEWS = [
+    { name: "Andrés V.", rating: 5, comment: "Increíble nivel de detalle y profesionalismo. Recomendada 100%.", date: "Hace 2 horas" },
+    { name: "Carlos M.", rating: 5, comment: "La mejor experiencia en Quito. Muy puntual y discreta.", date: "Ayer" },
+    { name: "Juan P.", rating: 4, comment: "Excelente trato, muy amable y educada.", date: "Hace 3 días" }
+  ];
+
   const PLAN_CONFIG = {
     'Básico': { 
       accent: 'text-white/40', 
@@ -78,6 +84,16 @@ export default function ModelProfile({ model }: ModelProfileProps) {
       border: 'border-white/10', 
       icon: <BadgeCheck size={16} />, 
       label: 'VERIFIED MEMBER',
+      glow: '',
+      exclusive: false,
+      autoplay: 0
+    },
+    'Anuncio Gratis': { 
+      accent: 'text-white/40', 
+      bg: 'bg-white/5', 
+      border: 'border-white/10', 
+      icon: <BadgeCheck size={16} />, 
+      label: 'ANUNCIO GRATIS',
       glow: '',
       exclusive: false,
       autoplay: 0
@@ -114,7 +130,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
     }
   };
 
-  const plan = (model.plan_type as keyof typeof PLAN_CONFIG) || 'Básico';
+  const plan = (model.plan_type as keyof typeof PLAN_CONFIG) || 'Anuncio Gratis';
   const config = PLAN_CONFIG[plan] || PLAN_CONFIG['Básico'];
 
   return (
@@ -205,9 +221,12 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                     <TrendingUp size={16} className="text-brand-gold animate-bounce-subtle" />
                     <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">Trending Now en {model.location}</span>
                  </div>
-                 <h1 className="text-8xl lg:text-9xl font-serif text-white tracking-tighter italic leading-none flex items-center gap-4">
+                 <h1 className="text-6xl lg:text-8xl font-serif text-white tracking-tighter italic leading-none flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-left duration-1000">
                    {model.name}
-                   {model.isVerified && <BadgeCheck className="text-brand-pink w-12 h-12" fill="currentColor" />}
+                   <div className="flex items-center gap-2 bg-brand-gold/10 px-4 py-2 rounded-full border border-brand-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+                      <BadgeCheck size={24} className="text-brand-gold" />
+                      <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.2em] pt-0.5">ELITE VERIFIED</span>
+                   </div>
                  </h1>
               </div>
 
@@ -359,6 +378,34 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                 </div>
             </div>
 
+            {/* Verified Reviews Section */}
+            <div className="space-y-8 pt-12 pb-12 border-t border-white/5">
+               <div className="flex items-center justify-between">
+                  <h3 className="text-[10px] text-white/30 uppercase font-black tracking-[0.5em] ml-1">Verified Reviews</h3>
+                  <div className="flex items-center gap-1 text-brand-gold">
+                     <Star size={12} fill="currentColor" />
+                     <span className="text-xs font-black">4.9/5</span>
+                  </div>
+               </div>
+               
+               <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                  {MOCK_REVIEWS.map((review, i) => (
+                    <div key={i} className="flex-shrink-0 w-72 p-6 glass-dark border border-white/5 rounded-3xl space-y-3">
+                       <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-white font-black uppercase tracking-widest">{review.name}</span>
+                          <span className="text-[8px] text-white/30 font-black uppercase tracking-widest">{review.date}</span>
+                       </div>
+                       <div className="flex gap-0.5">
+                          {[...Array(review.rating)].map((_, i) => (
+                            <Star key={i} size={10} className="text-brand-gold fill-brand-gold" />
+                          ))}
+                       </div>
+                       <p className="text-xs text-white/60 leading-relaxed italic">"{review.comment}"</p>
+                    </div>
+                  ))}
+               </div>
+            </div>
+
             {/* Services Grid - Magazine style icons */}
             <div className="space-y-8 pb-32">
                <h3 className="text-[10px] text-white/30 uppercase font-black tracking-[0.5em] ml-1">Elite Services</h3>
@@ -389,10 +436,16 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                   </div>
                   <div className="flex flex-col">
                      <span className="text-xl font-serif text-white italic">{model.name}</span>
-                     <span className="text-[9px] text-brand-gold font-black uppercase tracking-widest flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        Online Ahora · {model.city}
-                     </span>
+                     <div className="flex items-center gap-3">
+                        <span className="text-[9px] text-brand-gold font-black uppercase tracking-widest flex items-center gap-2">
+                           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                           Online Ahora
+                        </span>
+                        <div className="w-1 h-1 rounded-full bg-white/10" />
+                        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest">
+                           12 Reservas hoy
+                        </span>
+                     </div>
                   </div>
                </div>
 

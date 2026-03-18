@@ -15,6 +15,12 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: 'Cariñosas.top | Encuentros VIP en Ecuador',
   description: 'El directorio de mayor exclusividad en Quito, Guayaquil y Cuenca. Fotos 100% verificadas',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Cariñosas.top',
+  },
 };
 
 export default function RootLayout({

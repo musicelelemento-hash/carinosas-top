@@ -36,7 +36,7 @@ export default function AdminQuickUpload() {
   const [success, setSuccess] = useState(false);
   const [tempTransformed, setTempTransformed] = useState("");
   const [showMap, setShowMap] = useState(false);
-  const [planType, setPlanType] = useState("Diamante");
+  const [planType, setPlanType] = useState("Anuncio Gratis");
 
   const provinces = getProvinces();
 
@@ -132,7 +132,7 @@ export default function AdminQuickUpload() {
   };
 
   const plans = [
-    { id: 'Básico', icon: <Star size={16} />, color: 'text-brand-white/40', desc: 'Listing Estándar' },
+    { id: 'Anuncio Gratis', icon: <Star size={16} />, color: 'text-brand-white/40', desc: 'Listing Estándar' },
     { id: 'Premium', icon: <ShieldCheck size={16} />, color: 'text-brand-gold/60', desc: 'Destacado Ambar' },
     { id: 'Diamante', icon: <Diamond size={16} />, color: 'text-brand-pink', desc: 'Acceso Privado' },
     { id: 'VIP Elite', icon: <Crown size={16} />, color: 'text-brand-gold', desc: 'Máxima Exclusividad' },
@@ -219,7 +219,7 @@ export default function AdminQuickUpload() {
                   onChange={(e) => setPlanType(e.target.value)}
                   className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer capitalize"
                 >
-                  <option value="Básico">Básico</option>
+                  <option value="Anuncio Gratis">Anuncio Gratis</option>
                   <option value="Premium">Premium</option>
                   <option value="Diamante">Diamante</option>
                   <option value="VIP Elite">VIP Elite</option>
@@ -227,22 +227,42 @@ export default function AdminQuickUpload() {
               </div>
             </div>
 
-            {/* Selector de Plan Visual */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {plans.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setPlanType(p.id)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${
-                    planType === p.id 
-                    ? 'bg-brand-gold/10 border-brand-gold text-brand-gold' 
-                    : 'bg-transparent border-white/5 text-brand-white/40 hover:border-white/20'
-                  }`}
-                >
-                  {p.icon}
-                  <span className="text-[9px] font-black uppercase tracking-widest">{p.id}</span>
-                </button>
-              ))}
+            {/* Selector de Plan Visual + Preview */}
+            <div className="space-y-4 pt-4 border-t border-white/5">
+              <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Vista Previa del Plan</label>
+              <div className="flex items-center gap-6 p-6 glass-premium border-brand-gold/10 rounded-3xl">
+                <div className={`p-4 rounded-full bg-white/5 border ${
+                  planType === 'VIP Elite' ? 'border-brand-gold text-brand-gold shadow-[0_0_20px_rgba(212,175,55,0.3)]' :
+                  planType === 'Diamante' ? 'border-brand-pink text-brand-pink shadow-[0_0_15px_rgba(255,0,110,0.2)]' :
+                  planType === 'Premium' ? 'border-brand-gold/40 text-brand-gold/60' :
+                  'border-white/10 text-white/40'
+                }`}>
+                  {plans.find(p => p.id === planType)?.icon || <Star size={24} />}
+                </div>
+                <div>
+                   <h4 className="text-xl font-serif text-white italic">{planType}</h4>
+                   <p className="text-[9px] text-white/40 uppercase tracking-widest font-black">
+                     {plans.find(p => p.id === planType)?.desc}
+                   </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {plans.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setPlanType(p.id)}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${
+                      planType === p.id 
+                      ? 'bg-brand-gold/10 border-brand-gold text-brand-gold' 
+                      : 'bg-transparent border-white/5 text-brand-white/40 hover:border-white/20'
+                    }`}
+                  >
+                    {p.icon}
+                    <span className="text-[9px] font-black uppercase tracking-widest">{p.id}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Sector manual + mapa toggle */}

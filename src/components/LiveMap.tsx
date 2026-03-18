@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Navigation, Loader2, MapPin, ChevronRight, Star, Users, Zap } from "lucide-react";
+import { Navigation, Loader2, MapPin, ChevronRight, Star, Users, Zap, MessageSquare, Heart } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
+import LiveMapAnimator from "./LiveMapAnimator";
 
 // Dynamic imports for leaflet (SSR-safe)
 const MapContainer = dynamic(
@@ -59,22 +60,8 @@ export default function LiveMap() {
   const [mapTarget, setMapTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
   const mapRef = useRef<any>(null);
 
-  // Dynamic useMap component
-  const MapNavigation = dynamic(
-    () => import("react-leaflet").then((m) => {
-      const { useMap } = m;
-      return function Nav({ target }: { target: { center: [number, number]; zoom: number } | null }) {
-        const map = useMap();
-        useEffect(() => {
-          if (target) {
-            map.flyTo(target.center, target.zoom, { animate: true, duration: 1.5 });
-          }
-        }, [target, map]);
-        return null;
-      };
-    }),
-    { ssr: false }
-  );
+  // LiveMapAnimator will handle the flyTo logic internally
+  // based on the mapTarget prop.
 
   useEffect(() => {
     import("leaflet").then((leaflet) => setL(leaflet.default || leaflet));
@@ -166,47 +153,44 @@ export default function LiveMap() {
 
   return (
     <section className="relative w-full overflow-hidden bg-brand-black">
-      {/* Premium Header */}
-      <div className="relative z-20 max-w-7xl mx-auto px-6 pt-24 pb-12">
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">
-              <Zap size={14} className="animate-pulse" />
-              Proximity Live Dashboard
+      {/* Floating minimalist Overlay (replacing large header) */}
+      <div className="absolute top-24 left-8 z-30 pointer-events-none hidden md:block">
+        <div className="glass-premium border-brand-gold/10 p-6 rounded-[2rem] space-y-4 max-w-sm pointer-events-auto shadow-2xl">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-brand-black shadow-gold">
+              <Zap size={20} className="animate-pulse" />
             </div>
-            <h2 className="text-5xl md:text-7xl font-serif text-white tracking-tighter italic">
-              Elite <span className="text-brand-gold">Discovery</span>
-            </h2>
-            <p className="text-brand-white/40 text-xs uppercase tracking-[0.3em] font-black max-w-sm">
-              Encuentra compañía premium a pocos minutos de tu ubicación actual.
-            </p>
+            <div>
+              <h2 className="text-2xl font-serif text-white italic leading-none">Elite <span className="text-brand-gold">Proximity</span></h2>
+              <p className="text-[8px] text-brand-white/40 uppercase font-black tracking-widest mt-1">Sincronización GPS en Vivo</p>
+            </div>
           </div>
-
-          <div className="flex gap-3">
-             <div className="bg-white/5 border border-white/10 px-6 py-4 rounded-3xl flex flex-col items-center">
-                <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Activas</span>
-                <span className="text-2xl font-serif text-brand-gold">{models.length}</span>
+          <div className="flex gap-4 pt-2 border-t border-white/5">
+             <div className="flex flex-col">
+                <span className="text-[7px] text-white/30 uppercase font-black tracking-widest">Activas</span>
+                <span className="text-xl font-serif text-brand-gold leading-none">{models.length}</span>
              </div>
-             <div className="bg-white/5 border border-white/10 px-6 py-4 rounded-3xl flex flex-col items-center">
-                <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Cercanas</span>
-                <span className="text-2xl font-serif text-brand-pink">{cityModels.length}</span>
+             <div className="flex flex-col border-l border-white/10 pl-4">
+                <span className="text-[7px] text-white/30 uppercase font-black tracking-widest">Cercanas</span>
+                <span className="text-xl font-serif text-brand-pink leading-none">{cityModels.length}</span>
              </div>
           </div>
         </div>
+      </div>
 
-        {/* City Filter Layout */}
-        <div className="mt-12 flex gap-3 overflow-x-auto no-scrollbar pb-4">
+      {/* Floating City Filters (Compact) */}
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-4xl px-4 pointer-events-none">
+        <div className="flex gap-2 p-2 glass-premium border-white/5 rounded-2xl overflow-x-auto no-scrollbar pointer-events-auto shadow-2xl">
           {Object.entries(ECUADOR_CITIES).map(([key, val]) => (
             <button
               key={key}
               onClick={() => handleCitySelect(key)}
-              className={`flex-shrink-0 flex items-center gap-3 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all duration-500 active:scale-95 ${
+              className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${
                 selectedCity === key
-                  ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_15px_30px_rgba(212,175,55,0.2)]"
-                  : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
+                  ? "bg-brand-gold text-brand-black border-brand-gold"
+                  : "bg-white/5 border-white/5 text-white/30 hover:border-white/10"
               }`}
             >
-              <MapPin size={12} />
               {val.label}
             </button>
           ))}
@@ -214,7 +198,7 @@ export default function LiveMap() {
       </div>
 
       {/* Main Map Experience */}
-      <div className="flex flex-col lg:flex-row h-[70vh] min-h-[600px] border-t border-white/5">
+      <div className="flex flex-col lg:flex-row h-screen border-t border-white/5">
         
         {/* === Sidebar (Uber style) === */}
         <div className="w-full lg:w-96 bg-brand-black border-r border-white/5 overflow-y-auto custom-scrollbar z-20">
@@ -269,7 +253,7 @@ export default function LiveMap() {
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               />
               
-              <MapNavigation target={mapTarget} />
+              {mapTarget && <LiveMapAnimator target={mapTarget} />}
 
               {/* User marker */}
               {userLocation && userIcon && (
@@ -294,7 +278,12 @@ export default function LiveMap() {
                              <h5 className="text-brand-gold font-serif text-lg">{model.name}</h5>
                              <p className="text-[8px] text-white/50 uppercase tracking-widest font-black">{model.age} Años · {model.city}</p>
                           </div>
-                          <a href={`/profile/${model.id}`} className="block w-full py-2 bg-brand-gold text-brand-black text-[10px] font-black uppercase text-center rounded-lg tracking-widest">Ver Perfil VIP</a>
+                          <button 
+                             onClick={(e) => { e.stopPropagation(); window.location.href = `/profile/${model.id}`; }}
+                             className="block w-full py-2 bg-brand-gold text-brand-black text-[10px] font-black uppercase text-center rounded-lg tracking-widest hover:scale-105 active:scale-95 transition-all"
+                          >
+                             Ver Perfil VIP
+                          </button>
                        </div>
                     </Popup>
                   </Marker>

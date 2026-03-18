@@ -40,9 +40,18 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] text-brand-white/30 uppercase tracking-[0.2em]">
-            Cariñosas.top © 2026 | Quito · Guayaquil · Cuenca · Manta
-          </p>
+          <div className="flex flex-col gap-6">
+             <p className="text-[10px] text-brand-white/30 uppercase tracking-[0.2em]">
+               Cariñosas.top © 2026 | Quito · Guayaquil · Cuenca · Manta · Salinas · Ambato
+             </p>
+             {/* SEO Authority Block for Google Ranking */}
+             <div className="max-w-4xl text-[8px] text-brand-white/10 leading-relaxed uppercase tracking-widest text-justify select-none opacity-50">
+               Directorio #1 de Cariñosas en Quito, Guayaquil y todo el Ecuador. Encuentra las mejores acompañantes VIP, escorts independientes y servicios 
+               de lujo en sectores exclusivos como La Carolina, Samborondón y Manta. Superamos los estándares de plataformas tradicionales como Skokka, 
+               ofreciendo fotos 100% verificadas, discreción total y una experiencia premium inigualable. La mejor opción para caballeros exigentes que buscan 
+               calidad y seguridad en servicios para adultos en las principales ciudades ecuatorianas.
+             </div>
+          </div>
           <div className="flex gap-8 text-[10px] text-brand-white/30 uppercase tracking-widest font-black">
             <a href="#" className="hover:text-brand-gold transition-colors">Términos</a>
             <a href="#" className="hover:text-brand-gold transition-colors">Privacidad</a>

@@ -13,6 +13,8 @@ import Footer from "@/components/Footer";
 import StoriesBar from "@/components/StoriesBar";
 import LiveMap from "@/components/LiveMap";
 import AIAssistantOverlay from "@/components/AIAssistantOverlay";
+import GlobalLounge from "@/components/GlobalLounge";
+import PushPrompt from "@/components/PushPrompt";
 
 import { supabase } from "@/lib/supabase";
 
@@ -22,7 +24,7 @@ const STATIC_MODELS = [
   { id: '2', name: 'Camila', age: 23, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Diamante' },
   { id: '3', name: 'Luciana', age: 22, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Premium' },
   { id: '4', name: 'Alessandra', age: 25, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1503105391650-704fd6827a88?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1503105391650-704fd6827a88?auto=format&fit=crop&q=80&w=1200'], isBoosted: true, plan_type: 'VIP Elite' },
-  { id: '5', name: 'Isabella', age: 24, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Básico' },
+  { id: '5', name: 'Isabella', age: 24, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Anuncio Gratis' },
   { id: '6', name: 'Antonella', age: 26, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Premium' },
 ];
 
@@ -62,6 +64,7 @@ export default function Home() {
           'VIP Elite': 0,
           'Diamante': 1,
           'Premium': 2,
+          'Anuncio Gratis': 3,
           'Básico': 3
         };
         
@@ -116,6 +119,8 @@ export default function Home() {
       {/* Smart Recommendations */}
       <RecommendationSection />
 
+      <GlobalLounge />
+
       {/* Main Directory Grid with Infinite Scroll */}
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center gap-4 mb-20 px-4">
@@ -149,6 +154,7 @@ export default function Home() {
       <AvailabilityChat />
       <GhostNotifications />
       <AIAssistantOverlay />
+      <PushPrompt />
 
       <Footer />
     </main>

@@ -1,6 +1,7 @@
 import ModelProfile from "@/components/ModelProfile";
 
 const MOCK_MODEL = {
+  id: "valentina",
   name: "Valentina",
   age: 23,
   location: "Quito, La Carolina",

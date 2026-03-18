@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { MessageCircle, MapPin, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond } from "lucide-react";
+import { MessageCircle, MapPin, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond, TrendingUp } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
+import { useRouter } from "next/navigation";
 
 interface ProfileCardProps {
   id?: string;
@@ -34,6 +35,7 @@ export default function ProfileCard({
   tags = [],
   plan_type
 }: ProfileCardProps) {
+  const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -105,6 +107,7 @@ export default function ProfileCard({
       <div 
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={() => router.push(`/profile/${id}`)}
         className={`relative glass-dark rounded-[2.1rem] overflow-hidden transition-all duration-700 active:scale-[0.98] cursor-pointer border ${
           isHovered ? 'border-brand-gold/50 -translate-y-3' : 'border-white/5'
         } shadow-2xl`}
@@ -140,12 +143,34 @@ export default function ProfileCard({
               <Star size={12} className="text-brand-gold fill-brand-gold" />
               <span className="text-[8px] text-white font-black uppercase tracking-[0.2em]">PREMIUM</span>
             </div>
+          ) : plan_type === 'Anuncio Gratis' || plan_type === 'Básico' ? (
+            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 px-3 py-1.5 rounded-full scale-90 origin-left">
+              <span className="text-[7px] text-white/40 font-black uppercase tracking-[0.2em]">ANUNCIO GRATIS</span>
+            </div>
           ) : null}
+        </div>
 
-          <div className="flex items-center gap-2 bg-green-500/10 backdrop-blur-md border border-green-500/30 px-3 py-1.5 rounded-full scale-90 origin-left">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-            <span className="text-[8px] text-green-500 font-black uppercase tracking-[0.2em]">LIVE AHORA</span>
+        {/* Real-time Status Indicator - "Live Ahora" at top-right */}
+        <div className="absolute top-8 right-6 z-30 flex items-center gap-2 bg-brand-black/40 backdrop-blur-xl border border-white/10 px-3 py-1.5 rounded-full animate-in fade-in zoom-in duration-1000">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </div>
+          <span className="text-[8px] font-black text-white/90 uppercase tracking-[0.2em]">Live Ahora</span>
+        </div>
+
+
+        {/* Gamification Badges - Bottom Left */}
+        <div className="absolute bottom-6 left-6 z-30 flex gap-2">
+           <div className="bg-brand-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-xl group/badge hover:bg-brand-gold/20 transition-all">
+              <Zap size={14} className="text-brand-gold animate-pulse" />
+           </div>
+           <div className="bg-brand-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-xl group/badge hover:bg-brand-gold/20 transition-all">
+              <Star size={14} className="text-brand-gold fill-brand-gold/40" />
+           </div>
+           <div className="bg-brand-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-xl group/badge hover:bg-brand-gold/20 transition-all">
+              <TrendingUp size={14} className="text-brand-gold" />
+           </div>
         </div>
 
         {/* Action Buttons (Visible on Hover) */}
