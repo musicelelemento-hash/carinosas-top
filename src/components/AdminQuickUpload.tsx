@@ -21,6 +21,8 @@ export default function AdminQuickUpload() {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [city, setCity] = useState("Quito");
+  const [lat, setLat] = useState<number | null>(-0.1807);
+  const [lng, setLng] = useState<number | null>(-78.4678);
   const [age, setAge] = useState("21");
   const [rawDesc, setRawDesc] = useState("");
   const [images, setImages] = useState<string[]>([]);
@@ -29,6 +31,25 @@ export default function AdminQuickUpload() {
   const [tempTransformed, setTempTransformed] = useState("");
 
   const provinces = getProvinces();
+
+  // Simple city to approximate coordinate mapper
+  const updateCoordsFromCity = (cityName: string) => {
+    const coords: Record<string, [number, number]> = {
+      'Quito': [-0.1807, -78.4678],
+      'Guayaquil': [-2.1894, -79.8891],
+      'Cuenca': [-2.9001, -79.0059],
+      'Manta': [-0.9621, -80.7127],
+      'Machala': [-3.2581, -79.9161],
+      'Santo Domingo': [-0.2520, -79.1714],
+      'Ambato': [-1.2417, -78.6197],
+      'Portoviejo': [-1.0544, -80.4544],
+      'Pasaje': [-3.3283, -79.8067]
+    };
+    if (coords[cityName]) {
+       setLat(coords[cityName][0] + (Math.random() - 0.5) * 0.01); // Small jitter
+       setLng(coords[cityName][1] + (Math.random() - 0.5) * 0.01);
+    }
+  };
 
   // Live transformation effect
   React.useEffect(() => {
@@ -62,7 +83,9 @@ export default function AdminQuickUpload() {
           tags, 
           images: finalImages, 
           plan_type: 'Diamante', 
-          age: parseInt(age) || 21 
+          age: parseInt(age) || 21,
+          lat,
+          lng
         }
       ]);
       
@@ -134,7 +157,10 @@ export default function AdminQuickUpload() {
                    <MapPin size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-gold/40" />
                    <select 
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={(e) => {
+                  setCity(e.target.value);
+                  updateCoordsFromCity(e.target.value);
+                }}
                     className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer"
                    >
                      {provinces.map(prov => (

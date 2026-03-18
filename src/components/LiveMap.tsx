@@ -1,21 +1,57 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Crown, Navigation, ZoomIn } from "lucide-react";
+import { Crown, Navigation, ZoomIn, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
-// Mock locations for premium models in Ecuador
-const LOCATIONS = [
-  { id: '1', name: 'Valentina', lat: -0.1807, lng: -78.4678, area: 'Quito - Cumbayá', distance: '1.2km' },
-  { id: '2', name: 'Camila', lat: -2.1894, lng: -79.8891, area: 'Guayaquil - Samborondón', distance: '3.5km' },
-  { id: '3', name: 'Luciana', lat: -2.9001, lng: -79.0059, area: 'Cuenca VIP', distance: '0.8km' },
-  { id: '4', name: 'Alessandra', lat: -0.9621, lng: -80.7127, area: 'Manta Puerto', distance: '4.1km' },
-  { id: '5', name: 'Isabella', lat: -0.1700, lng: -78.4800, area: 'Quito Norte', distance: '2.4km' },
-  { id: '6', name: 'Elena', lat: -3.2581, lng: -79.9161, area: 'Machala Centro', distance: '5.2km' },
-  { id: '7', name: 'Sofia', lat: -3.3283, lng: -79.8067, area: 'Pasaje VIP', distance: '2.9km' },
-];
+// Dynamic import for Leaflet to avoid SSR issues in Next.js
+import dynamic from 'next/dynamic';
+
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default marker icons in Leaflet + Next.js
+let L: any = null;
+if (typeof window !== 'undefined') {
+  L = require('leaflet');
+}
 
 export default function LiveMap() {
-  const [selected, setSelected] = useState<typeof LOCATIONS[0] | null>(null);
+  const [models, setModels] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
+  useEffect(() => {
+    async function fetchLocations() {
+      const { data, error } = await supabase
+        .from('models')
+        .select('id, name, city, lat, lng, plan_type, images')
+        .not('lat', 'is', null);
+      
+      if (data && !error) setModels(data);
+      setLoading(false);
+    }
+    fetchLocations();
+
+    // Try to get user location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
+        () => console.log("User denied location")
+      );
+    }
+  }, []);
+
+  const customIcon = L ? new L.DivIcon({
+    html: `<div class="p-2 rounded-full backdrop-blur-md border bg-brand-gold/20 border-brand-gold/40 shadow-gold animate-in fade-in zoom-in duration-500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg></div>`,
+    className: 'custom-div-icon',
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+  }) : null;
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-20 overflow-hidden">
@@ -29,80 +65,65 @@ export default function LiveMap() {
             Mapa de <span className="text-brand-gold">Proximidad VIP</span>
           </h2>
           <p className="text-brand-white/40 text-sm md:text-base leading-relaxed">
-            Visualiza en tiempo real a las modelos más exclusivas cerca de tu ubicación. Discreción garantizada mediante nuestro sistema de geocodificación enmascarada.
+            Visualiza en tiempo real a las modelos más exclusivas cerca de tu ubicación. Discrección garantizada mediante nuestro sistema de geocodificación enmascarada.
           </p>
         </div>
         <div className="flex items-center gap-4 bg-brand-gold/10 border border-brand-gold/20 px-6 py-3 rounded-2xl">
            <div className="w-2 h-2 rounded-full bg-brand-pink animate-pulse" />
-           <span className="text-[10px] font-black text-brand-gold uppercase tracking-widest">{LOCATIONS.length} Modelos Activas</span>
+           <span className="text-[10px] font-black text-brand-gold uppercase tracking-widest">
+             {loading ? <Loader2 size={10} className="animate-spin" /> : `${models.length} Modelos Encontradas`}
+           </span>
         </div>
       </div>
 
-      <div className="relative w-full aspect-[21/9] bg-[#0A0A0A] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
-        {/* Mock Map Background (Dark Mode Aesthetic) */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                 <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-                    <path d="M 100 0 L 0 0 0 100" fill="none" stroke="white" strokeWidth="0.5" />
-                 </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-           </svg>
-        </div>
+      <div className="relative w-full aspect-[21/9] bg-[#0A0A0A] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl z-0">
+        {!loading && typeof window !== 'undefined' && (
+          <MapContainer 
+            center={userLocation || [-1.8312, -78.1834]} 
+            zoom={userLocation ? 13 : 7} 
+            scrollWheelZoom={false}
+            className="w-full h-full"
+            zoomControl={false}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            />
+            
+            {models.map(model => (
+              <Marker 
+                key={model.id} 
+                position={[model.lat, model.lng]} 
+                icon={customIcon}
+              >
+                <Popup className="premium-popup">
+                  <div className="text-center p-2">
+                    <p className="font-serif text-brand-gold mb-1">{model.name}</p>
+                    <p className="text-[10px] text-white/60 uppercase tracking-widest">{model.city}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
 
-        {/* Pulsing Central User Location */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-           <div className="w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_20px_#3B82F6] animate-pulse" />
-           <div className="absolute inset-0 w-20 h-20 -translate-x-1/2 -translate-y-1/2 border border-blue-500/20 rounded-full animate-ping" />
-        </div>
+            {userLocation && (
+              <Marker position={userLocation} icon={L ? new L.DivIcon({
+                html: `<div class="w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_20px_#3B82F6] animate-pulse"></div><div class="absolute inset-0 w-12 h-12 -translate-x-1/2 -translate-y-1/2 border border-blue-500/20 rounded-full animate-ping"></div>`,
+                className: 'user-location-icon',
+                iconSize: [16, 16],
+              }) : null} />
+            )}
+          </MapContainer>
+        )}
 
-        {/* Model Icons (👑) */}
-        {LOCATIONS.map((loc) => {
-          // Semi-random positioning for mock visualization
-          const top = `${40 + (loc.lat * 5)}%`;
-          const left = `${50 + (loc.lng * 2)}%`;
-          const isSelected = selected?.id === loc.id;
-
-          return (
-            <div 
-              key={loc.id}
-              className="absolute z-20 cursor-pointer transition-all duration-500 hover:scale-125"
-              style={{ top, left }}
-              onClick={() => setSelected(loc)}
-            >
-              <div className={`p-2 rounded-full backdrop-blur-md border transition-all duration-500 ${isSelected ? 'bg-brand-pink border-white shadow-[0_0_20px_#E91E63]' : 'bg-brand-gold/20 border-brand-gold/40'}`}>
-                <Crown size={18} className={isSelected ? 'text-white' : 'text-brand-gold'} />
-              </div>
-
-              {/* Quick Preview Card */}
-              {isSelected && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 glass-dark border border-brand-gold/30 rounded-2xl p-4 animate-in slide-in-from-bottom-2 fade-in duration-300 pointer-events-none">
-                   <div className="flex flex-col gap-2">
-                      <p className="text-xs font-serif text-brand-gold">{loc.name}</p>
-                      <p className="text-[10px] text-brand-white font-bold uppercase tracking-widest">{loc.area}</p>
-                      <div className="flex items-center justify-between mt-2">
-                         <span className="text-[9px] text-brand-white/40 font-black">📍 A {loc.distance}</span>
-                         <span className="text-[9px] text-brand-pink font-black uppercase">Online</span>
-                      </div>
-                   </div>
-                   <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-brand-gold/30" />
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* Map Controls */}
-        <div className="absolute bottom-8 right-8 flex flex-col gap-4">
-           <button className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-white/40 hover:text-brand-gold hover:bg-white/10 transition-all shadow-xl">
-             <ZoomIn size={20} />
-           </button>
-           <button className="w-12 h-12 rounded-2xl glass-dark border border-brand-gold/30 flex items-center justify-center text-brand-gold hover:scale-110 transition-all shadow-xl">
-             <Navigation size={20} />
-           </button>
-        </div>
+        {/* Dynamic Design Overlay */}
+        <div className="absolute inset-0 pointer-events-none border-[20px] border-brand-black/20 z-10" />
       </div>
+
+      <style jsx global>{`
+        .leaflet-container { background: #050505 !important; }
+        .premium-popup .leaflet-popup-content-wrapper { background: rgba(10, 10, 10, 0.8) !important; backdrop-filter: blur(10px); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 1rem; color: white; }
+        .premium-popup .leaflet-popup-tip { background: rgba(10, 10, 10, 0.8) !important; border: 1px solid rgba(212, 175, 55, 0.2); }
+      `}</style>
     </section>
   );
 }
