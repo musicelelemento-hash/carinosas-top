@@ -26,13 +26,32 @@ export default function AdminQuickUpload() {
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [tempTransformed, setTempTransformed] = useState("");
 
   const provinces = getProvinces();
 
+  // Live transformation effect
+  React.useEffect(() => {
+    if (rawDesc) {
+      const { text } = StitchEngine.quickTransform(rawDesc, city);
+      setTempTransformed(text);
+    } else {
+      setTempTransformed("");
+    }
+  }, [rawDesc, city]);
+
   const handleQuickPublish = async () => {
+    if (!name || !whatsapp) {
+      alert("Nombre y WhatsApp son obligatorios.");
+      return;
+    }
+
     setLoading(true);
     const { text, tags } = StitchEngine.quickTransform(rawDesc || "Acompañante VIP de alto nivel", city);
     
+    // Placeholder image if none provided
+    const finalImages = images.length > 0 ? images : ["https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop"];
+
     try {
       const { error } = await supabase.from('models').insert([
         { 
@@ -41,8 +60,8 @@ export default function AdminQuickUpload() {
           whatsapp, 
           description: text, 
           tags, 
-          images, 
-          plan_type: 'Diamante', // Admin uploads are always top-tier
+          images: finalImages, 
+          plan_type: 'Diamante', 
           age: parseInt(age) || 21 
         }
       ]);
@@ -148,6 +167,14 @@ export default function AdminQuickUpload() {
                 placeholder="Pega aquí la info de la competencia..."
                 className="w-full bg-brand-black/40 border border-white/10 rounded-3xl py-4 px-6 text-white outline-none focus:border-brand-gold h-40 resize-none transition-all placeholder:text-white/10"
               />
+              {tempTransformed && (
+                <div className="mt-4 p-4 glass-premium border-brand-gold/10 rounded-2xl animate-in slide-in-from-top-2">
+                  <p className="text-[10px] text-brand-gold uppercase tracking-widest font-black mb-1 flex items-center gap-2">
+                    <Sparkles size={10} /> Stitch Preview:
+                  </p>
+                  <p className="text-xs italic text-brand-white/60">"{tempTransformed}"</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -181,11 +208,17 @@ export default function AdminQuickUpload() {
                   onUploadError={(err) => alert(`Error: ${err.message}`)}
                 />
               </div>
+
+              {images.length === 0 && (
+                <p className="text-[8px] text-brand-white/20 uppercase text-center mt-2 italic">
+                  * Se usará imagen temporal si no subes fotos.
+                </p>
+              )}
             </div>
 
             <button 
               onClick={handleQuickPublish}
-              disabled={loading || !name || !whatsapp || images.length === 0}
+              disabled={loading || !name || !whatsapp}
               className={`w-full mt-8 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 shadow-2xl ${
                 success 
                   ? 'bg-green-500 text-white' 
@@ -202,6 +235,10 @@ export default function AdminQuickUpload() {
         .uploadthing-admin .ut-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 900; color: rgba(212, 175, 55, 0.5); }
         .uploadthing-admin .ut-button { background-color: #D4AF37; color: #050505; border-radius: 1rem; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; }
         .uploadthing-admin .ut-allowed-content { display: none; }
+        .uploadthing-admin [data-ut-element="label"] { color: #D4AF37 !important; }
+        @media (max-width: 640px) {
+          .admin-quick-upload-container { padding-left: 1rem; padding-right: 1rem; }
+        }
       `}</style>
     </div>
   );
