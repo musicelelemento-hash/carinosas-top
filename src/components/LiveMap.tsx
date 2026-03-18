@@ -29,7 +29,7 @@ export default function LiveMap() {
     async function fetchLocations() {
       const { data, error } = await supabase
         .from('models')
-        .select('id, name, city, lat, lng, plan_type, images')
+        .select('id, name, city, lat, lng, plan_type, images, sector')
         .not('lat', 'is', null);
       
       if (data && !error) setModels(data);
@@ -97,9 +97,12 @@ export default function LiveMap() {
                 icon={customIcon}
               >
                 <Popup className="premium-popup">
-                  <div className="text-center p-2">
-                    <p className="font-serif text-brand-gold mb-1">{model.name}</p>
-                    <p className="text-[10px] text-white/60 uppercase tracking-widest">{model.city}</p>
+                  <div className="text-center p-2 min-w-[120px]">
+                    <p className="font-serif text-brand-gold mb-1 text-sm">{model.name}</p>
+                    <p className="text-[9px] text-white font-black uppercase tracking-widest mb-1">{model.city}</p>
+                    {model.sector && (
+                      <p className="text-[8px] text-brand-gold/60 italic border-t border-white/10 pt-1 mt-1 font-medium">{model.sector}</p>
+                    )}
                   </div>
                 </Popup>
               </Marker>

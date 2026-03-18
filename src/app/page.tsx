@@ -43,11 +43,12 @@ export default function Home() {
           id: m.id,
           name: m.name,
           age: m.age,
-          location: m.city,
+          location: m.sector ? `${m.sector}, ${m.city}` : m.city,
           imageUrl: m.images && m.images[0] ? m.images[0] : STATIC_MODELS[0].imageUrl,
           isBoosted: m.plan_type === 'Diamante',
           description: m.description,
-          whatsapp: m.whatsapp
+          whatsapp: m.whatsapp,
+          sector: m.sector
         }));
         
         // Merge live models with static ones in the beginning for a full directory

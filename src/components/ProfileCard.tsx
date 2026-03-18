@@ -12,6 +12,7 @@ interface ProfileCardProps {
   imageUrl: string;
   isVip?: boolean;
   isBoosted?: boolean;
+  sector?: string;
 }
 
 export default function ProfileCard({ 
@@ -20,7 +21,8 @@ export default function ProfileCard({
   location, 
   imageUrl, 
   isVip = true,
-  isBoosted = false
+  isBoosted = false,
+  sector
 }: ProfileCardProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [isTransitioning, setIsTransitioning] = React.useState(false);
@@ -100,6 +102,7 @@ export default function ProfileCard({
             <div className="space-y-2">
               <h3 className="text-4xl font-serif text-brand-gold-light italic tracking-tight">{name}</h3>
               <p className="text-[10px] text-white/60 uppercase tracking-[0.4em] font-black">Elite Model VIP</p>
+              {sector && <p className="text-[8px] text-brand-gold/60 uppercase tracking-widest font-black">{sector}</p>}
             </div>
             
             <div className="flex gap-4">

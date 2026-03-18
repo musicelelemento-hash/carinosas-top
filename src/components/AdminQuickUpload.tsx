@@ -21,6 +21,7 @@ export default function AdminQuickUpload() {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [city, setCity] = useState("Quito");
+  const [sector, setSector] = useState("");
   const [lat, setLat] = useState<number | null>(-0.1807);
   const [lng, setLng] = useState<number | null>(-78.4678);
   const [age, setAge] = useState("21");
@@ -85,7 +86,8 @@ export default function AdminQuickUpload() {
           plan_type: 'Diamante', 
           age: parseInt(age) || 21,
           lat,
-          lng
+          lng,
+          sector
         }
       ]);
       
@@ -96,6 +98,7 @@ export default function AdminQuickUpload() {
         setSuccess(false);
         setName("");
         setWhatsapp("");
+        setSector("");
         setRawDesc("");
         setImages([]);
       }, 3000);
@@ -150,6 +153,21 @@ export default function AdminQuickUpload() {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Ubicación Precisa / Sector / Calles (Referencia para el mapa)</label>
+              <div className="relative">
+                <MapPin size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-gold/40" />
+                <input 
+                  type="text" 
+                  value={sector}
+                  onChange={(e) => setSector(e.target.value)}
+                  placeholder="Ej: Sector La Carolina, Av. Amazonas y Eloy Alfaro"
+                  className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all"
+                />
+              </div>
+              <p className="text-[8px] text-brand-gold/40 uppercase font-black ml-1">Esto ayudará al usuario a ubicarte mejor en el mapa.</p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Ciudad Destino</label>
@@ -180,6 +198,35 @@ export default function AdminQuickUpload() {
                   className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all"
                 />
               </div>
+            </div>
+
+            <div className="space-y-4 p-6 glass-premium border-brand-gold/5 rounded-3xl">
+              <label className="text-[10px] text-brand-gold/50 uppercase font-black tracking-widest ml-1 flex items-center gap-2">
+                <Navigation size={12} /> Coordenadas GPS (Auto-generadas)
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <span className="text-[8px] text-white/20 uppercase font-black ml-1">Latitud</span>
+                  <input 
+                    type="number" 
+                    step="any"
+                    value={lat || ""} 
+                    onChange={(e) => setLat(parseFloat(e.target.value))}
+                    className="w-full bg-brand-black/60 border border-white/5 rounded-xl py-3 px-4 text-white text-xs outline-none focus:border-brand-gold/40"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[8px] text-white/20 uppercase font-black ml-1">Longitud</span>
+                  <input 
+                    type="number" 
+                    step="any"
+                    value={lng || ""} 
+                    onChange={(e) => setLng(parseFloat(e.target.value))}
+                    className="w-full bg-brand-black/60 border border-white/5 rounded-xl py-3 px-4 text-white text-xs outline-none focus:border-brand-gold/40"
+                  />
+                </div>
+              </div>
+              <p className="text-[8px] text-brand-white/20 italic ml-1">* El sistema asigna coordenadas aleatorias dentro de la ciudad para proteger la privacidad.</p>
             </div>
 
             <div className="space-y-2">
