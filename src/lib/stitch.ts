@@ -1,3 +1,5 @@
+import { CITIES } from "./cities";
+
 /**
  * Stitch Content Engine - Cariñosas.top
  * Luxury Copywriting, Smart Tagging and Quality Control for the Ecuador Market.
@@ -15,6 +17,10 @@ const CITY_TAGS: Record<string, string[]> = {
   'Guayaquil': ['#Samborondón', '#PuertoSantaAna', '#GuayaquilVIP', '#Exclusividad'],
   'Cuenca': ['#CuencaElite', '#CentroHistórico', '#AzuayVIP'],
   'Manta': ['#MantaVIP', '#Murciélago', '#CostaLujo'],
+  'Machala': ['#MachalaVIP', '#CapitalBananera', '#ElOroElite'],
+  'Pasaje': ['#PasajeVIP', '#ExclusividadOro', '#Discreción'],
+  'Santo Domingo': ['#SantoDomingoElite', '#TsáchilaVIP', '#Lujo'],
+  'Quevedo': ['#QuevedoVIP', '#RíosElite', '#Exclusivo'],
 };
 
 export const StitchEngine = {
@@ -40,7 +46,15 @@ export const StitchEngine = {
    * Generates smart SEO tags based on location.
    */
   generateTags(city: string): string[] {
-    return CITY_TAGS[city] || ['#EcuadorVIP', '#Elite'];
+    const province = CITIES.find(c => c.name === city || c.id === city)?.province || 'Ecuador';
+    const baseTags = [`#${city.replace(/\s+/g, '')}VIP`, `#${province}Elite`, '#Exclusividad', '#Discreción'];
+    
+    // Add specific high-end tags for major areas
+    if (CITY_TAGS[city]) {
+      return [...CITY_TAGS[city], ...baseTags.slice(2)];
+    }
+    
+    return baseTags;
   },
 
   /**
@@ -66,8 +80,42 @@ export const StitchEngine = {
    */
   getConversionPitch(isInterested: boolean): string {
     if (isInterested) {
-      return "En Cariñosas.top garantizamos Cero Fakes. Tu inversión de $50 en el Plan Oro te otorga la máxima visibilidad en sectores como Samborondón y Cumbayá, asegurando clientes de élite y discreción total.";
+      return "En Cariñosas.top garantizamos Cero Fakes y posicionamiento nacional. Tu inversión en el Plan Oro te otorga visibilidad prioritaria en los sectores más exclusivos de tu ciudad, asegurando clientes de élite y discreción absoluta.";
     }
-    return "Únete a la plataforma más exclusiva de Ecuador. El Plan Oro es tu llave a la cima del mercado VIP.";
+    return "Únete a la plataforma más exclusiva de Ecuador. El Plan Oro es tu llave para dominar el mercado VIP en tu región.";
+  },
+
+  /**
+   * Returns quick drafts for mobile users to pick from.
+   */
+  getQuickDrafts(city: string): Record<string, string> {
+    return {
+      'Elegante': `Busco caballeros distinguidos en ${city} que aprecien la elegancia y la buena compañía en un ambiente exclusivo.`,
+      'Atrevida': `Nueva en ${city} y con ganas de romper la rutina. Si buscas una experiencia intensa y real, soy la indicada.`,
+      'Nueva': `Recién llegada a ${city}. Ven a conocerme y descubre por qué soy la favorita de los clientes más exigentes.`,
+    };
+  },
+
+  /**
+   * Returns a random tip for mobile users.
+   */
+  getMobileTip(): string {
+    const tips = [
+      "📸 Tip: Las fotos con luz natural reciben un 40% más de atención.",
+      "✨ Tip: Un mensaje personalizado en el bio genera más confianza.",
+      "📱 Tip: Mantén tu WhatsApp activo para no perder clientes elite.",
+      "🔒 Tip: La discreción es nuestra prioridad, igual que la tuya."
+    ];
+    return tips[Math.floor(Math.random() * tips.length)];
+  },
+
+  /**
+   * Admin-only utility for rapid transformation.
+   */
+  quickTransform(rawText: string, city: string): { text: string, tags: string[] } {
+    return {
+      text: this.transformDescription(rawText, city),
+      tags: this.generateTags(city)
+    };
   }
 };

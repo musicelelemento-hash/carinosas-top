@@ -12,6 +12,7 @@ import GhostNotifications from "@/components/GhostNotifications";
 import Footer from "@/components/Footer";
 import StoriesBar from "@/components/StoriesBar";
 import LiveMap from "@/components/LiveMap";
+import AIAssistantOverlay from "@/components/AIAssistantOverlay";
 
 // In a real app, this would be fetched from Supabase
 const MODELS = [
@@ -97,6 +98,7 @@ export default function Home() {
       <PanicButton />
       <AvailabilityChat />
       <GhostNotifications />
+      <AIAssistantOverlay />
 
       <Footer />
     </main>

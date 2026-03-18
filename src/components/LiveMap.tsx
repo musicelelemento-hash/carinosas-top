@@ -10,6 +10,8 @@ const LOCATIONS = [
   { id: '3', name: 'Luciana', lat: -2.9001, lng: -79.0059, area: 'Cuenca VIP', distance: '0.8km' },
   { id: '4', name: 'Alessandra', lat: -0.9621, lng: -80.7127, area: 'Manta Puerto', distance: '4.1km' },
   { id: '5', name: 'Isabella', lat: -0.1700, lng: -78.4800, area: 'Quito Norte', distance: '2.4km' },
+  { id: '6', name: 'Elena', lat: -3.2581, lng: -79.9161, area: 'Machala Centro', distance: '5.2km' },
+  { id: '7', name: 'Sofia', lat: -3.3283, lng: -79.8067, area: 'Pasaje VIP', distance: '2.9km' },
 ];
 
 export default function LiveMap() {

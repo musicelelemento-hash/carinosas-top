@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-black: #0D0D0D;
+  --color-brand-black: #050505;
   --color-brand-gold: #D4AF37;
-  --color-brand-pink: #E91E63;
-  --color-brand-white: #F5F5F5;
+  --color-brand-gold-light: #F3E5AB;
+  --color-brand-pink: #FF006E;
+  --color-brand-pink-dark: #8338EC;
+  --color-brand-white: #FFFFFF;
 
-  --font-montserrat: var(--font-montserrat);
-  --font-playfair: var(--font-playfair);
+  --font-montserrat: "Inter", sans-serif;
+  --font-playfair: "Playfair Display", serif;
 }
 
 :root {
@@ -41,31 +43,45 @@ h1, h2, h3, h4, .font-serif {
 
 @layer utilities {
   .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
   }
   
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.4);
+  .glass-premium {
+    background: rgba(212, 175, 55, 0.03);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
   }
 
   .neon-gold {
-    border-color: rgba(212, 175, 55, 0.5);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.15), inset 0 0 10px rgba(212, 175, 55, 0.05);
   }
 
   .neon-pink {
-    border-color: rgba(233, 30, 99, 0.5);
-    box-shadow: 0 0 15px rgba(233, 30, 99, 0.4);
+    border-color: rgba(255, 0, 110, 0.4);
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.15), inset 0 0 10px rgba(255, 0, 110, 0.05);
   }
 
-  .text-glow {
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  .text-glow-gold {
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  }
+
+  .bg-mesh {
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(212, 175, 55, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(255, 0, 110, 0.05) 0px, transparent 50%);
   }
 }

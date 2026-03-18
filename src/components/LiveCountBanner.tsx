@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { CITIES } from "@/lib/cities";
+import { getPopularCities } from "@/lib/cities";
 import { Users, Flame } from "lucide-react";
 
 export default function LiveCountBanner() {
   const [count, setCount] = useState(42);
-  const [city, setCity] = useState("Quito");
+  const [cityIndex, setCityIndex] = useState(0);
+  const popularCities = getPopularCities();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -14,10 +17,15 @@ export default function LiveCountBanner() {
         const delta = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
         return Math.max(38, Math.min(prev + delta, 54));
       });
+      
+      // Rotate through popular cities
+      setCityIndex(prev => (prev + 1) % popularCities.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [popularCities.length]);
+
+  const currentCity = popularCities[cityIndex].name;
 
   return (
     <div className="w-full bg-brand-gold/10 border-b border-brand-gold/20 py-2.5 px-4 overflow-hidden relative">
@@ -32,7 +40,7 @@ export default function LiveCountBanner() {
             <Users size={14} />
           </span>
           <span>
-            <strong className="text-brand-white text-sm md:text-base">{count}</strong> Modelos Verificadas activas en <span className="text-brand-gold">{city}</span>
+            <strong className="text-brand-white text-sm md:text-base">{count}</strong> Modelos Verificadas activas en <span className="text-brand-gold animate-pulse">{currentCity}</span>
           </span>
         </div>
         <div className="hidden md:flex h-4 w-px bg-white/10" />
