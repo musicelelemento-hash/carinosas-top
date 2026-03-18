@@ -14,8 +14,10 @@ import StoriesBar from "@/components/StoriesBar";
 import LiveMap from "@/components/LiveMap";
 import AIAssistantOverlay from "@/components/AIAssistantOverlay";
 
-// In a real app, this would be fetched from Supabase
-const MODELS = [
+import { supabase } from "@/lib/supabase";
+
+// In a real app, this would be fetched from Supabase, now we connect it!
+const STATIC_MODELS = [
   { id: '1', name: 'Valentina', age: 21, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800', isBoosted: true },
   { id: '2', name: 'Camila', age: 23, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800' },
   { id: '3', name: 'Luciana', age: 22, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800' },
@@ -25,8 +27,36 @@ const MODELS = [
 ];
 
 export default function Home() {
-  const [displayModels, setDisplayModels] = React.useState(MODELS);
+  const [displayModels, setDisplayModels] = React.useState<any[]>(STATIC_MODELS);
   const [isLoading, setIsLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    async function fetchLiveModels() {
+      const { data, error } = await supabase
+        .from('models')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (data && !error) {
+        // Map Supabase fields to the UI expected format if needed
+        const mappedLiveModels = data.map((m: any) => ({
+          id: m.id,
+          name: m.name,
+          age: m.age,
+          location: m.city,
+          imageUrl: m.images && m.images[0] ? m.images[0] : STATIC_MODELS[0].imageUrl,
+          isBoosted: m.plan_type === 'Diamante',
+          description: m.description,
+          whatsapp: m.whatsapp
+        }));
+        
+        // Merge live models with static ones in the beginning for a full directory
+        setDisplayModels([...mappedLiveModels, ...STATIC_MODELS]);
+      }
+    }
+    
+    fetchLiveModels();
+  }, []);
 
   React.useEffect(() => {
     const handleScroll = () => {
