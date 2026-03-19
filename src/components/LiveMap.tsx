@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Navigation, Loader2, MapPin, ChevronRight, Star, Users, Zap, MessageSquare, Heart } from "lucide-react";
+import { Navigation, Loader2, MapPin, ChevronRight, Star, Users, Zap, MessageSquare, Heart, Radar, ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
@@ -24,18 +24,6 @@ const Popup = dynamic(
   () => import("react-leaflet").then((m) => m.Popup),
   { ssr: false }
 );
-const Circle = dynamic(
-  () => import("react-leaflet").then((m) => m.Circle),
-  { ssr: false }
-);
-
-// FlyToHandler - renders inside MapContainer so useMap works safely
-const FlyToHandler = ({ target }: { target: { center: [number, number]; zoom: number } | null }) => {
-  // We handle FlyTo inside the component that has access to useMap
-  // but react-leaflet's useMap requires being a child of MapContainer.
-  // Since we are using dynamic imports, we'll define a local component for it.
-  return null; 
-};
 
 // ECUADOR CITY PRESETS
 const ECUADOR_CITIES: Record<string, { center: [number, number]; zoom: number; label: string }> = {
@@ -59,9 +47,6 @@ export default function LiveMap() {
   const [L, setL] = useState<any>(null);
   const [mapTarget, setMapTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
   const mapRef = useRef<any>(null);
-
-  // LiveMapAnimator will handle the flyTo logic internally
-  // based on the mapTarget prop.
 
   useEffect(() => {
     import("leaflet").then((leaflet) => setL(leaflet.default || leaflet));
@@ -153,42 +138,54 @@ export default function LiveMap() {
 
   return (
     <section className="relative w-full overflow-hidden bg-brand-black">
-      {/* Floating minimalist Overlay (replacing large header) */}
-      <div className="absolute top-24 left-8 z-30 pointer-events-none hidden md:block">
-        <div className="glass-premium border-brand-gold/10 p-6 rounded-[2rem] space-y-4 max-w-sm pointer-events-auto shadow-2xl">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-brand-black shadow-gold">
-              <Zap size={20} className="animate-pulse" />
+      {/* Floating Tactical Overlay */}
+      <div className="absolute top-28 left-10 z-30 pointer-events-none hidden md:block">
+        <div className="glass-premium border-brand-gold/10 p-8 rounded-[2.5rem] space-y-6 max-w-sm pointer-events-auto shadow-[0_40px_80px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-left-12 duration-1000">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/5 border border-brand-gold/20 rounded-2xl flex items-center justify-center text-brand-gold shadow-gold overflow-hidden relative">
+              <Radar size={24} className="animate-spin-slow opacity-20 absolute" />
+              <Zap size={20} className="animate-pulse relative z-10" />
             </div>
             <div>
-              <h2 className="text-2xl font-serif text-white italic leading-none">Elite <span className="text-brand-gold">Proximity</span></h2>
-              <p className="text-[8px] text-brand-white/40 uppercase font-black tracking-widest mt-1">Sincronización GPS en Vivo</p>
+              <h2 className="text-3xl font-serif text-white italic leading-none">Elite <span className="text-brand-gold">Proximity</span></h2>
+              <p className="text-[9px] text-brand-white/40 uppercase font-black tracking-[0.3em] mt-2">Active Satellite Sync</p>
             </div>
           </div>
-          <div className="flex gap-4 pt-2 border-t border-white/5">
-             <div className="flex flex-col">
-                <span className="text-[7px] text-white/30 uppercase font-black tracking-widest">Activas</span>
-                <span className="text-xl font-serif text-brand-gold leading-none">{models.length}</span>
+          
+          <div className="space-y-4">
+             <div className="flex items-center justify-between text-[10px] uppercase font-black tracking-widest text-white/40">
+                <span>System Status</span>
+                <span className="text-brand-gold">Operational</span>
              </div>
-             <div className="flex flex-col border-l border-white/10 pl-4">
-                <span className="text-[7px] text-white/30 uppercase font-black tracking-widest">Cercanas</span>
-                <span className="text-xl font-serif text-brand-pink leading-none">{cityModels.length}</span>
+             <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-brand-gold w-3/4 animate-pulse" />
+             </div>
+          </div>
+
+          <div className="flex gap-6 pt-4 border-t border-white/5">
+             <div className="flex flex-col">
+                <span className="text-[9px] text-white/30 uppercase font-black tracking-widest mb-1">Total Online</span>
+                <span className="text-3xl font-serif text-brand-gold leading-none">{models.length}</span>
+             </div>
+             <div className="flex flex-col border-l border-white/10 pl-6">
+                <span className="text-[9px] text-white/30 uppercase font-black tracking-widest mb-1">Local Verified</span>
+                <span className="text-3xl font-serif text-white leading-none">{cityModels.length}</span>
              </div>
           </div>
         </div>
       </div>
 
-      {/* Floating City Filters (Compact) */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-4xl px-4 pointer-events-none">
-        <div className="flex gap-2 p-2 glass-premium border-white/5 rounded-2xl overflow-x-auto no-scrollbar pointer-events-auto shadow-2xl">
+      {/* Compact City Filters */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 z-40 w-full max-w-5xl px-6 pointer-events-none">
+        <div className="flex gap-3 p-2.5 glass-premium border-white/5 rounded-[2.5rem] overflow-x-auto no-scrollbar pointer-events-auto shadow-2xl backdrop-blur-3xl">
           {Object.entries(ECUADOR_CITIES).map(([key, val]) => (
             <button
               key={key}
               onClick={() => handleCitySelect(key)}
-              className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${
+              className={`flex-shrink-0 px-6 py-3.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border transition-all duration-700 ${
                 selectedCity === key
-                  ? "bg-brand-gold text-brand-black border-brand-gold"
-                  : "bg-white/5 border-white/5 text-white/30 hover:border-white/10"
+                  ? "bg-white text-brand-black border-white shadow-lg"
+                  : "bg-white/5 border-white/5 text-white/40 hover:text-white hover:border-white/20"
               }`}
             >
               {val.label}
@@ -197,15 +194,18 @@ export default function LiveMap() {
         </div>
       </div>
 
-      {/* Main Map Experience */}
-      <div className="flex flex-col lg:flex-row h-screen border-t border-white/5">
+      {/* Main Experience Container */}
+      <div className="flex flex-col lg:flex-row h-screen pt-24 lg:pt-0">
         
-        {/* === Sidebar (Uber style) === */}
-        <div className="w-full lg:w-96 bg-brand-black border-r border-white/5 overflow-y-auto custom-scrollbar z-20">
-          <div className="sticky top-0 bg-brand-black/90 backdrop-blur-md p-6 border-b border-white/5 z-10">
+        {/* === SIDEBAR COMPONENT (Curated List) === */}
+        <div className="w-full lg:w-[400px] bg-brand-black/95 border-r border-white/5 overflow-y-auto custom-scrollbar z-20 backdrop-blur-3xl">
+          <div className="sticky top-0 bg-brand-black/80 backdrop-blur-2xl p-8 border-b border-white/5 z-10 space-y-2">
              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-brand-gold font-black uppercase tracking-widest">Modelos en {selectedCity}</span>
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[11px] text-brand-gold font-black uppercase tracking-[0.4em]">Curated in {selectedCity}</span>
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]" />
+                   <span className="text-[8px] text-white/40 font-black uppercase">Live Now</span>
+                </div>
              </div>
           </div>
           
@@ -214,37 +214,45 @@ export default function LiveMap() {
               <button
                 key={model.id}
                 onClick={() => handleModelSelect(model)}
-                className={`w-full p-6 text-left flex items-center gap-4 transition-all hover:bg-white/5 group ${
-                  selectedModel?.id === model.id ? 'bg-brand-gold/10' : ''
+                className={`w-full p-8 text-left flex items-center gap-6 transition-all duration-500 hover:bg-white/5 group relative overflow-hidden ${
+                  selectedModel?.id === model.id ? 'bg-brand-gold/5' : ''
                 }`}
               >
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-brand-gold/50 transition-colors">
-                  <img src={model.images?.[0]} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-black/60 to-transparent" />
+                {selectedModel?.id === model.id && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-gold" />
+                )}
+                
+                <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-brand-gold/40 transition-all duration-500">
+                  <img src={model.images?.[0]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-black/80 to-transparent" />
                 </div>
-                <div className="flex-1 min-w-0 space-y-1">
-                  <h4 className="text-white font-serif text-lg leading-tight">{model.name}</h4>
-                  <p className="text-[9px] text-white/40 uppercase tracking-widest font-black truncate">
-                    {model.age} Años · {model.sector || 'Exclusivo'}
+
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-2">
+                     <h4 className="text-white font-serif text-xl leading-none group-hover:text-brand-gold transition-colors">{model.name}</h4>
+                     {model.plan_type === 'VIP Elite' && <ShieldCheck size={14} className="text-brand-gold" />}
+                  </div>
+                  <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black truncate">
+                    {model.age} Years · {model.sector || 'Exclusive Zone'}
                   </p>
                   <div className="flex items-center gap-2">
-                    <span className="text-[8px] text-brand-gold font-black uppercase tracking-widest">A 5 min de distancia</span>
+                    <span className="text-[9px] text-brand-gold font-black uppercase tracking-[0.3em] opacity-60 group-hover:opacity-100 transition-opacity">5 min arrival window</span>
                   </div>
                 </div>
-                <ChevronRight size={16} className={`text-white/20 group-hover:text-brand-gold transition-all ${selectedModel?.id === model.id ? 'translate-x-1 text-brand-gold' : ''}`} />
+                <ChevronRight size={18} className={`text-white/10 group-hover:text-brand-gold transition-all duration-500 ${selectedModel?.id === model.id ? 'translate-x-2' : ''}`} />
               </button>
             ))}
           </div>
         </div>
 
-        {/* === MAP ENGINE === */}
+        {/* === TACTICAL MAP ENGINE === */}
         <div className="flex-1 relative z-10">
           {!loading && typeof window !== "undefined" && (
             <MapContainer
               center={initialCenter}
               zoom={13}
               scrollWheelZoom={true}
-              className="w-full h-full"
+              className="w-full h-full grayscale-[0.8] contrast-125"
               zoomControl={false}
               ref={mapRef}
             >
@@ -255,12 +263,7 @@ export default function LiveMap() {
               
               {mapTarget && <LiveMapAnimator target={mapTarget} />}
 
-              {/* User marker */}
-              {userLocation && userIcon && (
-                <Marker position={userLocation} icon={userIcon} />
-              )}
-
-              {/* Models */}
+              {/* Verified Models Pins */}
               {models.map((model) => (
                 model.lat && model.lng && (
                   <Marker
@@ -270,19 +273,20 @@ export default function LiveMap() {
                     eventHandlers={{ click: () => handleModelSelect(model) }}
                   >
                     <Popup className="premium-map-popup">
-                       <div className="p-3 w-48 space-y-3">
-                          <div className="aspect-video rounded-xl overflow-hidden bg-brand-black">
+                       <div className="p-4 w-60 space-y-4">
+                          <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-brand-black border border-white/5 relative">
                              <img src={model.images?.[0]} className="w-full h-full object-cover" />
+                             <div className="absolute top-3 right-3 bg-brand-gold text-brand-black text-[8px] font-black px-2 py-1 rounded-full uppercase">Verified</div>
                           </div>
                           <div>
-                             <h5 className="text-brand-gold font-serif text-lg">{model.name}</h5>
-                             <p className="text-[8px] text-white/50 uppercase tracking-widest font-black">{model.age} Años · {model.city}</p>
+                             <h5 className="text-white font-serif text-2xl italic leading-none">{model.name}</h5>
+                             <p className="text-[9px] text-white/40 uppercase tracking-[0.3em] font-black mt-2">{model.age} Años · Ecuador</p>
                           </div>
                           <button 
                              onClick={(e) => { e.stopPropagation(); window.location.href = `/profile/${model.id}`; }}
-                             className="block w-full py-2 bg-brand-gold text-brand-black text-[10px] font-black uppercase text-center rounded-lg tracking-widest hover:scale-105 active:scale-95 transition-all"
+                             className="block w-full py-4 bg-white text-brand-black text-[10px] font-black uppercase text-center rounded-xl tracking-[0.3em] hover:bg-brand-gold transition-all duration-500 shadow-xl"
                           >
-                             Ver Perfil VIP
+                             Access Profile
                           </button>
                        </div>
                     </Popup>
@@ -292,15 +296,22 @@ export default function LiveMap() {
             </MapContainer>
           )}
 
-          {/* Vignette elements */}
-          <div className="absolute inset-0 pointer-events-none z-20 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
-          <div className="absolute top-8 right-8 z-30 glass-premium px-6 py-4 rounded-3xl border-brand-gold/20 flex items-center gap-4">
-             <div className="flex flex-col items-end">
-                <span className="text-[8px] text-white/40 uppercase font-black tracking-widest">Sincronización</span>
-                <span className="text-[10px] text-brand-gold font-black uppercase tracking-widest">Satélite Activo</span>
+          {/* Map Vignette & Controls */}
+          <div className="absolute inset-0 pointer-events-none z-20 shadow-[inset_0_0_150px_rgba(0,0,0,0.95)]" />
+          
+          <div className="absolute bottom-12 right-12 z-30 flex flex-col items-end gap-6 text-right animate-in fade-in duration-1000">
+             <div className="glass-premium px-8 py-5 rounded-[2rem] border-white/5 space-y-1">
+                <span className="text-[9px] text-white/30 uppercase font-black tracking-widest block">Satellite Encryption</span>
+                <span className="text-[11px] text-brand-gold font-black uppercase tracking-[0.4em]">AES-256 SECURED</span>
              </div>
-             <div className="w-8 h-8 rounded-full border border-brand-gold/30 flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-brand-gold animate-ping" />
+             <div className="flex items-center gap-4">
+                <div className="flex flex-col items-end">
+                   <span className="text-[8px] text-white/40 uppercase font-black tracking-widest">Active Members</span>
+                   <span className="text-lg font-serif text-white italic">Elite Access Only</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl border border-brand-gold/30 flex items-center justify-center bg-brand-gold/5 backdrop-blur-xl">
+                   <div className="w-3 h-3 rounded-full bg-brand-gold animate-ping" />
+                </div>
              </div>
           </div>
         </div>
@@ -309,34 +320,45 @@ export default function LiveMap() {
       <style jsx global>{`
         .leaflet-container { background: #050505 !important; }
         .premium-map-popup .leaflet-popup-content-wrapper {
-          background: rgba(10, 10, 12, 0.95) !important;
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          border-radius: 1.5rem;
+          background: rgba(5, 5, 5, 0.95) !important;
+          backdrop-filter: blur(40px);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 2.5rem;
           color: white;
           padding: 0;
           overflow: hidden;
+          box-shadow: 0 40px 100px rgba(0,0,0,0.9);
         }
         .premium-map-popup .leaflet-popup-content { margin: 0; width: auto !important; }
-        .premium-map-popup .leaflet-popup-tip { background: rgba(10, 10, 12, 0.95); }
+        .premium-map-popup .leaflet-popup-tip { background: rgba(5, 5, 5, 0.95); border: 1px solid rgba(255, 255, 255, 0.05); }
         
         .live-pin { position: relative; width: 32px; height: 32px; }
-        .pin-pulse { position: absolute; inset: 0; background: #D4AF37; border-radius: 50%; opacity: 0.4; animation: pinPulse 2s infinite; }
-        .pin-core { position: absolute; inset: 10px; background: #D4AF37; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px #D4AF37; }
+        .pin-pulse { position: absolute; inset: 0; background: #D4AF37; border-radius: 50%; opacity: 0.4; animation: pinPulse 2.5s infinite; }
+        .pin-core { position: absolute; inset: 10px; background: #D4AF37; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 15px #D4AF37; }
         
         .live-pin-selected { position: relative; width: 44px; height: 44px; }
-        .pin-pulse-red { position: absolute; inset: 0; background: #FF006E; border-radius: 50%; opacity: 0.6; animation: pinPulse 1s infinite; }
-        .pin-core-red { position: absolute; inset: 12px; background: #FF006E; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 20px #FF006E; }
+        .pin-pulse-red { position: absolute; inset: 0; background: #FFFFFF; border-radius: 50%; opacity: 0.6; animation: pinPulse 1.2s infinite; }
+        .pin-core-red { position: absolute; inset: 14px; background: #FFFFFF; border-radius: 50%; border: 3px solid #D4AF37; box-shadow: 0 0 30px rgba(255,255,255,0.8); }
 
         @keyframes pinPulse {
-          0% { transform: scale(1); opacity: 0.6; }
-          100% { transform: scale(2.5); opacity: 0; }
+          0% { transform: scale(1); opacity: 0.8; }
+          100% { transform: scale(3.5); opacity: 0; }
+        }
+
+        .animate-spin-slow {
+          animation: spin 8s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.3); }
       `}</style>
     </section>
   );

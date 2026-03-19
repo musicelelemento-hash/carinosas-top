@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { MessageCircle, MapPin, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond, TrendingUp } from "lucide-react";
+import { MessageCircle, MapPin, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond, TrendingUp, Fingerprint } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +19,7 @@ interface ProfileCardProps {
   whatsapp?: string;
   tags?: string[];
   plan_type?: string;
+  personal_note?: string;
 }
 
 export default function ProfileCard({ 
@@ -33,7 +34,8 @@ export default function ProfileCard({
   sector,
   whatsapp,
   tags = [],
-  plan_type
+  plan_type,
+  personal_note = "Un encuentro inolvidable te espera..."
 }: ProfileCardProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
@@ -55,7 +57,7 @@ export default function ProfileCard({
       return;
     }
 
-    const duration = 2000; // 2 seconds per image
+    const duration = 2400; // Slightly slower for elegance
     const startTime = Date.now();
     
     const interval = setInterval(() => {
@@ -65,8 +67,6 @@ export default function ProfileCard({
       if (newProgress >= 100) {
         setCurrentImageIndex(prev => (prev + 1) % allImages.length);
         setProgress(0);
-        // This effect will re-run because currentImageIndex/startTime changes? 
-        // Actually, we need a better way to handle the continuous loop.
       } else {
         setProgress(newProgress);
       }
@@ -101,21 +101,21 @@ export default function ProfileCard({
     <div className="relative group">
       {/* Premium Border Glow Layer */}
       {isBoosted && (
-        <div className="absolute -inset-[2px] bg-gradient-to-r from-brand-gold via-brand-pink to-brand-gold bg-[length:200%_auto] animate-gradient-slow rounded-[2.2rem] opacity-30 blur-sm group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="absolute -inset-[1px] bg-gradient-to-r from-brand-gold/40 via-white/20 to-brand-gold/40 bg-[length:200%_auto] animate-gradient-slow rounded-[2.5rem] opacity-20 blur-sm group-hover:opacity-60 transition-opacity duration-1000" />
       )}
 
       <div 
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => router.push(`/profile/${id}`)}
-        className={`relative glass-dark rounded-[2.1rem] overflow-hidden transition-all duration-700 active:scale-[0.98] cursor-pointer border ${
-          isHovered ? 'border-brand-gold/50 -translate-y-3' : 'border-white/5'
-        } shadow-2xl`}
+        className={`relative bg-brand-black rounded-[2.4rem] overflow-hidden transition-all duration-1000 active:scale-[0.99] cursor-pointer border ${
+          isHovered ? 'border-brand-gold/30 -translate-y-4 shadow-[0_30px_60px_rgba(0,0,0,0.8)]' : 'border-white/5 shadow-2xl'
+        }`}
       >
         {/* Instagram Story-style Bars */}
-        <div className="absolute top-3 left-4 right-4 z-40 flex gap-1.5 h-[2px]">
+        <div className="absolute top-4 left-6 right-6 z-40 flex gap-2 h-[1px]">
           {allImages.map((_, i) => (
-            <div key={i} className="flex-1 bg-white/20 rounded-full overflow-hidden">
+            <div key={i} className="flex-1 bg-white/10 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-brand-gold transition-all duration-300 ease-linear"
                 style={{ 
@@ -126,65 +126,37 @@ export default function ProfileCard({
           ))}
         </div>
 
-        {/* Tiered Plan Badges & Status */}
-        <div className="absolute top-8 left-6 z-30 flex flex-col gap-2">
+        {/* Human Identity Badge - Non Invasive */}
+        <div className="absolute top-10 left-8 z-30 flex items-center gap-2.5 glass-premium px-4 py-2 rounded-full border-white/5 human-pulse group/human">
+           <Fingerprint size={12} className="text-brand-gold group-hover/human:rotate-12 transition-transform" />
+           <span className="text-[8px] text-white/80 font-black uppercase tracking-[0.2em]">Verified Human Identity</span>
+        </div>
+
+        {/* Tier Indicators */}
+        <div className="absolute top-24 left-8 z-30 flex flex-col gap-2">
           {plan_type === 'VIP Elite' ? (
-            <div className="flex items-center gap-2 bg-brand-gold/20 backdrop-blur-xl border border-brand-gold/40 px-3 py-1.5 rounded-full scale-100 origin-left shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-              <Crown size={12} className="text-brand-gold fill-brand-gold" />
-              <span className="text-[9px] text-brand-gold font-black uppercase tracking-[0.3em]">VIP ELITE ALPHA</span>
+            <div className="bg-brand-gold/10 backdrop-blur-3xl border border-brand-gold/30 p-2.5 rounded-2xl shadow-gold">
+               <Crown size={14} className="text-brand-gold fill-brand-gold" />
             </div>
           ) : plan_type === 'Diamante' ? (
-            <div className="flex items-center gap-2 bg-brand-pink/20 backdrop-blur-xl border border-brand-pink/40 px-3 py-1.5 rounded-full scale-100 origin-left shadow-[0_0_20px_rgba(255,0,110,0.3)]">
-              <Diamond size={12} className="text-brand-pink fill-brand-pink" />
-              <span className="text-[9px] text-brand-pink font-black uppercase tracking-[0.3em]">DIAMOND STATUS</span>
-            </div>
-          ) : plan_type === 'Premium' ? (
-            <div className="flex items-center gap-2 glass-premium px-3 py-1.5 rounded-full border-brand-gold/20 scale-90 origin-left">
-              <Star size={12} className="text-brand-gold fill-brand-gold" />
-              <span className="text-[8px] text-white font-black uppercase tracking-[0.2em]">PREMIUM</span>
-            </div>
-          ) : plan_type === 'Anuncio Gratis' || plan_type === 'Básico' ? (
-            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 px-3 py-1.5 rounded-full scale-90 origin-left">
-              <span className="text-[7px] text-white/40 font-black uppercase tracking-[0.2em]">ANUNCIO GRATIS</span>
+            <div className="bg-brand-pink/10 backdrop-blur-3xl border border-brand-pink/30 p-2.5 rounded-2xl">
+               <Diamond size={14} className="text-brand-pink fill-brand-pink" />
             </div>
           ) : null}
         </div>
 
-        {/* Real-time Status Indicator - "Live Ahora" at top-right */}
-        <div className="absolute top-8 right-6 z-30 flex items-center gap-2 bg-brand-black/40 backdrop-blur-xl border border-white/10 px-3 py-1.5 rounded-full animate-in fade-in zoom-in duration-1000">
-          <div className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-          </div>
-          <span className="text-[8px] font-black text-white/90 uppercase tracking-[0.2em]">Live Ahora</span>
-        </div>
-
-
-        {/* Gamification Badges - Bottom Left */}
-        <div className="absolute bottom-6 left-6 z-30 flex gap-2">
-           <div className="bg-brand-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-xl group/badge hover:bg-brand-gold/20 transition-all">
-              <Zap size={14} className="text-brand-gold animate-pulse" />
-           </div>
-           <div className="bg-brand-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-xl group/badge hover:bg-brand-gold/20 transition-all">
-              <Star size={14} className="text-brand-gold fill-brand-gold/40" />
-           </div>
-           <div className="bg-brand-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-xl group/badge hover:bg-brand-gold/20 transition-all">
-              <TrendingUp size={14} className="text-brand-gold" />
-           </div>
-        </div>
-
         {/* Action Buttons (Visible on Hover) */}
-        <div className="absolute top-8 right-6 z-30 flex flex-col gap-3 transition-all duration-500 group-hover:translate-x-0 translate-x-12 opacity-0 group-hover:opacity-100">
-          <button className="p-2.5 glass-premium rounded-full text-white/60 hover:text-brand-pink hover:scale-110 transition-all">
+        <div className="absolute top-10 right-8 z-30 flex flex-col gap-4 transition-all duration-700 group-hover:translate-x-0 translate-x-12 opacity-0 group-hover:opacity-100">
+          <button className="p-3 bg-white/5 hover:bg-brand-pink/20 backdrop-blur-xl rounded-2xl text-white/40 hover:text-brand-pink hover:scale-110 transition-all border border-white/10">
             <Heart size={16} />
           </button>
-          <button className="p-2.5 glass-premium rounded-full text-white/60 hover:text-brand-gold hover:scale-110 transition-all">
+          <button className="p-3 bg-white/5 hover:bg-brand-gold/20 backdrop-blur-xl rounded-2xl text-white/40 hover:text-brand-gold hover:scale-110 transition-all border border-white/10">
             <Share2 size={16} />
           </button>
         </div>
 
         {/* Main Image Container */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-brand-black">
+        <div className="relative aspect-[4/5] overflow-hidden bg-brand-black">
           {allImages.map((img, i) => (
             <Image
               key={i}
@@ -193,108 +165,89 @@ export default function ProfileCard({
               fill
               className={`object-cover transition-all duration-1000 absolute inset-0 ${
                 i === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
-              } ${isHovered ? 'brightness-[0.4] scale-105' : 'brightness-100'}`}
+              } ${isHovered ? 'brightness-[0.3] scale-105' : 'brightness-90'}`}
               priority={i === 0}
             />
           ))}
           
-          {/* Overlay Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent opacity-90" />
-          <div className={`absolute inset-0 bg-brand-gold/10 mix-blend-overlay transition-opacity duration-700 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
-
-          {/* Bottom Info - Static Appearance */}
-          <div className={`absolute inset-x-0 bottom-0 p-8 space-y-3 transition-all duration-700 ${isHovered ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}>
-            <div className="flex items-center gap-3">
-              <h3 className="text-3xl font-serif text-white tracking-tight">{name}</h3>
-              <ShieldCheck size={20} className="text-brand-gold" />
+          {/* Magazine Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/20 to-transparent opacity-90" />
+          
+          {/* Static Content (Bottom) */}
+          <div className={`absolute inset-x-0 bottom-0 p-10 space-y-4 transition-all duration-700 ${isHovered ? 'translate-y-8 opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <div className="space-y-1">
+              <h3 className="text-4xl font-serif text-white tracking-tighter leading-none">{name}</h3>
+              <div className="flex items-center gap-3">
+                 <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">{plan_type || 'Elite Member'}</span>
+                 <div className="w-1 h-1 rounded-full bg-white/20" />
+                 <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.4em]">{location}</span>
+              </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5 text-[10px] text-white/60 font-black uppercase tracking-widest">
-                <MapPin size={12} className="text-brand-pink" />
-                {location}
-              </div>
-              <div className="w-1 h-1 rounded-full bg-white/20" />
-              <div className="text-[10px] text-white/60 font-black uppercase tracking-widest">
-                {age} Años
-              </div>
+            <div className="font-signature text-2xl text-brand-gold/60 opacity-80 -rotate-2">
+               {personal_note}
             </div>
-
-            {/* Tags preview */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {tags.slice(0, 2).map(tag => (
-                  <span key={tag} className="text-[7px] text-brand-gold/60 border border-brand-gold/20 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">{tag}</span>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Detailed Info - Hover Appearance */}
-          <div className={`absolute inset-0 p-8 flex flex-col justify-center items-center text-center space-y-8 transition-all duration-700 ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-90'} pointer-events-none`}>
-            <div className="space-y-3">
-               {isBoosted ? (
-                 <div className="flex items-center justify-center gap-2 mb-2">
-                   <Star size={12} className="text-brand-gold fill-brand-gold" />
-                   <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">Diamond Selection</span>
-                   <Star size={12} className="text-brand-gold fill-brand-gold" />
-                 </div>
-               ) : (
-                 <p className="text-[10px] text-brand-gold-light uppercase tracking-[0.4em] font-black">Elite Member</p>
-               )}
-               <h3 className="text-5xl font-serif text-white italic tracking-tighter">{name}</h3>
-               <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-medium max-w-[200px] leading-relaxed mx-auto">
-                 Disponibilidad inmediata en el sector de {sector || location}.
-               </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-6 w-full">
-              {[
-                { label: 'Estatura', val: '1.72' },
-                { label: 'Ojos', val: 'Café' },
-                { label: 'Plan', val: isBoosted ? 'Elite' : 'Vip' }
-              ].map(stat => (
-                <div key={stat.label} className="flex flex-col gap-1">
-                  <span className="text-[8px] text-brand-gold/50 uppercase font-black tracking-widest">{stat.label}</span>
-                  <span className="text-sm text-white font-serif">{stat.val}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-3 w-full animate-in slide-in-from-bottom-4 duration-500">
-               <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 flex flex-col items-center">
-                  <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Citas Hoy</span>
-                  <span className="text-lg font-serif text-brand-gold">12</span>
-               </div>
-               <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 flex flex-col items-center">
-                  <span className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1">Rating</span>
-                  <div className="flex items-center gap-1 text-brand-gold">
-                    <Star size={12} fill="currentColor" />
-                    <span className="text-lg font-serif">4.9</span>
+          {/* Hover Detail View (Magazine Style) */}
+          <div className={`absolute inset-0 p-10 flex flex-col justify-center items-start text-left space-y-10 transition-all duration-1000 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'} pointer-events-none`}>
+            <div className="space-y-4">
+               <span className="text-[11px] text-brand-gold font-black uppercase tracking-[0.5em] leading-none">Curated Selection</span>
+               <h3 className="text-7xl font-serif text-white italic leading-none">{name}</h3>
+               <div className="flex items-center gap-6 pt-2">
+                  <div className="flex flex-col">
+                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">Edad</span>
+                     <span className="text-xl font-serif text-white">{age}</span>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="flex flex-col">
+                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">Estatura</span>
+                     <span className="text-xl font-serif text-white">1.72</span>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="flex flex-col">
+                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">Verified</span>
+                     <ShieldCheck size={18} className="text-brand-gold mt-1" />
                   </div>
                </div>
             </div>
-            
-            <div className="w-full flex items-center justify-center gap-4">
-              <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]" />
-              <span className="text-[9px] text-white/70 uppercase font-black tracking-[0.3em] inline-block">Online Ahora</span>
+
+            <p className="text-xs text-brand-white/40 leading-relaxed max-w-xs font-medium tracking-wide">
+              {name} destaca por su elegancia natural y su capacidad para crear momentos de absoluta discreción y sofisticación en {location}.
+            </p>
+
+            <div className="flex gap-4 w-full">
+               <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col gap-1 backdrop-blur-xl">
+                  <span className="text-[8px] text-white/20 uppercase font-black tracking-widest">Reviews</span>
+                  <div className="flex items-center gap-2">
+                    <Star size={14} className="text-brand-gold fill-brand-gold" />
+                    <span className="text-lg font-serif text-white">4.9</span>
+                  </div>
+               </div>
+               <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col gap-1 backdrop-blur-xl">
+                  <span className="text-[8px] text-white/20 uppercase font-black tracking-widest">Status</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-xs font-black uppercase text-white/80 tracking-widest">Online</span>
+                  </div>
+               </div>
             </div>
           </div>
         </div>
 
-        {/* Global Action Bar */}
-        <div className={`p-5 flex items-center justify-between border-t border-white/5 transition-colors duration-500 ${isHovered ? 'bg-brand-gold/5' : 'bg-transparent'}`}>
+        {/* Premium Action Bar */}
+        <div className={`p-6 flex items-center justify-between transition-all duration-700 ${isHovered ? 'bg-brand-gold/10' : 'bg-transparent'}`}>
             <button 
               onClick={(e) => { e.stopPropagation(); handleContact(); }}
-              className="px-8 py-3.5 bg-brand-gold text-brand-black rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 shadow-lg shadow-brand-gold/10 hover:scale-[1.05] active:scale-95 transition-all pointer-events-auto"
+              className="px-10 py-5 bg-white hover:bg-brand-gold text-brand-black rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95 pointer-events-auto"
             >
-              <MessageCircle size={14} fill="currentColor" />
+              <MessageCircle size={16} fill="currentColor" />
               WhatsApp VIP
             </button>
             
-            <div className="flex flex-col items-end opacity-40 group-hover:opacity-100 transition-opacity">
-               <span className="text-[7px] text-white/40 uppercase font-black tracking-widest">Disponibilidad</span>
-               <span className="text-[10px] text-white font-black tracking-widest italic uppercase">Alta</span>
+            <div className="flex flex-col items-end opacity-20 group-hover:opacity-100 transition-opacity duration-700">
+               <span className="text-[8px] text-white font-black uppercase tracking-widest mb-1">Response Time</span>
+               <span className="text-[11px] text-brand-gold font-black tracking-widest italic uppercase">Sub 5min</span>
             </div>
         </div>
       </div>
@@ -312,7 +265,7 @@ export default function ProfileCard({
           100% { background-position: 0% 50%; }
         }
         .animate-gradient-slow {
-          animation: gradient-slow 6s infinite linear;
+          animation: gradient-slow 8s infinite linear;
         }
       `}</style>
     </div>

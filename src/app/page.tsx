@@ -13,12 +13,11 @@ import Footer from "@/components/Footer";
 import StoriesBar from "@/components/StoriesBar";
 import LiveMap from "@/components/LiveMap";
 import AIAssistantOverlay from "@/components/AIAssistantOverlay";
-import GlobalLounge from "@/components/GlobalLounge";
+import VIPLounge from "@/components/VIPLounge";
 import PushPrompt from "@/components/PushPrompt";
 
 import { supabase } from "@/lib/supabase";
 
-// In a real app, this would be fetched from Supabase, now we connect it!
 const STATIC_MODELS = [
   { id: '1', name: 'Valentina', age: 21, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200'], isBoosted: true, plan_type: 'VIP Elite' },
   { id: '2', name: 'Camila', age: 23, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800', images: ['https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200'], plan_type: 'Diamante' },
@@ -40,13 +39,11 @@ export default function Home() {
         .order('created_at', { ascending: false });
 
       if (data && !error) {
-        // Map Supabase fields to the UI expected format if needed
         const mappedLiveModels = data.map((m: any) => ({
           id: m.id,
           name: m.name,
           age: m.age,
           location: m.sector ? `${m.sector}, ${m.city}` : m.city,
-          // Pass full images array so ProfileCard can do slideshow between all photos
           images: m.images && m.images.length > 0 ? m.images : [STATIC_MODELS[0].imageUrl],
           imageUrl: m.images && m.images[0] ? m.images[0] : STATIC_MODELS[0].imageUrl,
           isBoosted: m.plan_type === 'Diamante' || m.plan_type === 'VIP Elite',
@@ -54,12 +51,12 @@ export default function Home() {
           whatsapp: m.whatsapp,
           sector: m.sector,
           tags: m.tags,
-          plan_type: m.plan_type
+          plan_type: m.plan_type,
+          personal_note: m.personal_note || "Cada encuentro es una historia que merece ser contada con elegancia."
         }));
         
         const allModels = [...mappedLiveModels, ...STATIC_MODELS];
         
-        // Sort by plan priority
         const PLAN_PRIORITY: Record<string, number> = {
           'VIP Elite': 0,
           'Diamante': 1,
@@ -87,9 +84,9 @@ export default function Home() {
         setIsLoading(true);
         setTimeout(() => {
           const extraModels = [
-            { id: Math.random().toString(), name: 'Elena', age: 22, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800' },
-            { id: Math.random().toString(), name: 'Sofía', age: 23, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true },
-            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800' },
+            { id: Math.random().toString(), name: 'Elena', age: 22, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800', plan_type: 'Premium' },
+            { id: Math.random().toString(), name: 'Sofía', age: 23, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true, plan_type: 'VIP Elite' },
+            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800', plan_type: 'Diamante' },
           ];
           setDisplayModels(prev => [...prev, ...extraModels]);
           setIsLoading(false);
@@ -105,51 +102,50 @@ export default function Home() {
     <main className="min-h-screen bg-brand-black pb-0">
       <Navbar />
       
-      {/* Social Proof Header */}
       <LiveCountBanner />
-
-      {/* Instagram-style Stories */}
       <StoriesBar />
 
       <HeroSection />
 
-      {/* Uber-style Live Map */}
       <LiveMap />
       
-      {/* Smart Recommendations */}
       <RecommendationSection />
 
-      <GlobalLounge />
+      <VIPLounge />
 
-      {/* Main Directory Grid with Infinite Scroll */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="flex items-center gap-4 mb-20 px-4">
-          <div className="h-px bg-brand-gold/10 flex-1" />
-          <div className="flex flex-col items-center gap-1">
-            <h2 className="text-2xl font-serif text-brand-gold uppercase tracking-[0.4em] text-center">ELITE DIRECTORY</h2>
-            <span className="text-[10px] text-brand-white/30 uppercase tracking-[0.5em] font-black">Luxury Access Only</span>
+      <section className="max-w-7xl mx-auto px-4 py-20">
+        <div className="flex items-center gap-6 mb-24 px-4 overflow-hidden">
+          <div className="h-[1px] bg-brand-gold/20 flex-1 translate-x-12" />
+          <div className="flex flex-col items-center gap-2 relative">
+            <h2 className="text-4xl md:text-5xl font-serif text-brand-gold uppercase tracking-[0.5em] text-center italic">The Collection</h2>
+            <span className="text-[10px] text-brand-white/30 uppercase tracking-[0.8em] font-black">Curated Human Identity</span>
+            <div className="absolute -top-8 text-brand-gold/10 font-signature text-[100px] pointer-events-none select-none -z-10">
+               Elite
+            </div>
           </div>
-          <div className="h-px bg-brand-gold/10 flex-1" />
+          <div className="h-[1px] bg-brand-gold/20 flex-1 -translate-x-12" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
           {displayModels.map((model) => (
             <ProfileCard key={model.id} {...model} />
           ))}
         </div>
 
-        {/* Infinite Scroll Loader */}
         {isLoading && (
-          <div className="mt-20 flex justify-center py-10 animate-in fade-in duration-500">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-10 h-10 border-2 border-brand-gold/10 border-t-brand-gold rounded-full animate-spin" />
-              <span className="text-[10px] text-brand-gold/40 uppercase tracking-[0.4em] font-black">Cargando Élite Adicional...</span>
+          <div className="mt-32 flex justify-center py-20">
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative w-16 h-16">
+                 <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
+                 <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+                 <div className="absolute inset-4 border border-brand-gold/20 rounded-full animate-pulse" />
+              </div>
+              <span className="text-[11px] text-brand-gold/40 uppercase tracking-[0.6em] font-black italic">Expanding the Directory...</span>
             </div>
           </div>
         )}
       </section>
 
-      {/* Futuristic Floating Elements */}
       <PanicButton />
       <AvailabilityChat />
       <GhostNotifications />
