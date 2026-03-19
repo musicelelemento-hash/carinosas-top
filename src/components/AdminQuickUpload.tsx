@@ -19,8 +19,10 @@ import {
   ShieldCheck,
   Crown,
   Star,
-  Diamond
+  Diamond,
+  Shuffle
 } from "lucide-react";
+
 
 export default function AdminQuickUpload() {
   const [name, setName] = useState("");
@@ -39,6 +41,54 @@ export default function AdminQuickUpload() {
   const [planType, setPlanType] = useState("Anuncio Gratis");
 
   const provinces = getProvinces();
+
+  // ─── Test Data Banks ─────────────────────────────────────────────────────
+  const TEST_NAMES = ["Valentina", "Camila", "Isabella", "Luciana", "Sofía", "Antonella", "Alessandra", "Daniela", "Gabriela", "Mariana", "Natalia", "Paula", "Rebeca", "Viviana", "Ximena"];
+  const TEST_CITIES = ["Quito", "Guayaquil", "Cuenca", "Manta", "Ambato", "Loja", "Machala", "Esmeraldas", "Ibarra", "Riobamba"];
+  const TEST_SECTORS = ["La Carolina", "La Mariscal", "González Suárez", "Urdesa", "Samborondón", "El Ejido", "El Batán", "Cumbayá", "Tumbaco", "Los Chillos"];
+  const TEST_PLANS: string[] = ["Anuncio Gratis", "Premium", "Diamante", "VIP Elite"];
+  const TEST_DESCS = [
+    "Chica joven y sofisticada, busco caballeros distinguidos para momentos especiales.",
+    "Companía de alto nivel, discreta y elegante. Disponible para cenas y eventos exclusivos.",
+    "Modelo exclusiva, educada, con presencia. Reservas con anticipación.",
+    "Atención personalizada para quienes aprecian lo mejor. Encuentros únicos e irrepetibles.",
+    "Presencia cautivadora, conversación inteligente. Para quien tiene gusto por las cosas finas.",
+  ];
+  const TEST_IMAGES = [
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80",
+    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80",
+    "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=80",
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80",
+    "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&q=80",
+    "https://images.unsplash.com/photo-1503105391650-704fd6827a88?w=800&q=80",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80",
+    "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80",
+    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80",
+    "https://images.unsplash.com/photo-1464347744102-11db6282f854?w=800&q=80",
+  ];
+
+  const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+  const handleAutoFill = () => {
+    const randomCity = pick(TEST_CITIES);
+    const coords = CITY_CENTERS[randomCity] || [-0.1807, -78.4678];
+    const numImages = Math.floor(Math.random() * 3) + 1;
+    const shuffledImages = [...TEST_IMAGES].sort(() => Math.random() - 0.5).slice(0, numImages);
+    const phone = `09${Math.floor(Math.random() * 90000000 + 10000000)}`;
+    const age = String(Math.floor(Math.random() * 8) + 20); // 20-27
+
+    setName(pick(TEST_NAMES));
+    setWhatsapp(phone);
+    setCity(randomCity);
+    setSector(pick(TEST_SECTORS));
+    setLat(coords[0] + (Math.random() - 0.5) * 0.05);
+    setLng(coords[1] + (Math.random() - 0.5) * 0.05);
+    setAge(age);
+    setRawDesc(pick(TEST_DESCS));
+    setPlanType(pick(TEST_PLANS));
+    setImages(shuffledImages);
+  };
+
 
   const CITY_CENTERS: Record<string, [number, number]> = {
     'Quito': [-0.1807, -78.4678],
@@ -140,16 +190,26 @@ export default function AdminQuickUpload() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-4xl font-serif text-brand-gold tracking-tight">Publicación Rápida</h1>
-          <p className="text-brand-white/40 text-[10px] uppercase tracking-[0.4em] font-black">Admin Elite Dashboard</p>
+        <div className="flex flex-wrap gap-3 items-start md:items-center">
+          <div>
+            <h1 className="text-4xl font-serif text-brand-gold tracking-tight">Publicación Rápida</h1>
+            <p className="text-brand-white/40 text-[10px] uppercase tracking-[0.4em] font-black">Admin Elite Dashboard</p>
+          </div>
+          <div className="flex items-center gap-3 ml-auto flex-wrap">
+            <button
+              onClick={handleAutoFill}
+              className="flex items-center gap-2 px-6 py-3 rounded-full glass-premium border border-brand-gold/30 text-brand-gold text-[10px] font-black uppercase tracking-widest hover:bg-brand-gold hover:text-brand-black transition-all duration-300 shadow-gold/10 hover:shadow-gold/30"
+            >
+              <Shuffle size={14} className="animate-pulse" />
+              Auto-Generar
+            </button>
+            <div className="flex items-center gap-3 glass-premium px-6 py-3 rounded-full border-brand-gold/10">
+              <Zap size={16} className="text-brand-gold" />
+              <span className="text-[10px] text-brand-gold font-black uppercase tracking-widest">Modo Turbo Activo</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-3 glass-premium px-6 py-3 rounded-full border-brand-gold/10">
-          <Zap size={16} className="text-brand-gold" />
-          <span className="text-[10px] text-brand-gold font-black uppercase tracking-widest">Modo Turbo Activo</span>
-        </div>
-      </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Input Side */}
