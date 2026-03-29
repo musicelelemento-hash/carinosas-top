@@ -20,6 +20,7 @@ interface ProfileCardProps {
   tags?: string[];
   plan_type?: string;
   personal_note?: string;
+  is_verified_4k?: boolean;
 }
 
 export default function ProfileCard({ 
@@ -35,13 +36,18 @@ export default function ProfileCard({
   whatsapp,
   tags = [],
   plan_type,
-  personal_note = "Un encuentro inolvidable te espera..."
+  personal_note = "Un encuentro inolvidable te espera...",
+  is_verified_4k = false
 }: ProfileCardProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  
+  const isFree = useMemo(() => 
+    !plan_type || plan_type === 'Gratis' || plan_type === 'Anuncio Gratis' || plan_type === 'Básico'
+  , [plan_type]);
 
   // Build final image array
   const allImages = useMemo(() => {
@@ -108,9 +114,7 @@ export default function ProfileCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => router.push(`/profile/${id}`)}
-        className={`relative bg-brand-black rounded-[2.4rem] overflow-hidden transition-all duration-1000 active:scale-[0.99] cursor-pointer border ${
-          isHovered ? 'border-brand-gold/30 -translate-y-4 shadow-[0_30px_60px_rgba(0,0,0,0.8)]' : 'border-white/5 shadow-2xl'
-        }`}
+        className={`relative group cursor-pointer transition-all duration-700 bg-brand-black/40 rounded-[2.5rem] border border-white/5 overflow-hidden ${isHovered ? 'scale-[1.02] -translate-y-2' : ''} ${isBoosted ? 'boost-pulse border-brand-gold/40' : ''}`}
       >
         {/* Instagram Story-style Bars */}
         <div className="absolute top-4 left-6 right-6 z-40 flex gap-2 h-[1px]">
@@ -127,20 +131,35 @@ export default function ProfileCard({
         </div>
 
         {/* Human Identity Badge - Non Invasive */}
-        <div className="absolute top-10 left-8 z-30 flex items-center gap-2.5 glass-premium px-4 py-2 rounded-full border-white/5 human-pulse group/human">
-           <Fingerprint size={12} className="text-brand-gold group-hover/human:rotate-12 transition-transform" />
-           <span className="text-[8px] text-white/80 font-black uppercase tracking-[0.2em]">Verified Human Identity</span>
-        </div>
+        {!isFree && (
+          <div className={`absolute top-10 left-8 z-30 flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/5 group/human transition-all duration-500 ${is_verified_4k ? 'bg-brand-gold/20 backdrop-blur-3xl border-brand-gold/40 shadow-gold group-hover:scale-110' : 'glass-premium human-pulse'}`}>
+            {is_verified_4k ? (
+              <>
+                <Zap size={12} className="text-brand-gold fill-brand-gold animate-bounce" />
+                <span className="text-[8px] text-brand-gold font-black uppercase tracking-[0.2em]">ULTRA VERIFIED 4K</span>
+              </>
+            ) : (
+              <>
+                <Fingerprint size={12} className="text-brand-gold group-hover/human:rotate-12 transition-transform" />
+                <span className="text-[8px] text-white/80 font-black uppercase tracking-[0.2em]">Verified Human Identity</span>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Tier Indicators */}
         <div className="absolute top-24 left-8 z-30 flex flex-col gap-2">
-          {plan_type === 'VIP Elite' ? (
+          {plan_type === 'VIP Elite' || plan_type === 'Diamante' ? (
             <div className="bg-brand-gold/10 backdrop-blur-3xl border border-brand-gold/30 p-2.5 rounded-2xl shadow-gold">
                <Crown size={14} className="text-brand-gold fill-brand-gold" />
             </div>
-          ) : plan_type === 'Diamante' ? (
+          ) : plan_type === 'Oro' ? (
             <div className="bg-brand-pink/10 backdrop-blur-3xl border border-brand-pink/30 p-2.5 rounded-2xl">
                <Diamond size={14} className="text-brand-pink fill-brand-pink" />
+            </div>
+          ) : plan_type === 'Plata' ? (
+            <div className="bg-white/5 backdrop-blur-3xl border border-white/20 p-2.5 rounded-2xl">
+               <ShieldCheck size={14} className="text-white/60" />
             </div>
           ) : null}
         </div>
@@ -178,7 +197,9 @@ export default function ProfileCard({
             <div className="space-y-1">
               <h3 className="text-4xl font-serif text-white tracking-tighter leading-none">{name}</h3>
               <div className="flex items-center gap-3">
-                 <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">{plan_type || 'Elite Member'}</span>
+                  <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${isFree ? 'text-white/30' : 'text-brand-gold'}`}>
+                    {isFree ? 'Anuncio Estándar' : (plan_type || 'Elite Member')}
+                  </span>
                  <div className="w-1 h-1 rounded-full bg-white/20" />
                  <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.4em]">{location}</span>
               </div>
@@ -192,7 +213,9 @@ export default function ProfileCard({
           {/* Hover Detail View (Magazine Style) */}
           <div className={`absolute inset-0 p-10 flex flex-col justify-center items-start text-left space-y-10 transition-all duration-1000 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'} pointer-events-none`}>
             <div className="space-y-4">
-               <span className="text-[11px] text-brand-gold font-black uppercase tracking-[0.5em] leading-none">Curated Selection</span>
+               <span className={`text-[11px] font-black uppercase tracking-[0.5em] leading-none ${isFree ? 'text-white/20' : 'text-brand-gold'}`}>
+                  {isFree ? 'Miembro Base' : 'Curated Selection'}
+               </span>
                <h3 className="text-7xl font-serif text-white italic leading-none">{name}</h3>
                <div className="flex items-center gap-6 pt-2">
                   <div className="flex flex-col">
@@ -206,8 +229,8 @@ export default function ProfileCard({
                   </div>
                   <div className="w-px h-8 bg-white/10" />
                   <div className="flex flex-col">
-                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">Verified</span>
-                     <ShieldCheck size={18} className="text-brand-gold mt-1" />
+                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">{isFree ? 'Identity' : 'Verified'}</span>
+                     <ShieldCheck size={18} className={isFree ? 'text-white/10 mt-1' : 'text-brand-gold mt-1'} />
                   </div>
                </div>
             </div>
@@ -239,10 +262,14 @@ export default function ProfileCard({
         <div className={`p-6 flex items-center justify-between transition-all duration-700 ${isHovered ? 'bg-brand-gold/10' : 'bg-transparent'}`}>
             <button 
               onClick={(e) => { e.stopPropagation(); handleContact(); }}
-              className="px-10 py-5 bg-white hover:bg-brand-gold text-brand-black rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95 pointer-events-auto"
+              className={`px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95 pointer-events-auto ${
+                isFree 
+                  ? 'bg-white/5 border border-white/10 text-white/60 hover:bg-white hover:text-brand-black' 
+                  : 'bg-white hover:bg-brand-gold text-brand-black'
+              }`}
             >
               <MessageCircle size={16} fill="currentColor" />
-              WhatsApp VIP
+              {isFree ? 'Contactar WhatsApp' : 'WhatsApp VIP'}
             </button>
             
             <div className="flex flex-col items-end opacity-20 group-hover:opacity-100 transition-opacity duration-700">

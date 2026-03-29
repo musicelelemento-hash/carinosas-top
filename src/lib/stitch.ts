@@ -9,7 +9,7 @@ export interface StitchResponse {
   transformedText: string;
   tags: string[];
   suggestions: string[];
-  planRecommendation: 'Silver' | 'Gold';
+  planRecommendation: 'Plata' | 'Oro';
 }
 
 const CITY_TAGS: Record<string, string[]> = {

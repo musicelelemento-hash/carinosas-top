@@ -90,9 +90,10 @@ export default function RegistrationAssistant() {
               <Crown className="text-brand-gold mx-auto mb-2" size={32} />
               <h2 className="text-2xl font-serif text-brand-gold uppercase tracking-widest text-center">Elige tu Nivel de Élite</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { name: 'Plata', price: '$25', features: ['Listado básico', 'WhatsApp directo'] },
+                { name: 'Gratis', price: '$0', features: ['Listado Base', 'WhatsApp Directo'] },
+                { name: 'Plata', price: '$25', features: ['Prioridad Bronce', 'Soporte 24/7'] },
                 { name: 'Oro', price: '$50', features: ['Stitch AI Copy', 'Posicionamiento VIP'] },
                 { name: 'Diamante', price: '$100', features: ['Top 1 Nacional', 'Verificación 4K'] }
               ].map((p) => (
@@ -101,14 +102,14 @@ export default function RegistrationAssistant() {
                   onClick={() => { setPlan(p.name); setStep(2); }}
                   className={`p-6 rounded-2xl border transition-all text-left ${plan === p.name ? 'border-brand-gold bg-brand-gold/10' : 'border-white/10 bg-white/5'}`}
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-lg font-black text-brand-white">{p.name}</span>
-                    <span className="text-brand-gold font-serif">{p.price}</span>
+                  <div className="flex flex-col mb-4">
+                    <span className="text-sm font-black text-brand-white uppercase tracking-tighter">{p.name}</span>
+                    <span className="text-brand-gold font-serif text-lg">{p.price}</span>
                   </div>
                   <ul className="space-y-2">
                     {p.features.map(f => (
-                      <li key={f} className="text-[10px] text-brand-white/40 flex items-center gap-2">
-                        <CheckCircle2 size={10} className="text-brand-gold" /> {f}
+                      <li key={f} className="text-[8px] text-brand-white/40 flex items-center gap-1.5 font-bold uppercase tracking-tight">
+                        <CheckCircle2 size={8} className="text-brand-gold shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
