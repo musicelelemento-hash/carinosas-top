@@ -34,8 +34,11 @@ export default function StoriesBar() {
               onClick={() => setActiveStory(story)}
               className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none"
             >
-              <div className="relative p-[3px] rounded-full bg-gradient-to-tr from-brand-gold via-brand-pink to-brand-gold animate-gradient-spin">
-                <div className="p-[2px] rounded-full bg-brand-black">
+              <div className="relative w-[64px] h-[64px] rounded-full overflow-hidden flex items-center justify-center">
+                {/* Rotating border gradient */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-brand-gold via-brand-pink to-brand-gold animate-gradient-spin" />
+                {/* Static inner content */}
+                <div className="absolute inset-[3px] rounded-full bg-brand-black flex items-center justify-center z-10">
                    <div className="w-14 h-14 rounded-full overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-500">
                       <Image 
                         src={story.avatar} 
