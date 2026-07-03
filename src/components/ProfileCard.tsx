@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { MessageCircle, MapPin, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond, TrendingUp, Fingerprint } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
@@ -40,7 +40,9 @@ export default function ProfileCard({
   is_verified_4k = false
 }: ProfileCardProps) {
   const router = useRouter();
+  const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -48,6 +50,31 @@ export default function ProfileCard({
   const isFree = useMemo(() => 
     !plan_type || plan_type === 'Gratis' || plan_type === 'Anuncio Gratis' || plan_type === 'Básico'
   , [plan_type]);
+
+  const isAnimating = isHovered || isVisible;
+
+  // Viewport Observer to trigger auto-play on scroll
+  useEffect(() => {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      {
+        rootMargin: "-25% 0px -25% 0px", // Trigger when card occupies center of screen
+        threshold: 0.1
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   // Build final image array
   const allImages = useMemo(() => {
@@ -58,7 +85,7 @@ export default function ProfileCard({
 
   // Instagram-style Story Progress Logic
   useEffect(() => {
-    if (!isHovered || allImages.length <= 1) {
+    if (!isAnimating || allImages.length <= 1) {
       setProgress(0);
       return;
     }
@@ -79,15 +106,15 @@ export default function ProfileCard({
     }, 30);
 
     return () => clearInterval(interval);
-  }, [isHovered, currentImageIndex, allImages.length]);
+  }, [isAnimating, currentImageIndex, allImages.length]);
 
-  // Reset when hover ends
+  // Reset when animation ends
   useEffect(() => {
-    if (!isHovered) {
+    if (!isAnimating) {
       setCurrentImageIndex(0);
       setProgress(0);
     }
-  }, [isHovered]);
+  }, [isAnimating]);
 
   const handleContact = () => {
     setIsTransitioning(true);
@@ -111,10 +138,15 @@ export default function ProfileCard({
       )}
 
       <div 
+        ref={cardRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => router.push(`/profile/${id}`)}
-        className={`relative group cursor-pointer transition-all duration-700 bg-brand-black/40 rounded-[2.5rem] border border-white/5 overflow-hidden ${isHovered ? 'scale-[1.02] -translate-y-2' : ''} ${isBoosted ? 'boost-pulse border-brand-gold/40' : ''}`}
+        className={`relative group cursor-pointer transition-all duration-700 bg-brand-black/40 rounded-[2.5rem] border border-white/5 overflow-hidden ${
+          isHovered || isVisible 
+            ? 'scale-[1.02] -translate-y-2 shadow-[0_20px_50px_rgba(212,175,55,0.12)] border-brand-gold/20' 
+            : ''
+        } ${isBoosted ? 'boost-pulse border-brand-gold/40' : ''}`}
       >
         {/* Instagram Story-style Bars */}
         <div className="absolute top-4 left-6 right-6 z-40 flex gap-2 h-[1px]">
@@ -175,25 +207,45 @@ export default function ProfileCard({
         </div>
 
         {/* Main Image Container */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-brand-black">
+        <div className="relative aspect-[4/5] overflow-hidden bg-brand-black select-none">
+          {/* Interactive Touch Zones for manual slider skip */}
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+              setProgress(0);
+            }}
+            className="absolute left-0 top-0 bottom-0 w-[30%] z-40 cursor-w-resize touch-manipulation"
+            title="Foto Anterior"
+          />
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+              setProgress(0);
+            }}
+            className="absolute right-0 top-0 bottom-0 w-[30%] z-40 cursor-e-resize touch-manipulation"
+            title="Siguiente Foto"
+          />
+
           {allImages.map((img, i) => {
-            if (i > 0 && !isHovered) return null;
+            if (i > 0 && !isAnimating) return null;
             return (
               <Image
                 key={i}
                 src={img}
                 alt={`${name} photo`}
                 fill
-                className={`object-cover transition-all duration-1000 absolute inset-0 ${
+                className={`object-cover transition-all duration-1000 absolute inset-0 will-change-transform will-change-opacity ${
                   i === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
-                } ${isHovered ? 'brightness-[0.3] scale-105' : 'brightness-90'}`}
+                } ${isAnimating ? 'brightness-[0.35] scale-105' : 'brightness-90'}`}
                 priority={i === 0}
               />
             );
           })}
           
           {/* Magazine Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/20 to-transparent opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/20 to-transparent opacity-90 pointer-events-none" />
           
           {/* Static Content (Bottom) */}
           <div className={`absolute inset-x-0 bottom-0 p-10 space-y-4 transition-all duration-700 ${isHovered ? 'translate-y-8 opacity-0' : 'translate-y-0 opacity-100'}`}>
