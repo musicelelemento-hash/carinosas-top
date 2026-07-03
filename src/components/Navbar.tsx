@@ -38,11 +38,11 @@ export default function Navbar() {
             </Link>
 
             <div className="hidden lg:flex items-center gap-10">
-               <Link href="/mapa" className="flex items-center gap-2 text-[10px] text-white/40 hover:text-white font-black uppercase tracking-[0.3em] transition-all group">
+               <Link href="/#mapa" className="flex items-center gap-2 text-[10px] text-white/40 hover:text-white font-black uppercase tracking-[0.3em] transition-all group">
                   <MapPin size={14} className="group-hover:text-brand-gold transition-colors" />
                   Live Radar
                </Link>
-               <Link href="/boutique" className="flex items-center gap-2 text-[10px] text-white/40 hover:text-white font-black uppercase tracking-[0.3em] transition-all group">
+               <Link href="/#collection" className="flex items-center gap-2 text-[10px] text-white/40 hover:text-white font-black uppercase tracking-[0.3em] transition-all group">
                   <Sparkles size={14} className="group-hover:text-brand-gold transition-colors" />
                   Selection
                </Link>
@@ -51,7 +51,7 @@ export default function Navbar() {
           
           <div className="flex items-center gap-6 md:gap-10">
             <Link 
-              href="/login" 
+              href="/admin" 
               className="hidden sm:flex items-center gap-3 text-[10px] text-white/60 hover:text-white uppercase tracking-[0.3em] font-black transition-colors"
             >
               <User size={16} className="text-brand-gold" />

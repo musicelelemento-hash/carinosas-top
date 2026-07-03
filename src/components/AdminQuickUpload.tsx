@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { createModelAction } from "@/app/actions/admin";
 import { StitchEngine } from "@/lib/stitch";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
@@ -146,23 +147,19 @@ export default function AdminQuickUpload() {
     const finalImages = images.length > 0 ? images : ["https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop"];
 
     try {
-      const { error } = await supabase.from('models').insert([
-        { 
-          name, 
-          city, 
-          whatsapp, 
-          description: text, 
-          tags, 
-          images: finalImages, 
-          plan_type: planType, 
-          age: parseInt(age) || 21,
-          lat,
-          lng,
-          sector
-        }
-      ]);
-      
-      if (error) throw error;
+      await createModelAction({
+        name,
+        city,
+        whatsapp,
+        description: text,
+        tags,
+        images: finalImages,
+        plan_type: planType,
+        age: parseInt(age) || 21,
+        lat,
+        lng,
+        sector
+      });
       
       setSuccess(true);
       setTimeout(() => {

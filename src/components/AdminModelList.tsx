@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { updateModelAction, deleteModelAction } from "@/app/actions/admin";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { 
   Trash2, 
@@ -88,22 +89,23 @@ export default function AdminModelList() {
   const handleSave = async () => {
     if (!editModel) return;
     setSaving(true);
-    const { error } = await supabase.from('models').update({
-      name: editName,
-      whatsapp: editWhatsapp,
-      city: editCity,
-      sector: editSector,
-      age: parseInt(editAge) || editModel.age,
-      plan_type: editPlan,
-      images: editImages,
-      description: editDesc,
-    }).eq('id', editModel.id);
+    try {
+      await updateModelAction(editModel.id, {
+        name: editName,
+        whatsapp: editWhatsapp,
+        city: editCity,
+        sector: editSector,
+        age: parseInt(editAge) || editModel.age,
+        plan_type: editPlan,
+        images: editImages,
+        description: editDesc,
+      });
 
-    if (!error) {
       setSaveSuccess(true);
       fetchModels();
       setTimeout(closeEdit, 1500);
-    } else {
+    } catch (err) {
+      console.error(err);
       alert("Error al guardar cambios.");
     }
     setSaving(false);
@@ -111,9 +113,13 @@ export default function AdminModelList() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Seguro que quieres eliminar esta publicación?")) return;
-    const { error } = await supabase.from('models').delete().eq('id', id);
-    if (!error) setModels(prev => prev.filter(m => m.id !== id));
-    else alert("Error al eliminar.");
+    try {
+      await deleteModelAction(id);
+      setModels(prev => prev.filter(m => m.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Error al eliminar.");
+    }
   };
 
   const removeImage = (idx: number) => setEditImages(prev => prev.filter((_, i) => i !== idx));

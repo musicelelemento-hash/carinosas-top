@@ -1,14 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLogin from "@/components/AdminLogin";
 import AdminQuickUpload from "@/components/AdminQuickUpload";
 import AdminModelList from "@/components/AdminModelList";
-import { LogOut, LayoutDashboard, PlusCircle, ListTodo, Users, ShieldAlert } from "lucide-react";
+import { LogOut, LayoutDashboard, PlusCircle, ListTodo, Users, ShieldAlert, Loader2 } from "lucide-react";
+import { checkAdminSessionAction, logoutAdminAction } from "@/app/actions/admin";
 
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [activeTab, setActiveTab] = useState<'upload' | 'catalog'>('catalog');
+
+  useEffect(() => {
+    async function checkSession() {
+      const active = await checkAdminSessionAction();
+      setIsAdmin(active);
+      setCheckingSession(false);
+    }
+    checkSession();
+  }, []);
+
+  const handleLogout = async () => {
+    await logoutAdminAction();
+    setIsAdmin(false);
+  };
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-brand-black flex flex-col items-center justify-center gap-4">
+        <Loader2 size={48} className="text-brand-gold animate-spin" />
+        <p className="text-[10px] text-brand-gold/40 uppercase font-black tracking-[0.5em]">Verificando Credenciales...</p>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return <AdminLogin onSuccess={() => setIsAdmin(true)} />;
@@ -51,7 +76,7 @@ export default function AdminPage() {
           </div>
 
           <button 
-            onClick={() => setIsAdmin(false)}
+            onClick={handleLogout}
             className="flex items-center gap-2 text-[10px] text-brand-white/30 uppercase font-black hover:text-brand-pink transition-colors group"
           >
             <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-brand-pink/10 transition-colors">

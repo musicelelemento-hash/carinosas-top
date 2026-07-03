@@ -2,13 +2,16 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Sparkles, X, MessageSquare, Send, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  models?: any[];
 }
 
 export default function AIAssistantOverlay() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -42,7 +45,7 @@ export default function AIAssistantOverlay() {
       });
 
       const data = await response.json();
-      setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+      setMessages(prev => [...prev, { role: "assistant", content: data.reply, models: data.models }]);
     } catch (error) {
       setMessages(prev => [...prev, { role: "assistant", content: "Lo siento, tuve un problema conectando con el servidor Élite. ¿Podrías intentar de nuevo?" }]);
     } finally {
@@ -96,7 +99,7 @@ export default function AIAssistantOverlay() {
           className="flex-1 p-6 overflow-y-auto space-y-4 bg-brand-black/20 scroll-smooth"
         >
           {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === "assistant" ? "justify-start" : "justify-end"} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+            <div key={i} className={`flex flex-col ${msg.role === "assistant" ? "items-start" : "items-end"} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
               <div className={`p-4 rounded-2xl border ${
                 msg.role === "assistant" 
                   ? "glass-dark rounded-tl-none border-white/5 max-w-[85%]" 
@@ -106,6 +109,29 @@ export default function AIAssistantOverlay() {
                   {msg.role === "assistant" ? `"${msg.content}"` : msg.content}
                 </p>
               </div>
+              
+              {msg.role === "assistant" && msg.models && msg.models.length > 0 && (
+                <div className="w-full mt-2 flex gap-3 overflow-x-auto pb-2 scrollbar-none no-scrollbar max-w-[90%]">
+                  {msg.models.map((model: any) => (
+                    <div
+                      key={model.id}
+                      onClick={() => router.push(`/profile/${model.id}`)}
+                      className="flex-shrink-0 w-40 p-3 glass-dark border border-white/5 rounded-2xl flex items-center gap-3 cursor-pointer hover:border-brand-gold/40 transition-all hover:scale-[1.02]"
+                    >
+                      <div className="relative w-9 h-9 rounded-full overflow-hidden border border-brand-gold/20 flex-shrink-0">
+                        <img src={model.imageUrl} alt={model.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="text-[10px] font-black uppercase tracking-wider text-white truncate">{model.name}</h5>
+                        <p className="text-[8px] text-white/40 truncate">{model.city}</p>
+                        <span className="text-[6px] font-black uppercase text-brand-gold bg-brand-gold/10 px-1 py-0.5 rounded tracking-widest mt-0.5 inline-block">
+                          {model.plan_type === 'VIP Elite' || model.plan_type === 'Diamante' ? 'VIP ELITE' : (model.plan_type || 'VIP')}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
           

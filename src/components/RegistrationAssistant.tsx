@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { StitchEngine } from "@/lib/stitch";
-import { supabase } from "@/lib/supabase";
+import { registerModelAction } from "@/app/actions/admin";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { 
   Sparkles, 
@@ -58,19 +58,15 @@ export default function RegistrationAssistant() {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.from('models').insert([
-        { 
-          name, 
-          city, 
-          whatsapp, 
-          description: transformed || StitchEngine.transformDescription(desc, city), 
-          tags: tags.length > 0 ? tags : StitchEngine.generateTags(city), 
-          images, 
-          plan_type: plan,
-          age: 21 
-        }
-      ]);
-      if (error) throw error;
+      await registerModelAction({
+        name,
+        city,
+        whatsapp,
+        description: transformed || StitchEngine.transformDescription(desc, city),
+        tags: tags.length > 0 ? tags : StitchEngine.generateTags(city),
+        images,
+        plan_type: plan
+      });
       setStep(5);
     } catch (err) {
       console.error("Error:", err);

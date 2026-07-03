@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Lock, ShieldAlert } from "lucide-react";
+import { loginAdminAction } from "@/app/actions/admin";
 
 interface AdminLoginProps {
   onSuccess: () => void;
@@ -11,10 +12,10 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   const [passkey, setPasskey] = React.useState("");
   const [error, setError] = React.useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real staging app, this would be an env var
-    if (passkey === "elite2026") {
+    const res = await loginAdminAction(passkey);
+    if (res.success) {
       onSuccess();
     } else {
       setError(true);

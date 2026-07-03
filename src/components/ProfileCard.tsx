@@ -176,18 +176,21 @@ export default function ProfileCard({
 
         {/* Main Image Container */}
         <div className="relative aspect-[4/5] overflow-hidden bg-brand-black">
-          {allImages.map((img, i) => (
-            <Image
-              key={i}
-              src={img}
-              alt={`${name} photo`}
-              fill
-              className={`object-cover transition-all duration-1000 absolute inset-0 ${
-                i === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
-              } ${isHovered ? 'brightness-[0.3] scale-105' : 'brightness-90'}`}
-              priority={i === 0}
-            />
-          ))}
+          {allImages.map((img, i) => {
+            if (i > 0 && !isHovered) return null;
+            return (
+              <Image
+                key={i}
+                src={img}
+                alt={`${name} photo`}
+                fill
+                className={`object-cover transition-all duration-1000 absolute inset-0 ${
+                  i === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
+                } ${isHovered ? 'brightness-[0.3] scale-105' : 'brightness-90'}`}
+                priority={i === 0}
+              />
+            );
+          })}
           
           {/* Magazine Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/20 to-transparent opacity-90" />
