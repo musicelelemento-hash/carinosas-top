@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import AdminLogin from "@/components/AdminLogin";
 import AdminQuickUpload from "@/components/AdminQuickUpload";
 import AdminModelList from "@/components/AdminModelList";
-import { LogOut, LayoutDashboard, PlusCircle, ListTodo, Users, ShieldAlert, Loader2 } from "lucide-react";
+import { LogOut, LayoutDashboard, PlusCircle, Users, Loader2 } from "lucide-react";
 import { checkAdminSessionAction, logoutAdminAction } from "@/app/actions/admin";
 
 export default function AdminPage() {
@@ -39,7 +39,7 @@ export default function AdminPage() {
     return <AdminLogin onSuccess={() => setIsAdmin(true)} />;
   }
 
-  const TABS = [
+  const TABS: { id: 'catalog' | 'upload'; label: string; icon: React.ReactNode }[] = [
     { id: 'catalog', label: 'Gestionar Catálogo', icon: <Users size={16} /> },
     { id: 'upload', label: 'Publicación Rápida', icon: <PlusCircle size={16} /> },
   ];
@@ -62,7 +62,7 @@ export default function AdminPage() {
             {TABS.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   activeTab === tab.id 
                   ? 'bg-brand-gold text-brand-black shadow-lg' 

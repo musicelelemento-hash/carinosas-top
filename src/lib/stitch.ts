@@ -60,7 +60,7 @@ export const StitchEngine = {
   /**
    * Analyzes photo metadata/simulated quality.
    */
-  analyzePhotoQuality(photos: any[]): { score: number; feedback: string } {
+  analyzePhotoQuality(photos: unknown[]): { score: number; feedback: string } {
     // Simulated analysis: in a real scenario, this would check resolution, lighting via AI
     if (photos.length < 3) {
       return { 

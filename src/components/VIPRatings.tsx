@@ -38,7 +38,7 @@ export default function VIPRatings() {
                 ))}
               </div>
             </div>
-            <p className="text-sm text-brand-white/70 italic leading-relaxed">"{r.comment}"</p>
+            <p className="text-sm text-brand-white/70 italic leading-relaxed">&quot;{r.comment}&quot;</p>
             <p className="text-[10px] text-brand-white/30 mt-3 text-right">{r.date}</p>
           </div>
         ))}

@@ -7,24 +7,16 @@ import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
 import { 
   MessageCircle, 
   MapPin, 
-  CheckCircle2, 
   Star, 
-  ShieldCheck, 
-  Heart,
   ChevronLeft,
   Crown,
   Share2,
   Lock,
-  Camera,
-  Layers,
   Sparkles,
-  Zap,
-  Phone,
   Scissors,
   Diamond,
   BadgeCheck,
-  TrendingUp,
-  Map
+  TrendingUp
 } from "lucide-react";
 import Link from "next/link";
 
@@ -134,7 +126,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
   const config = PLAN_CONFIG[plan] || PLAN_CONFIG['Básico'];
 
   return (
-    <div className="relative min-h-screen bg-brand-black text-brand-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-12">
+    <div className="relative min-h-screen bg-mesh text-brand-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-12">
       {/* HUD Headers & Overlay Layouts - Uber style */}
       <div className="fixed top-8 left-8 z-[100] flex flex-col gap-3">
         <Link 
@@ -400,7 +392,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                             <Star key={i} size={10} className="text-brand-gold fill-brand-gold" />
                           ))}
                        </div>
-                       <p className="text-xs text-white/60 leading-relaxed italic">"{review.comment}"</p>
+                       <p className="text-xs text-white/60 leading-relaxed italic">&quot;{review.comment}&quot;</p>
                     </div>
                   ))}
                </div>

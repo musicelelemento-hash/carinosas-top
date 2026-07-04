@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Navigation, Loader2, MapPin, ChevronRight, Star, Users, Zap, MessageSquare, Heart, Radar, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { ChevronRight, Zap, Radar, ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
@@ -38,13 +39,25 @@ const ECUADOR_CITIES: Record<string, { center: [number, number]; zoom: number; l
   Pasaje:        { center: [-3.3283, -79.8067], zoom: 14, label: "Pasaje" },
 };
 
+interface MapModel {
+  id: string;
+  name: string;
+  city: string;
+  lat: number;
+  lng: number;
+  plan_type: string;
+  images: string[];
+  sector?: string;
+  whatsapp?: string;
+  age?: number;
+}
+
 export default function LiveMap() {
-  const [models, setModels] = useState<any[]>([]);
+  const [models, setModels] = useState<MapModel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [selectedCity, setSelectedCity] = useState<string>("Quito");
-  const [selectedModel, setSelectedModel] = useState<any | null>(null);
-  const [L, setL] = useState<any>(null);
+  const [selectedModel, setSelectedModel] = useState<MapModel | null>(null);
+  const [L, setL] = useState<typeof import("leaflet") | null>(null);
   const [mapTarget, setMapTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
   const mapRef = useRef<any>(null);
 
@@ -67,7 +80,6 @@ export default function LiveMap() {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          setUserLocation(coords);
           setMapTarget({ center: coords, zoom: 14 });
         },
         () => {
@@ -92,7 +104,7 @@ export default function LiveMap() {
     setSelectedModel(null);
   };
 
-  const handleModelSelect = (model: any) => {
+  const handleModelSelect = (model: MapModel) => {
     setSelectedModel(model);
     if (model.lat && model.lng) {
       const coords: [number, number] = [model.lat, model.lng];
@@ -125,14 +137,7 @@ export default function LiveMap() {
       })
     : null;
 
-  const userIcon = L
-    ? new L.DivIcon({
-        html: `<div class="user-pin"><div class="user-pulse"></div><div class="user-core"></div></div>`,
-        className: "user-loc-icon",
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
-      })
-    : null;
+
 
   const initialCenter = ECUADOR_CITIES.Quito.center;
 
@@ -223,8 +228,13 @@ export default function LiveMap() {
                 )}
                 
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-brand-gold/40 transition-all duration-500">
-                  <img src={model.images?.[0]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-black/80 to-transparent" />
+                  <Image 
+                    src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
+                    alt={model.name} 
+                    fill 
+                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-black/80 to-transparent z-10" />
                 </div>
 
                 <div className="flex-1 min-w-0 space-y-2">
@@ -269,15 +279,20 @@ export default function LiveMap() {
                   <Marker
                     key={model.id}
                     position={[model.lat, model.lng]}
-                    icon={selectedModel?.id === model.id ? selectedIcon : goldIcon}
+                    icon={(selectedModel?.id === model.id ? selectedIcon : goldIcon) || undefined}
                     eventHandlers={{ click: () => handleModelSelect(model) }}
                   >
                     <Popup className="premium-map-popup">
                        <div className="p-4 w-60 space-y-4">
-                          <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-brand-black border border-white/5 relative">
-                             <img src={model.images?.[0]} className="w-full h-full object-cover" />
-                             <div className="absolute top-3 right-3 bg-brand-gold text-brand-black text-[8px] font-black px-2 py-1 rounded-full uppercase">Verified</div>
-                          </div>
+                           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-brand-black border border-white/5 relative">
+                              <Image 
+                                src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
+                                alt={model.name} 
+                                fill 
+                                className="object-cover" 
+                              />
+                              <div className="absolute top-3 right-3 bg-brand-gold text-brand-black text-[8px] font-black px-2 py-1 rounded-full uppercase z-10">Verified</div>
+                           </div>
                           <div>
                              <h5 className="text-white font-serif text-2xl italic leading-none">{model.name}</h5>
                              <p className="text-[9px] text-white/40 uppercase tracking-[0.3em] font-black mt-2">{model.age} Años · Ecuador</p>

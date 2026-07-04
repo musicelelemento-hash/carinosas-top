@@ -1,13 +1,25 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, X, MessageSquare, Send, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Sparkles, X, Send, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+interface AssistantModel {
+  id: string;
+  name: string;
+  city: string;
+  sector?: string;
+  plan_type?: string;
+  age?: number;
+  imageUrl: string;
+  is_verified_4k?: boolean;
+}
 
 interface Message {
   role: "user" | "assistant";
   content: string;
-  models?: any[];
+  models?: AssistantModel[];
 }
 
 export default function AIAssistantOverlay() {
@@ -46,7 +58,7 @@ export default function AIAssistantOverlay() {
 
       const data = await response.json();
       setMessages(prev => [...prev, { role: "assistant", content: data.reply, models: data.models }]);
-    } catch (error) {
+    } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "Lo siento, tuve un problema conectando con el servidor Élite. ¿Podrías intentar de nuevo?" }]);
     } finally {
       setIsLoading(false);
@@ -112,14 +124,19 @@ export default function AIAssistantOverlay() {
               
               {msg.role === "assistant" && msg.models && msg.models.length > 0 && (
                 <div className="w-full mt-2 flex gap-3 overflow-x-auto pb-2 scrollbar-none no-scrollbar max-w-[90%]">
-                  {msg.models.map((model: any) => (
+                  {msg.models.map((model: AssistantModel) => (
                     <div
                       key={model.id}
                       onClick={() => router.push(`/profile/${model.id}`)}
                       className="flex-shrink-0 w-40 p-3 glass-dark border border-white/5 rounded-2xl flex items-center gap-3 cursor-pointer hover:border-brand-gold/40 transition-all hover:scale-[1.02]"
                     >
                       <div className="relative w-9 h-9 rounded-full overflow-hidden border border-brand-gold/20 flex-shrink-0">
-                        <img src={model.imageUrl} alt={model.name} className="w-full h-full object-cover" />
+                        <Image 
+                          src={model.imageUrl} 
+                          alt={model.name} 
+                          fill 
+                          className="object-cover" 
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h5 className="text-[10px] font-black uppercase tracking-wider text-white truncate">{model.name}</h5>

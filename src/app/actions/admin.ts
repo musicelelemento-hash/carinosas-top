@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import crypto from "crypto";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "elite-secret-key-2026-safe";
 const DEFAULT_PASSKEY = "elite2026";
@@ -93,7 +93,7 @@ export async function createModelAction(modelData: {
 }) {
   await assertAdmin();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("models")
     .insert([
       {
@@ -142,7 +142,7 @@ export async function updateModelAction(
 ) {
   await assertAdmin();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("models")
     .update({
       name: modelData.name,
@@ -174,7 +174,7 @@ export async function updateModelAction(
 export async function deleteModelAction(id: string) {
   await assertAdmin();
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("models")
     .delete()
     .eq("id", id);
@@ -204,7 +204,7 @@ export async function registerModelAction(modelData: {
     throw new Error("Nombre, ciudad y WhatsApp son requeridos.");
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("models")
     .insert([
       {

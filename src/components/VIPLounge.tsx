@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Crown, Shield, Star, Diamond, ArrowRight } from "lucide-react";
 
 export default function VIPLounge() {
@@ -52,10 +53,11 @@ export default function VIPLounge() {
           </div>
 
           <div className="relative aspect-[4/5] rounded-[3.5rem] overflow-hidden group animate-in fade-in slide-in-from-right-12 duration-1000">
-             <img 
+             <Image 
                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1200" 
                className="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
                alt="VIP Lounge"
+               fill
              />
              <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent opacity-80" />
              

@@ -16,12 +16,29 @@ import AIAssistantOverlay from "@/components/AIAssistantOverlay";
 import VIPLounge from "@/components/VIPLounge";
 import PushPrompt from "@/components/PushPrompt";
 
+interface HomePageModel {
+  id: string;
+  name: string;
+  age: number;
+  location: string;
+  imageUrl?: string;
+  images?: string[];
+  isBoosted?: boolean;
+  is_verified_4k?: boolean;
+  description?: string | null;
+  whatsapp?: string;
+  sector?: string | null;
+  tags?: string[] | null;
+  plan_type?: string;
+  personal_note?: string;
+}
+
 interface HomePageClientProps {
-  initialModels: any[];
+  initialModels: HomePageModel[];
 }
 
 export default function HomePageClient({ initialModels }: HomePageClientProps) {
-  const [displayModels, setDisplayModels] = React.useState<any[]>(initialModels);
+  const [displayModels, setDisplayModels] = React.useState<HomePageModel[]>(initialModels);
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
@@ -45,7 +62,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
   }, [isLoading]);
 
   return (
-    <main className="min-h-screen bg-brand-black pb-0">
+    <main className="min-h-screen bg-mesh pb-0">
       <Navbar />
       
       <LiveCountBanner />

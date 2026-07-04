@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 import { createModelAction } from "@/app/actions/admin";
 import { StitchEngine } from "@/lib/stitch";
 import { UploadDropzone } from "@/components/Uploadthing";
@@ -383,7 +383,7 @@ export default function AdminQuickUpload() {
                   <p className="text-[10px] text-brand-gold uppercase tracking-widest font-black mb-1 flex items-center gap-2">
                     <Sparkles size={10} /> Stitch Preview:
                   </p>
-                  <p className="text-xs italic text-brand-white/60">"{tempTransformed}"</p>
+                  <p className="text-xs italic text-brand-white/60">&quot;{tempTransformed}&quot;</p>
                 </div>
               )}
             </div>
@@ -401,10 +401,15 @@ export default function AdminQuickUpload() {
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {images.map((img, i) => (
                   <div key={i} className="relative aspect-square rounded-2xl overflow-hidden group border border-white/10">
-                    <img src={img} className="w-full h-full object-cover" />
+                    <Image 
+                      src={img} 
+                      alt={`Miniatura subida ${i + 1}`} 
+                      fill 
+                      className="object-cover" 
+                    />
                     <button 
                       onClick={() => setImages(images.filter((_, idx) => idx !== i))}
-                      className="absolute inset-0 bg-brand-pink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                      className="absolute inset-0 bg-brand-pink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white z-10"
                     >
                       <Trash2 size={20} />
                     </button>

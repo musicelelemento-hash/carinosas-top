@@ -22,6 +22,21 @@ const PLAN_PRIORITY: Record<string, number> = {
   'Básico': 3
 };
 
+interface ChatModel {
+  id: string;
+  name: string;
+  city: string;
+  sector: string | null;
+  plan_type: string;
+  age: number;
+  images: string[] | null;
+  tags: string[] | null;
+  description: string | null;
+  is_verified_4k: boolean;
+  is_online: boolean;
+  is_verified?: boolean;
+}
+
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
@@ -65,10 +80,10 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
-    const models = rawModels || [];
+    const models = (rawModels as unknown as ChatModel[]) || [];
 
     // 3. Compute relevance scores
-    const scoredModels = models.map((model: any) => {
+    const scoredModels = models.map((model: ChatModel) => {
       let score = 0;
 
       // City matching (Highest weight)
@@ -154,7 +169,7 @@ export async function POST(req: Request) {
     }
 
     // Format models output for the client
-    const clientModels = recommendations.map((m: any) => ({
+    const clientModels = recommendations.map((m: ChatModel) => ({
       id: m.id,
       name: m.name,
       city: m.city,

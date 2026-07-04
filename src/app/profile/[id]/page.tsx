@@ -7,10 +7,26 @@ import ModelProfile from "@/components/ModelProfile";
 import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
+interface ProfileModel {
+  id: string;
+  name: string;
+  age: number;
+  location: string;
+  description: string;
+  images: string[];
+  services?: string[];
+  isVerified?: boolean;
+  plan_type?: string;
+  tags?: string[];
+  sector?: string;
+  whatsapp?: string;
+  city?: string;
+}
+
 export default function DynamicProfilePage() {
   const params = useParams();
   const id = params.id as string;
-  const [model, setModel] = useState<any>(null);
+  const [model, setModel] = useState<ProfileModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -28,28 +44,6 @@ export default function DynamicProfilePage() {
         if (data && !sbError) {
           setModel(data);
           return;
-        }
-
-        // 2. Mock fallback (for testing or specific static IDs)
-        if (id === "valentina") {
-           setModel({
-             id: "valentina",
-             name: "Valentina",
-             age: 23,
-             location: "Quito",
-             sector: "Cumbayá",
-             description: "Modelo exclusiva con un aura de misterio y elegancia natural. Valentina personifica la sofisticación de Quito, ofreciendo una compañía que trasciende lo convencional para convertirse en una experiencia de alto diseño.",
-             images: [
-               "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200",
-               "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1200"
-             ],
-             plan_type: "VIP Elite",
-             isVerified: true,
-             tags: ["#Elite", "#Luxury", "#QuitoNight"],
-             whatsapp: "593900000000",
-             city: "Quito"
-           });
-           return;
         }
 
         setError(true);

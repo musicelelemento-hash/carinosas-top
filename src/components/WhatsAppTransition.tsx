@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { ShieldCheck, Loader2 } from "lucide-react";
 
 interface WhatsAppTransitionProps {
   modelName: string;
   isOpen: boolean;
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
-export default function WhatsAppTransition({ modelName, isOpen, onComplete }: WhatsAppTransitionProps) {
+export default function WhatsAppTransition({ modelName, isOpen }: WhatsAppTransitionProps) {
   if (!isOpen) return null;
 
   return (

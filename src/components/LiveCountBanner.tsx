@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CITIES } from "@/lib/cities";
 import { getPopularCities } from "@/lib/cities";
 import { Users, Flame } from "lucide-react";
 

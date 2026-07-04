@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ProfileCard from "./ProfileCard";
 import { Sparkles, TrendingUp } from "lucide-react";
 
@@ -12,19 +12,14 @@ interface Model {
   imageUrl: string;
 }
 
-export default function RecommendationSection() {
-  const [recommendations, setRecommendations] = useState<Model[]>([]);
+const MOCK_RECOMMENDATIONS: Model[] = [
+  { id: '1', name: 'Valentina', age: 21, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800' },
+  { id: '2', name: 'Alessandra', age: 24, location: 'Samborondón', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800' },
+  { id: '3', name: 'Isabella', age: 22, location: 'Cumbayá', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800' },
+];
 
-  useEffect(() => {
-    // Simulated Algorithm: Priorities higher-tier and same-city models
-    // In a real app, this would fetch from a database with a score-based algorithm
-    const mockRecs: Model[] = [
-      { id: '1', name: 'Valentina', age: 21, location: 'Guayaquil', imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800' },
-      { id: '2', name: 'Alessandra', age: 24, location: 'Samborondón', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800' },
-      { id: '3', name: 'Isabella', age: 22, location: 'Cumbayá', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800' },
-    ];
-    setRecommendations(mockRecs);
-  }, []);
+export default function RecommendationSection() {
+  const [recommendations] = useState<Model[]>(MOCK_RECOMMENDATIONS);
 
   return (
     <section className="py-20 px-4">

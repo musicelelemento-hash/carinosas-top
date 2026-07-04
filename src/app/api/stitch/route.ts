@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       pitch,
       success: true
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to process Stitch request" }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import { MessageCircle, MapPin, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond, TrendingUp, Fingerprint } from "lucide-react";
+import { MessageCircle, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond, Fingerprint } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
 
@@ -15,9 +15,9 @@ interface ProfileCardProps {
   images?: string[];
   isVip?: boolean;
   isBoosted?: boolean;
-  sector?: string;
+  sector?: string | null;
   whatsapp?: string;
-  tags?: string[];
+  tags?: string[] | null;
   plan_type?: string;
   personal_note?: string;
   is_verified_4k?: boolean;
@@ -30,11 +30,8 @@ export default function ProfileCard({
   location, 
   imageUrl,
   images,
-  isVip = true,
   isBoosted = false,
-  sector,
   whatsapp,
-  tags = [],
   plan_type,
   personal_note = "Un encuentro inolvidable te espera...",
   is_verified_4k = false
@@ -86,8 +83,10 @@ export default function ProfileCard({
   // Instagram-style Story Progress Logic
   useEffect(() => {
     if (!isAnimating || allImages.length <= 1) {
-      setProgress(0);
-      return;
+      const timer = setTimeout(() => {
+        setProgress(0);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     const duration = 2400; // Slightly slower for elegance
@@ -111,8 +110,11 @@ export default function ProfileCard({
   // Reset when animation ends
   useEffect(() => {
     if (!isAnimating) {
-      setCurrentImageIndex(0);
-      setProgress(0);
+      const timer = setTimeout(() => {
+        setCurrentImageIndex(0);
+        setProgress(0);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isAnimating]);
 

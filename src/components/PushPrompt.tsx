@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell, X, Sparkles, ShieldCheck } from "lucide-react";
+import { Bell, X, ShieldCheck } from "lucide-react";
 
 export default function PushPrompt() {
   const [isVisible, setIsVisible] = useState(false);

@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Image from "next/image";
-import { X, Heart, MessageCircle, Send } from "lucide-react";
+import { X, Heart, Send } from "lucide-react";
 
 interface StoryModalProps {
   isOpen: boolean;

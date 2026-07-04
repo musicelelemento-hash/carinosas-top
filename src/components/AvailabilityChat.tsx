@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MessageSquare, Sparkles, Send, Bot, User } from "lucide-react";
-import { StitchEngine } from "@/lib/stitch";
+import { MessageSquare, Sparkles, Send } from "lucide-react";
 
 interface Message {
   role: 'user' | 'bot';

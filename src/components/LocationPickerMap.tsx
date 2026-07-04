@@ -5,6 +5,8 @@ import { MapPin, Navigation, Target, RefreshCw } from "lucide-react";
 
 // ── All react-leaflet imports are STATIC here (this file is client-only via "use client")
 // ── We guard rendering with an `isClient` check, so SSR never executes Leaflet code.
+import type { MapContainerProps, TileLayerProps, MarkerProps } from "react-leaflet";
+import type L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 interface LocationPickerMapProps {
@@ -18,12 +20,14 @@ interface LocationPickerMapProps {
 // MapClickHandler — must be rendered inside <MapContainer>
 // Uses useMapEvents (hook) which is only valid inside a MapContainer tree.
 // ---------------------------------------------------------------------------
-function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
-  // Imported at module level so TypeScript is happy; Leaflet never runs on the server
-  // because the parent component gate-keeps with isClient.
-  const { useMapEvents } = require("react-leaflet"); // eslint-disable-line @typescript-eslint/no-var-requires
+interface MapClickHandlerProps {
+  onMapClick: (lat: number, lng: number) => void;
+  useMapEvents: (events: Record<string, (e: L.LeafletMouseEvent) => void>) => void;
+}
+
+function MapClickHandler({ onMapClick, useMapEvents }: MapClickHandlerProps) {
   useMapEvents({
-    click(e: any) {
+    click(e: L.LeafletMouseEvent) {
       onMapClick(e.latlng.lat, e.latlng.lng);
     },
   });
@@ -40,11 +44,12 @@ export default function LocationPickerMap({
   cityCenter,
 }: LocationPickerMapProps) {
   const [isClient, setIsClient] = useState(false);
-  const [LeafletLib, setLeafletLib] = useState<any>(null);
+  const [LeafletLib, setLeafletLib] = useState<typeof L | null>(null);
   const [MapComponents, setMapComponents] = useState<{
-    MapContainer: any;
-    TileLayer: any;
-    Marker: any;
+    MapContainer: React.ComponentType<any>;
+    TileLayer: React.ComponentType<any>;
+    Marker: React.ComponentType<any>;
+    useMapEvents: any;
   } | null>(null);
   const [reversedAddress, setReversedAddress] = useState("");
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -61,6 +66,7 @@ export default function LocationPickerMap({
         MapContainer: rl.MapContainer,
         TileLayer: rl.TileLayer,
         Marker: rl.Marker,
+        useMapEvents: rl.useMapEvents,
       });
     });
   }, []);
@@ -170,7 +176,7 @@ export default function LocationPickerMap({
           />
 
           {/* Click handler — must be INSIDE MapContainer */}
-          <MapClickHandler onMapClick={(la, ln) => reverseGeocode(la, ln)} />
+          <MapClickHandler onMapClick={(la, ln) => reverseGeocode(la, ln)} useMapEvents={MapComponents.useMapEvents} />
 
           {lat && lng && customIcon && (
             <Marker position={[lat, lng]} icon={customIcon} />

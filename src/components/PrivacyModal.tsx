@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { ShieldCheck, Scale, EyeOff, Camera, X } from "lucide-react";
+import React from "react";
+import { ShieldCheck, Scale, EyeOff, Camera } from "lucide-react";
 
 interface PrivacyModalProps {
   isOpen: boolean;

@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { StitchEngine } from "@/lib/stitch";
 import { registerModelAction } from "@/app/actions/admin";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { 
   Sparkles, 
-  MapPin, 
   CheckCircle2, 
-  TrendingUp, 
   MessageCircle,
   Crown,
   Loader2,
@@ -16,7 +15,7 @@ import {
   Zap
 } from "lucide-react";
 import PrivacyModal from "./PrivacyModal";
-import { CITIES, getProvinces, getCitiesByProvince } from "@/lib/cities";
+import { getProvinces, getCitiesByProvince } from "@/lib/cities";
 
 export default function RegistrationAssistant() {
   const [mounted, setMounted] = useState(false);
@@ -194,17 +193,26 @@ export default function RegistrationAssistant() {
               <h2 className="text-2xl font-serif text-brand-gold uppercase tracking-widest text-center">Vista Previa Mobile</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-               {/* Phone Frame */}
+                {/* Phone Frame */}
                <div className="w-56 h-[460px] bg-brand-black border-[6px] border-white/10 rounded-[2.5rem] mx-auto overflow-hidden relative shadow-2xl">
-                  {images[0] ? <img src={images[0]} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-white/5" />}
-                  <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black via-black/80 to-transparent">
+                  {images[0] ? (
+                    <Image 
+                      src={images[0]} 
+                      alt="Preview" 
+                      fill 
+                      className="object-cover" 
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5" />
+                  )}
+                  <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black via-black/80 to-transparent z-10">
                     <span className="text-xs font-bold text-white flex items-center gap-1">{name} <CheckCircle2 size={10} className="text-brand-gold" /></span>
                     <p className="text-[9px] text-brand-white/60 line-clamp-2 mt-1">{transformed}</p>
                   </div>
                </div>
                <div className="space-y-6">
                   <div className="bg-white/5 border border-brand-gold/20 p-5 rounded-2xl relative">
-                    <p className="text-sm italic text-brand-white">"{transformed}"</p>
+                     <p className="text-sm italic text-brand-white">&quot;{transformed}&quot;</p>
                     <div className="mt-3 flex gap-2">
                        {tags.map(t => <span key={t} className="text-[10px] text-brand-pink font-bold">{t}</span>)}
                     </div>

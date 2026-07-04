@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { updateModelAction, deleteModelAction } from "@/app/actions/admin";
 import { UploadDropzone } from "@/components/Uploadthing";
@@ -17,7 +18,7 @@ import {
   Save,
   Loader2,
   CheckCircle2,
-  Image,
+  Image as ImageIcon,
   Phone
 } from "lucide-react";
 
@@ -70,7 +71,12 @@ export default function AdminModelList() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchModels(); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchModels();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const openEdit = (model: Model) => {
     setEditModel(model);
@@ -159,10 +165,12 @@ export default function AdminModelList() {
         <div className="grid grid-cols-1 gap-4">
           {filteredModels.map((model) => (
             <div key={model.id} className="glass-dark border border-white/5 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6 group hover:border-brand-gold/30 transition-all">
-              <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10">
-                <img
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10">
+                <Image
                   src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'}
-                  className="w-full h-full object-cover"
+                  alt={model.name}
+                  fill
+                  className="object-cover"
                 />
               </div>
               <div className="flex-1 space-y-2 text-center md:text-left">
@@ -178,7 +186,7 @@ export default function AdminModelList() {
                   </div>
                   {model.images && model.images.length > 1 && (
                     <span className="text-[8px] text-white/30 font-black uppercase tracking-widest flex items-center gap-1">
-                      <Image size={10} /> {model.images.length} fotos
+                      <ImageIcon size={10} /> {model.images.length} fotos
                     </span>
                   )}
                 </div>
@@ -296,8 +304,13 @@ export default function AdminModelList() {
                   <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
                     {editImages.map((img, i) => (
                       <div key={i} className="relative aspect-square rounded-2xl overflow-hidden group border border-white/10 hover:border-brand-gold/40 transition-all">
-                        <img src={img} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-brand-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Image 
+                          src={img} 
+                          alt={`Imagen de perfil ${i + 1}`} 
+                          fill 
+                          className="object-cover" 
+                        />
+                        <div className="absolute inset-0 bg-brand-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
                           <button onClick={() => removeImage(i)}
                             className="w-10 h-10 rounded-full bg-brand-pink flex items-center justify-center text-white shadow-lg hover:scale-110 active:scale-95 transition-all">
                             <X size={16} />
