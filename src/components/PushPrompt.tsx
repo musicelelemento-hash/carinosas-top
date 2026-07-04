@@ -25,8 +25,8 @@ export default function PushPrompt() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md animate-in slide-in-from-bottom-10 duration-700">
-      <div className="glass-premium rounded-[2.5rem] border border-brand-gold/30 p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+    <div className="fixed bottom-8 left-4 right-4 md:left-auto md:right-8 md:w-96 z-[100] animate-in slide-in-from-bottom-10 duration-700">
+      <div className="bg-brand-black/95 backdrop-blur-2xl rounded-[2.5rem] border border-brand-gold/30 p-8 shadow-[0_30px_70px_rgba(0,0,0,0.8)] relative overflow-hidden group">
         {/* Decorative background elements */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-gold/10 blur-[80px] rounded-full group-hover:bg-brand-gold/20 transition-colors" />
         
