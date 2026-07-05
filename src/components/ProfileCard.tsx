@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import { MessageCircle, Star, ShieldCheck, Zap, Heart, Share2, Crown, Diamond, Fingerprint } from "lucide-react";
+import { MessageCircle, Star, ShieldCheck, Zap, Heart, Crown, Diamond, Fingerprint, Eye } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
 
@@ -23,16 +23,9 @@ interface ProfileCardProps {
   is_verified_4k?: boolean;
 }
 
-export default function ProfileCard({ 
-  id,
-  name, 
-  age, 
-  location, 
-  imageUrl,
-  images,
-  isBoosted = false,
-  whatsapp,
-  plan_type,
+export default function ProfileCard({
+  id, name, age, location, imageUrl, images,
+  isBoosted = false, whatsapp, plan_type,
   personal_note = "Un encuentro inolvidable te espera...",
   is_verified_4k = false
 }: ProfileCardProps) {
@@ -43,59 +36,48 @@ export default function ProfileCard({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  
-  const isFree = useMemo(() => 
+  const [isLiked, setIsLiked] = useState(false);
+
+  const isFree = useMemo(() =>
     !plan_type || plan_type === 'Gratis' || plan_type === 'Anuncio Gratis' || plan_type === 'Básico'
   , [plan_type]);
 
   const isAnimating = isHovered || isVisible;
 
-  // Viewport Observer to trigger auto-play on scroll
+  const tierConfig = useMemo(() => {
+    if (plan_type === 'VIP Elite') return { label: 'VIP ELITE', color: '#C9A84C', bg: 'rgba(201,168,76,0.1)', border: 'rgba(201,168,76,0.3)', Icon: Crown };
+    if (plan_type === 'Diamante') return { label: 'DIAMANTE', color: '#C9A84C', bg: 'rgba(201,168,76,0.08)', border: 'rgba(201,168,76,0.25)', Icon: Diamond };
+    if (plan_type === 'Oro') return { label: 'ORO', color: '#E8005A', bg: 'rgba(232,0,90,0.08)', border: 'rgba(232,0,90,0.2)', Icon: Diamond };
+    if (plan_type === 'Premium') return { label: 'PREMIUM', color: 'rgba(255,255,255,0.7)', bg: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.1)', Icon: ShieldCheck };
+    return null;
+  }, [plan_type]);
+
   useEffect(() => {
-    if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
-
+    if (!(("IntersectionObserver" in window))) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      {
-        rootMargin: "-25% 0px -25% 0px", // Trigger when card occupies center of screen
-        threshold: 0.1
-      }
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { rootMargin: "-20% 0px -20% 0px", threshold: 0.1 }
     );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
+    if (cardRef.current) observer.observe(cardRef.current);
+    return () => observer.disconnect();
   }, []);
 
-  // Build final image array
   const allImages = useMemo(() => {
     if (images && images.length > 0) return images;
     if (imageUrl) return [imageUrl];
     return ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'];
   }, [images, imageUrl]);
 
-  // Instagram-style Story Progress Logic
   useEffect(() => {
     if (!isAnimating || allImages.length <= 1) {
-      const timer = setTimeout(() => {
-        setProgress(0);
-      }, 0);
-      return () => clearTimeout(timer);
+      setProgress(0);
+      return;
     }
-
-    const duration = 2400; // Slightly slower for elegance
+    const duration = 2800;
     const startTime = Date.now();
-    
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const newProgress = (elapsed / duration) * 100;
-      
       if (newProgress >= 100) {
         setCurrentImageIndex(prev => (prev + 1) % allImages.length);
         setProgress(0);
@@ -103,18 +85,13 @@ export default function ProfileCard({
         setProgress(newProgress);
       }
     }, 30);
-
     return () => clearInterval(interval);
   }, [isAnimating, currentImageIndex, allImages.length]);
 
-  // Reset when animation ends
   useEffect(() => {
     if (!isAnimating) {
-      const timer = setTimeout(() => {
-        setCurrentImageIndex(0);
-        setProgress(0);
-      }, 0);
-      return () => clearTimeout(timer);
+      setCurrentImageIndex(0);
+      setProgress(0);
     }
   }, [isAnimating]);
 
@@ -126,7 +103,7 @@ export default function ProfileCard({
       setTimeout(() => {
         window.open(`https://wa.me/${fullPhone}?text=Hola%20${encodeURIComponent(name)}%2C%20vi%20tu%20perfil%20en%20Cari%C3%B1osas.top%20%F0%9F%94%A5`, '_blank');
         setIsTransitioning(false);
-      }, 1200);
+      }, 1100);
     } else {
       setTimeout(() => setIsTransitioning(false), 1500);
     }
@@ -134,224 +111,229 @@ export default function ProfileCard({
 
   return (
     <div className="relative group">
-      {/* Premium Border Glow Layer */}
+      {/* Glow layer for boosted */}
       {isBoosted && (
-        <div className="absolute -inset-[1px] bg-gradient-to-r from-brand-gold/40 via-white/20 to-brand-gold/40 bg-[length:200%_auto] animate-gradient-slow rounded-[2.5rem] opacity-20 blur-sm group-hover:opacity-60 transition-opacity duration-1000" />
+        <div className="absolute -inset-[1px] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+          style={{
+            background: 'linear-gradient(135deg, rgba(201,168,76,0.5), rgba(201,168,76,0.1), rgba(201,168,76,0.5))',
+            filter: 'blur(8px)',
+          }}
+        />
       )}
 
-      <div 
+      <div
         ref={cardRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => router.push(`/profile/${id}`)}
-        className={`relative group cursor-pointer transition-all duration-700 bg-brand-black/40 rounded-[2.5rem] border border-white/5 overflow-hidden ${
-          isHovered || isVisible 
-            ? 'scale-[1.02] -translate-y-2 shadow-[0_20px_50px_rgba(212,175,55,0.12)] border-brand-gold/20' 
-            : ''
-        } ${isBoosted ? 'boost-pulse border-brand-gold/40' : ''}`}
+        className={`relative group cursor-pointer rounded-[2rem] overflow-hidden border card-premium ${
+          isBoosted ? 'boost-pulse border-brand-gold/20' : 'border-white/4'
+        } ${isHovered ? 'border-brand-gold/30' : ''}`}
+        style={{
+          background: 'rgba(14,14,18,0.95)',
+          boxShadow: isHovered
+            ? '0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(201,168,76,0.06)'
+            : '0 8px 30px rgba(0,0,0,0.4)',
+          transform: isHovered ? 'translateY(-8px) scale(1.012)' : 'translateY(0) scale(1)',
+          transition: 'transform 0.6s cubic-bezier(0.23,1,0.32,1), box-shadow 0.6s ease, border-color 0.4s ease',
+        }}
       >
-        {/* Instagram Story-style Bars */}
-        <div className="absolute top-4 left-6 right-6 z-40 flex gap-2 h-[1px]">
+        {/* ── Story Progress Bars ── */}
+        <div className="absolute top-3.5 left-5 right-5 z-40 flex gap-1.5">
           {allImages.map((_, i) => (
-            <div key={i} className="flex-1 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-brand-gold transition-all duration-300 ease-linear"
-                style={{ 
-                  width: i < currentImageIndex ? '100%' : (i === currentImageIndex ? `${progress}%` : '0%') 
+            <div key={i} className="flex-1 h-[2px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div
+                className="h-full rounded-full transition-none"
+                style={{
+                  width: i < currentImageIndex ? '100%' : i === currentImageIndex ? `${progress}%` : '0%',
+                  background: 'linear-gradient(90deg, #C9A84C, #F5E0A0)',
+                  boxShadow: '0 0 8px rgba(201,168,76,0.5)',
                 }}
               />
             </div>
           ))}
         </div>
 
-        {/* Human Identity Badge - Non Invasive */}
+        {/* ── Action Buttons ── */}
+        <div className="absolute top-4 right-5 z-40 flex flex-col gap-2 transition-all duration-500 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100">
+          <button
+            onClick={e => { e.stopPropagation(); setIsLiked(!isLiked); }}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            style={{ background: isLiked ? 'rgba(232,0,90,0.2)' : 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: `1px solid ${isLiked ? 'rgba(232,0,90,0.4)' : 'rgba(255,255,255,0.08)'}` }}
+          >
+            <Heart size={14} className={`transition-colors ${isLiked ? 'text-brand-pink fill-brand-pink' : 'text-white/40'}`} />
+          </button>
+          <button
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <Eye size={14} className="text-white/40" />
+          </button>
+        </div>
+
+        {/* ── Tier Badge ── */}
+        {tierConfig && (
+          <div className="absolute top-10 left-5 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            style={{ background: tierConfig.bg, border: `1px solid ${tierConfig.border}`, backdropFilter: 'blur(10px)' }}
+          >
+            <tierConfig.Icon size={9} style={{ color: tierConfig.color, fill: tierConfig.color }} />
+            <span className="text-[7px] font-black uppercase tracking-[0.35em]" style={{ color: tierConfig.color }}>{tierConfig.label}</span>
+          </div>
+        )}
+
+        {/* ── Verified Badge ── */}
         {!isFree && (
-          <div className={`absolute top-10 left-8 z-30 flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/5 group/human transition-all duration-500 ${is_verified_4k ? 'bg-brand-gold/20 backdrop-blur-3xl border-brand-gold/40 shadow-gold group-hover:scale-110' : 'glass-premium human-pulse'}`}>
+          <div className="absolute z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            style={{
+              top: tierConfig ? '5.5rem' : '2.75rem',
+              left: '1.25rem',
+              background: is_verified_4k ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(10px)',
+              border: is_verified_4k ? '1px solid rgba(201,168,76,0.35)' : '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
             {is_verified_4k ? (
               <>
-                <Zap size={12} className="text-brand-gold fill-brand-gold animate-bounce" />
-                <span className="text-[8px] text-brand-gold font-black uppercase tracking-[0.2em]">ULTRA VERIFIED 4K</span>
+                <Zap size={9} className="text-brand-gold fill-brand-gold" />
+                <span className="text-[7px] font-black uppercase tracking-[0.3em] text-brand-gold">4K VERIFIED</span>
               </>
             ) : (
               <>
-                <Fingerprint size={12} className="text-brand-gold group-hover/human:rotate-12 transition-transform" />
-                <span className="text-[8px] text-white/80 font-black uppercase tracking-[0.2em]">Verified Human Identity</span>
+                <Fingerprint size={9} className="text-white/50" />
+                <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/40">Verified</span>
               </>
             )}
           </div>
         )}
 
-        {/* Tier Indicators */}
-        <div className="absolute top-24 left-8 z-30 flex flex-col gap-2">
-          {plan_type === 'VIP Elite' || plan_type === 'Diamante' ? (
-            <div className="bg-brand-gold/10 backdrop-blur-3xl border border-brand-gold/30 p-2.5 rounded-2xl shadow-gold">
-               <Crown size={14} className="text-brand-gold fill-brand-gold" />
-            </div>
-          ) : plan_type === 'Oro' ? (
-            <div className="bg-brand-pink/10 backdrop-blur-3xl border border-brand-pink/30 p-2.5 rounded-2xl">
-               <Diamond size={14} className="text-brand-pink fill-brand-pink" />
-            </div>
-          ) : plan_type === 'Plata' ? (
-            <div className="bg-white/5 backdrop-blur-3xl border border-white/20 p-2.5 rounded-2xl">
-               <ShieldCheck size={14} className="text-white/60" />
-            </div>
-          ) : null}
+        {/* ── Touch Zones ── */}
+        <div className="absolute inset-0 z-30 flex">
+          <div className="w-[35%] h-full cursor-w-resize" onClick={e => { e.stopPropagation(); setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length); setProgress(0); }} />
+          <div className="flex-1" />
+          <div className="w-[35%] h-full cursor-e-resize" onClick={e => { e.stopPropagation(); setCurrentImageIndex(prev => (prev + 1) % allImages.length); setProgress(0); }} />
         </div>
 
-        {/* Action Buttons (Visible on Hover) */}
-        <div className="absolute top-10 right-8 z-30 flex flex-col gap-4 transition-all duration-700 group-hover:translate-x-0 translate-x-12 opacity-0 group-hover:opacity-100">
-          <button className="p-3 bg-white/5 hover:bg-brand-pink/20 backdrop-blur-xl rounded-2xl text-white/40 hover:text-brand-pink hover:scale-110 transition-all border border-white/10">
-            <Heart size={16} />
-          </button>
-          <button className="p-3 bg-white/5 hover:bg-brand-gold/20 backdrop-blur-xl rounded-2xl text-white/40 hover:text-brand-gold hover:scale-110 transition-all border border-white/10">
-            <Share2 size={16} />
-          </button>
-        </div>
-
-        {/* Main Image Container */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-brand-black select-none">
-          {/* Interactive Touch Zones for manual slider skip */}
-          <div 
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
-              setProgress(0);
-            }}
-            className="absolute left-0 top-0 bottom-0 w-[30%] z-40 cursor-w-resize touch-manipulation"
-            title="Foto Anterior"
-          />
-          <div 
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrentImageIndex(prev => (prev + 1) % allImages.length);
-              setProgress(0);
-            }}
-            className="absolute right-0 top-0 bottom-0 w-[30%] z-40 cursor-e-resize touch-manipulation"
-            title="Siguiente Foto"
-          />
-
+        {/* ── IMAGE ── */}
+        <div className="relative aspect-[3/4] overflow-hidden bg-brand-black">
           {allImages.map((img, i) => {
             if (i > 0 && !isAnimating) return null;
             return (
               <Image
                 key={i}
                 src={img}
-                alt={`${name} photo`}
+                alt={`${name}`}
                 fill
-                className={`object-cover transition-all duration-1000 absolute inset-0 will-change-transform will-change-opacity ${
-                  i === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
-                } ${isAnimating ? 'brightness-[0.35] scale-105' : 'brightness-90'}`}
+                className="object-cover absolute inset-0 transition-all duration-1000"
+                style={{
+                  opacity: i === currentImageIndex ? 1 : 0,
+                  transform: i === currentImageIndex ? (isAnimating ? 'scale(1.08)' : 'scale(1)') : 'scale(1.12)',
+                  filter: isAnimating ? 'brightness(0.3) saturate(0.8)' : 'brightness(0.85)',
+                  transition: 'opacity 0.8s ease, transform 1.2s cubic-bezier(0.23,1,0.32,1), filter 0.8s ease',
+                }}
                 priority={i === 0}
               />
             );
           })}
-          
-          {/* Magazine Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/20 to-transparent opacity-90 pointer-events-none" />
-          
-          {/* Static Content (Bottom) */}
-          <div className={`absolute inset-x-0 bottom-0 p-10 space-y-4 transition-all duration-700 ${isHovered ? 'translate-y-8 opacity-0' : 'translate-y-0 opacity-100'}`}>
-            <div className="space-y-1">
-              <h3 className="text-4xl font-serif text-white tracking-tighter leading-none">{name}</h3>
-              <div className="flex items-center gap-3">
-                  <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${isFree ? 'text-white/30' : 'text-brand-gold'}`}>
-                    {isFree ? 'Anuncio Estándar' : (plan_type || 'Elite Member')}
-                  </span>
-                 <div className="w-1 h-1 rounded-full bg-white/20" />
-                 <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.4em]">{location}</span>
-              </div>
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 magazine-overlay pointer-events-none" />
+
+          {/* ── STATIC INFO (bottom) ── */}
+          <div className={`absolute inset-x-0 bottom-0 p-7 space-y-2 transition-all duration-500 ${isHovered ? 'translate-y-6 opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <h3 className="font-serif text-4xl text-white leading-none tracking-tight" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}>
+              {name}
+            </h3>
+            <div className="flex items-center gap-3">
+              <span className={`text-[8px] font-black uppercase tracking-[0.45em] ${isFree ? 'text-white/25' : 'text-brand-gold/80'}`}>
+                {isFree ? 'Estándar' : plan_type}
+              </span>
+              <span className="w-[3px] h-[3px] rounded-full bg-white/15" />
+              <span className="text-[8px] font-black uppercase tracking-[0.35em] text-white/30">{location}</span>
             </div>
-            
-            <div className="font-signature text-2xl text-brand-gold/60 opacity-80 -rotate-2">
-               {personal_note}
-            </div>
+            <p className="font-signature text-xl text-brand-gold/50 -rotate-1 leading-tight">
+              {personal_note}
+            </p>
           </div>
 
-          {/* Hover Detail View (Magazine Style) */}
-          <div className={`absolute inset-0 p-10 flex flex-col justify-center items-start text-left space-y-10 transition-all duration-1000 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'} pointer-events-none`}>
-            <div className="space-y-4">
-               <span className={`text-[11px] font-black uppercase tracking-[0.5em] leading-none ${isFree ? 'text-white/20' : 'text-brand-gold'}`}>
+          {/* ── HOVER INFO ── */}
+          <div className={`absolute inset-0 p-8 flex flex-col justify-center transition-all duration-700 ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            style={{ transform: isHovered ? 'translateX(0)' : 'translateX(-20px)' }}
+          >
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <span className={`text-[9px] font-black uppercase tracking-[0.5em] ${isFree ? 'text-white/15' : 'text-brand-gold/70'}`}>
                   {isFree ? 'Miembro Base' : 'Curated Selection'}
-               </span>
-               <h3 className="text-7xl font-serif text-white italic leading-none">{name}</h3>
-               <div className="flex items-center gap-6 pt-2">
-                  <div className="flex flex-col">
-                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">Edad</span>
-                     <span className="text-xl font-serif text-white">{age}</span>
-                  </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="flex flex-col">
-                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">Estatura</span>
-                     <span className="text-xl font-serif text-white">1.72</span>
-                  </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="flex flex-col">
-                     <span className="text-[9px] text-white/30 uppercase font-black tracking-widest">{isFree ? 'Identity' : 'Verified'}</span>
-                     <ShieldCheck size={18} className={isFree ? 'text-white/10 mt-1' : 'text-brand-gold mt-1'} />
-                  </div>
-               </div>
-            </div>
+                </span>
+                <h3 className="font-serif text-[3.5rem] text-white italic leading-none tracking-tighter">{name}</h3>
+              </div>
 
-            <p className="text-xs text-brand-white/40 leading-relaxed max-w-xs font-medium tracking-wide">
-              {name} destaca por su elegancia natural y su capacidad para crear momentos de absoluta discreción y sofisticación en {location}.
-            </p>
+              <div className="flex items-center gap-5">
+                {[
+                  { label: 'Edad', value: age },
+                  { label: 'Rating', value: '4.9★' },
+                  { label: 'Status', value: 'Online' },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex flex-col gap-0.5">
+                    <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20">{label}</span>
+                    <span className="font-serif text-lg text-white leading-tight">{value}</span>
+                  </div>
+                ))}
+              </div>
 
-            <div className="flex gap-4 w-full">
-               <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col gap-1 backdrop-blur-xl">
-                  <span className="text-[8px] text-white/20 uppercase font-black tracking-widest">Reviews</span>
-                  <div className="flex items-center gap-2">
-                    <Star size={14} className="text-brand-gold fill-brand-gold" />
-                    <span className="text-lg font-serif text-white">4.9</span>
+              <p className="text-[10px] text-white/30 leading-relaxed max-w-[220px] tracking-wide">
+                {name} destaca por elegancia natural y discreción total en {location}.
+              </p>
+
+              {/* Mini stats */}
+              <div className="flex gap-3">
+                <div className="flex-1 rounded-xl p-3 flex flex-col gap-1"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <span className="text-[7px] text-white/20 uppercase font-black tracking-widest">Reviews</span>
+                  <div className="flex items-center gap-1.5">
+                    <Star size={11} className="text-brand-gold fill-brand-gold" />
+                    <span className="font-serif text-base text-white">4.9</span>
                   </div>
-               </div>
-               <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col gap-1 backdrop-blur-xl">
-                  <span className="text-[8px] text-white/20 uppercase font-black tracking-widest">Status</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs font-black uppercase text-white/80 tracking-widest">Online</span>
-                  </div>
-               </div>
+                </div>
+                <div className="flex-1 rounded-xl p-3 flex flex-col gap-1"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <span className="text-[7px] text-white/20 uppercase font-black tracking-widest">Response</span>
+                  <span className="font-serif text-base text-brand-gold italic">Sub 5min</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Premium Action Bar */}
-        <div className={`p-6 flex items-center justify-between transition-all duration-700 ${isHovered ? 'bg-brand-gold/10' : 'bg-transparent'}`}>
-            <button 
-              onClick={(e) => { e.stopPropagation(); handleContact(); }}
-              className={`px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95 pointer-events-auto ${
-                isFree 
-                  ? 'bg-white/5 border border-white/10 text-white/60 hover:bg-white hover:text-brand-black' 
-                  : 'bg-white hover:bg-brand-gold text-brand-black'
-              }`}
-            >
-              <MessageCircle size={16} fill="currentColor" />
-              {isFree ? 'Contactar WhatsApp' : 'WhatsApp VIP'}
-            </button>
-            
-            <div className="flex flex-col items-end opacity-20 group-hover:opacity-100 transition-opacity duration-700">
-               <span className="text-[8px] text-white font-black uppercase tracking-widest mb-1">Response Time</span>
-               <span className="text-[11px] text-brand-gold font-black tracking-widest italic uppercase">Sub 5min</span>
-            </div>
+        {/* ── ACTION BAR ── */}
+        <div className={`px-5 py-4 flex items-center justify-between transition-all duration-500 ${isHovered ? 'opacity-100' : 'opacity-70'}`}
+          style={{ background: isHovered ? 'rgba(201,168,76,0.06)' : 'transparent', borderTop: '1px solid rgba(255,255,255,0.04)' }}
+        >
+          <button
+            onClick={e => { e.stopPropagation(); handleContact(); }}
+            className="flex items-center gap-3 px-7 py-3.5 rounded-xl font-black text-[8px] uppercase tracking-[0.35em] transition-all duration-400 hover:scale-[1.03] active:scale-95 pointer-events-auto"
+            style={isFree
+              ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }
+              : { background: 'linear-gradient(135deg, #D4B060, #C9A84C, #B8962A)', color: '#060608', boxShadow: '0 4px 20px rgba(201,168,76,0.2)' }
+            }
+          >
+            <MessageCircle size={13} fill="currentColor" />
+            {isFree ? 'WhatsApp' : 'WhatsApp VIP'}
+          </button>
+
+          <div className="flex flex-col items-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            <span className="text-[6px] text-white/20 uppercase font-black tracking-[0.4em]">Response</span>
+            <span className="text-[9px] font-black tracking-widest italic uppercase text-brand-gold/60">Sub 5min</span>
+          </div>
         </div>
       </div>
 
-      <WhatsAppTransition 
-        modelName={name} 
-        isOpen={isTransitioning} 
-        onComplete={() => setIsTransitioning(false)} 
+      <WhatsAppTransition
+        modelName={name}
+        isOpen={isTransitioning}
+        onComplete={() => setIsTransitioning(false)}
       />
-
-      <style jsx global>{`
-        @keyframes gradient-slow {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animate-gradient-slow {
-          animation: gradient-slow 8s infinite linear;
-        }
-      `}</style>
     </div>
   );
 }

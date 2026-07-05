@@ -2,125 +2,181 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
-import { Search, Sparkles, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, Gem } from "lucide-react";
 
 export default function HeroSection() {
   const provinces = getProvinces();
-
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedLocationName, setSelectedLocationName] = useState("Todas las Ciudades");
-
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("todas");
   const [selectedCategoryName, setSelectedCategoryName] = useState("Explorar Todo");
-
+  const [mounted, setMounted] = useState(false);
   const locationRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMounted(true);
     function handleClickOutside(event: MouseEvent) {
-      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
-        setIsLocationOpen(false);
-      }
-      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
-      }
+      if (locationRef.current && !locationRef.current.contains(event.target as Node)) setIsLocationOpen(false);
+      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) setIsCategoryOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Cinematic Background */}
-      <div className="absolute inset-0 bg-brand-black -z-20" />
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-black via-transparent to-brand-black opacity-80 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-transparent to-brand-black opacity-40 z-10" />
-        <video 
-          autoPlay 
-          muted 
-          loop 
-          playsInline
-          className="w-full h-full object-cover opacity-30 grayscale contrast-125"
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 noise-overlay">
+
+      {/* ── CINEMATIC BACKGROUND ── */}
+      <div className="absolute inset-0 -z-30" style={{ background: '#060608' }} />
+
+      {/* Grid lines */}
+      <div className="absolute inset-0 -z-20 grid-lines opacity-100" />
+
+      {/* Video */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 z-10" style={{
+          background: 'linear-gradient(to bottom, #060608 0%, rgba(6,6,8,0.3) 30%, rgba(6,6,8,0.2) 60%, #060608 100%)'
+        }} />
+        <div className="absolute inset-0 z-10" style={{
+          background: 'linear-gradient(to right, rgba(6,6,8,0.8) 0%, transparent 40%, transparent 60%, rgba(6,6,8,0.8) 100%)'
+        }} />
+        <video
+          autoPlay muted loop playsInline
+          className="w-full h-full object-cover"
+          style={{ opacity: 0.18, filter: 'grayscale(60%) contrast(1.2) brightness(0.8)' }}
         >
           <source src="https://assets.mixkit.co/videos/preview/mixkit-luxury-expensive-watch-detail-32431-large.mp4" type="video/mp4" />
         </video>
       </div>
-      
-      {/* Decorative Blobs */}
-      <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-brand-gold/10 blur-[150px] rounded-full animate-blob -z-10" />
-      <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-brand-pink/5 blur-[150px] rounded-full animate-blob animation-delay-2000 -z-10" />
 
-      <div className="max-w-7xl mx-auto px-6 w-full text-center z-20 space-y-12">
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-1000">
-          <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-premium border-brand-gold/20 mb-4 backdrop-blur-3xl">
-            <Sparkles size={16} className="text-brand-gold animate-pulse" />
-            <span className="text-[11px] text-brand-gold font-black uppercase tracking-[0.4em]">
+      {/* ── FLOATING ORBS ── */}
+      <div className="absolute top-[20%] left-[5%] w-[600px] h-[600px] -z-10 pointer-events-none animate-blob"
+        style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)', filter: 'blur(60px)' }}
+      />
+      <div className="absolute bottom-[15%] right-[5%] w-[500px] h-[500px] -z-10 pointer-events-none animate-blob animation-delay-2000"
+        style={{ background: 'radial-gradient(circle, rgba(232,0,90,0.04) 0%, transparent 70%)', filter: 'blur(80px)' }}
+      />
+      <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] -z-10 pointer-events-none animate-orb-float"
+        style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.025) 0%, transparent 60%)', filter: 'blur(40px)' }}
+      />
+
+      {/* ── MAIN CONTENT ── */}
+      <div className={`max-w-7xl mx-auto px-6 w-full text-center z-10 space-y-16 transition-all duration-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+
+        {/* Badge */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-3 px-7 py-2.5 rounded-full glass-gold"
+            style={{ animationDelay: '0ms' }}
+          >
+            <Gem size={11} className="text-brand-gold" />
+            <span className="text-[9px] font-black uppercase tracking-[0.55em] text-brand-gold/80">
               The Gold Standard in Ecuador
             </span>
-          </div>
-
-          <h1 className="text-6xl md:text-9xl font-serif text-white leading-[0.9] tracking-tighter">
-            CARIÑOSAS<span className="text-brand-gold italic">.TOP</span>
-          </h1>
-          
-          <div className="flex flex-col items-center gap-4 max-w-2xl mx-auto">
-             <p className="text-brand-white/40 text-sm md:text-base font-medium tracking-[0.2em] uppercase">
-                The Ultimate Standard in Elite Companionship
-             </p>
-             <div className="h-px w-20 bg-brand-gold/30" />
+            <div className="w-1 h-1 rounded-full bg-brand-gold/40" />
+            <span className="text-[9px] font-black uppercase tracking-[0.55em] text-brand-gold/40">Est. 2024</span>
           </div>
         </div>
 
-        {/* Integrated Intelligent Search (Luxury Dropdown Redesign) */}
-        <div className="max-w-5xl mx-auto mt-20 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
-          <div className="glass-premium p-1.5 rounded-[2.5rem] border-brand-gold/10 shadow-[0_0_80px_rgba(0,0,0,0.5)] group hover:border-brand-gold/30 transition-all duration-700">
-            <div className="flex flex-col md:flex-row items-center gap-2">
-              <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-2 px-8 py-2">
-                
-                {/* Custom Location Dropdown */}
-                <div className="flex flex-col items-start gap-1 relative w-full text-left" ref={locationRef}>
-                  <span className="text-[9px] text-brand-gold/40 uppercase font-black tracking-widest">Localidad</span>
-                  <button 
-                    onClick={() => {
-                      setIsLocationOpen(!isLocationOpen);
-                      setIsCategoryOpen(false);
-                    }}
-                    className="flex items-center justify-between w-full bg-transparent border-none text-white focus:ring-0 cursor-pointer h-10 outline-none font-serif text-xl appearance-none text-left"
+        {/* ── TITLE ── */}
+        <div className="space-y-6">
+          <h1 className="font-serif font-bold leading-[0.88] tracking-[-0.02em] select-none">
+            <span className="block" style={{
+              fontSize: 'clamp(4.5rem, 14vw, 13rem)',
+              background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.75) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              CARIÑOSAS
+            </span>
+            <span className="block" style={{
+              fontSize: 'clamp(4.5rem, 14vw, 13rem)',
+              fontStyle: 'italic',
+              background: 'linear-gradient(135deg, #F5E0A0 0%, #C9A84C 30%, #9A7B35 55%, #C9A84C 75%, #F5E0A0 100%)',
+              backgroundSize: '200% auto',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              animation: 'shimmer-gold 5s linear infinite',
+            }}>
+              .TOP
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <div className="flex flex-col items-center gap-5 max-w-lg mx-auto">
+            <div className="divider-gold w-24" />
+            <p className="text-[11px] text-white/30 uppercase tracking-[0.55em] font-black">
+              The Ultimate Standard in Elite Companionship
+            </p>
+            <div className="divider-gold w-24" />
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex items-center justify-center gap-10 mt-2">
+            {[
+              { value: '500+', label: 'Perfiles Verificados' },
+              { value: '4K', label: 'Ultra HD Media' },
+              { value: '24/7', label: 'Disponibilidad' },
+            ].map(({ value, label }) => (
+              <div key={label} className="flex flex-col items-center gap-1">
+                <span className="font-serif text-2xl font-bold text-brand-gold/90 leading-none">{value}</span>
+                <span className="text-[8px] text-white/20 uppercase tracking-[0.45em] font-black">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── SEARCH BAR ── */}
+        <div className="max-w-4xl mx-auto">
+          {/* Container */}
+          <div className="relative rounded-[2rem] p-[1px]"
+            style={{
+              background: 'linear-gradient(135deg, rgba(201,168,76,0.4), rgba(201,168,76,0.08), rgba(201,168,76,0.3))',
+              boxShadow: '0 0 80px rgba(201,168,76,0.06), 0 40px 80px rgba(0,0,0,0.5)',
+            }}
+          >
+            <div className="rounded-[calc(2rem-1px)] overflow-hidden"
+              style={{ background: 'rgba(14,14,18,0.95)', backdropFilter: 'blur(30px)' }}
+            >
+              <div className="flex flex-col md:flex-row items-stretch">
+
+                {/* Location dropdown */}
+                <div className="flex-1 relative" ref={locationRef}>
+                  <button
+                    onClick={() => { setIsLocationOpen(!isLocationOpen); setIsCategoryOpen(false); }}
+                    className="w-full flex flex-col items-start px-8 py-6 text-left hover:bg-white/2 transition-colors group/loc outline-none"
                   >
-                    <span>{selectedLocationName}</span>
-                    <ChevronDown size={14} className={`text-brand-gold/50 group-hover:text-brand-gold transition-transform duration-300 ${isLocationOpen ? 'rotate-180 text-brand-gold' : ''}`} />
+                    <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/40 mb-1.5">Localidad</span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-serif text-xl text-white/90 leading-none">{selectedLocationName}</span>
+                      <ChevronDown size={13} className={`text-brand-gold/40 group-hover/loc:text-brand-gold transition-all duration-300 ml-3 ${isLocationOpen ? 'rotate-180 text-brand-gold' : ''}`} />
+                    </div>
                   </button>
-                  
+
                   {isLocationOpen && (
-                    <div className="absolute top-full left-0 mt-4 w-full md:w-[480px] bg-brand-black/95 backdrop-blur-3xl border border-brand-gold/20 rounded-[2.5rem] p-6 shadow-[0_30px_70px_rgba(0,0,0,0.9)] z-50 animate-in fade-in slide-in-from-top-4 duration-300 max-h-[350px] overflow-y-auto no-scrollbar scroll-smooth">
-                      <div className="space-y-6">
-                        <button 
-                          onClick={() => {
-                            setSelectedLocation("");
-                            setSelectedLocationName("Todas las Ciudades");
-                            setIsLocationOpen(false);
-                          }}
-                          className={`w-full text-left py-3 px-6 rounded-2xl text-xs uppercase tracking-widest font-black transition-all ${!selectedLocation ? 'bg-brand-gold text-brand-black' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                    <div className="absolute top-full left-0 mt-3 w-full md:w-[480px] rounded-[1.8rem] p-5 z-50 no-scrollbar overflow-y-auto max-h-[340px]"
+                      style={{ background: 'rgba(10,10,14,0.98)', backdropFilter: 'blur(40px)', border: '1px solid rgba(201,168,76,0.15)', boxShadow: '0 40px 80px rgba(0,0,0,0.9)' }}
+                    >
+                      <div className="space-y-5">
+                        <button
+                          onClick={() => { setSelectedLocation(""); setSelectedLocationName("Todas las Ciudades"); setIsLocationOpen(false); }}
+                          className={`w-full text-left py-2.5 px-5 rounded-2xl text-[9px] uppercase tracking-[0.4em] font-black transition-all ${!selectedLocation ? 'bg-brand-gold text-brand-black' : 'text-white/40 hover:text-white hover:bg-white/4'}`}
                         >
                           Todas las Ciudades
                         </button>
-                        
                         {provinces.map(prov => (
-                          <div key={prov} className="space-y-3">
-                            <span className="text-[9px] text-brand-gold font-black uppercase tracking-[0.2em] px-4 block border-l-2 border-brand-gold/30">{prov}</span>
-                            <div className="grid grid-cols-2 gap-2">
+                          <div key={prov} className="space-y-2">
+                            <span className="text-[8px] text-brand-gold/50 font-black uppercase tracking-[0.3em] px-3 block border-l border-brand-gold/20 ml-2">{prov}</span>
+                            <div className="grid grid-cols-2 gap-1.5">
                               {getCitiesByProvince(prov).map(city => (
                                 <button
                                   key={city.id}
-                                  onClick={() => {
-                                    setSelectedLocation(city.id);
-                                    setSelectedLocationName(city.name);
-                                    setIsLocationOpen(false);
-                                  }}
-                                  className={`text-left py-3 px-5 rounded-2xl text-xs font-bold transition-all ${selectedLocation === city.id ? 'bg-brand-gold text-brand-black font-black shadow-lg shadow-brand-gold/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                                  onClick={() => { setSelectedLocation(city.id); setSelectedLocationName(city.name); setIsLocationOpen(false); }}
+                                  className={`text-left py-2.5 px-4 rounded-xl text-[9px] font-bold transition-all ${selectedLocation === city.id ? 'bg-brand-gold text-brand-black font-black' : 'text-white/40 hover:text-white hover:bg-white/4'}`}
                                 >
                                   {city.name}
                                 </button>
@@ -132,42 +188,45 @@ export default function HeroSection() {
                     </div>
                   )}
                 </div>
-                
-                <div className="hidden md:block w-px h-12 bg-white/5 self-center" />
-                
-                {/* Custom Category Dropdown */}
-                <div className="flex flex-col items-start gap-1 relative w-full text-left" ref={categoryRef}>
-                  <span className="text-[9px] text-brand-gold/40 uppercase font-black tracking-widest">Categoría</span>
-                  <button 
-                    onClick={() => {
-                      setIsCategoryOpen(!isCategoryOpen);
-                      setIsLocationOpen(false);
-                    }}
-                    className="flex items-center justify-between w-full bg-transparent border-none text-white focus:ring-0 cursor-pointer h-10 outline-none font-serif text-xl appearance-none text-left"
+
+                {/* Divider */}
+                <div className="hidden md:block w-[1px] my-4" style={{ background: 'rgba(201,168,76,0.08)' }} />
+
+                {/* Category dropdown */}
+                <div className="flex-1 relative" ref={categoryRef}>
+                  <button
+                    onClick={() => { setIsCategoryOpen(!isCategoryOpen); setIsLocationOpen(false); }}
+                    className="w-full flex flex-col items-start px-8 py-6 text-left hover:bg-white/2 transition-colors group/cat outline-none"
                   >
-                    <span>{selectedCategoryName}</span>
-                    <ChevronDown size={14} className={`text-brand-gold/50 group-hover:text-brand-gold transition-transform duration-300 ${isCategoryOpen ? 'rotate-180 text-brand-gold' : ''}`} />
+                    <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/40 mb-1.5">Categoría</span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-serif text-xl text-white/90 leading-none">{selectedCategoryName}</span>
+                      <ChevronDown size={13} className={`text-brand-gold/40 group-hover/cat:text-brand-gold transition-all duration-300 ml-3 ${isCategoryOpen ? 'rotate-180 text-brand-gold' : ''}`} />
+                    </div>
                   </button>
-                  
+
                   {isCategoryOpen && (
-                    <div className="absolute top-full left-0 mt-4 w-full bg-brand-black/95 backdrop-blur-3xl border border-brand-gold/20 rounded-[2.5rem] p-4 shadow-[0_30px_70px_rgba(0,0,0,0.9)] z-50 animate-in fade-in slide-in-from-top-4 duration-300">
-                      <div className="flex flex-col gap-2">
+                    <div className="absolute top-full left-0 mt-3 w-full rounded-[1.8rem] p-4 z-50"
+                      style={{ background: 'rgba(10,10,14,0.98)', backdropFilter: 'blur(40px)', border: '1px solid rgba(201,168,76,0.15)', boxShadow: '0 40px 80px rgba(0,0,0,0.9)' }}
+                    >
+                      <div className="flex flex-col gap-1.5">
                         {[
-                          { id: 'todas', name: 'Explorar Todo' },
-                          { id: 'mujeres', name: 'Modelos Elite' },
-                          { id: 'trans', name: 'Modelos Trans' },
-                          { id: 'clubes', name: 'Lifestyle Clubs' }
+                          { id: 'todas', name: 'Explorar Todo', sub: 'Todos los perfiles' },
+                          { id: 'mujeres', name: 'Modelos Elite', sub: 'Selección premium' },
+                          { id: 'trans', name: 'Modelos Trans', sub: 'Identidades diversas' },
+                          { id: 'clubes', name: 'Lifestyle Clubs', sub: 'Experiencias grupales' },
                         ].map(cat => (
                           <button
                             key={cat.id}
-                            onClick={() => {
-                              setSelectedCategory(cat.id);
-                              setSelectedCategoryName(cat.name);
-                              setIsCategoryOpen(false);
-                            }}
-                            className={`w-full text-left py-3 px-6 rounded-2xl text-xs uppercase tracking-widest font-black transition-all ${selectedCategory === cat.id ? 'bg-brand-gold text-brand-black font-black' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                            onClick={() => { setSelectedCategory(cat.id); setSelectedCategoryName(cat.name); setIsCategoryOpen(false); }}
+                            className={`w-full text-left py-3 px-5 rounded-xl transition-all flex items-center justify-between group/opt ${selectedCategory === cat.id ? 'bg-brand-gold' : 'hover:bg-white/4'}`}
                           >
-                            {cat.name}
+                            <span className={`text-[9px] font-black uppercase tracking-[0.35em] ${selectedCategory === cat.id ? 'text-brand-black' : 'text-white/50 group-hover/opt:text-white'}`}>
+                              {cat.name}
+                            </span>
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${selectedCategory === cat.id ? 'text-brand-black/50' : 'text-white/20'}`}>
+                              {cat.sub}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -175,21 +234,36 @@ export default function HeroSection() {
                   )}
                 </div>
 
+                {/* Search button */}
+                <div className="p-3 flex items-stretch">
+                  <button className="btn-gold flex items-center gap-3 px-10 py-4 rounded-[1.5rem] text-[9px] uppercase tracking-[0.35em] font-black w-full md:w-auto justify-center">
+                    <Search size={15} strokeWidth={2.5} />
+                    <span>Buscar</span>
+                  </button>
+                </div>
               </div>
-              
-              <button className="w-full md:w-auto bg-brand-gold hover:bg-white text-brand-black px-16 py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all active:scale-95 group/btn shadow-[0_10px_40px_rgba(212,175,55,0.2)] hover:shadow-[0_20px_60px_rgba(212,175,55,0.4)]">
-                <Search size={20} className="group-hover/btn:scale-110 transition-transform" />
-                <span>Iniciar Búsqueda</span>
-              </button>
             </div>
           </div>
-          
-          <div className="flex flex-wrap justify-center gap-6 mt-12 overflow-hidden">
-            {['VERCACE', 'ELITE QUITO', 'DIAMOND GUAYAQUIL', 'VIP MANTA'].map((tag, i) => (
-              <button key={tag} className="group flex items-center gap-3 animate-in fade-in slide-in-from-right-12 duration-1000" style={{ animationDelay: `${700 + (i * 100)}ms` }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-gold/30 group-hover:bg-brand-gold group-hover:scale-150 transition-all" />
-                <span className="text-[10px] text-white/20 group-hover:text-brand-gold uppercase tracking-[0.4em] font-black transition-colors">
-                  {tag}
+
+          {/* Quick filters */}
+          <div className="flex flex-wrap justify-center gap-5 mt-10">
+            {[
+              { label: 'VERCACE', city: 'Quito Norte' },
+              { label: 'ELITE QUITO', city: 'González Suárez' },
+              { label: 'DIAMOND GYE', city: 'Samborondón' },
+              { label: 'VIP MANTA', city: 'Manta Centro' },
+            ].map(({ label, city }, i) => (
+              <button
+                key={label}
+                className="group flex items-center gap-2.5 transition-all duration-500"
+                style={{ animationDelay: `${600 + i * 80}ms`, opacity: 0, animation: `fadeInUp 0.6s ease forwards ${600 + i * 80}ms` }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full border border-brand-gold/20 group-hover:bg-brand-gold group-hover:border-brand-gold group-hover:scale-125 transition-all duration-300" />
+                <span className="text-[9px] text-white/15 group-hover:text-brand-gold/70 uppercase tracking-[0.5em] font-black transition-colors duration-300">
+                  {label}
+                </span>
+                <span className="text-[8px] text-white/8 group-hover:text-white/20 uppercase tracking-[0.3em] font-black transition-colors hidden sm:block">
+                  · {city}
                 </span>
               </button>
             ))}
@@ -197,33 +271,20 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Humanity Indicator - Subtle Breath */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-4 opacity-40 hover:opacity-100 transition-opacity duration-700 cursor-pointer group">
-         <span className="text-[9px] text-white font-black uppercase tracking-[0.6em] font-serif italic">Scroll to Discover</span>
-         <div className="w-px h-16 bg-gradient-to-b from-brand-gold to-transparent relative overflow-hidden">
-            <div className="absolute inset-0 bg-white/20 -translate-y-full group-hover:translate-y-full transition-transform duration-1000 ease-in-out" />
-         </div>
+      {/* ── SCROLL INDICATOR ── */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3 opacity-30 hover:opacity-70 transition-opacity duration-700 cursor-pointer group">
+        <span className="text-[8px] font-serif italic text-white uppercase tracking-[0.7em]">Scroll to Discover</span>
+        <div className="relative w-[1px] h-14 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-gold to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-full bg-white/30 -translate-y-full group-hover:translate-y-[200%] transition-transform duration-1200 ease-in-out" />
+        </div>
+        <div className="w-1 h-1 rounded-full bg-brand-gold/50 animate-bounce" />
       </div>
 
       <style jsx global>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(60px, -100px) scale(1.2); }
-          66% { transform: translate(-40px, 40px) scale(0.8); }
-        }
-        .animate-blob {
-          animation: blob 15s infinite alternate ease-in-out;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
+        .hover\\:bg-white\\/2:hover { background: rgba(255,255,255,0.02); }
+        .hover\\:bg-white\\/4:hover { background: rgba(255,255,255,0.04); }
+        .text-white\\/8 { color: rgba(255,255,255,0.08); }
       `}</style>
     </section>
   );

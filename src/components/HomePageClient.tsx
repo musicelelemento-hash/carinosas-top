@@ -78,20 +78,34 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
       <VIPLounge />
 
-      <section id="collection" className="max-w-7xl mx-auto px-4 py-20">
-        <div className="flex items-center gap-6 mb-24 px-4 overflow-hidden">
-          <div className="h-[1px] bg-brand-gold/20 flex-1 translate-x-12" />
-          <div className="flex flex-col items-center gap-2 relative">
-            <h2 className="text-4xl md:text-5xl font-serif text-brand-gold uppercase tracking-[0.5em] text-center italic">The Collection</h2>
-            <span className="text-[10px] text-brand-white/30 uppercase tracking-[0.8em] font-black">Curated Human Identity</span>
-            <div className="absolute -top-8 text-brand-gold/10 font-signature text-[100px] pointer-events-none select-none -z-10">
-               Elite
-            </div>
+      <section id="collection" className="max-w-7xl mx-auto px-6 py-28">
+        {/* Section header */}
+        <div className="flex flex-col items-center gap-6 mb-28 relative">
+          {/* Background signature */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+            <span className="font-signature text-[180px] leading-none" style={{ color: 'rgba(201,168,76,0.03)' }}>Collection</span>
           </div>
-          <div className="h-[1px] bg-brand-gold/20 flex-1 -translate-x-12" />
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-gold z-10">
+            <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/60">Curated Human Identity</span>
+          </div>
+
+          {/* Title */}
+          <h2 className="font-serif font-bold text-5xl md:text-6xl text-center italic leading-none tracking-tight z-10" style={{
+            background: 'linear-gradient(135deg, #F5E0A0 0%, #C9A84C 35%, #9A7B35 65%, #C9A84C 100%)',
+            backgroundSize: '200% auto',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'shimmer-gold 6s linear infinite',
+          }}>The Collection</h2>
+
+          {/* Divider */}
+          <div className="divider-gold w-40 z-10" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
           {displayModels.map((model) => (
             <ProfileCard key={model.id} {...model} />
           ))}
