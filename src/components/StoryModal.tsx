@@ -68,7 +68,7 @@ export default function StoryModal({ isOpen, onClose, imageUrl, modelName }: Sto
         {/* Footer Actions */}
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between gap-6">
            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-full px-6 py-3 border border-white/20 text-white/60 text-sm">
-             Responder a {modelName}...
+             Responderle a {modelName}...
            </div>
            <div className="flex items-center gap-6 text-white/80">
               <Heart size={24} className="hover:text-brand-pink transition-colors cursor-pointer" />

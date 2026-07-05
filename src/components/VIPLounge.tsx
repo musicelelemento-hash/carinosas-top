@@ -40,13 +40,13 @@ export default function VIPLounge() {
             {/* Badge */}
             <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full glass-gold">
               <Crown size={13} className="text-brand-gold fill-brand-gold" style={{ animation: 'humanPulse 3s ease-in-out infinite' }} />
-              <span className="text-[9px] font-black uppercase tracking-[0.5em] text-brand-gold/80">Members Only Experience</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.5em] text-brand-gold/80">Solo para Miembros</span>
             </div>
 
             {/* Title */}
             <div className="space-y-2">
               <h2 className="font-serif font-bold leading-[1.05] tracking-tight">
-                <span className="block text-white/80" style={{ fontSize: 'clamp(2.5rem, 6vw, 5.5rem)' }}>Welcome to the</span>
+                <span className="block text-white/80" style={{ fontSize: 'clamp(2.5rem, 6vw, 5.5rem)' }}>Bienvenido al</span>
                 <span className="block italic" style={{
                   fontSize: 'clamp(2.5rem, 6vw, 5.5rem)',
                   background: 'linear-gradient(135deg, #F5E0A0 0%, #C9A84C 35%, #9A7B35 65%, #C9A84C 100%)',
@@ -55,7 +55,7 @@ export default function VIPLounge() {
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                   animation: 'shimmer-gold 5s linear infinite',
-                }}>VIP Alpha Lounge</span>
+                }}>Salón VIP Alpha</span>
               </h2>
             </div>
 
@@ -67,10 +67,10 @@ export default function VIPLounge() {
             {/* Feature Grid */}
             <div className="grid grid-cols-2 gap-5">
               {[
-                { icon: Shield, title: 'Full Discretion', desc: 'Zero digital footprint guarantee' },
-                { icon: Gem, title: 'Elite Alpha', desc: 'Curated by senior talent team' },
-                { icon: Lock, title: 'Encrypted', desc: 'Military-grade privacy protocol' },
-                { icon: Star, title: 'Verified 4K', desc: 'Ultra-HD media authentication' },
+                { icon: Shield, title: 'Discreción Total', desc: 'Cero rastro digital garantizado' },
+                { icon: Gem, title: 'Élite Alpha', desc: 'Seleccionado por equipo experto' },
+                { icon: Lock, title: 'Encriptado', desc: 'Protocolo de privacidad máximo' },
+                { icon: Star, title: 'Verificado 4K', desc: 'Autenticación de fotos Ultra HD' },
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="group p-4 rounded-2xl transition-all duration-500 hover:scale-[1.02] cursor-default"
                   style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
@@ -94,7 +94,7 @@ export default function VIPLounge() {
               }}
             >
               <span className="relative z-10 flex items-center gap-4">
-                Apply for Membership
+                Solicitar Membresía
                 <ArrowRight size={15} className="group-hover:translate-x-2 transition-transform duration-300" />
               </span>
               <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-400" />
@@ -135,7 +135,7 @@ export default function VIPLounge() {
                 }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-serif text-xl text-white italic">The Signature Selection</h4>
+                  <h4 className="font-serif text-xl text-white italic">La Selección Exclusiva</h4>
                   <Star size={14} className="text-brand-gold fill-brand-gold" />
                 </div>
                 <p className="text-[8px] text-white/30 uppercase font-black tracking-[0.3em] leading-relaxed">

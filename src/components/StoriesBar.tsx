@@ -35,9 +35,9 @@ export default function StoriesBar() {
               style={{ border: '1.5px dashed rgba(232,0,90,0.35)', background: 'rgba(232,0,90,0.06)' }}
             >
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand-pink shadow-[0_0_8px_rgba(232,0,90,0.8)] live-dot" />
-              <span className="text-[7px] text-brand-pink font-black uppercase text-center leading-tight tracking-wider">LIVE<br/>NOW</span>
+              <span className="text-[7px] text-brand-pink font-black uppercase text-center leading-tight tracking-wider">EN<br/>VIVO</span>
             </div>
-            <span className="text-[7px] text-white/20 font-black uppercase tracking-[0.5em]">Stories</span>
+            <span className="text-[7px] text-white/20 font-black uppercase tracking-[0.5em]">Historias</span>
           </div>
 
           {/* Vertical divider */}

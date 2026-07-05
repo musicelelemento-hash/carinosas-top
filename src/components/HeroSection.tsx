@@ -73,7 +73,7 @@ export default function HeroSection() {
           >
             <Gem size={11} className="text-brand-gold" />
             <span className="text-[9px] font-black uppercase tracking-[0.55em] text-brand-gold/80">
-              The Gold Standard in Ecuador
+              El Estándar Dorado en Ecuador
             </span>
             <div className="w-1 h-1 rounded-full bg-brand-gold/40" />
             <span className="text-[9px] font-black uppercase tracking-[0.55em] text-brand-gold/40">Est. 2024</span>
@@ -110,7 +110,7 @@ export default function HeroSection() {
           <div className="flex flex-col items-center gap-5 max-w-lg mx-auto">
             <div className="divider-gold w-24" />
             <p className="text-[11px] text-white/30 uppercase tracking-[0.55em] font-black">
-              The Ultimate Standard in Elite Companionship
+              El Máximo Estándar en Compañía de Élite
             </p>
             <div className="divider-gold w-24" />
           </div>
@@ -119,7 +119,7 @@ export default function HeroSection() {
           <div className="flex items-center justify-center gap-10 mt-2">
             {[
               { value: '500+', label: 'Perfiles Verificados' },
-              { value: '4K', label: 'Ultra HD Media' },
+              { value: '4K', label: 'Fotos Ultra HD' },
               { value: '24/7', label: 'Disponibilidad' },
             ].map(({ value, label }) => (
               <div key={label} className="flex flex-col items-center gap-1">
@@ -212,9 +212,9 @@ export default function HeroSection() {
                       <div className="flex flex-col gap-1.5">
                         {[
                           { id: 'todas', name: 'Explorar Todo', sub: 'Todos los perfiles' },
-                          { id: 'mujeres', name: 'Modelos Elite', sub: 'Selección premium' },
+                          { id: 'mujeres', name: 'Modelos Élite', sub: 'Selección premium' },
                           { id: 'trans', name: 'Modelos Trans', sub: 'Identidades diversas' },
-                          { id: 'clubes', name: 'Lifestyle Clubs', sub: 'Experiencias grupales' },
+                          { id: 'clubes', name: 'Clubes Exclusivos', sub: 'Experiencias en grupo' },
                         ].map(cat => (
                           <button
                             key={cat.id}
@@ -273,7 +273,7 @@ export default function HeroSection() {
 
       {/* ── SCROLL INDICATOR ── */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3 opacity-30 hover:opacity-70 transition-opacity duration-700 cursor-pointer group">
-        <span className="text-[8px] font-serif italic text-white uppercase tracking-[0.7em]">Scroll to Discover</span>
+        <span className="text-[8px] font-serif italic text-white uppercase tracking-[0.7em]">Desliza para Descubrir</span>
         <div className="relative w-[1px] h-14 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-brand-gold to-transparent" />
           <div className="absolute top-0 left-0 w-full h-full bg-white/30 -translate-y-full group-hover:translate-y-[200%] transition-transform duration-1200 ease-in-out" />

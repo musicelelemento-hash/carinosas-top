@@ -50,7 +50,7 @@ export default function Navbar() {
               <div className="flex items-center gap-2.5 group-hover:opacity-80 transition-opacity">
                 <div className="h-px w-6 bg-brand-gold/50" />
                 <span className="text-[8px] text-brand-gold/50 uppercase tracking-[0.55em] font-black">
-                  Elite Digital Concierge
+                  Directorio Élite Digital
                 </span>
               </div>
             </Link>
@@ -58,8 +58,8 @@ export default function Navbar() {
             {/* CENTER: Nav Links */}
             <div className="hidden lg:flex items-center gap-1">
               {[
-                { href: '/#mapa', icon: <MapPin size={11} />, label: 'Live Radar' },
-                { href: '/#collection', icon: <Sparkles size={11} />, label: 'Selection' },
+                { href: '/#mapa', icon: <MapPin size={11} />, label: 'Radar en Vivo' },
+                { href: '/#collection', icon: <Sparkles size={11} />, label: 'Catálogo' },
               ].map(({ href, icon, label }) => (
                 <Link key={href} href={href}
                   className="group flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] text-white/35 hover:text-white font-black uppercase tracking-[0.3em] transition-all hover:bg-white/4"
@@ -77,7 +77,7 @@ export default function Navbar() {
                 className="hidden sm:flex items-center gap-2.5 text-[10px] text-white/40 hover:text-white/80 uppercase tracking-[0.28em] font-black transition-all"
               >
                 <User size={14} className="text-brand-gold/60" />
-                Member Sign In
+                Ingreso de Miembros
               </Link>
 
               <Link
@@ -91,7 +91,7 @@ export default function Navbar() {
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <Diamond size={10} className="fill-current" />
-                  Join the Elite
+                  Únete a la Élite
                 </span>
                 {/* Shimmer on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-600 ease-in-out" />
@@ -114,10 +114,10 @@ export default function Navbar() {
         <div className={`lg:hidden transition-all duration-500 overflow-hidden ${menuOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="bg-brand-black/95 backdrop-blur-[30px] border-t border-white/4 px-8 py-6 space-y-4">
             <Link href="/#mapa" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-[10px] text-white/40 hover:text-white uppercase tracking-[0.3em] font-black transition-colors">
-              <MapPin size={13} className="text-brand-gold" /> Live Radar
+              <MapPin size={13} className="text-brand-gold" /> Radar en Vivo
             </Link>
             <Link href="/#collection" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-[10px] text-white/40 hover:text-white uppercase tracking-[0.3em] font-black transition-colors">
-              <Sparkles size={13} className="text-brand-gold" /> Selection
+              <Sparkles size={13} className="text-brand-gold" /> Catálogo
             </Link>
           </div>
         </div>

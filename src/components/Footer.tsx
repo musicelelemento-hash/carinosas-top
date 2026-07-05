@@ -40,7 +40,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-px w-5 bg-brand-gold/40" />
-                <span className="text-[8px] text-brand-gold/30 uppercase font-black tracking-[0.6em]">Elite Digital Concierge</span>
+                <span className="text-[8px] text-brand-gold/30 uppercase font-black tracking-[0.6em]">Directorio Élite Digital</span>
               </div>
             </div>
 
@@ -94,7 +94,7 @@ export default function Footer() {
               {[
                 { icon: '18+', label: 'Solo Adultos', sub: 'Acceso restringido +18' },
                 { icon: '✓', label: 'Pago Seguro', sub: 'Transacciones cifradas' },
-                { icon: '♦', label: 'Elite Verified', sub: 'Sello de exclusividad' },
+                { icon: '♦', label: 'Verificado Élite', sub: 'Sello de exclusividad' },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-4 p-3 rounded-xl group hover:scale-[1.02] transition-transform duration-300 cursor-default"
                   style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
@@ -118,7 +118,7 @@ export default function Footer() {
         <div className="py-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="space-y-3">
             <p className="text-[9px] text-white/15 uppercase tracking-[0.35em] font-black text-center md:text-left">
-              Cariñosas.top © 2026 · All Rights Reserved
+              Cariñosas.top © 2026 · Todos los Derechos Reservados
             </p>
             {/* SEO Block */}
             <p className="text-[7px] text-white/[0.06] leading-relaxed uppercase tracking-widest max-w-3xl text-justify select-none">

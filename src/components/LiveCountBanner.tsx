@@ -7,10 +7,10 @@ const TICKER_ITEMS = [
   "✦ VERIFICACIÓN 4K ACTIVA",
   "✦ 100% DISCRECIÓN GARANTIZADA",
   "✦ PERFILES AUDITADOS EN TIEMPO REAL",
-  "✦ ACCESO ELITE · ECUADOR",
-  "✦ RESPONSE TIME SUB-5 MIN",
-  "✦ ZERO DIGITAL FOOTPRINT",
-  "✦ CURATED SELECTION · MEMBERS ONLY",
+  "✦ ACCESO ÉLITE · ECUADOR",
+  "✦ TIEMPO DE RESPUESTA MENOR A 5 MIN",
+  "✦ CERO RASTRO DIGITAL",
+  "✦ SELECCIÓN ESPECIAL · SOLO MIEMBROS",
   "✦ QUITO · GUAYAQUIL · CUENCA · MANTA",
 ];
 
@@ -57,7 +57,7 @@ export default function LiveCountBanner() {
           style={{ background: 'linear-gradient(90deg, rgba(232,0,90,0.08), transparent)' }}
         >
           <div className="live-dot" />
-          <span className="text-[9px] font-black uppercase tracking-[0.5em] text-white/90 whitespace-nowrap">Live Now</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.5em] text-white/90 whitespace-nowrap">En Vivo</span>
         </div>
 
         {/* Center: count */}

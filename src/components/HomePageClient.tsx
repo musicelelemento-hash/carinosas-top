@@ -88,7 +88,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
           {/* Badge */}
           <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-gold z-10">
-            <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/60">Curated Human Identity</span>
+            <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/60">Identidades Seleccionadas</span>
           </div>
 
           {/* Title */}
@@ -99,7 +99,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             animation: 'shimmer-gold 6s linear infinite',
-          }}>The Collection</h2>
+          }}>El Catálogo</h2>
 
           {/* Divider */}
           <div className="divider-gold w-40 z-10" />
@@ -119,7 +119,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                  <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
                  <div className="absolute inset-4 border border-brand-gold/20 rounded-full animate-pulse" />
               </div>
-              <span className="text-[11px] text-brand-gold/40 uppercase tracking-[0.6em] font-black italic">Expanding the Directory...</span>
+              <span className="text-[11px] text-brand-gold/40 uppercase tracking-[0.6em] font-black italic">Ampliando el Directorio...</span>
             </div>
           </div>
         )}

@@ -200,7 +200,7 @@ export default function ProfileCard({
             ) : (
               <>
                 <Fingerprint size={9} className="text-white/50" />
-                <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/40">Verified</span>
+                <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/40">Verificado</span>
               </>
             )}
           </div>
@@ -262,7 +262,7 @@ export default function ProfileCard({
             <div className="space-y-5">
               <div className="space-y-1">
                 <span className={`text-[9px] font-black uppercase tracking-[0.5em] ${isFree ? 'text-white/15' : 'text-brand-gold/70'}`}>
-                  {isFree ? 'Miembro Base' : 'Curated Selection'}
+                  {isFree ? 'Miembro Base' : 'Selección Especial'}
                 </span>
                 <h3 className="font-serif text-[3.5rem] text-white italic leading-none tracking-tighter">{name}</h3>
               </div>
@@ -270,8 +270,8 @@ export default function ProfileCard({
               <div className="flex items-center gap-5">
                 {[
                   { label: 'Edad', value: age },
-                  { label: 'Rating', value: '4.9★' },
-                  { label: 'Status', value: 'Online' },
+                  { label: 'Calificación', value: '4.9★' },
+                  { label: 'Estado', value: 'En Línea' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col gap-0.5">
                     <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20">{label}</span>
@@ -289,7 +289,7 @@ export default function ProfileCard({
                 <div className="flex-1 rounded-xl p-3 flex flex-col gap-1"
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
-                  <span className="text-[7px] text-white/20 uppercase font-black tracking-widest">Reviews</span>
+                  <span className="text-[7px] text-white/20 uppercase font-black tracking-widest">Reseñas</span>
                   <div className="flex items-center gap-1.5">
                     <Star size={11} className="text-brand-gold fill-brand-gold" />
                     <span className="font-serif text-base text-white">4.9</span>
@@ -298,8 +298,8 @@ export default function ProfileCard({
                 <div className="flex-1 rounded-xl p-3 flex flex-col gap-1"
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
-                  <span className="text-[7px] text-white/20 uppercase font-black tracking-widest">Response</span>
-                  <span className="font-serif text-base text-brand-gold italic">Sub 5min</span>
+                  <span className="text-[7px] text-white/20 uppercase font-black tracking-widest">Respuesta</span>
+                  <span className="font-serif text-base text-brand-gold italic">Menos de 5 min</span>
                 </div>
               </div>
             </div>
@@ -323,8 +323,8 @@ export default function ProfileCard({
           </button>
 
           <div className="flex flex-col items-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-            <span className="text-[6px] text-white/20 uppercase font-black tracking-[0.4em]">Response</span>
-            <span className="text-[9px] font-black tracking-widest italic uppercase text-brand-gold/60">Sub 5min</span>
+            <span className="text-[6px] text-white/20 uppercase font-black tracking-[0.4em]">Respuesta</span>
+            <span className="text-[9px] font-black tracking-widest italic uppercase text-brand-gold/60">Menos de 5 min</span>
           </div>
         </div>
       </div>
