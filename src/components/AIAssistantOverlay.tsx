@@ -73,7 +73,7 @@ export default function AIAssistantOverlay() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-8 z-50 group flex items-center gap-3 bg-brand-gold text-brand-black px-6 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.3em] shadow-[0_10px_40px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95 transition-all duration-500"
+        className="fixed bottom-6 right-6 z-[100] group flex items-center gap-3 bg-brand-gold text-brand-black px-6 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.3em] shadow-[0_10px_40px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95 transition-all duration-500"
       >
         <Sparkles size={16} className="animate-pulse" />
         <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">
@@ -84,7 +84,7 @@ export default function AIAssistantOverlay() {
   }
 
   return (
-    <div className="fixed bottom-8 right-8 w-[350px] z-50 animate-in slide-in-from-bottom-8 fade-in duration-500">
+    <div className="fixed bottom-6 right-6 w-[350px] z-[100] animate-in slide-in-from-bottom-8 fade-in duration-500">
       <div className="glass-premium rounded-[2rem] overflow-hidden border-brand-gold/30 shadow-2xl flex flex-col h-[500px]">
         {/* Header */}
         <div className="p-6 bg-brand-gold text-brand-black flex justify-between items-center">

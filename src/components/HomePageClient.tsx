@@ -6,7 +6,6 @@ import ProfileCard from "@/components/ProfileCard";
 import Navbar from "@/components/Navbar";
 import RecommendationSection from "@/components/RecommendationSection";
 import PanicButton from "@/components/PanicButton";
-import AvailabilityChat from "@/components/AvailabilityChat";
 import LiveCountBanner from "@/components/LiveCountBanner";
 import GhostNotifications from "@/components/GhostNotifications";
 import Footer from "@/components/Footer";
@@ -134,7 +133,6 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         </section>
 
         <PanicButton />
-        <AvailabilityChat />
         <GhostNotifications />
         <AIAssistantOverlay />
         <PushPrompt />
