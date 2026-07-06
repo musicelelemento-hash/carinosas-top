@@ -15,6 +15,7 @@ import LiveMap from "@/components/LiveMap";
 import AIAssistantOverlay from "@/components/AIAssistantOverlay";
 import VIPLounge from "@/components/VIPLounge";
 import PushPrompt from "@/components/PushPrompt";
+import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
 
 interface HomePageModel {
   id: string;
@@ -40,6 +41,7 @@ interface HomePageClientProps {
 export default function HomePageClient({ initialModels }: HomePageClientProps) {
   const [displayModels, setDisplayModels] = React.useState<HomePageModel[]>(initialModels);
   const [isLoading, setIsLoading] = React.useState(false);
+  const { showGateway, location, handleEnter, resetLocation } = useLocationGateway();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -62,76 +64,83 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
   }, [isLoading]);
 
   return (
-    <main className="min-h-screen bg-mesh pb-0">
-      <Navbar />
-      
-      <LiveCountBanner />
-      <StoriesBar />
+    <>
+      {/* Location Gateway — shown before home if no location saved */}
+      {showGateway && (
+        <LocationGateway onEnter={handleEnter} />
+      )}
 
-      <HeroSection />
+      <main className="min-h-screen bg-mesh pb-0">
+        <Navbar onChangeLocation={resetLocation} />
 
-      <div id="mapa">
-        <LiveMap />
-      </div>
-      
-      <RecommendationSection />
+        <LiveCountBanner />
+        <StoriesBar />
 
-      <VIPLounge />
+        <HeroSection />
 
-      <section id="collection" className="max-w-7xl mx-auto px-6 py-28">
-        {/* Section header */}
-        <div className="flex flex-col items-center gap-6 mb-28 relative">
-          {/* Background signature */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-            <span className="font-signature text-[180px] leading-none" style={{ color: 'rgba(201,168,76,0.03)' }}>Collection</span>
-          </div>
-
-          {/* Badge */}
-          <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-gold z-10">
-            <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/60">Identidades Seleccionadas</span>
-          </div>
-
-          {/* Title */}
-          <h2 className="font-serif font-bold text-5xl md:text-6xl text-center italic leading-none tracking-tight z-10" style={{
-            background: 'linear-gradient(135deg, #F5E0A0 0%, #C9A84C 35%, #9A7B35 65%, #C9A84C 100%)',
-            backgroundSize: '200% auto',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            animation: 'shimmer-gold 6s linear infinite',
-          }}>El Catálogo</h2>
-
-          {/* Divider */}
-          <div className="divider-gold w-40 z-10" />
+        <div id="mapa">
+          <LiveMap />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
-          {displayModels.map((model) => (
-            <ProfileCard key={model.id} {...model} />
-          ))}
-        </div>
+        <RecommendationSection />
 
-        {isLoading && (
-          <div className="mt-32 flex justify-center py-20">
-            <div className="flex flex-col items-center gap-6">
-              <div className="relative w-16 h-16">
-                 <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
-                 <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
-                 <div className="absolute inset-4 border border-brand-gold/20 rounded-full animate-pulse" />
-              </div>
-              <span className="text-[11px] text-brand-gold/40 uppercase tracking-[0.6em] font-black italic">Ampliando el Directorio...</span>
+        <VIPLounge />
+
+        <section id="collection" className="max-w-7xl mx-auto px-6 py-28">
+          {/* Section header */}
+          <div className="flex flex-col items-center gap-6 mb-28 relative">
+            {/* Background signature */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+              <span className="font-signature text-[180px] leading-none" style={{ color: 'rgba(212,168,67,0.03)' }}>Collection</span>
             </div>
+
+            {/* Badge */}
+            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-gold z-10">
+              <span className="label-xs text-brand-gold/70">Identidades Seleccionadas</span>
+            </div>
+
+            {/* Title */}
+            <h2 className="font-serif font-bold text-5xl md:text-6xl text-center italic leading-none tracking-tight z-10" style={{
+              background: 'linear-gradient(135deg, #F8E5AE 0%, #D4A843 35%, #9A7830 65%, #D4A843 100%)',
+              backgroundSize: '200% auto',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              animation: 'shimmer-gold 6s linear infinite',
+            }}>El Catálogo</h2>
+
+            {/* Divider */}
+            <div className="divider-gold w-40 z-10" />
           </div>
-        )}
-      </section>
 
-      <PanicButton />
-      <AvailabilityChat />
-      <GhostNotifications />
-      <AIAssistantOverlay />
-      <PushPrompt />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
+            {displayModels.map((model) => (
+              <ProfileCard key={model.id} {...model} />
+            ))}
+          </div>
 
-      <Footer />
-    </main>
+          {isLoading && (
+            <div className="mt-32 flex justify-center py-20">
+              <div className="flex flex-col items-center gap-6">
+                <div className="relative w-16 h-16">
+                  <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
+                  <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+                  <div className="absolute inset-4 border border-brand-gold/20 rounded-full animate-pulse" />
+                </div>
+                <span className="label-xs text-brand-gold/50 italic">Ampliando el Directorio...</span>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <PanicButton />
+        <AvailabilityChat />
+        <GhostNotifications />
+        <AIAssistantOverlay />
+        <PushPrompt />
+
+        <Footer />
+      </main>
+    </>
   );
 }

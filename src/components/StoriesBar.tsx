@@ -35,9 +35,9 @@ export default function StoriesBar() {
               style={{ border: '1.5px dashed rgba(232,0,90,0.35)', background: 'rgba(232,0,90,0.06)' }}
             >
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand-pink shadow-[0_0_8px_rgba(232,0,90,0.8)] live-dot" />
-              <span className="text-[7px] text-brand-pink font-black uppercase text-center leading-tight tracking-wider">EN<br/>VIVO</span>
+              <span className="text-[10px] text-brand-pink font-bold uppercase text-center leading-tight tracking-wider">EN<br/>VIVO</span>
             </div>
-            <span className="text-[7px] text-white/20 font-black uppercase tracking-[0.5em]">Historias</span>
+            <span className="label-xs text-white/45">Historias</span>
           </div>
 
           {/* Vertical divider */}
@@ -82,11 +82,11 @@ export default function StoriesBar() {
               </div>
 
               {/* Name */}
-              <span className="text-[9px] text-white/40 font-black uppercase tracking-[0.3em] group-hover:text-brand-gold/80 transition-colors duration-300">
+              <span className="text-[10px] text-white/60 font-bold uppercase tracking-[0.25em] group-hover:text-brand-gold transition-colors duration-300">
                 {story.name}
               </span>
               {/* City */}
-              <span className="text-[7px] text-white/15 font-black uppercase tracking-[0.25em] group-hover:text-white/30 transition-colors">
+              <span className="text-[9px] text-white/30 font-bold uppercase tracking-[0.2em] group-hover:text-white/50 transition-colors">
                 {story.city}
               </span>
             </button>

@@ -68,15 +68,13 @@ export default function HeroSection() {
 
         {/* Badge */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 px-7 py-2.5 rounded-full glass-gold"
-            style={{ animationDelay: '0ms' }}
-          >
-            <Gem size={11} className="text-brand-gold" />
-            <span className="text-[9px] font-black uppercase tracking-[0.55em] text-brand-gold/80">
+          <div className="inline-flex items-center gap-3 px-7 py-2.5 rounded-full glass-gold">
+            <Gem size={12} className="text-brand-gold" />
+            <span className="label-xs text-brand-gold/90">
               El Estándar Dorado en Ecuador
             </span>
-            <div className="w-1 h-1 rounded-full bg-brand-gold/40" />
-            <span className="text-[9px] font-black uppercase tracking-[0.55em] text-brand-gold/40">Est. 2024</span>
+            <div className="w-1 h-1 rounded-full bg-brand-gold/50" />
+            <span className="label-xs text-brand-gold/55">Est. 2024</span>
           </div>
         </div>
 
@@ -109,7 +107,7 @@ export default function HeroSection() {
           {/* Subtitle */}
           <div className="flex flex-col items-center gap-5 max-w-lg mx-auto">
             <div className="divider-gold w-24" />
-            <p className="text-[11px] text-white/30 uppercase tracking-[0.55em] font-black">
+            <p className="label-sm text-white/55">
               El Máximo Estándar en Compañía de Élite
             </p>
             <div className="divider-gold w-24" />
@@ -123,8 +121,8 @@ export default function HeroSection() {
               { value: '24/7', label: 'Disponibilidad' },
             ].map(({ value, label }) => (
               <div key={label} className="flex flex-col items-center gap-1">
-                <span className="font-serif text-2xl font-bold text-brand-gold/90 leading-none">{value}</span>
-                <span className="text-[8px] text-white/20 uppercase tracking-[0.45em] font-black">{label}</span>
+                <span className="font-serif text-3xl font-bold text-brand-gold leading-none">{value}</span>
+                <span className="label-xs text-white/45">{label}</span>
               </div>
             ))}
           </div>
@@ -148,12 +146,12 @@ export default function HeroSection() {
                 <div className="flex-1 relative" ref={locationRef}>
                   <button
                     onClick={() => { setIsLocationOpen(!isLocationOpen); setIsCategoryOpen(false); }}
-                    className="w-full flex flex-col items-start px-8 py-6 text-left hover:bg-white/2 transition-colors group/loc outline-none"
+                    className="w-full flex flex-col items-start px-8 py-6 text-left hover:bg-white/5 transition-colors group/loc outline-none"
                   >
-                    <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/40 mb-1.5">Localidad</span>
+                    <span className="label-xs text-brand-gold/65 mb-1.5">Localidad</span>
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-serif text-xl text-white/90 leading-none">{selectedLocationName}</span>
-                      <ChevronDown size={13} className={`text-brand-gold/40 group-hover/loc:text-brand-gold transition-all duration-300 ml-3 ${isLocationOpen ? 'rotate-180 text-brand-gold' : ''}`} />
+                      <span className="font-serif text-xl text-white leading-none">{selectedLocationName}</span>
+                      <ChevronDown size={14} className={`text-brand-gold/55 group-hover/loc:text-brand-gold transition-all duration-300 ml-3 ${isLocationOpen ? 'rotate-180 text-brand-gold' : ''}`} />
                     </div>
                   </button>
 
@@ -196,12 +194,12 @@ export default function HeroSection() {
                 <div className="flex-1 relative" ref={categoryRef}>
                   <button
                     onClick={() => { setIsCategoryOpen(!isCategoryOpen); setIsLocationOpen(false); }}
-                    className="w-full flex flex-col items-start px-8 py-6 text-left hover:bg-white/2 transition-colors group/cat outline-none"
+                    className="w-full flex flex-col items-start px-8 py-6 text-left hover:bg-white/5 transition-colors group/cat outline-none"
                   >
-                    <span className="text-[8px] font-black uppercase tracking-[0.55em] text-brand-gold/40 mb-1.5">Categoría</span>
+                    <span className="label-xs text-brand-gold/65 mb-1.5">Categoría</span>
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-serif text-xl text-white/90 leading-none">{selectedCategoryName}</span>
-                      <ChevronDown size={13} className={`text-brand-gold/40 group-hover/cat:text-brand-gold transition-all duration-300 ml-3 ${isCategoryOpen ? 'rotate-180 text-brand-gold' : ''}`} />
+                      <span className="font-serif text-xl text-white leading-none">{selectedCategoryName}</span>
+                      <ChevronDown size={14} className={`text-brand-gold/55 group-hover/cat:text-brand-gold transition-all duration-300 ml-3 ${isCategoryOpen ? 'rotate-180 text-brand-gold' : ''}`} />
                     </div>
                   </button>
 
@@ -236,8 +234,8 @@ export default function HeroSection() {
 
                 {/* Search button */}
                 <div className="p-3 flex items-stretch">
-                  <button className="btn-gold flex items-center gap-3 px-10 py-4 rounded-[1.5rem] text-[9px] uppercase tracking-[0.35em] font-black w-full md:w-auto justify-center">
-                    <Search size={15} strokeWidth={2.5} />
+                  <button className="btn-gold flex items-center gap-3 px-10 py-4 rounded-[1.5rem] w-full md:w-auto justify-center">
+                    <Search size={16} strokeWidth={2.5} />
                     <span>Buscar</span>
                   </button>
                 </div>
@@ -246,7 +244,7 @@ export default function HeroSection() {
           </div>
 
           {/* Quick filters */}
-          <div className="flex flex-wrap justify-center gap-5 mt-10">
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
             {[
               { label: 'VERCACE', city: 'Quito Norte' },
               { label: 'ELITE QUITO', city: 'González Suárez' },
@@ -255,14 +253,14 @@ export default function HeroSection() {
             ].map(({ label, city }, i) => (
               <button
                 key={label}
-                className="group flex items-center gap-2.5 transition-all duration-500"
+                className="group flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/6 border border-white/8 hover:border-brand-gold/35"
                 style={{ animationDelay: `${600 + i * 80}ms`, opacity: 0, animation: `fadeInUp 0.6s ease forwards ${600 + i * 80}ms` }}
               >
-                <span className="w-1.5 h-1.5 rounded-full border border-brand-gold/20 group-hover:bg-brand-gold group-hover:border-brand-gold group-hover:scale-125 transition-all duration-300" />
-                <span className="text-[9px] text-white/15 group-hover:text-brand-gold/70 uppercase tracking-[0.5em] font-black transition-colors duration-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-gold/35 group-hover:bg-brand-gold group-hover:scale-125 transition-all duration-300" />
+                <span className="label-xs text-white/50 group-hover:text-brand-gold/85 transition-colors duration-300">
                   {label}
                 </span>
-                <span className="text-[8px] text-white/8 group-hover:text-white/20 uppercase tracking-[0.3em] font-black transition-colors hidden sm:block">
+                <span className="label-xs text-white/25 group-hover:text-white/45 transition-colors hidden sm:block">
                   · {city}
                 </span>
               </button>
@@ -272,8 +270,8 @@ export default function HeroSection() {
       </div>
 
       {/* ── SCROLL INDICATOR ── */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3 opacity-30 hover:opacity-70 transition-opacity duration-700 cursor-pointer group">
-        <span className="text-[8px] font-serif italic text-white uppercase tracking-[0.7em]">Desliza para Descubrir</span>
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3 opacity-45 hover:opacity-80 transition-opacity duration-700 cursor-pointer group">
+        <span className="text-[11px] font-serif italic text-white uppercase tracking-[0.5em]">Desliza para Descubrir</span>
         <div className="relative w-[1px] h-14 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-brand-gold to-transparent" />
           <div className="absolute top-0 left-0 w-full h-full bg-white/30 -translate-y-full group-hover:translate-y-[200%] transition-transform duration-1200 ease-in-out" />
@@ -281,11 +279,6 @@ export default function HeroSection() {
         <div className="w-1 h-1 rounded-full bg-brand-gold/50 animate-bounce" />
       </div>
 
-      <style jsx global>{`
-        .hover\\:bg-white\\/2:hover { background: rgba(255,255,255,0.02); }
-        .hover\\:bg-white\\/4:hover { background: rgba(255,255,255,0.04); }
-        .text-white\\/8 { color: rgba(255,255,255,0.08); }
-      `}</style>
     </section>
   );
 }

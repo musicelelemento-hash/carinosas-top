@@ -44,21 +44,21 @@ export default function Footer() {
               </div>
             </div>
 
-            <p className="text-[10px] text-white/20 uppercase tracking-[0.35em] font-black leading-relaxed max-w-xs">
+            <p className="body-sm text-white/45 leading-relaxed max-w-xs">
               El estándar de oro en servicios premium y exclusividad en Ecuador.
             </p>
 
             {/* Cities */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <MapPin size={10} className="text-brand-gold/40" />
-                <span className="text-[8px] text-brand-gold/30 uppercase font-black tracking-[0.5em]">Cobertura Nacional</span>
+                <MapPin size={11} className="text-brand-gold/55" />
+                <span className="label-xs text-brand-gold/50">Cobertura Nacional</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {cities.map(city => (
                   <span key={city}
-                    className="px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-[0.35em] text-white/20 hover:text-brand-gold/50 transition-colors cursor-default"
-                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
+                    className="px-3 py-1.5 rounded-full label-xs text-white/45 hover:text-brand-gold/70 transition-colors cursor-default"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
                     {city}
                   </span>
@@ -72,7 +72,7 @@ export default function Footer() {
 
           {/* Security */}
           <div className="md:col-span-3 space-y-6">
-            <h4 className="text-[9px] font-black text-brand-gold/60 uppercase tracking-[0.5em] border-b border-brand-gold/8 pb-3">Seguridad VIP</h4>
+            <h4 className="label-sm text-brand-gold/75 border-b border-brand-gold/12 pb-3">Seguridad VIP</h4>
             <div className="space-y-4">
               {[
                 { icon: ShieldCheck, text: 'Fotos 100% Verificadas', color: 'text-brand-pink' },
@@ -80,8 +80,8 @@ export default function Footer() {
                 { icon: Gem, text: 'Identidad Auditada', color: 'text-brand-gold' },
               ].map(({ icon: Icon, text, color }) => (
                 <div key={text} className="flex items-center gap-3 group">
-                  <Icon size={15} className={`${color} transition-transform group-hover:scale-110 duration-300`} />
-                  <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/30 group-hover:text-white/50 transition-colors">{text}</span>
+                  <Icon size={16} className={`${color} transition-transform group-hover:scale-110 duration-300`} />
+                  <span className="body-sm text-white/55 group-hover:text-white/80 transition-colors">{text}</span>
                 </div>
               ))}
             </div>
@@ -89,7 +89,7 @@ export default function Footer() {
 
           {/* Badges */}
           <div className="md:col-span-3 space-y-6">
-            <h4 className="text-[9px] font-black text-brand-gold/60 uppercase tracking-[0.5em] border-b border-brand-gold/8 pb-3">Certificaciones</h4>
+            <h4 className="label-sm text-brand-gold/75 border-b border-brand-gold/12 pb-3">Certificaciones</h4>
             <div className="space-y-3">
               {[
                 { icon: '18+', label: 'Solo Adultos', sub: 'Acceso restringido +18' },
@@ -97,12 +97,12 @@ export default function Footer() {
                 { icon: '♦', label: 'Verificado Élite', sub: 'Sello de exclusividad' },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-4 p-3 rounded-xl group hover:scale-[1.02] transition-transform duration-300 cursor-default"
-                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                 >
-                  <span className="font-serif font-bold text-base text-brand-gold/70 w-8 text-center shrink-0">{icon}</span>
+                  <span className="font-serif font-bold text-base text-brand-gold/80 w-8 text-center shrink-0">{icon}</span>
                   <div>
-                    <div className="text-[8px] font-black uppercase tracking-[0.3em] text-white/50">{label}</div>
-                    <div className="text-[7px] uppercase tracking-[0.25em] text-white/15 font-black">{sub}</div>
+                    <div className="body-sm font-bold text-white/70">{label}</div>
+                    <div className="label-xs text-white/35">{sub}</div>
                   </div>
                 </div>
               ))}
@@ -117,7 +117,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="py-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="space-y-3">
-            <p className="text-[9px] text-white/15 uppercase tracking-[0.35em] font-black text-center md:text-left">
+            <p className="body-sm text-white/35 text-center md:text-left">
               Cariñosas.top © 2026 · Todos los Derechos Reservados
             </p>
             {/* SEO Block */}
@@ -131,7 +131,7 @@ export default function Footer() {
           <div className="flex items-center gap-8">
             {['Términos', 'Privacidad', 'Contacto'].map(link => (
               <a key={link} href="#"
-                className="text-[8px] font-black uppercase tracking-[0.5em] text-white/15 hover:text-brand-gold/50 transition-colors duration-300"
+                className="label-xs text-white/35 hover:text-brand-gold/70 transition-colors duration-300"
               >
                 {link}
               </a>
