@@ -41,6 +41,8 @@ interface ModelProfileProps {
     sector?: string;
     whatsapp?: string;
     city?: string;
+    is_verified_4k?: boolean;
+    is_online?: boolean;
   };
 }
 
@@ -56,7 +58,8 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
   const handleContact = () => {
     if (model.whatsapp) {
-      window.open(`https://wa.me/${model.whatsapp.replace(/\D/g, '')}?text=Hola%20${model.name}%2C%20vi%20tu%20perfil%20Premium%20en%20Cari%C3%B1osas.top%20%F0%9F%94%A5`, '_blank');
+      const message = `Hola ${model.name}, vi tu perfil en Cariñosas.top. ¿Podrías confirmarme tu disponibilidad?`;
+      window.open(`https://wa.me/${model.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -124,6 +127,8 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
   const plan = (model.plan_type as keyof typeof PLAN_CONFIG) || 'Anuncio Gratis';
   const config = PLAN_CONFIG[plan] || PLAN_CONFIG['Básico'];
+  const isVerified = Boolean(model.isVerified || model.is_verified_4k);
+  const availabilityLabel = model.is_online ? 'Disponible ahora' : 'Disponibilidad por confirmar';
 
   return (
     <div className="relative min-h-screen bg-mesh text-brand-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-12">
@@ -138,7 +143,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
         </Link>
         <div className={`glass-premium px-6 py-2 rounded-full border border-green-500/30 flex items-center gap-2 transition-opacity duration-500 ${scrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-           <span className="text-[8px] text-green-500 font-black uppercase tracking-widest pt-0.5">Direct Connect Activo</span>
+           <span className="text-[8px] text-green-500 font-black uppercase tracking-widest pt-0.5">{availabilityLabel}</span>
         </div>
       </div>
 
@@ -188,7 +193,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
               </div>
               <div className="flex flex-col">
                 <span className={`text-[9px] ${config.accent} font-black uppercase tracking-[0.2em] leading-none`}>{config.label}</span>
-                <span className="text-[7px] text-white/40 uppercase font-black tracking-widest mt-1">Status Verificado por Stitch</span>
+                <span className="text-[7px] text-white/40 uppercase font-black tracking-widest mt-1">{isVerified ? 'Perfil verificado' : 'Perfil en revisión'}</span>
               </div>
             </div>
             
@@ -217,7 +222,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                    {model.name}
                    <div className="flex items-center gap-2 bg-brand-gold/10 px-4 py-2 rounded-full border border-brand-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
                       <BadgeCheck size={24} className="text-brand-gold" />
-                      <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.2em] pt-0.5">ELITE VERIFIED</span>
+                      <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.2em] pt-0.5">{isVerified ? 'PERFIL VERIFICADO' : 'PERFIL ACTIVO'}</span>
                    </div>
                  </h1>
               </div>
@@ -431,11 +436,11 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                      <div className="flex items-center gap-3">
                         <span className="text-[9px] text-brand-gold font-black uppercase tracking-widest flex items-center gap-2">
                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                           Online Ahora
+                           {availabilityLabel}
                         </span>
                         <div className="w-1 h-1 rounded-full bg-white/10" />
                         <span className="text-[8px] text-white/40 uppercase font-black tracking-widest">
-                           12 Reservas hoy
+                           Contacto protegido
                         </span>
                      </div>
                   </div>
@@ -446,7 +451,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                  className="w-full md:w-auto px-12 py-5 bg-brand-gold hover:bg-white text-brand-black rounded-[1.5rem] font-black text-xs uppercase tracking-[0.4em] transition-all transform hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-3 shadow-2xl shadow-brand-gold/20"
                >
                   <MessageCircle size={18} fill="currentColor" />
-                  RESERVAR VIP
+                  SOLICITAR DISPONIBILIDAD
                </button>
             </div>
          </div>

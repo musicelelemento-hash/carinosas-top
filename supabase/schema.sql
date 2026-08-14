@@ -1,9 +1,8 @@
 -- Database Schema for Cariñosas.top
 -- Create models table for VIP profiles
 
--- Drop old objects if updating
-DROP TABLE IF EXISTS models;
-DROP TYPE IF EXISTS plan_type;
+-- Bootstrap schema for a new empty project only.
+-- Never drop production objects from this file; add a migration instead.
 
 -- Visibility plans matching the codebase
 CREATE TYPE plan_type AS ENUM ('Anuncio Gratis', 'Premium', 'Diamante', 'VIP Elite');

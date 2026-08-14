@@ -29,13 +29,9 @@ export default function AvailabilityChat() {
     setMessages(prev => [...prev, userMsg]);
     setInput("");
 
-    // Simulate Stitch AI Response
+    // The assistant must not invent availability or location details.
     setTimeout(() => {
-      let response = "La modelo está actualmente activa y disponible. Para una respuesta inmediata, te sugiero contactarla por WhatsApp presionando su botón dorado.";
-      
-      if (input.toLowerCase().includes("norte") || input.toLowerCase().includes("quito")) {
-        response = "Confirmado. Hay disponibilidad en el sector Norte de Quito ahora mismo. ¿Deseas el link directo de WhatsApp?";
-      }
+      const response = "La disponibilidad la confirma cada perfil directamente. Revisa el estado mostrado y usa Solicitar disponibilidad para enviar un mensaje privado.";
 
       setMessages(prev => [...prev, { role: 'bot', text: response }]);
     }, 800);

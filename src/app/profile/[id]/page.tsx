@@ -21,6 +21,8 @@ interface ProfileModel {
   sector?: string;
   whatsapp?: string;
   city?: string;
+  is_verified_4k?: boolean;
+  is_online?: boolean;
 }
 
 export default function DynamicProfilePage() {
@@ -37,12 +39,27 @@ export default function DynamicProfilePage() {
         // 1. Check Supabase
         const { data, error: sbError } = await supabase
           .from("models")
-          .select("*")
+          .select("id, name, age, city, sector, description, images, tags, plan_type, whatsapp, is_verified_4k, is_online")
           .eq("id", id)
           .single();
 
         if (data && !sbError) {
-          setModel(data);
+          setModel({
+            id: data.id,
+            name: data.name,
+            age: data.age,
+            location: data.sector ? `${data.sector}, ${data.city}` : data.city,
+            description: data.description || "",
+            images: data.images?.length ? data.images : ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
+            tags: data.tags || [],
+            plan_type: data.plan_type,
+            whatsapp: data.whatsapp,
+            isVerified: data.is_verified_4k,
+            is_verified_4k: data.is_verified_4k,
+            is_online: data.is_online,
+            city: data.city,
+            sector: data.sector || undefined,
+          });
           return;
         }
 
