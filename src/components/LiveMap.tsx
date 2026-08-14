@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { ChevronRight, Zap, Radar, ShieldCheck } from "lucide-react";
+import { ChevronRight, Zap, Radar, ShieldCheck, MessageCircle, X, MapPin, Star, Navigation, LocateFixed } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
@@ -314,6 +314,67 @@ export default function LiveMap() {
           {/* Map Vignette & Controls */}
           <div className="absolute inset-0 pointer-events-none z-20 shadow-[inset_0_0_150px_rgba(0,0,0,0.95)]" />
           
+          {/* Sliding Quick Preview Modal on Selected Model Pin */}
+          {selectedModel && (
+            <div className="absolute bottom-8 left-8 right-8 md:right-auto md:max-w-md z-40 animate-in slide-in-from-bottom-8 duration-500 pointer-events-auto">
+              <div className="glass-obsidian p-6 rounded-[2.5rem] border border-brand-gold/40 shadow-[0_30px_90px_rgba(0,0,0,0.95)] relative space-y-4">
+                <button
+                  onClick={() => setSelectedModel(null)}
+                  className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all"
+                >
+                  <X size={15} />
+                </button>
+
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-brand-gold/40 flex-shrink-0">
+                    <Image
+                      src={selectedModel.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'}
+                      alt={selectedModel.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <div className="flex flex-col flex-1 min-w-0 pr-6">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-white font-serif text-2xl leading-none">{selectedModel.name}</h4>
+                      <span className="text-[8px] px-2 py-0.5 rounded-full bg-brand-gold/20 text-brand-gold font-bold">4K VIP</span>
+                    </div>
+                    <p className="text-[10px] text-white/50 uppercase font-black tracking-widest mt-1.5">
+                      {selectedModel.age ? `${selectedModel.age} Años · ` : ''}{selectedModel.sector || selectedModel.city}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">A ~ 1.2 km de ti</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 pt-2 border-t border-white/10">
+                  <button
+                    onClick={() => {
+                      if (selectedModel.whatsapp) {
+                        const phone = selectedModel.whatsapp.replace(/\D/g, '');
+                        const fullPhone = phone.startsWith('593') ? phone : `593${phone.replace(/^0/, '')}`;
+                        window.open(`https://wa.me/${fullPhone}?text=Hola%20${encodeURIComponent(selectedModel.name)}%2C%20vi%20tu%20perfil%20en%20el%20Radar%20de%20Cari%C3%B1osas.top`, '_blank');
+                      }
+                    }}
+                    className="flex-1 py-3.5 bg-brand-gold text-brand-black text-[10px] font-black uppercase rounded-2xl tracking-widest hover:bg-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-gold/25"
+                  >
+                    <MessageCircle size={14} fill="currentColor" />
+                    WhatsApp Directo
+                  </button>
+                  <button
+                    onClick={() => window.location.href = `/profile/${selectedModel.id}`}
+                    className="px-5 py-3.5 rounded-2xl border border-white/20 text-white hover:border-brand-gold hover:text-brand-gold text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    Ver Perfil
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="absolute bottom-12 right-12 z-30 flex flex-col items-end gap-6 text-right animate-in fade-in duration-1000">
              <div className="glass-premium px-8 py-5 rounded-[2rem] border-white/5 space-y-1">
                 <span className="text-[9px] text-white/30 uppercase font-black tracking-widest block">Satellite Encryption</span>

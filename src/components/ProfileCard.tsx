@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import { MessageCircle, Star, ShieldCheck, Zap, Heart, Crown, Diamond, Fingerprint, Eye } from "lucide-react";
+import { MessageCircle, Star, ShieldCheck, Zap, Heart, Crown, Diamond, Fingerprint, Eye, Volume2, VolumeX, MapPin, Radio } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
 
@@ -37,6 +37,7 @@ export default function ProfileCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const isFree = useMemo(() =>
     !plan_type || plan_type === 'Gratis' || plan_type === 'Anuncio Gratis' || plan_type === 'Básico'
@@ -272,18 +273,29 @@ export default function ProfileCard({
           <div className="absolute inset-0 magazine-overlay pointer-events-none" />
 
           {/* ── STATIC INFO (bottom) ── */}
-          <div className={`absolute inset-x-0 bottom-0 p-6 space-y-2 transition-all duration-500 ${isHovered ? 'translate-y-6 opacity-0' : 'translate-y-0 opacity-100'}`}>
-            <h3 className="font-serif text-4xl text-white leading-none tracking-tight" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}>
-              {name}
-            </h3>
+          <div className={`absolute inset-x-0 bottom-0 p-6 space-y-2.5 transition-all duration-500 ${isHovered ? 'translate-y-6 opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-4xl text-white leading-none tracking-tight" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}>
+                {name}
+              </h3>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 border border-emerald-500/30 backdrop-blur-md">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">En Línea</span>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3">
               <span className={`label-xs ${isFree ? 'text-white/40' : 'text-brand-gold'}`}>
                 {isFree ? 'Estándar' : plan_type}
               </span>
               <span className="w-[3px] h-[3px] rounded-full bg-white/25" />
-              <span className="label-xs text-white/50">{location}</span>
+              <span className="label-xs text-white/60 flex items-center gap-1">
+                <MapPin size={10} className="text-brand-gold/70" />
+                {location}
+              </span>
             </div>
-            <p className="font-signature text-xl text-brand-gold/65 -rotate-1 leading-tight">
+
+            <p className="font-signature text-xl text-brand-gold/70 -rotate-1 leading-tight">
               {personal_note}
             </p>
           </div>
@@ -302,9 +314,9 @@ export default function ProfileCard({
 
               <div className="flex items-center gap-5">
                 {[
-                  { label: 'Edad', value: age },
+                  { label: 'Edad', value: `${age} años` },
                   { label: 'Calificación', value: '4.9★' },
-                  { label: 'Estado', value: 'En Línea' },
+                  { label: 'Proximidad', value: 'Sector Cerca' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col gap-0.5">
                     <span className="label-xs text-white/30">{label}</span>
@@ -332,7 +344,7 @@ export default function ProfileCard({
                   style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
                 >
                   <span className="label-xs text-white/35">Respuesta</span>
-                  <span className="font-serif text-sm text-brand-gold italic">Menos de 5 min</span>
+                  <span className="font-serif text-sm text-brand-gold italic">&lt; 5 min</span>
                 </div>
               </div>
             </div>
@@ -340,22 +352,49 @@ export default function ProfileCard({
         </div>
 
         {/* ── ACTION BAR ── */}
-        <div className={`px-5 py-4 flex items-center justify-between transition-all duration-500 card-action-bar ${isHovered ? 'opacity-100' : 'opacity-85'}`}>
-          <button
-            onClick={e => { e.stopPropagation(); handleContact(); }}
-            className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] transition-all duration-300 hover:scale-[1.04] active:scale-95 pointer-events-auto ${
-              isFree
-                ? 'btn-ghost'
-                : 'btn-gold'
-            }`}
-          >
-            <MessageCircle size={14} fill="currentColor" />
-            {isFree ? 'WhatsApp' : 'WhatsApp VIP'}
-          </button>
+        <div className={`px-5 py-4 flex items-center justify-between transition-all duration-500 card-action-bar ${isHovered ? 'opacity-100' : 'opacity-90'}`}>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={e => { e.stopPropagation(); handleContact(); }}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] transition-all duration-300 hover:scale-[1.04] active:scale-95 pointer-events-auto ${
+                isFree
+                  ? 'btn-ghost'
+                  : 'btn-gold'
+              }`}
+            >
+              <MessageCircle size={14} fill="currentColor" />
+              {isFree ? 'WhatsApp' : 'WhatsApp VIP'}
+            </button>
 
-          <div className="flex flex-col items-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-            <span className="label-xs text-white/30">Respuesta</span>
-            <span className="body-sm font-bold italic text-brand-gold/75">5 min</span>
+            {/* Audio Greeting preview trigger */}
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                setIsPlayingAudio(!isPlayingAudio);
+              }}
+              title="Escuchar audio de voz"
+              className={`p-3 rounded-xl border transition-all duration-300 active:scale-95 flex items-center justify-center pointer-events-auto ${
+                isPlayingAudio
+                  ? 'bg-brand-pink/20 border-brand-pink text-brand-pink shadow-[0_0_15px_rgba(255,0,98,0.4)]'
+                  : 'bg-white/5 border-white/10 text-white/70 hover:text-brand-gold hover:border-brand-gold/40'
+              }`}
+            >
+              {isPlayingAudio ? (
+                <div className="flex items-center gap-0.5 h-3.5 px-0.5">
+                  <span className="w-0.5 bg-brand-pink rounded-full sound-bar-1" />
+                  <span className="w-0.5 bg-brand-pink rounded-full sound-bar-2" />
+                  <span className="w-0.5 bg-brand-pink rounded-full sound-bar-3" />
+                  <span className="w-0.5 bg-brand-pink rounded-full sound-bar-4" />
+                </div>
+              ) : (
+                <Volume2 size={14} />
+              )}
+            </button>
+          </div>
+
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="label-xs text-white/40">Respuesta</span>
+            <span className="body-sm font-bold italic text-brand-gold">&lt; 5 min</span>
           </div>
         </div>
       </div>

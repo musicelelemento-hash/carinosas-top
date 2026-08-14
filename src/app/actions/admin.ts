@@ -103,6 +103,8 @@ export async function createModelAction(modelData: {
   sector?: string;
 }) {
   await assertAdmin();
+  if (!PLAN_TYPES.has(modelData.plan_type)) throw new Error("El plan seleccionado no es válido.");
+  if (modelData.age !== undefined && modelData.age < 18) throw new Error("La edad mínima es 18 años.");
 
   const { data, error } = await supabaseAdmin
     .from("models")
@@ -149,9 +151,13 @@ export async function updateModelAction(
     lat?: number;
     lng?: number;
     sector?: string;
+    is_verified_4k?: boolean;
+    is_online?: boolean;
   }
 ) {
   await assertAdmin();
+  if (modelData.plan_type && !PLAN_TYPES.has(modelData.plan_type)) throw new Error("El plan seleccionado no es válido.");
+  if (modelData.age !== undefined && modelData.age < 18) throw new Error("La edad mínima es 18 años.");
 
   const { data, error } = await supabaseAdmin
     .from("models")
@@ -166,7 +172,9 @@ export async function updateModelAction(
       age: modelData.age,
       lat: modelData.lat,
       lng: modelData.lng,
-      sector: modelData.sector
+      sector: modelData.sector,
+      is_verified_4k: modelData.is_verified_4k,
+      is_online: modelData.is_online
     })
     .eq("id", id)
     .select();

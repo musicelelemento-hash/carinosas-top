@@ -16,7 +16,15 @@ import {
   Scissors,
   Diamond,
   BadgeCheck,
-  TrendingUp
+  TrendingUp,
+  Volume2,
+  Play,
+  Pause,
+  PhoneCall,
+  CheckCircle2,
+  ShieldCheck,
+  Zap,
+  Eye
 } from "lucide-react";
 import Link from "next/link";
 
@@ -47,7 +55,9 @@ interface ModelProfileProps {
 }
 
 export default function ModelProfile({ model }: ModelProfileProps) {
-  const [activeTab, setActiveTab] = useState<'photos' | 'exclusive'>('photos');
+  const [activeTab, setActiveTab] = useState<'photos' | 'exclusive' | 'vault'>('photos');
+  const [selectedRate, setSelectedRate] = useState<'1h' | '2h' | 'night'>('1h');
+  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -219,12 +229,42 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                     <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.4em]">Trending Now en {model.location}</span>
                  </div>
                  <h1 className="text-6xl lg:text-8xl font-serif text-white tracking-tighter italic leading-none flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-left duration-1000">
-                   {model.name}
-                   <div className="flex items-center gap-2 bg-brand-gold/10 px-4 py-2 rounded-full border border-brand-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-                      <BadgeCheck size={24} className="text-brand-gold" />
-                      <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.2em] pt-0.5">{isVerified ? 'PERFIL VERIFICADO' : 'PERFIL ACTIVO'}</span>
-                   </div>
+                    {model.name}
+                    <div className="flex items-center gap-2 bg-brand-gold/10 px-4 py-2 rounded-full border border-brand-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+                       <BadgeCheck size={24} className="text-brand-gold" />
+                       <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.2em] pt-0.5">{isVerified ? 'PERFIL VERIFICADO' : 'PERFIL ACTIVO'}</span>
+                    </div>
                  </h1>
+              </div>
+
+              {/* Obsidian Voice Greeting Player */}
+              <div className="p-5 rounded-3xl glass-obsidian flex items-center justify-between gap-4 border border-brand-gold/25 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setIsPlayingVoice(!isPlayingVoice)}
+                    className="w-12 h-12 rounded-2xl bg-brand-gold text-brand-black flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(212,168,67,0.4)]"
+                  >
+                    {isPlayingVoice ? <Pause size={20} className="fill-brand-black" /> : <Play size={20} className="fill-brand-black ml-0.5" />}
+                  </button>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-brand-gold font-black uppercase tracking-[0.25em]">Nota de Voz de {model.name}</span>
+                    <span className="text-xs text-white/60 font-serif italic">&quot;Hola, te cuento sobre mis servicios...&quot;</span>
+                  </div>
+                </div>
+
+                {/* Animated Waveform Bars */}
+                <div className="flex items-center gap-1 h-8 px-3">
+                  {[40, 75, 50, 90, 60, 80, 45, 100, 70, 85, 55, 65].map((h, idx) => (
+                    <span
+                      key={idx}
+                      className="w-1 bg-brand-gold/80 rounded-full transition-all duration-300"
+                      style={{
+                        height: isPlayingVoice ? `${(idx % 4 + 1) * 6 + 6}px` : '6px',
+                        opacity: isPlayingVoice ? 1 : 0.35,
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -245,11 +285,49 @@ export default function ModelProfile({ model }: ModelProfileProps) {
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-brand-gold/40">
                   <Scissors size={14} className="rotate-90" />
-                  <span className="text-[8px] uppercase font-black tracking-[0.4em]">STITCH LUXURY COPY</span>
+                  <span className="text-[8px] uppercase font-black tracking-[0.4em]">EXPERIENCIA EXCLUSIVA</span>
                 </div>
                 <p className="text-2xl font-serif text-white/80 italic leading-relaxed first-letter:text-7xl first-letter:font-black first-letter:text-brand-gold first-letter:mr-4 first-letter:float-left first-letter:leading-[0.8]">
                    {model.description}
                 </p>
+              </div>
+            </div>
+
+            {/* Obsidian Elite Tiered Investment & Rate Selector */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[10px] text-white/40 uppercase font-black tracking-[0.5em] ml-1">Tarifas & Experiencias</h3>
+                <span className="text-[9px] text-brand-gold uppercase tracking-widest font-black">Precios Transparentes</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { id: '1h', time: '1 Hora', price: '$100', desc: 'Cita Privada Estándar', highlight: false },
+                  { id: '2h', time: '2 Horas', price: '$180', desc: 'Encuentro Relajado & Masaje', highlight: true },
+                  { id: 'night', time: 'Cena + Noche VIP', price: '$450', desc: 'Acompañamiento 5★ Completo', highlight: false },
+                ].map(rate => (
+                  <div
+                    key={rate.id}
+                    onClick={() => setSelectedRate(rate.id as any)}
+                    className={`cursor-pointer p-5 rounded-3xl border transition-all duration-300 space-y-2.5 relative ${
+                      selectedRate === rate.id
+                        ? 'glass-obsidian border-brand-gold bg-brand-gold/10 shadow-[0_0_25px_rgba(212,168,67,0.25)]'
+                        : 'bg-white/5 border-white/10 hover:border-brand-gold/30 hover:bg-white/[0.07]'
+                    }`}
+                  >
+                    {rate.highlight && (
+                      <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-brand-gold text-brand-black text-[7px] font-black uppercase tracking-wider">
+                        Más Solicitado
+                      </span>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-white/60">{rate.time}</span>
+                      {selectedRate === rate.id && <CheckCircle2 size={14} className="text-brand-gold" />}
+                    </div>
+                    <div className="text-2xl font-serif text-white font-bold">{rate.price}</div>
+                    <p className="text-[9px] text-white/50 leading-tight">{rate.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -299,7 +377,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
               </div>
             </div>
 
-            {/* Exclusive Tabs - OnlyFans Logic */}
+            {/* Exclusive Tabs & Media Vault Teaser */}
             <div className="space-y-8">
                <div className="flex gap-4 border-b border-white/5">
                   <button 
@@ -313,7 +391,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                     onClick={() => setActiveTab('exclusive')}
                     className={`flex-1 pb-4 text-[10px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'exclusive' ? 'text-brand-pink' : 'text-white/20 hover:text-brand-pink'}`}
                   >
-                    EXCLUSIVO VIP
+                    BÓVEDA VIP (6 Medios)
                     <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-pink/20 text-[8px]">
                        <Lock size={10} />
                     </span>
@@ -324,53 +402,49 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                 <div className="animate-in fade-in zoom-in duration-500">
                   {activeTab === 'photos' ? (
                     <div className="grid grid-cols-2 gap-4">
-                        {/* Placeholder for public feed */}
-                        {[1,2,3,4].map(i => (
-                          <div key={i} className="aspect-square bg-white/5 rounded-3xl border border-white/10 overflow-hidden group/item">
-                             <div className="w-full h-full bg-brand-gold/5 flex items-center justify-center text-brand-gold/20">
-                                <span className="text-[10px] font-black uppercase tracking-widest italic">Live Feed #{i}</span>
+                        {model.images.slice(0, 4).map((img, i) => (
+                          <div key={i} className="aspect-square rounded-3xl border border-white/10 overflow-hidden relative group/item">
+                             <Image src={img} fill className="object-cover group-hover/item:scale-110 transition-transform duration-700" alt="Preview" />
+                             <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[8px] font-bold uppercase tracking-widest text-white/80">
+                                4K Foto #{i+1}
                              </div>
                           </div>
                         ))}
                     </div>
                   ) : (
-                    config.exclusive ? (
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* Realistic exclusive blurred thumbnails */}
-                        {[1,2,3,4].map(i => (
-                          <div key={i} className="aspect-square bg-white/5 rounded-3xl border border-brand-pink/10 overflow-hidden relative group/item">
-                             <div className="absolute inset-0 bg-brand-pink/5 blur-2xl opacity-50" />
-                             <div className="w-full h-full flex flex-col items-center justify-center gap-3 relative z-10">
-                                <div className="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/30 flex items-center justify-center text-brand-pink">
-                                   <Lock size={16} />
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-3 gap-3">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                          <div key={i} className="aspect-square bg-white/5 rounded-2xl border border-brand-gold/20 overflow-hidden relative group/item">
+                             <div className="absolute inset-0 bg-brand-gold/10 backdrop-blur-xl" />
+                             <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 relative z-10">
+                                <div className="w-8 h-8 rounded-full bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center text-brand-gold">
+                                   <Lock size={12} />
                                 </div>
-                                <span className="text-[8px] text-brand-pink font-black uppercase tracking-widest italic">Contenido VIP</span>
-                             </div>
-                             <div className="absolute inset-x-0 bottom-4 px-4 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                <button className="w-full py-2 bg-brand-pink text-white text-[8px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-brand-pink/20">
-                                   Ver Ahora
-                                </button>
+                                <span className="text-[7px] text-brand-gold font-black uppercase tracking-widest">VIP #{i}</span>
                              </div>
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <div className="py-20 text-center glass-premium rounded-[3rem] border border-brand-gold/20 space-y-6">
-                         <div className="w-16 h-16 rounded-full bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center text-brand-gold mx-auto animate-bounce-subtle">
-                            <Crown size={32} />
-                         </div>
-                         <div className="space-y-2">
-                            <h4 className="text-xl font-serif text-white italic">Sección Exclusiva</h4>
-                            <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black max-w-[200px] mx-auto leading-relaxed">
-                               Esta sección solo está disponible para planes 
-                               <span className="text-brand-gold"> Diamante</span> y <span className="text-brand-gold">VIP Elite</span>.
-                            </p>
-                         </div>
-                         <button className="px-8 py-4 bg-brand-gold text-brand-black text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:scale-105 transition-all shadow-[0_0_20px_#D4AF37]">
-                            Potenciar Perfil Ahora
-                         </button>
+
+                      <div className="p-6 rounded-3xl glass-obsidian border border-brand-gold/30 text-center space-y-4">
+                        <div className="w-12 h-12 rounded-full bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center text-brand-gold mx-auto">
+                          <Crown size={24} />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-lg font-serif text-white italic">Bóveda Privada de {model.name}</h4>
+                          <p className="text-[9px] text-white/50 uppercase tracking-widest font-black max-w-xs mx-auto">
+                            Accede a fotos y videos inéditos contactando directamente por WhatsApp Seguro.
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleContact}
+                          className="px-8 py-3.5 bg-brand-gold text-brand-black text-[9px] font-black uppercase tracking-[0.25em] rounded-full hover:scale-105 transition-all shadow-[0_0_20px_rgba(212,168,67,0.4)]"
+                        >
+                          Desbloquear por WhatsApp
+                        </button>
                       </div>
-                    )
+                    </div>
                   )}
                 </div>
             </div>
@@ -423,52 +497,44 @@ export default function ModelProfile({ model }: ModelProfileProps) {
         </div>
       </div>
 
-      {/* FIXED CONVERSION BAR - Uber Order Bottom style */}
+      {/* FIXED OBSIDIAN CONVERSION BAR */}
       <div className="fixed bottom-0 inset-x-0 z-[120] p-6 flex justify-center pointer-events-none">
-         <div className="max-w-2xl w-full pointer-events-auto">
-            <div className="glass-premium bg-brand-black/95 backdrop-blur-2xl border border-brand-gold/30 px-6 py-6 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.8)] flex flex-col md:flex-row items-center gap-6">
-               <div className="flex-1 flex items-center gap-4">
-                  <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-brand-gold/30">
+         <div className="max-w-3xl w-full pointer-events-auto">
+            <div className="glass-obsidian px-6 py-5 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.9)] flex flex-col sm:flex-row items-center justify-between gap-4 border border-brand-gold/35">
+               <div className="flex items-center gap-4 w-full sm:w-auto">
+                  <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-brand-gold/40 flex-shrink-0">
                      <Image src={model.images[0]} fill className="object-cover" alt="Avatar" />
                   </div>
                   <div className="flex flex-col">
-                     <span className="text-xl font-serif text-white italic">{model.name}</span>
-                     <div className="flex items-center gap-3">
-                        <span className="text-[9px] text-brand-gold font-black uppercase tracking-widest flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                     <div className="flex items-center gap-2">
+                        <span className="text-xl font-serif text-white italic">{model.name}</span>
+                        <span className="text-[8px] px-2 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold font-bold">VIP</span>
+                     </div>
+                     <div className="flex items-center gap-2.5">
+                        <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                            {availabilityLabel}
                         </span>
-                        <div className="w-1 h-1 rounded-full bg-white/10" />
-                        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest">
-                           Contacto protegido
+                        <div className="w-1 h-1 rounded-full bg-white/20" />
+                        <span className="text-[8px] text-white/50 uppercase font-bold tracking-wider">
+                           Tarifa: {selectedRate === '1h' ? '$100/h' : selectedRate === '2h' ? '$180/2h' : '$450/Noche'}
                         </span>
                      </div>
                   </div>
                </div>
 
-               <button 
-                 onClick={handleContact}
-                 className="w-full md:w-auto px-12 py-5 bg-brand-gold hover:bg-white text-brand-black rounded-[1.5rem] font-black text-xs uppercase tracking-[0.4em] transition-all transform hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-3 shadow-2xl shadow-brand-gold/20"
-               >
-                  <MessageCircle size={18} fill="currentColor" />
-                  SOLICITAR DISPONIBILIDAD
-               </button>
+               <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button 
+                    onClick={handleContact}
+                    className="flex-1 sm:flex-none px-8 py-4 bg-brand-gold hover:bg-white text-brand-black rounded-2xl font-black text-[11px] uppercase tracking-[0.25em] transition-all transform hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-2.5 shadow-xl shadow-brand-gold/25"
+                  >
+                     <MessageCircle size={16} fill="currentColor" />
+                     WHATSAPP DIRECTO
+                  </button>
+               </div>
             </div>
          </div>
       </div>
-
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.2); border-radius: 10px; }
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
-        .animate-bounce-subtle { animation: bounce-subtle 4s infinite ease-in-out; }
-        .animate-spin-slow { animation: spin 10s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
     </div>
   );
 }

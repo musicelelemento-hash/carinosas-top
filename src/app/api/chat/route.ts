@@ -1,10 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 import { getClientKey, isRateLimited } from "@/lib/rateLimit";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const ECUADOR_CITIES = [
   "Quito", "Guayaquil", "Cuenca", "Manta", "Machala", "Ambato", "Loja", "Riobamba", 
