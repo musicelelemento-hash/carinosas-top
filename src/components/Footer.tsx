@@ -1,64 +1,57 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, Lock, CheckCircle, Gem, MapPin } from "lucide-react";
+import { ShieldCheck, Lock, Gem, MapPin, Sparkles, Heart } from "lucide-react";
 
 export default function Footer() {
-  const cities = ['Quito', 'Guayaquil', 'Cuenca', 'Manta', 'Salinas', 'Ambato', 'Loja', 'Ibarra'];
+  const cities = ['Quito Norte', 'Cumbayá VIP', 'Guayaquil', 'Samborondón', 'Cuenca', 'Manta 5★', 'Salinas', 'Ambato', 'Loja', 'Machala'];
 
   return (
-    <footer className="relative overflow-hidden" style={{ background: '#040406', borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+    <footer className="relative overflow-hidden bg-[#040406] border-t border-brand-gold/15">
 
-      {/* Top gold line */}
-      <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.5), rgba(201,168,76,0.7), rgba(201,168,76,0.5), transparent)' }} />
+      {/* Top gold ambient line */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-gold/60 to-transparent" />
 
       {/* Background grid */}
-      <div className="absolute inset-0 grid-lines opacity-40" />
+      <div className="absolute inset-0 grid-lines opacity-20 pointer-events-none" />
 
-      {/* Gold orb */}
-      <div className="absolute bottom-0 right-[20%] w-[500px] h-[300px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(201,168,76,0.04) 0%, transparent 70%)', filter: 'blur(40px)' }}
-      />
+      {/* Gold ambient orb */}
+      <div className="absolute bottom-0 right-[20%] w-[500px] h-[300px] pointer-events-none bg-brand-gold/5 blur-[100px]" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
         {/* Main section */}
-        <div className="py-20 grid grid-cols-1 md:grid-cols-12 gap-16">
+        <div className="py-20 grid grid-cols-1 md:grid-cols-12 gap-12">
 
-          {/* Brand col */}
-          <div className="md:col-span-5 space-y-7">
-            {/* Logo */}
+          {/* Brand Column */}
+          <div className="md:col-span-5 space-y-6">
             <div>
-              <div className="flex items-baseline gap-0 mb-1">
-                <span className="font-serif font-bold text-[1.8rem] tracking-[0.06em]" style={{
-                  background: 'linear-gradient(135deg, #F5E0A0 0%, #C9A84C 40%, #9A7B35 70%, #C9A84C 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>CARIÑOSAS</span>
-                <span className="font-serif font-bold text-[1.8rem] text-white/60 tracking-[0.06em]">.TOP</span>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="font-serif font-bold text-3xl sm:text-4xl italic bg-gradient-to-r from-[#F5E0A0] via-[#D4A843] to-[#F5E0A0] bg-clip-text text-transparent">
+                  CARIÑOSAS
+                </span>
+                <span className="font-serif font-bold text-3xl sm:text-4xl text-white">.TOP</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-px w-5 bg-brand-gold/40" />
-                <span className="text-[8px] text-brand-gold/30 uppercase font-black tracking-[0.6em]">Directorio Élite Digital</span>
+                <div className="h-px w-6 bg-brand-gold/50" />
+                <span className="text-[8px] text-brand-gold uppercase font-black tracking-[0.5em]">Directorio Élite Digital Ecuador</span>
               </div>
             </div>
 
-            <p className="body-sm text-white/45 leading-relaxed max-w-xs">
-              El estándar de oro en servicios premium y exclusividad en Ecuador.
+            <p className="text-xs text-white/50 leading-relaxed max-w-sm">
+              El círculo privado de mayor prestigio y discreción para caballeros de alto perfil y modelos independientes en Ecuador.
             </p>
 
-            {/* Cities */}
+            {/* Coverage Cities */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin size={11} className="text-brand-gold/55" />
-                <span className="label-xs text-brand-gold/50">Cobertura Nacional</span>
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin size={12} className="text-brand-gold" />
+                <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest">Cobertura Exclusiva Nacional</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {cities.map(city => (
                   <span key={city}
-                    className="px-3 py-1.5 rounded-full label-xs text-white/45 hover:text-brand-gold/70 transition-colors cursor-default"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    className="px-3 py-1 rounded-full text-[9px] text-white/60 hover:text-brand-gold transition-colors glass-obsidian border border-white/10"
                   >
                     {city}
                   </span>
@@ -68,41 +61,43 @@ export default function Footer() {
           </div>
 
           {/* Spacer */}
-          <div className="md:col-span-1" />
+          <div className="hidden md:block md:col-span-1" />
 
-          {/* Security */}
-          <div className="md:col-span-3 space-y-6">
-            <h4 className="label-sm text-brand-gold/75 border-b border-brand-gold/12 pb-3">Seguridad VIP</h4>
-            <div className="space-y-4">
+          {/* Security & Privacy */}
+          <div className="md:col-span-3 space-y-5">
+            <h4 className="text-[10px] font-black text-brand-gold uppercase tracking-[0.3em] border-b border-brand-gold/20 pb-3">
+              Seguridad & Blindaje VIP
+            </h4>
+            <div className="space-y-3.5">
               {[
-                { icon: ShieldCheck, text: 'Fotos 100% Verificadas', color: 'text-brand-pink' },
-                { icon: Lock, text: 'Privacidad Encriptada', color: 'text-brand-gold' },
-                { icon: Gem, text: 'Identidad Auditada', color: 'text-brand-gold' },
+                { icon: ShieldCheck, text: 'Verificación 4K Manual', color: 'text-brand-gold' },
+                { icon: Lock, text: 'Encriptación AES-256', color: 'text-brand-gold' },
+                { icon: Gem, text: 'Discreción Absoluta', color: 'text-brand-gold' },
               ].map(({ icon: Icon, text, color }) => (
                 <div key={text} className="flex items-center gap-3 group">
-                  <Icon size={16} className={`${color} transition-transform group-hover:scale-110 duration-300`} />
-                  <span className="body-sm text-white/55 group-hover:text-white/80 transition-colors">{text}</span>
+                  <Icon size={16} className={`${color} transition-transform group-hover:scale-110`} />
+                  <span className="text-xs text-white/60 group-hover:text-white transition-colors">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Badges */}
-          <div className="md:col-span-3 space-y-6">
-            <h4 className="label-sm text-brand-gold/75 border-b border-brand-gold/12 pb-3">Certificaciones</h4>
-            <div className="space-y-3">
+          {/* Trust Certifications */}
+          <div className="md:col-span-3 space-y-5">
+            <h4 className="text-[10px] font-black text-brand-gold uppercase tracking-[0.3em] border-b border-brand-gold/20 pb-3">
+              Certificaciones
+            </h4>
+            <div className="space-y-2.5">
               {[
-                { icon: '18+', label: 'Solo Adultos', sub: 'Acceso restringido +18' },
-                { icon: '✓', label: 'Pago Seguro', sub: 'Transacciones cifradas' },
-                { icon: '♦', label: 'Verificado Élite', sub: 'Sello de exclusividad' },
+                { icon: '18+', label: 'Solo Adultos', sub: 'Acceso Estricto +18' },
+                { icon: '✓', label: 'WhatsApp Seguro', sub: 'Canal Directo Encriptado' },
+                { icon: '★', label: 'Sello Alpha 4K', sub: 'Exclusividad Garantizada' },
               ].map(({ icon, label, sub }) => (
-                <div key={label} className="flex items-center gap-4 p-3 rounded-xl group hover:scale-[1.02] transition-transform duration-300 cursor-default"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-                >
-                  <span className="font-serif font-bold text-base text-brand-gold/80 w-8 text-center shrink-0">{icon}</span>
+                <div key={label} className="flex items-center gap-3.5 p-3 rounded-2xl glass-obsidian border border-white/10 group hover:border-brand-gold/30 transition-all">
+                  <span className="font-serif font-bold text-sm text-brand-gold w-6 text-center shrink-0">{icon}</span>
                   <div>
-                    <div className="body-sm font-bold text-white/70">{label}</div>
-                    <div className="label-xs text-white/35">{sub}</div>
+                    <div className="text-xs font-bold text-white/80">{label}</div>
+                    <div className="text-[9px] text-white/40">{sub}</div>
                   </div>
                 </div>
               ))}
@@ -112,30 +107,23 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="divider-gold" />
+        <div className="h-[1px] w-full bg-white/10" />
 
         {/* Bottom bar */}
         <div className="py-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="space-y-3">
-            <p className="body-sm text-white/35 text-center md:text-left">
-              Cariñosas.top © 2026 · Todos los Derechos Reservados
+          <div className="space-y-2 text-center md:text-left">
+            <p className="text-xs text-white/40">
+              Cariñosas.top © 2026 · Todos los Derechos Reservados · Ecuador
             </p>
-            {/* SEO Block */}
-            <p className="text-[7px] text-white/[0.06] leading-relaxed uppercase tracking-widest max-w-3xl text-justify select-none">
-              Directorio #1 de Cariñosas en Quito, Guayaquil y todo el Ecuador. Encuentra las mejores acompañantes VIP, escorts independientes y
-              servicios de lujo en sectores exclusivos como La Carolina, Samborondón y Manta. Superamos los estándares de plataformas como Skokka,
-              ofreciendo fotos 100% verificadas, discreción total y una experiencia premium inigualable.
+            <p className="text-[8px] text-white/20 leading-relaxed uppercase tracking-widest max-w-2xl">
+              Plataforma digital para mayores de 18 años. Anuncios independientes de acompañamiento y modelaje en Quito, Guayaquil y todo Ecuador.
             </p>
           </div>
 
-          <div className="flex items-center gap-8">
-            {['Términos', 'Privacidad', 'Contacto'].map(link => (
-              <a key={link} href="#"
-                className="label-xs text-white/35 hover:text-brand-gold/70 transition-colors duration-300"
-              >
-                {link}
-              </a>
-            ))}
+          <div className="flex items-center gap-6 text-[10px] text-white/40 uppercase tracking-widest font-black">
+            <a href="/registro" className="hover:text-brand-gold transition-colors">Registro de Modelos</a>
+            <a href="/admin" className="hover:text-brand-gold transition-colors">Administración</a>
+            <a href="https://wa.me/593987654321" target="_blank" className="text-brand-gold hover:underline">Soporte VIP</a>
           </div>
         </div>
 

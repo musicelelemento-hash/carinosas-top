@@ -1,19 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Sparkles, MapPin, Diamond } from "lucide-react";
+import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck } from "lucide-react";
 
 interface NavbarProps {
   onChangeLocation?: () => void;
 }
 
 export default function Navbar({ onChangeLocation }: NavbarProps) {
-  const [scrolled, setScrolled] = React.useState(false);
-  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  React.useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40);
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -22,22 +22,22 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
     <>
       <nav className={`fixed top-0 w-full z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
         scrolled
-          ? "bg-[#08080C]/90 backdrop-blur-[30px] border-b border-[rgba(212,168,67,0.12)] shadow-[0_4px_30px_rgba(0,0,0,0.7)]"
+          ? "bg-[#08080C]/90 backdrop-blur-2xl border-b border-brand-gold/20 shadow-[0_10px_35px_rgba(0,0,0,0.8)]"
           : "bg-transparent"
       }`}>
 
-        {/* Top ultra-thin gold line */}
+        {/* Top gold line */}
         <div className={`h-[1px] w-full transition-opacity duration-700 ${scrolled ? 'opacity-0' : 'opacity-100'}`}
           style={{ background: 'linear-gradient(90deg, transparent, rgba(212,168,67,0.6), rgba(212,168,67,0.9), rgba(212,168,67,0.6), transparent)' }}
         />
 
-        <div className="max-w-[1700px] mx-auto px-8 md:px-14">
-          <div className={`flex justify-between items-center transition-all duration-700 ${scrolled ? 'h-[68px]' : 'h-[88px]'}`}>
+        <div className="max-w-[1700px] mx-auto px-6 md:px-12">
+          <div className={`flex justify-between items-center transition-all duration-700 ${scrolled ? 'h-[70px]' : 'h-[90px]'}`}>
 
-            {/* LEFT: Logo */}
+            {/* LEFT: Brand Logo */}
             <Link href="/" className="group flex flex-col items-start gap-0.5 relative">
-              <div className="flex items-baseline gap-0">
-                <span className={`font-serif font-bold tracking-[0.08em] transition-all duration-700 leading-none ${scrolled ? 'text-[1.7rem]' : 'text-[2.1rem]'}`}
+              <div className="flex items-baseline">
+                <span className={`font-serif font-bold tracking-[0.06em] transition-all duration-700 leading-none ${scrolled ? 'text-2xl md:text-3xl' : 'text-3xl md:text-4xl'}`}
                   style={{
                     background: 'linear-gradient(135deg, #F8E5AE 0%, #D4A843 40%, #9A7830 65%, #D4A843 100%)',
                     WebkitBackgroundClip: 'text',
@@ -47,96 +47,88 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
                 >
                   CARIÑOSAS
                 </span>
-                <span className={`font-serif font-bold tracking-[0.08em] text-white/95 transition-all duration-700 leading-none ${scrolled ? 'text-[1.7rem]' : 'text-[2.1rem]'}`}>
+                <span className={`font-serif font-bold tracking-[0.06em] text-white transition-all duration-700 leading-none ${scrolled ? 'text-2xl md:text-3xl' : 'text-3xl md:text-4xl'}`}>
                   .TOP
                 </span>
               </div>
-              <div className="flex items-center gap-2.5 group-hover:opacity-80 transition-opacity">
-                <div className="h-px w-6 bg-brand-gold/60" />
-                <span className="text-[10px] text-brand-gold/60 uppercase tracking-[0.45em] font-bold">
-                  Directorio Élite Digital
+              <div className="flex items-center gap-2 group-hover:opacity-80 transition-opacity">
+                <div className="h-px w-5 bg-brand-gold/60" />
+                <span className="text-[8px] md:text-[9px] text-brand-gold/70 uppercase tracking-[0.4em] font-bold">
+                  Directorio Élite Ecuador
                 </span>
               </div>
             </Link>
 
-            {/* CENTER: Nav Links */}
-            <div className="hidden lg:flex items-center gap-1">
+            {/* CENTER: Navigation Links */}
+            <div className="hidden lg:flex items-center gap-2">
               {[
-                { href: '/#mapa', icon: <MapPin size={12} />, label: 'Radar en Vivo' },
-                { href: '/#collection', icon: <Sparkles size={12} />, label: 'Catálogo' },
+                { href: '/#mapa', icon: <MapPin size={13} />, label: 'Radar GPS' },
+                { href: '/#collection', icon: <Sparkles size={13} />, label: 'Catálogo 4K' },
               ].map(({ href, icon, label }) => (
                 <Link key={href} href={href}
-                  className="group flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] text-white/55 hover:text-white font-bold uppercase tracking-[0.22em] transition-all hover:bg-white/5"
+                  className="group flex items-center gap-2 px-5 py-2 rounded-full text-[10px] text-white/60 hover:text-white font-black uppercase tracking-[0.2em] transition-all glass-obsidian border border-transparent hover:border-brand-gold/30"
                 >
-                  <span className="text-brand-gold/60 group-hover:text-brand-gold transition-colors">{icon}</span>
+                  <span className="text-brand-gold group-hover:scale-110 transition-transform">{icon}</span>
                   {label}
                 </Link>
               ))}
             </div>
 
-            {/* RIGHT: CTA */}
-            <div className="flex items-center gap-4 md:gap-6">
+            {/* RIGHT: Actions */}
+            <div className="flex items-center gap-3 md:gap-5">
 
-              {/* Location change button */}
+              {/* Change Location */}
               {onChangeLocation && (
                 <button
                   onClick={onChangeLocation}
-                  className="hidden sm:flex items-center gap-1.5 text-[10px] text-white/40 hover:text-brand-gold/80 uppercase tracking-[0.2em] font-bold transition-all"
+                  className="hidden sm:flex items-center gap-1.5 text-[9px] text-white/50 hover:text-brand-gold uppercase tracking-widest font-bold transition-all px-3 py-1.5 rounded-full glass-dark border border-white/10"
                 >
-                  <MapPin size={12} className="text-brand-gold/50" />
-                  <span>Ubicación</span>
+                  <MapPin size={11} className="text-brand-gold" />
+                  <span>Ciudad</span>
                 </button>
               )}
 
               <Link
                 href="/admin"
-                className="hidden sm:flex items-center gap-2 text-[11px] text-white/50 hover:text-white/90 uppercase tracking-[0.22em] font-bold transition-all"
+                className="hidden sm:flex items-center gap-2 text-[10px] text-white/50 hover:text-white uppercase tracking-widest font-bold transition-all"
               >
-                <User size={14} className="text-brand-gold/70" />
-                Ingreso
+                <User size={13} className="text-brand-gold" />
+                Admin
               </Link>
 
+              {/* Join as Model CTA */}
               <Link
                 href="/registro"
-                className="relative group overflow-hidden px-7 py-3 rounded-xl font-bold text-[11px] uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 hover:-translate-y-0.5"
-                style={{
-                  background: 'linear-gradient(135deg, #E8BC50 0%, #D4A843 50%, #BC8E2C 100%)',
-                  color: '#0A0808',
-                  boxShadow: '0 4px 20px rgba(212,168,67,0.4), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                }}
+                className="relative group overflow-hidden px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-[0_4px_20px_rgba(212,168,67,0.35)] bg-brand-gold text-brand-black hover:bg-white flex items-center gap-2"
               >
-                <span className="relative z-10 flex items-center gap-2">
-                  <Diamond size={11} className="fill-current" />
-                  Únete a la Élite
-                </span>
-                {/* Shimmer on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out" />
+                <Diamond size={12} className="fill-current" />
+                <span>Únete a la Élite</span>
               </Link>
 
-              {/* Mobile hamburger */}
+              {/* Mobile Hamburger */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="lg:hidden w-10 h-10 rounded-xl border border-white/10 flex flex-col items-center justify-center gap-1.5 text-white/55 hover:text-white hover:border-brand-gold/40 transition-all"
+                className="lg:hidden w-10 h-10 rounded-2xl glass-obsidian border border-white/15 flex flex-col items-center justify-center gap-1.5 text-white hover:border-brand-gold/50 transition-all"
               >
-                <span className={`w-5 h-[1.5px] bg-current rounded-full transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[5px]' : ''}`} />
-                <span className={`w-3.5 h-[1.5px] bg-current rounded-full transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} />
-                <span className={`w-5 h-[1.5px] bg-current rounded-full transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[5px]' : ''}`} />
+                <span className={`w-4 h-[1.5px] bg-brand-gold rounded-full transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[4.5px]' : ''}`} />
+                <span className={`w-3 h-[1.5px] bg-white rounded-full transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
+                <span className={`w-4 h-[1.5px] bg-brand-gold rounded-full transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[4.5px]' : ''}`} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile menu */}
-        <div className={`lg:hidden transition-all duration-500 overflow-hidden ${menuOpen ? 'max-h-52 opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="bg-[#08080C]/98 backdrop-blur-[30px] border-t border-white/6 px-8 py-6 space-y-5">
-            <Link href="/#mapa" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-[11px] text-white/55 hover:text-white uppercase tracking-[0.25em] font-bold transition-colors">
-              <MapPin size={14} className="text-brand-gold" /> Radar en Vivo
+        {/* Mobile menu dropdown */}
+        <div className={`lg:hidden transition-all duration-500 overflow-hidden ${menuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="glass-obsidian border-t border-brand-gold/20 px-8 py-6 space-y-4 shadow-2xl">
+            <Link href="/#mapa" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
+              <MapPin size={14} className="text-brand-gold" /> Radar GPS en Vivo
             </Link>
-            <Link href="/#collection" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-[11px] text-white/55 hover:text-white uppercase tracking-[0.25em] font-bold transition-colors">
-              <Sparkles size={14} className="text-brand-gold" /> Catálogo
+            <Link href="/#collection" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
+              <Sparkles size={14} className="text-brand-gold" /> Catálogo 4K
             </Link>
-            <Link href="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-[11px] text-white/55 hover:text-white uppercase tracking-[0.25em] font-bold transition-colors">
-              <User size={14} className="text-brand-gold" /> Ingreso de Miembros
+            <Link href="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
+              <User size={14} className="text-brand-gold" /> Panel de Administración
             </Link>
           </div>
         </div>

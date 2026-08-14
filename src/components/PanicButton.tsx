@@ -1,21 +1,32 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, LogOut } from "lucide-react";
 
 export default function PanicButton() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-    return () => clearTimeout(timer);
+    setMounted(true);
+
+    // Double Escape key to quickly exit
+    let lastEsc = 0;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        const now = Date.now();
+        if (now - lastEsc < 600) {
+          window.location.href = "https://www.google.com";
+        }
+        lastEsc = now;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const handlePanic = () => {
-    // Immediate redirect to Google News for discretion
-    window.location.href = "https://news.google.com";
+    window.location.href = "https://www.google.com";
   };
 
   if (!mounted) return null;
@@ -23,15 +34,14 @@ export default function PanicButton() {
   return (
     <button
       onClick={handlePanic}
-      className="fixed bottom-6 left-6 z-[100] group flex items-center gap-3 bg-brand-black/40 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-full hover:bg-brand-pink/20 hover:border-brand-pink/50 transition-all active:scale-95 shadow-2xl"
-      title="Incógnito Flash (Salida Rápida)"
+      className="fixed bottom-6 right-6 md:right-24 z-[80] group flex items-center gap-2.5 glass-obsidian border border-white/15 px-4 py-2.5 rounded-full hover:border-brand-pink/60 hover:bg-brand-pink/15 transition-all active:scale-95 shadow-2xl"
+      title="Salida Rápida Discreta (Doble Esc)"
     >
       <div className="relative">
-        <ShieldAlert className="text-brand-pink group-hover:animate-pulse" size={20} />
-        <div className="absolute inset-0 bg-brand-pink/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+        <ShieldAlert className="text-brand-pink group-hover:animate-pulse" size={16} />
       </div>
-      <span className="text-xs font-bold text-brand-white/70 group-hover:text-brand-white uppercase tracking-tighter">
-        Salir Rápido
+      <span className="text-[10px] font-black text-white/60 group-hover:text-white uppercase tracking-wider hidden sm:inline">
+        Salida Rápida
       </span>
     </button>
   );
