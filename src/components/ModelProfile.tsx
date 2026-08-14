@@ -27,6 +27,7 @@ import {
   Eye
 } from "lucide-react";
 import Link from "next/link";
+import VIPRatings from "@/components/VIPRatings";
 
 // Swiper styles
 import "swiper/css";
@@ -55,7 +56,7 @@ interface ModelProfileProps {
 }
 
 export default function ModelProfile({ model }: ModelProfileProps) {
-  const [activeTab, setActiveTab] = useState<'photos' | 'exclusive' | 'vault'>('photos');
+  const [activeTab, setActiveTab] = useState<'photos' | 'exclusive' | 'reviews'>('photos');
   const [selectedRate, setSelectedRate] = useState<'1h' | '2h' | 'night'>('1h');
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -449,32 +450,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                 </div>
             </div>
 
-            {/* Verified Reviews Section */}
-            <div className="space-y-8 pt-12 pb-12 border-t border-white/5">
-               <div className="flex items-center justify-between">
-                  <h3 className="text-[10px] text-white/30 uppercase font-black tracking-[0.5em] ml-1">Verified Reviews</h3>
-                  <div className="flex items-center gap-1 text-brand-gold">
-                     <Star size={12} fill="currentColor" />
-                     <span className="text-xs font-black">4.9/5</span>
-                  </div>
-               </div>
-               
-               <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-                  {MOCK_REVIEWS.map((review, i) => (
-                    <div key={i} className="flex-shrink-0 w-72 p-6 glass-dark border border-white/5 rounded-3xl space-y-3">
-                       <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-white font-black uppercase tracking-widest">{review.name}</span>
-                          <span className="text-[8px] text-white/30 font-black uppercase tracking-widest">{review.date}</span>
-                       </div>
-                       <div className="flex gap-0.5">
-                          {[...Array(review.rating)].map((_, i) => (
-                            <Star key={i} size={10} className="text-brand-gold fill-brand-gold" />
-                          ))}
-                       </div>
-                       <p className="text-xs text-white/60 leading-relaxed italic">&quot;{review.comment}&quot;</p>
-                    </div>
-                  ))}
-               </div>
+            {/* VIP Loyalty & Verified Reputation Section */}
+            <div className="pt-12 pb-12 border-t border-white/10">
+               <VIPRatings />
             </div>
 
             {/* Services Grid - Magazine style icons */}

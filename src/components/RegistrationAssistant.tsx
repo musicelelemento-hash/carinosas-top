@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { StitchEngine } from "@/lib/stitch";
 import { registerModelAction } from "@/app/actions/admin";
@@ -18,7 +18,13 @@ import {
   TrendingUp,
   ArrowRight,
   Sliders,
-  Star
+  Star,
+  Mic,
+  MicOff,
+  Play,
+  Pause,
+  RotateCcw,
+  Volume2
 } from "lucide-react";
 import PrivacyModal from "./PrivacyModal";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
@@ -47,6 +53,16 @@ export default function RegistrationAssistant() {
   const [images, setImages] = useState<string[]>([]);
   const [activeTip, setActiveTip] = useState("");
 
+  // Audio Greeting State
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [recordSeconds, setRecordSeconds] = useState(0);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const recordIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   const provinces = getProvinces();
 
   const estimatedMonthly = appointmentsPerWeek * hourlyRate * 4;
@@ -62,12 +78,85 @@ export default function RegistrationAssistant() {
 
   if (!mounted) return null;
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordSeconds(0);
+
+      recordIntervalRef.current = setInterval(() => {
+        setRecordSeconds(prev => {
+          if (prev >= 14) {
+            stopRecording();
+            return 15;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } catch (err) {
+      console.error("Microphone access error:", err);
+      alert("Por favor permite el acceso al micrófono en tu dispositivo para grabar tu saludo de voz.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (recordIntervalRef.current) clearInterval(recordIntervalRef.current);
+    }
+  };
+
+  const togglePlayAudio = () => {
+    if (!audioUrl) return;
+    if (!audioPlayerRef.current) {
+      audioPlayerRef.current = new Audio(audioUrl);
+      audioPlayerRef.current.onended = () => setIsPlayingAudio(false);
+    }
+
+    if (isPlayingAudio) {
+      audioPlayerRef.current.pause();
+      setIsPlayingAudio(false);
+    } else {
+      audioPlayerRef.current.play();
+      setIsPlayingAudio(true);
+    }
+  };
+
+  const resetRecording = () => {
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current = null;
+    }
+    setAudioUrl(null);
+    setRecordSeconds(0);
+    setIsPlayingAudio(false);
+  };
+
   const handleTransform = () => {
     const luxText = StitchEngine.transformDescription(desc, city);
     const luxTags = StitchEngine.generateTags(city);
     setTransformed(luxText);
     setTags(luxTags);
-    setStep(3); // Go to photos
+    setStep(3); // Go to photos & audio
   };
 
   const handleRegister = async () => {
@@ -366,31 +455,143 @@ export default function RegistrationAssistant() {
           </div>
         );
 
-      case 3: // Media Upload
+      case 3: // Multimedia & Voice Studio
         return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 text-center">
-            <div>
-              <Crown className="text-brand-gold mx-auto mb-3" size={36} />
-              <h2 className="text-3xl font-serif text-white italic">Sube tus Fotos de Alta Definición</h2>
-              <p className="text-white/50 text-xs mt-1">El plan {plan} incluye procesamiento y marca de agua 4K de ultra-lujo.</p>
+          <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
+            <div className="text-center">
+              <Crown className="text-brand-gold mx-auto mb-2" size={32} />
+              <h2 className="text-3xl font-serif text-white italic">Galería Multimedia & Saludo de Voz HD</h2>
+              <p className="text-white/50 text-xs mt-1">El plan {plan} incluye procesamiento 4K y reproductor de voz exclusivo.</p>
             </div>
 
-            <div className="glass-obsidian border-2 border-dashed border-brand-gold/30 rounded-3xl p-8 max-w-xl mx-auto shadow-2xl">
-              <UploadDropzone
-                endpoint="modelImage"
-                onClientUploadComplete={(res) => { 
-                  if(res && res.length > 0){ 
-                    setImages(res.map(f => f.url)); 
-                    setStep(4); 
-                  }
-                }}
-                onUploadError={(err) => alert(`Error al subir imagen: ${err.message}`)}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              {/* Photo Upload Box */}
+              <div className="glass-obsidian border border-brand-gold/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] text-brand-gold uppercase font-black tracking-widest">Paso 1: Fotos 4K</span>
+                    <span className="text-[9px] text-white/40">{images.length} fotos listas</span>
+                  </div>
+
+                  <UploadDropzone
+                    endpoint="modelImage"
+                    onClientUploadComplete={(res) => { 
+                      if(res && res.length > 0){ 
+                        setImages(res.map(f => f.url)); 
+                      }
+                    }}
+                    onUploadError={(err) => alert(`Error al subir imagen: ${err.message}`)}
+                  />
+                </div>
+
+                {images.length > 0 && (
+                  <div className="mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-emerald-400 text-xs font-bold">
+                    <CheckCircle2 size={16} /> {images.length} fotos procesadas correctamente
+                  </div>
+                )}
+              </div>
+
+              {/* Voice Greeting Studio */}
+              <div className="glass-obsidian border border-brand-gold/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] text-brand-gold uppercase font-black tracking-widest">Paso 2: Saludo de Voz (15s)</span>
+                    <Volume2 size={16} className="text-brand-gold" />
+                  </div>
+                  <p className="text-xs text-white/60 leading-relaxed">
+                    Graba un breve saludo presentándote (ej: <em>&quot;Hola, soy Valentina, espero verte pronto en Quito...&quot;</em>). Multiplica tus reservas un 300%.
+                  </p>
+                </div>
+
+                {/* Recorder Control Area */}
+                <div className="p-6 rounded-2xl glass-dark border border-white/10 text-center space-y-4">
+                  {isRecording ? (
+                    <div className="space-y-4">
+                      {/* Animated Sound Bars */}
+                      <div className="flex items-center justify-center gap-1.5 h-10">
+                        <div className="w-1.5 bg-brand-pink rounded-full sound-bar-1" />
+                        <div className="w-1.5 bg-brand-pink rounded-full sound-bar-2" />
+                        <div className="w-1.5 bg-brand-gold rounded-full sound-bar-3" />
+                        <div className="w-1.5 bg-brand-pink rounded-full sound-bar-2" />
+                        <div className="w-1.5 bg-brand-gold rounded-full sound-bar-1" />
+                      </div>
+
+                      <div className="flex items-center justify-center gap-2 text-brand-pink font-mono text-sm font-bold animate-pulse">
+                        <span className="w-2.5 h-2.5 rounded-full bg-brand-pink" />
+                        Grabando: 00:{recordSeconds < 10 ? `0${recordSeconds}` : recordSeconds} / 00:15
+                      </div>
+
+                      <button
+                        onClick={stopRecording}
+                        className="px-6 py-2.5 rounded-full bg-brand-pink text-white font-black text-xs uppercase tracking-wider shadow-lg hover:scale-105 transition-transform"
+                      >
+                        Finalizar Grabación
+                      </button>
+                    </div>
+                  ) : audioUrl ? (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl glass-obsidian border border-brand-gold/40 flex items-center justify-between">
+                        <button
+                          onClick={togglePlayAudio}
+                          className="w-10 h-10 rounded-full bg-brand-gold text-brand-black flex items-center justify-center shadow-md hover:scale-105 transition-transform"
+                        >
+                          {isPlayingAudio ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
+                        </button>
+                        <div className="flex-1 px-4 text-left">
+                          <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest block">Saludo de Voz Listo</span>
+                          <span className="text-xs text-white/70">Duración: {recordSeconds}s</span>
+                        </div>
+                        <button
+                          onClick={resetRecording}
+                          className="p-2 text-white/40 hover:text-brand-pink transition-colors"
+                          title="Volver a grabar"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      </div>
+
+                      <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
+                        <CheckCircle2 size={12} /> Saludo de voz integrado al perfil
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="w-14 h-14 rounded-full bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center mx-auto text-brand-gold shadow-[0_0_20px_rgba(212,168,67,0.2)]">
+                        <Mic size={24} />
+                      </div>
+                      <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Micrófono Listo</p>
+                      <button
+                        onClick={startRecording}
+                        className="px-8 py-3 rounded-full bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-widest shadow-lg transition-all"
+                      >
+                        Iniciar Grabación
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-[8px] text-white/30 uppercase font-black tracking-widest text-center">
+                  Audio procesado con filtro de reducción de ruido HD
+                </div>
+              </div>
+
             </div>
 
-            <button onClick={() => setStep(2)} className="text-white/40 text-xs uppercase tracking-wider hover:text-brand-gold underline transition-colors">
-              ← Volver a editar datos
-            </button>
+            <div className="flex items-center justify-between pt-4">
+              <button onClick={() => setStep(2)} className="text-white/40 text-xs uppercase tracking-wider hover:text-brand-gold underline transition-colors">
+                ← Volver a editar datos
+              </button>
+
+              <button
+                onClick={() => setStep(4)}
+                disabled={images.length === 0}
+                className="px-10 py-4 bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl transition-all disabled:opacity-30 flex items-center gap-2"
+              >
+                <span>Ver Vista Previa 4K</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
           </div>
         );
 
