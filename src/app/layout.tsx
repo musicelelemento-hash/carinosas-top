@@ -20,7 +20,7 @@ const alexBrush = Alex_Brush({
 
 export const metadata: Metadata = {
   title: 'Cariñosas.top | Encuentros VIP en Ecuador',
-  description: 'El directorio de mayor exclusividad en Quito, Guayaquil y Cuenca. Fotos 100% verificadas',
+  description: 'Directorio de perfiles en Quito, Guayaquil y Cuenca.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

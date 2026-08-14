@@ -21,7 +21,8 @@ export default function RegistrationAssistant() {
   const [mounted, setMounted] = useState(false);
   const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(false);
   const [step, setStep] = useState(1);
-  const [plan, setPlan] = useState("Oro");
+  const [plan, setPlan] = useState("Premium");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   
   const [city, setCity] = useState("Quito");
@@ -64,7 +65,8 @@ export default function RegistrationAssistant() {
         description: transformed || StitchEngine.transformDescription(desc, city),
         tags: tags.length > 0 ? tags : StitchEngine.generateTags(city),
         images,
-        plan_type: plan
+        plan_type: plan,
+        ageConfirmed
       });
       setStep(5);
     } catch (err) {
@@ -87,15 +89,15 @@ export default function RegistrationAssistant() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { name: 'Gratis', price: '$0', features: ['Listado Base', 'WhatsApp Directo'] },
-                { name: 'Plata', price: '$25', features: ['Prioridad Bronce', 'Soporte 24/7'] },
-                { name: 'Oro', price: '$50', features: ['Stitch AI Copy', 'Posicionamiento VIP'] },
-                { name: 'Diamante', price: '$100', features: ['Top 1 Nacional', 'Verificación 4K'] }
+                { name: 'Gratis', value: 'Anuncio Gratis', price: '$0', features: ['Listado Base', 'WhatsApp Directo'] },
+                { name: 'Premium', value: 'Premium', price: '$25', features: ['Prioridad Premium', 'Soporte 24/7'] },
+                { name: 'VIP Elite', value: 'VIP Elite', price: '$50', features: ['Stitch AI Copy', 'Posicionamiento VIP'] },
+                { name: 'Diamante', value: 'Diamante', price: '$100', features: ['Top 1 Nacional', 'Verificación 4K'] }
               ].map((p) => (
                 <button 
                   key={p.name}
-                  onClick={() => { setPlan(p.name); setStep(2); }}
-                  className={`p-6 rounded-2xl border transition-all text-left ${plan === p.name ? 'border-brand-gold bg-brand-gold/10' : 'border-white/10 bg-white/5'}`}
+                  onClick={() => { setPlan(p.value); setStep(2); }}
+                  className={`p-6 rounded-2xl border transition-all text-left ${plan === p.value ? 'border-brand-gold bg-brand-gold/10' : 'border-white/10 bg-white/5'}`}
                 >
                   <div className="flex flex-col mb-4">
                     <span className="text-sm font-black text-brand-white uppercase tracking-tighter">{p.name}</span>
@@ -160,9 +162,13 @@ export default function RegistrationAssistant() {
                   <p className="text-[10px] text-brand-white/40 italic">{activeTip}</p>
                 </div>
               </div>
+              <label className="flex items-start gap-2 text-[10px] text-brand-white/60">
+                <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} className="mt-0.5" />
+                Confirmo que tengo al menos 18 años y que la información es verídica.
+              </label>
               <div className="flex gap-4">
                 <button onClick={() => setStep(1)} className="flex-1 text-brand-white/40 text-xs uppercase tracking-widest border border-white/10 rounded-xl">Volver</button>
-                <button onClick={handleTransform} disabled={!name || !whatsapp || !desc} className="flex-[3] bg-brand-gold text-brand-black font-bold py-4 rounded-xl disabled:opacity-30">Continuar a Fotos</button>
+                <button onClick={handleTransform} disabled={!name || !whatsapp || !desc || !ageConfirmed} className="flex-[3] bg-brand-gold text-brand-black font-bold py-4 rounded-xl disabled:opacity-30">Continuar a Fotos</button>
               </div>
             </div>
           </div>

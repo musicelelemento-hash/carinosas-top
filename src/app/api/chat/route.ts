@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { getClientKey, isRateLimited } from "@/lib/rateLimit";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -39,8 +40,11 @@ interface ChatModel {
 
 export async function POST(req: Request) {
   try {
+    if (isRateLimited(getClientKey(req.headers, "chat"), 20, 60 * 1000)) {
+      return NextResponse.json({ reply: "Has realizado muchas consultas. Espera un momento e inténtalo de nuevo.", models: [] }, { status: 429 });
+    }
     const { message } = await req.json();
-    if (!message || typeof message !== "string") {
+    if (!message || typeof message !== "string" || message.trim().length > 500) {
       return NextResponse.json({ reply: "Hola. ¿En qué te puedo colaborar el día de hoy? Cuéntame qué tipo de compañía o ciudad buscas." }, { status: 400 });
     }
 
@@ -76,7 +80,8 @@ export async function POST(req: Request) {
     // 2. Fetch all models to filter and score in-memory
     const { data: rawModels, error } = await supabase
       .from("models")
-      .select("id, name, city, sector, plan_type, age, images, tags, description, is_verified_4k, is_online");
+      .select("id, name, city, sector, plan_type, age, images, tags, description, is_verified_4k, is_online")
+      .limit(100);
 
     if (error) throw error;
 

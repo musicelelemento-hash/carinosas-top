@@ -1,14 +1,23 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getClientKey, isRateLimited } from "@/lib/rateLimit";
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "elite-secret-key-2026-safe";
-const DEFAULT_PASSKEY = "elite2026";
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY;
+const PLAN_TYPES = new Set(["Anuncio Gratis", "Premium", "Diamante", "VIP Elite"]);
 
 function getExpectedToken() {
+  if (!ADMIN_SECRET) throw new Error("ADMIN_SECRET no está configurada.");
   return crypto.createHmac("sha256", ADMIN_SECRET).update("admin-logged-in").digest("hex");
+}
+
+function safeEqual(left: string, right: string) {
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
 }
 
 /**
@@ -16,9 +25,11 @@ function getExpectedToken() {
  */
 export async function loginAdminAction(passkey: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const adminPasskey = process.env.ADMIN_PASSKEY || DEFAULT_PASSKEY;
+    if (!ADMIN_SECRET || !ADMIN_PASSKEY) {
+      return { success: false, error: "La administración no está configurada." };
+    }
 
-    if (passkey !== adminPasskey) {
+    if (!safeEqual(passkey, ADMIN_PASSKEY)) {
       return { success: false, error: "Contraseña incorrecta" };
     }
 
@@ -199,12 +210,20 @@ export async function registerModelAction(modelData: {
   tags?: string[];
   images?: string[];
   plan_type: string;
+  ageConfirmed: boolean;
 }) {
-  if (!modelData.name || !modelData.city || !modelData.whatsapp) {
-    throw new Error("Nombre, ciudad y WhatsApp son requeridos.");
+  if (!modelData.ageConfirmed) throw new Error("Debes confirmar que eres mayor de edad.");
+  if (!modelData.name?.trim() || modelData.name.trim().length > 80) throw new Error("El nombre no es válido.");
+  if (!modelData.city?.trim() || modelData.city.trim().length > 80) throw new Error("La ciudad no es válida.");
+  if (!/^\+?[0-9\s-]{8,20}$/.test(modelData.whatsapp)) throw new Error("El WhatsApp no es válido.");
+  if (!PLAN_TYPES.has(modelData.plan_type)) throw new Error("El plan seleccionado no es válido.");
+
+  const requestHeaders = await headers();
+  if (isRateLimited(getClientKey(requestHeaders, "registration"), 3, 60 * 60 * 1000)) {
+    throw new Error("Demasiados intentos. Intenta nuevamente más tarde.");
   }
 
-  const { data, error } = await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from("models")
     .insert([
       {
@@ -220,12 +239,12 @@ export async function registerModelAction(modelData: {
         is_online: false
       }
     ])
-    .select();
+    .select("id");
 
   if (error) {
     console.error("Public registration insert error:", error);
     throw new Error(`Error en el registro: ${error.message}`);
   }
 
-  return data;
+  return { success: true };
 }

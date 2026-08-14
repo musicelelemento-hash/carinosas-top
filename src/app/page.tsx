@@ -44,7 +44,7 @@ export default async function Home() {
   try {
     const { data, error } = await supabase
       .from('models')
-      .select('*')
+      .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, description, whatsapp, tags, personal_note')
       .order('created_at', { ascending: false });
 
     if (data && !error) {
