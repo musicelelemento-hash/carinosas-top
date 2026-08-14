@@ -5,11 +5,66 @@ import Image from "next/image";
 import StoryModal from "./StoryModal";
 
 const STORIES = [
-  { id: '1', name: 'Valentina', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200', story: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200', city: 'Quito' },
-  { id: '2', name: 'Camila', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200', story: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200', city: 'Guayaquil' },
-  { id: '3', name: 'Luciana', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200', story: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1200', city: 'Cuenca' },
-  { id: '4', name: 'Elena', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200', story: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1200', city: 'Manta' },
-  { id: '5', name: 'Sofía', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200', story: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=1200', city: 'Salinas' },
+  { 
+    id: '1', 
+    name: 'Valentina S.', 
+    age: 24,
+    city: 'Quito', 
+    sector: 'Quito Norte (Hotel 5★)',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200', 
+    story: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200', 
+    audioName: 'Voz de Valentina',
+    whatsapp: '593987654321',
+    isOnline: true
+  },
+  { 
+    id: '2', 
+    name: 'Camila R.', 
+    age: 22,
+    city: 'Guayaquil', 
+    sector: 'Samborondón',
+    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200', 
+    story: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200',
+    audioName: 'Voz de Camila',
+    whatsapp: '593987654322',
+    isOnline: true
+  },
+  { 
+    id: '3', 
+    name: 'Luciana M.', 
+    age: 25,
+    city: 'Cuenca', 
+    sector: 'Centro Histórico',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200', 
+    story: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1200',
+    audioName: 'Voz de Luciana',
+    whatsapp: '593987654323',
+    isOnline: true
+  },
+  { 
+    id: '4', 
+    name: 'Elena V.', 
+    age: 23,
+    city: 'Manta', 
+    sector: 'Plaza del Sol',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200', 
+    story: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1200',
+    audioName: 'Voz de Elena',
+    whatsapp: '593987654324',
+    isOnline: true
+  },
+  { 
+    id: '5', 
+    name: 'Sofía K.', 
+    age: 26,
+    city: 'Salinas', 
+    sector: 'Chipipe VIP',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200', 
+    story: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=1200',
+    audioName: 'Voz de Sofía',
+    whatsapp: '593987654325',
+    isOnline: true
+  },
 ];
 
 export default function StoriesBar() {
@@ -97,8 +152,7 @@ export default function StoriesBar() {
       <StoryModal
         isOpen={!!activeStory}
         onClose={() => setActiveStory(null)}
-        imageUrl={activeStory?.story || ""}
-        modelName={activeStory?.name || ""}
+        story={activeStory}
       />
     </section>
   );
