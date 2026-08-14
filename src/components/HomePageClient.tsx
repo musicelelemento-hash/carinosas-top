@@ -87,29 +87,45 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
         <section id="collection" className="max-w-7xl mx-auto px-6 py-28">
           {/* Section header */}
-          <div className="flex flex-col items-center gap-6 mb-28 relative">
+          <div className="flex flex-col items-center gap-6 mb-16 relative">
             {/* Background signature */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
               <span className="font-signature text-[180px] leading-none" style={{ color: 'rgba(212,168,67,0.03)' }}>Collection</span>
             </div>
 
             {/* Badge */}
-            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-gold z-10">
-              <span className="label-xs text-brand-gold/70">Identidades Seleccionadas</span>
+            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-obsidian border border-brand-gold/30 z-10 shadow-[0_0_20px_rgba(212,168,67,0.2)]">
+              <span className="text-[9px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto</span>
             </div>
 
             {/* Title */}
-            <h2 className="font-serif font-bold text-5xl md:text-6xl text-center italic leading-none tracking-tight z-10" style={{
-              background: 'linear-gradient(135deg, #F8E5AE 0%, #D4A843 35%, #9A7830 65%, #D4A843 100%)',
-              backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              animation: 'shimmer-gold 6s linear infinite',
-            }}>El Catálogo</h2>
+            <h2 className="font-serif font-bold text-5xl md:text-6xl text-center italic leading-none tracking-tight z-10 bg-gradient-to-r from-brand-gold via-white to-brand-gold bg-clip-text text-transparent">
+              El Catálogo
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-xs text-white/50 uppercase tracking-widest font-bold z-10 text-center">
+              Filtra por nivel de exclusividad y discreción
+            </p>
+
+            {/* VIP Circle Quick Switch */}
+            <div className="flex items-center gap-3 p-1.5 rounded-2xl glass-obsidian border border-white/10 z-10 shadow-2xl">
+              <button
+                onClick={() => setDisplayModels(initialModels)}
+                className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-brand-gold text-brand-black shadow-md"
+              >
+                🌐 Catálogo General
+              </button>
+              <a
+                href="#vip-lounge"
+                className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider text-brand-gold hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                🔒 Círculo Secreto VIP (Pase Requerido)
+              </a>
+            </div>
 
             {/* Divider */}
-            <div className="divider-gold w-40 z-10" />
+            <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent z-10" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
