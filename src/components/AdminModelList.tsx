@@ -19,7 +19,10 @@ import {
   Loader2,
   CheckCircle2,
   Image as ImageIcon,
-  Phone
+  Phone,
+  ShieldCheck,
+  Zap,
+  Sparkles
 } from "lucide-react";
 
 interface Model {
@@ -32,6 +35,8 @@ interface Model {
   plan_type?: string;
   images?: string[];
   description?: string;
+  is_verified_4k?: boolean;
+  is_online?: boolean;
   created_at: string;
 }
 
@@ -52,6 +57,8 @@ export default function AdminModelList() {
   const [editPlan, setEditPlan] = useState("");
   const [editImages, setEditImages] = useState<string[]>([]);
   const [editDesc, setEditDesc] = useState("");
+  const [editVerified4k, setEditVerified4k] = useState(false);
+  const [editOnline, setEditOnline] = useState(false);
 
   const fetchModels = async () => {
     setLoading(true);
@@ -88,6 +95,8 @@ export default function AdminModelList() {
     setEditPlan(model.plan_type || "Anuncio Gratis");
     setEditImages(model.images || []);
     setEditDesc(model.description || "");
+    setEditVerified4k(Boolean(model.is_verified_4k));
+    setEditOnline(Boolean(model.is_online));
   };
 
   const closeEdit = () => { setEditModel(null); setSaveSuccess(false); };
@@ -105,6 +114,8 @@ export default function AdminModelList() {
         plan_type: editPlan,
         images: editImages,
         description: editDesc,
+        is_verified_4k: editVerified4k,
+        is_online: editOnline
       });
 
       setSaveSuccess(true);
@@ -115,6 +126,28 @@ export default function AdminModelList() {
       alert("Error al guardar cambios.");
     }
     setSaving(false);
+  };
+
+  const handleToggle4K = async (model: Model) => {
+    const newStatus = !model.is_verified_4k;
+    setModels(prev => prev.map(m => m.id === model.id ? { ...m, is_verified_4k: newStatus } : m));
+    try {
+      await updateModelAction(model.id, { is_verified_4k: newStatus });
+    } catch (err) {
+      console.error(err);
+      fetchModels();
+    }
+  };
+
+  const handleToggleOnline = async (model: Model) => {
+    const newStatus = !model.is_online;
+    setModels(prev => prev.map(m => m.id === model.id ? { ...m, is_online: newStatus } : m));
+    try {
+      await updateModelAction(model.id, { is_online: newStatus });
+    } catch (err) {
+      console.error(err);
+      fetchModels();
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -137,11 +170,16 @@ export default function AdminModelList() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
+      {/* Header & Metrics */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-serif text-brand-gold tracking-tighter">Gestión de Catálogo</h2>
-          <p className="text-[10px] text-brand-white/40 uppercase tracking-[0.3em] font-black">Control Total de Publicaciones</p>
+          <h2 className="text-3xl font-serif text-brand-gold tracking-tighter flex items-center gap-3">
+            <Sparkles size={24} />
+            Consola Ejecutiva de Catálogo
+          </h2>
+          <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black mt-1">
+            {models.length} Modelos Registradas · {models.filter(m => m.is_verified_4k).length} Verificadas 4K
+          </p>
         </div>
         <div className="relative w-full md:w-80">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-gold/40" />
@@ -150,7 +188,7 @@ export default function AdminModelList() {
             placeholder="Buscar por nombre o ciudad..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-brand-black/40 border border-white/10 rounded-full py-3 pl-12 pr-6 text-xs text-white outline-none focus:border-brand-gold transition-all"
+            className="w-full glass-obsidian border border-white/10 rounded-full py-3.5 pl-12 pr-6 text-xs text-white outline-none focus:border-brand-gold transition-all"
           />
         </div>
       </div>
@@ -159,143 +197,205 @@ export default function AdminModelList() {
       {loading ? (
         <div className="py-20 flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-brand-gold/10 border-t-brand-gold rounded-full animate-spin" />
-          <span className="text-[10px] text-brand-white/20 uppercase tracking-widest">Sincronizando Base de Datos...</span>
+          <span className="text-[10px] text-white/30 uppercase tracking-widest">Sincronizando Base de Datos...</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredModels.map((model) => (
-            <div key={model.id} className="glass-dark border border-white/5 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6 group hover:border-brand-gold/30 transition-all">
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10">
+            <div key={model.id} className="glass-obsidian border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6 group hover:border-brand-gold/40 transition-all shadow-xl">
+              
+              {/* Photo & 4K Overlay */}
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-white/15">
                 <Image
                   src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'}
                   alt={model.name}
                   fill
                   className="object-cover"
                 />
+                {model.is_verified_4k && (
+                  <div className="absolute top-1 left-1 bg-brand-gold text-brand-black text-[6px] font-black px-1.5 py-0.5 rounded-full uppercase">
+                    4K
+                  </div>
+                )}
               </div>
+
+              {/* Info Column */}
               <div className="flex-1 space-y-2 text-center md:text-left">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  <h3 className="text-xl font-serif text-brand-white">{model.name}</h3>
+                  <h3 className="text-xl font-serif text-white italic font-bold">{model.name}</h3>
+                  
                   <div className={`px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 ${
                     model.plan_type === 'Diamante' || model.plan_type === 'VIP Elite'
                       ? 'bg-brand-gold/20 border-brand-gold text-brand-gold'
-                      : 'bg-white/5 border-white/10 text-white/40'
+                      : 'bg-white/5 border-white/10 text-white/50'
                   }`}>
                     {(model.plan_type === 'Diamante' || model.plan_type === 'VIP Elite') && <Crown size={10} />}
                     {model.plan_type || 'Básico'}
                   </div>
-                  {model.images && model.images.length > 1 && (
-                    <span className="text-[8px] text-white/30 font-black uppercase tracking-widest flex items-center gap-1">
-                      <ImageIcon size={10} /> {model.images.length} fotos
-                    </span>
-                  )}
+
+                  {/* 1-Click Fast 4K Toggle */}
+                  <button 
+                    onClick={() => handleToggle4K(model)}
+                    className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider flex items-center gap-1 border transition-all ${
+                      model.is_verified_4k 
+                        ? 'bg-brand-gold text-brand-black border-brand-gold shadow-sm' 
+                        : 'bg-white/5 border-white/15 text-white/40 hover:text-white'
+                    }`}
+                  >
+                    <ShieldCheck size={10} />
+                    {model.is_verified_4k ? '4K Verificada' : '+ Activar 4K'}
+                  </button>
+
+                  {/* 1-Click Fast Online Toggle */}
+                  <button 
+                    onClick={() => handleToggleOnline(model)}
+                    className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider flex items-center gap-1 border transition-all ${
+                      model.is_online 
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' 
+                        : 'bg-white/5 border-white/15 text-white/40 hover:text-white'
+                    }`}
+                  >
+                    <div className={`w-1.5 h-1.5 rounded-full ${model.is_online ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
+                    {model.is_online ? 'En Línea' : 'Desconectada'}
+                  </button>
                 </div>
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-brand-white/30 uppercase tracking-widest font-black">
-                  <span className="flex items-center gap-1.5"><MapPin size={12} className="text-brand-gold" /> {model.city} {model.sector && `- ${model.sector}`}</span>
-                  <span className="flex items-center gap-1.5 text-brand-pink/60"><MessageCircle size={12} /> {model.whatsapp}</span>
+
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-white/40 uppercase tracking-widest font-black">
+                  <span className="flex items-center gap-1.5 text-white/60"><MapPin size={12} className="text-brand-gold" /> {model.city} {model.sector && `· ${model.sector}`}</span>
+                  <span className="flex items-center gap-1.5 text-emerald-400"><MessageCircle size={12} /> {model.whatsapp}</span>
                   <span className="flex items-center gap-1.5 opacity-50"><Clock size={12} /> {new Date(model.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
+
+              {/* Action Buttons */}
               <div className="flex items-center gap-3">
                 <a href={`/profile/${model.id}`} target="_blank"
-                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-brand-gold hover:border-brand-gold transition-all" title="Ver perfil público">
+                  className="p-3 rounded-2xl glass-dark border border-white/10 text-white/50 hover:text-brand-gold hover:border-brand-gold transition-all" title="Ver perfil público">
                   <ExternalLink size={18} />
                 </a>
                 <button onClick={() => handleDelete(model.id)}
-                  className="p-3 rounded-xl bg-brand-pink/10 border border-brand-pink/20 text-brand-pink/60 hover:bg-brand-pink hover:text-white transition-all" title="Eliminar">
+                  className="p-3 rounded-2xl bg-brand-pink/10 border border-brand-pink/20 text-brand-pink/70 hover:bg-brand-pink hover:text-white transition-all" title="Eliminar">
                   <Trash2 size={18} />
                 </button>
-                <div className="ml-2 h-10 w-[1px] bg-white/5 hidden md:block" />
+                <div className="ml-2 h-10 w-[1px] bg-white/10 hidden md:block" />
                 <button onClick={() => openEdit(model)}
-                  className="flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-[10px] font-black uppercase tracking-widest hover:bg-brand-gold hover:text-brand-black transition-all">
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 text-brand-gold text-[10px] font-black uppercase tracking-widest hover:bg-brand-gold hover:text-brand-black transition-all shadow-md">
                   Editar <ChevronRight size={14} />
                 </button>
               </div>
             </div>
           ))}
+
           {filteredModels.length === 0 && (
-            <div className="py-20 text-center glass-dark rounded-[3rem] border border-dashed border-white/10">
-              <p className="text-[10px] text-brand-white/20 uppercase tracking-[0.5em] font-black">No se encontraron registros</p>
+            <div className="py-20 text-center glass-obsidian rounded-[3rem] border border-dashed border-white/10">
+              <p className="text-[10px] text-white/30 uppercase tracking-[0.5em] font-black">No se encontraron registros</p>
             </div>
           )}
         </div>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
-          EDIT MODAL with full image upload support
-          ═══════════════════════════════════════════════════════════════ */}
+          EDIT MODAL
+         ═══════════════════════════════════════════════════════════════ */}
       {editModel && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={closeEdit}>
-          <div className="absolute inset-0 bg-brand-black/90 backdrop-blur-3xl" />
-          
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl" onClick={closeEdit}>
           <div
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto glass-dark border border-brand-gold/20 rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-300"
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto glass-obsidian border border-brand-gold/30 rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-8 border-b border-white/5 bg-brand-black/60 backdrop-blur-2xl rounded-t-[2.5rem]">
+            <div className="sticky top-0 z-10 flex items-center justify-between p-8 border-b border-white/10 bg-brand-black/90 backdrop-blur-2xl rounded-t-[2.5rem]">
               <div>
-                <h3 className="text-3xl font-serif text-brand-gold italic">Editar Perfil</h3>
-                <p className="text-[9px] text-white/30 uppercase tracking-[0.4em] font-black mt-1">{editModel.name}</p>
+                <h3 className="text-3xl font-serif text-brand-gold italic font-bold">Editar Perfil</h3>
+                <p className="text-[9px] text-white/40 uppercase tracking-[0.4em] font-black mt-1">{editModel.name}</p>
               </div>
               <button onClick={closeEdit} className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-all">
                 <X size={20} />
               </button>
             </div>
 
-            <div className="p-8 space-y-10">
+            <div className="p-8 space-y-8">
+              {/* Toggles Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl glass-dark border border-white/10">
+                <label className="flex items-center gap-3 cursor-pointer text-xs text-white">
+                  <input 
+                    type="checkbox" 
+                    checked={editVerified4k} 
+                    onChange={e => setEditVerified4k(e.target.checked)} 
+                    className="accent-brand-gold w-4 h-4 rounded"
+                  />
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-brand-gold" />
+                    <span className="font-bold text-brand-gold uppercase tracking-wider text-[11px]">Badge 4K Verificado</span>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer text-xs text-white">
+                  <input 
+                    type="checkbox" 
+                    checked={editOnline} 
+                    onChange={e => setEditOnline(e.target.checked)} 
+                    className="accent-emerald-400 w-4 h-4 rounded"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Zap size={16} className="text-emerald-400" />
+                    <span className="font-bold text-emerald-400 uppercase tracking-wider text-[11px]">Estado En Línea (Radar)</span>
+                  </div>
+                </label>
+              </div>
+
               {/* Basic Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] ml-1">Nombre Artístico</label>
+                  <label className="text-[9px] text-white/40 uppercase font-black tracking-[0.3em] ml-1">Nombre Artístico</label>
                   <input value={editName} onChange={e => setEditName(e.target.value)}
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all" />
+                    className="w-full glass-dark border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all text-sm" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] ml-1 flex items-center gap-2"><Phone size={12} className="text-brand-gold" /> WhatsApp</label>
+                  <label className="text-[9px] text-white/40 uppercase font-black tracking-[0.3em] ml-1 flex items-center gap-2"><Phone size={12} className="text-brand-gold" /> WhatsApp</label>
                   <input value={editWhatsapp} onChange={e => setEditWhatsapp(e.target.value)}
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all" />
+                    className="w-full glass-dark border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all text-sm" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] ml-1 flex items-center gap-2"><MapPin size={12} className="text-brand-gold" /> Ciudad</label>
+                  <label className="text-[9px] text-white/40 uppercase font-black tracking-[0.3em] ml-1 flex items-center gap-2"><MapPin size={12} className="text-brand-gold" /> Ciudad</label>
                   <input value={editCity} onChange={e => setEditCity(e.target.value)}
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all" />
+                    className="w-full glass-dark border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all text-sm" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] ml-1">Sector / Referencia</label>
+                  <label className="text-[9px] text-white/40 uppercase font-black tracking-[0.3em] ml-1">Sector / Referencia</label>
                   <input value={editSector} onChange={e => setEditSector(e.target.value)}
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all" />
+                    className="w-full glass-dark border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all text-sm" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] ml-1">Edad</label>
+                  <label className="text-[9px] text-white/40 uppercase font-black tracking-[0.3em] ml-1">Edad</label>
                   <input type="number" value={editAge} onChange={e => setEditAge(e.target.value)}
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all" />
+                    className="w-full glass-dark border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all text-sm" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] ml-1">Plan de Visibilidad</label>
+                  <label className="text-[9px] text-white/40 uppercase font-black tracking-[0.3em] ml-1">Plan de Visibilidad</label>
                   <select value={editPlan} onChange={e => setEditPlan(e.target.value)}
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer">
-                    <option value="Anuncio Gratis">Anuncio Gratis</option>
-                    <option value="Premium">Premium</option>
-                    <option value="Diamante">Diamante</option>
-                    <option value="VIP Elite">VIP Elite</option>
+                    className="w-full glass-dark border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all cursor-pointer text-sm">
+                    <option value="Anuncio Gratis" className="bg-brand-black">Anuncio Gratis</option>
+                    <option value="Premium" className="bg-brand-black">Premium</option>
+                    <option value="VIP Elite" className="bg-brand-black">VIP Elite</option>
+                    <option value="Diamante" className="bg-brand-black">Diamante</option>
                   </select>
                 </div>
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] ml-1">Descripción</label>
+                <label className="text-[9px] text-white/40 uppercase font-black tracking-[0.3em] ml-1">Descripción</label>
                 <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} rows={4}
-                  className="w-full bg-brand-black/40 border border-white/10 rounded-3xl py-4 px-6 text-white outline-none focus:border-brand-gold h-32 resize-none transition-all" />
+                  className="w-full glass-dark border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold h-28 resize-none transition-all text-sm leading-relaxed" />
               </div>
 
-              {/* ─── Image Section ─── */}
-              <div className="space-y-5 p-6 glass-premium border border-brand-gold/10 rounded-[2rem]">
+              {/* Image Section */}
+              <div className="space-y-5 p-6 glass-obsidian border border-brand-gold/20 rounded-[2rem]">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-brand-gold font-serif text-xl italic">Fotos del Perfil</h4>
-                    <p className="text-[9px] text-white/30 uppercase tracking-widest font-black mt-1">{editImages.length} de 6 imágenes · Arrastra o sube para añadir más</p>
+                    <p className="text-[9px] text-white/40 uppercase tracking-widest font-black mt-1">{editImages.length} de 6 imágenes</p>
                   </div>
                 </div>
 
@@ -316,7 +416,7 @@ export default function AdminModelList() {
                             <X size={16} />
                           </button>
                         </div>
-                        <div className="absolute top-2 left-2 bg-brand-black/70 text-[8px] text-white/60 font-black px-2 py-0.5 rounded-full uppercase">
+                        <div className="absolute top-2 left-2 bg-brand-black/70 text-[8px] text-white/70 font-black px-2 py-0.5 rounded-full uppercase">
                           {i === 0 ? "Principal" : `#${i + 1}`}
                         </div>
                       </div>
@@ -339,21 +439,18 @@ export default function AdminModelList() {
                     />
                   </div>
                 )}
-                {editImages.length >= 6 && (
-                  <p className="text-center text-[9px] text-brand-gold/50 uppercase font-black tracking-widest py-4">Límite de 6 fotos alcanzado. Elimina alguna para subir más.</p>
-                )}
               </div>
 
               {/* Save Button */}
               <div className="flex items-center gap-4 pt-4">
                 <button onClick={closeEdit}
-                  className="flex-1 py-4 rounded-2xl border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">
+                  className="flex-1 py-4 rounded-2xl border border-white/10 text-white/50 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">
                   Cancelar
                 </button>
                 <button onClick={handleSave} disabled={saving}
                   className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-2xl ${
                     saveSuccess
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-emerald-500 text-white'
                       : 'bg-brand-gold text-brand-black hover:scale-[1.02] active:scale-95 disabled:opacity-40'
                   }`}>
                   {saving ? <Loader2 size={18} className="animate-spin" /> : saveSuccess ? <><CheckCircle2 size={18} /> Guardado</> : <><Save size={18} /> Guardar Cambios</>}
@@ -363,39 +460,6 @@ export default function AdminModelList() {
           </div>
         </div>
       )}
-
-      <style jsx global>{`
-        .uploadthing-edit [data-ut-element="root"] {
-          background: rgba(5, 5, 5, 0.4);
-          border: 2px dashed rgba(212, 175, 55, 0.2);
-          border-radius: 1.5rem;
-          padding: 2rem;
-          transition: all 0.3s;
-        }
-        .uploadthing-edit [data-ut-element="root"]:hover {
-          border-color: rgba(212, 175, 55, 0.5);
-          background: rgba(212, 175, 55, 0.03);
-        }
-        .uploadthing-edit [data-ut-element="label"] {
-          color: rgba(212, 175, 55, 0.6) !important;
-          font-size: 10px !important;
-          font-weight: 900 !important;
-          text-transform: uppercase;
-          letter-spacing: 0.3em;
-        }
-        .uploadthing-edit [data-ut-element="button"],
-        .uploadthing-edit .ut-button {
-          background-color: #D4AF37 !important;
-          color: #050505 !important;
-          border-radius: 1rem !important;
-          font-weight: 900 !important;
-          font-size: 10px !important;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          padding: 0.75rem 1.5rem !important;
-        }
-        .uploadthing-edit .ut-allowed-content { display: none; }
-      `}</style>
     </div>
   );
 }

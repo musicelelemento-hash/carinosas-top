@@ -213,6 +213,7 @@ export async function deleteModelAction(id: string) {
 export async function registerModelAction(modelData: {
   name: string;
   city: string;
+  sector?: string;
   whatsapp: string;
   description?: string;
   tags?: string[];
@@ -237,6 +238,7 @@ export async function registerModelAction(modelData: {
       {
         name: modelData.name,
         city: modelData.city,
+        sector: modelData.sector || "",
         whatsapp: modelData.whatsapp,
         description: modelData.description || "",
         tags: modelData.tags || [],
