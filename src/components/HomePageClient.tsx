@@ -13,6 +13,7 @@ import StoriesBar from "@/components/StoriesBar";
 import LiveMap from "@/components/LiveMap";
 import AIAssistantOverlay from "@/components/AIAssistantOverlay";
 import VIPLounge from "@/components/VIPLounge";
+import GlobalLounge from "@/components/GlobalLounge";
 import PushPrompt from "@/components/PushPrompt";
 import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
 
@@ -84,6 +85,8 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <RecommendationSection />
 
         <VIPLounge />
+
+        <GlobalLounge />
 
         <section id="collection" className="max-w-7xl mx-auto px-6 py-28">
           {/* Section header */}
