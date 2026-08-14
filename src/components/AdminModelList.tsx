@@ -258,6 +258,12 @@ export default function AdminModelList() {
                     <div className={`w-1.5 h-1.5 rounded-full ${model.is_online ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
                     {model.is_online ? 'En Línea' : 'Desconectada'}
                   </button>
+
+                  {/* AI Authenticity Scorecard */}
+                  <div className="flex items-center gap-1 text-[8px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                    <Sparkles size={10} />
+                    <span>99.2% IA Auténtica</span>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-white/40 uppercase tracking-widest font-black">

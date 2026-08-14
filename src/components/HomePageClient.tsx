@@ -14,6 +14,7 @@ import LiveMap from "@/components/LiveMap";
 import AIAssistantOverlay from "@/components/AIAssistantOverlay";
 import VIPLounge from "@/components/VIPLounge";
 import GlobalLounge from "@/components/GlobalLounge";
+import VIPGuide from "@/components/VIPGuide";
 import PushPrompt from "@/components/PushPrompt";
 import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
 
@@ -150,6 +151,8 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
             </div>
           )}
         </section>
+
+        <VIPGuide />
 
         <PanicButton />
         <GhostNotifications />

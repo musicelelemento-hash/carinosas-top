@@ -19,11 +19,14 @@ import {
   Zap
 } from "lucide-react";
 
+import VIPCheckoutModal from "@/components/VIPCheckoutModal";
+
 export default function VIPLounge() {
   const [activeTab, setActiveTab] = useState<'gentleman' | 'muse'>('gentleman');
   const [isHoveredCard, setIsHoveredCard] = useState(false);
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = e.currentTarget.getBoundingClientRect();
@@ -42,9 +45,7 @@ export default function VIPLounge() {
   };
 
   const handleRequestAccess = () => {
-    const role = activeTab === 'gentleman' ? 'Caballero VIP' : 'Modelo / Musa VIP';
-    const text = encodeURIComponent(`Hola Concierge de Cariñosas.top, deseo solicitar la activación de mi Membresía ${role} para ingresar al Círculo Secreto Alpha.`);
-    window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
+    setIsCheckoutOpen(true);
   };
 
   return (
@@ -292,6 +293,14 @@ export default function VIPLounge() {
         </div>
 
       </div>
+
+      {/* Discreet Checkout Modal */}
+      <VIPCheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        planName={activeTab === 'gentleman' ? 'Pase Alpha Caballero VIP' : 'Pase Alpha Musa / Modelo VIP'}
+        planPrice={activeTab === 'gentleman' ? '$50 USD' : '$50 USD / mes'}
+      />
     </section>
   );
 }
