@@ -53,15 +53,18 @@ export default function HeroSection() {
       </div>
 
       {/* ── FLOATING ORBS ── */}
-      <div className="absolute top-[20%] left-[5%] w-[600px] h-[600px] -z-10 pointer-events-none"
+      <div className="absolute top-[20%] left-[5%] w-[600px] h-[600px] -z-10 pointer-events-none animate-blob"
         style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)', filter: 'blur(60px)' }}
       />
-      <div className="absolute bottom-[15%] right-[5%] w-[500px] h-[500px] -z-10 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(232,0,90,0.025) 0%, transparent 70%)', filter: 'blur(80px)' }}
+      <div className="absolute bottom-[15%] right-[5%] w-[500px] h-[500px] -z-10 pointer-events-none animate-blob animation-delay-2000"
+        style={{ background: 'radial-gradient(circle, rgba(232,0,90,0.04) 0%, transparent 70%)', filter: 'blur(80px)' }}
+      />
+      <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] -z-10 pointer-events-none animate-orb-float"
+        style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.025) 0%, transparent 60%)', filter: 'blur(40px)' }}
       />
 
       {/* ── MAIN CONTENT ── */}
-      <div className={`max-w-7xl mx-auto px-6 w-full text-center z-10 space-y-12 transition-all duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`max-w-7xl mx-auto px-6 w-full text-center z-10 space-y-16 transition-all duration-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
 
         {/* Badge */}
         <div className="flex justify-center">
@@ -91,9 +94,11 @@ export default function HeroSection() {
               fontSize: 'clamp(4.5rem, 14vw, 13rem)',
               fontStyle: 'italic',
               background: 'linear-gradient(135deg, #F5E0A0 0%, #C9A84C 30%, #9A7B35 55%, #C9A84C 75%, #F5E0A0 100%)',
+              backgroundSize: '200% auto',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
+              animation: 'shimmer-gold 5s linear infinite',
             }}>
               .TOP
             </span>
@@ -121,7 +126,6 @@ export default function HeroSection() {
               </div>
             ))}
           </div>
-
           <a
             href="#collection"
             className="btn-gold inline-flex items-center gap-3 px-8 py-4 rounded-2xl mt-4"
@@ -257,7 +261,6 @@ export default function HeroSection() {
               <button
                 key={label}
                 className="group flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/6 border border-white/8 hover:border-brand-gold/35"
-                style={{ animationDelay: `${300 + i * 80}ms`, opacity: 0, animation: `fadeInUp 0.45s ease forwards ${300 + i * 80}ms` }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-gold/35 group-hover:bg-brand-gold group-hover:scale-125 transition-all duration-300" />
                 <span className="label-xs text-white/50 group-hover:text-brand-gold/85 transition-colors duration-300">

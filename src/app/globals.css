@@ -50,7 +50,6 @@ html {
     transition-duration: 0.01ms !important;
   }
 }
-
 body {
   background-color: var(--background);
   color: var(--foreground);
