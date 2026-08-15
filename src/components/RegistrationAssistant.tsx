@@ -948,7 +948,7 @@ export default function RegistrationAssistant() {
                 </div>
 
                 <button 
-                  onClick={handleRegister} 
+                  onClick={() => handleRegister(false)} 
                   disabled={loading} 
                   className="w-full bg-brand-gold hover:bg-white text-brand-black font-black py-4 rounded-2xl uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(212,168,67,0.3)] transition-all flex items-center justify-center gap-2"
                 >

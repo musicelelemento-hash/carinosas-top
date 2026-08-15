@@ -35,7 +35,7 @@ function isPhoneLocked(cleanPhone: string): { isLocked: boolean; remainingMinute
 export async function sendPhoneOtpAction(
   phoneNumber: string, 
   channel: 'whatsapp_otp' | 'sms_otp'
-): Promise<{ success: boolean; message: string; isLocked?: boolean; debugOtp?: string }> {
+): Promise<{ success: boolean; message: string; isLocked?: boolean; debugOtp?: string; whatsAppLink?: string }> {
   try {
     const cleanPhone = phoneNumber.replace(/[^0-9+]/g, "");
     if (cleanPhone.length < 8) {

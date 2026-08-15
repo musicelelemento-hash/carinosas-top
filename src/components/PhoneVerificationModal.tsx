@@ -12,7 +12,8 @@ import {
   Loader2, 
   AlertTriangle,
   Send,
-  Clock
+  Clock,
+  Zap
 } from "lucide-react";
 import { sendPhoneOtpAction, verifyPhoneOtpAction } from "@/app/actions/authPhone";
 
