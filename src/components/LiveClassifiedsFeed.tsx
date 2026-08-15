@@ -16,7 +16,9 @@ import {
   Share2, 
   Heart,
   Eye,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  ArrowUpRight
 } from "lucide-react";
 
 interface ClassifiedAd {
@@ -42,11 +44,11 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     id: "ad-1",
     name: "Valentina VIP",
     city: "Quito",
-    sector: "La Carolina",
+    sector: "La Carolina / Cumbayá",
     country: "🇪🇨",
     age: 23,
     rate: 120,
-    headline: "Disponible hoy para cena elegante en Cumbayá o suite ejecutiva. Fotos 100% reales.",
+    headline: "Disponible hoy para cena elegante en Cumbayá o suite ejecutiva. Fotos 100% reales de alta fidelidad.",
     timeAgo: "Hace 4 min",
     imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
     whatsapp: "593987654321",
@@ -63,13 +65,13 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     country: "🇨🇴",
     age: 22,
     rate: 180,
-    headline: "Musa paisa en Provenza. Atención exclusiva para caballeros de alto perfil y giras.",
+    headline: "Musa paisa en Provenza. Atención exclusiva para caballeros de alto perfil, eventos y giras.",
     timeAgo: "Hace 8 min",
     imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800",
     whatsapp: "573001234567",
     isLiveNow: true,
     hasAudio: true,
-    tags: ["Provenza", "Paisa", "Giras"],
+    tags: ["Provenza", "Paisa VIP", "Giras"],
     likesCount: 230
   },
   {
@@ -80,7 +82,7 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     country: "🇵🇪",
     age: 24,
     rate: 150,
-    headline: "Compañía de alto nivel en San Isidro Golf. Total discreción y encanto natural.",
+    headline: "Compañía de alto nivel en San Isidro Golf. Total discreción, elegancia y encanto natural.",
     timeAgo: "Hace 12 min",
     imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
     whatsapp: "51987654321",
@@ -97,7 +99,7 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     country: "🇵🇦",
     age: 23,
     rate: 220,
-    headline: "Disponible para eventos en yate privado y cenas de negocios en Punta Pacífica.",
+    headline: "Disponible para eventos en yate privado y cenas de negocios en Punta Pacífica y Costa del Este.",
     timeAgo: "Hace 15 min",
     imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800",
     whatsapp: "50761234567",
@@ -138,32 +140,33 @@ export default function LiveClassifiedsFeed() {
   };
 
   return (
-    <section id="clasificados-express" className="py-20 px-4 md:px-12 max-w-[1700px] mx-auto space-y-8">
+    <section id="clasificados-express" className="py-24 px-4 md:px-12 max-w-[1700px] mx-auto space-y-10">
       
-      {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>Tablón de Clasificados Exprés en Vivo</span>
+      {/* Header Bar: Haute Horlogerie / Vogue Styling */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-brand-gold/20 pb-8">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full glass-obsidian border border-brand-gold/30 text-brand-gold text-[9px] font-black uppercase tracking-[0.3em]">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-ping" />
+            <span>Tablón de Clasificados Exprés · En Vivo</span>
           </div>
 
-          <h2 className="text-3xl md:text-5xl font-serif text-white italic">
-            Clasificados <span className="text-brand-gold">Dopamina 4K</span>
+          <h2 className="text-3xl md:text-6xl font-serif text-white italic tracking-tight">
+            Clasificados <span className="bg-gradient-to-r from-[#F5E0A0] via-[#D4A843] to-[#AA7C11] bg-clip-text text-transparent">Élite 4K</span>
           </h2>
           
-          <p className="text-xs text-white/50">
-            Publicaciones instantáneas y actualizadas en tiempo real por las modelos verificadas.
+          <p className="text-xs text-white/50 font-light max-w-xl">
+            Actualizaciones instantáneas en tiempo real directamente por modelos de alta gama con verificación biométrica.
           </p>
         </div>
 
         {/* Action Button: Post Fast Ad */}
         <Link
           href="/registro"
-          className="px-6 py-3.5 rounded-2xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-widest shadow-[0_10px_35px_rgba(212,168,67,0.4)] transition-all flex items-center gap-2.5 self-start md:self-auto shrink-0 group"
+          className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.35)] hover:shadow-[0_15px_45px_rgba(212,168,67,0.5)] hover:scale-[1.02] transition-all duration-300 flex items-center gap-3 self-start md:self-auto shrink-0 group"
         >
-          <PlusCircle size={16} className="group-hover:rotate-90 transition-transform" />
+          <PlusCircle size={16} className="group-hover:rotate-90 transition-transform duration-500" />
           <span>Publicar Anuncio Exprés</span>
+          <ArrowUpRight size={14} className="opacity-60" />
         </Link>
       </div>
 
@@ -176,10 +179,13 @@ export default function LiveClassifiedsFeed() {
           return (
             <div
               key={ad.id}
-              className="glass-obsidian border border-brand-gold/25 rounded-3xl overflow-hidden p-5 shadow-2xl flex flex-col justify-between space-y-4 group hover:border-brand-gold hover:scale-[1.02] transition-all duration-500"
+              className="glass-obsidian border border-brand-gold/25 hover:border-brand-gold rounded-[2.5rem] overflow-hidden p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col justify-between space-y-4 group hover:scale-[1.02] transition-all duration-500 relative"
             >
+              {/* Subtle Gold Aura Accent */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
+
               {/* Card Top: Image & Overlay Badges */}
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+              <div className="relative aspect-[4/3] rounded-[1.8rem] overflow-hidden border border-white/10">
                 <Image
                   src={ad.imageUrl}
                   alt={ad.name}
@@ -188,16 +194,16 @@ export default function LiveClassifiedsFeed() {
                   sizes="(max-width: 768px) 100vw, 25vw"
                 />
                 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
 
                 {/* Top Badges */}
                 <div className="absolute top-3 left-3 right-3 flex justify-between items-center">
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/90 text-black text-[9px] font-black uppercase tracking-wider shadow-md">
+                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/90 text-black text-[9px] font-black uppercase tracking-wider shadow-md">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                     En Línea
                   </span>
 
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-white/80 font-bold border border-white/10">
+                  <span className="px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] text-white/90 font-bold border border-white/15">
                     {ad.country} {ad.timeAgo}
                   </span>
                 </div>
@@ -205,16 +211,16 @@ export default function LiveClassifiedsFeed() {
                 {/* Bottom Overlay Info on Photo */}
                 <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
                   <div>
-                    <span className="text-base font-serif font-bold text-white block leading-tight drop-shadow-md">
+                    <span className="text-lg font-serif font-bold text-white block leading-tight drop-shadow-md">
                       {ad.name}, {ad.age}
                     </span>
-                    <span className="text-[10px] text-white/80 flex items-center gap-1">
+                    <span className="text-[10px] text-white/80 flex items-center gap-1 mt-0.5">
                       <MapPin size={10} className="text-brand-gold" />
-                      {ad.sector}, {ad.city}
+                      {ad.sector}
                     </span>
                   </div>
 
-                  <span className="text-sm font-mono font-bold text-brand-gold bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-xl border border-brand-gold/30">
+                  <span className="text-xs font-mono font-bold text-brand-gold bg-black/80 backdrop-blur-md px-3 py-1 rounded-xl border border-brand-gold/30">
                     ${ad.rate}/h
                   </span>
                 </div>
@@ -231,7 +237,7 @@ export default function LiveClassifiedsFeed() {
                   {ad.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full glass-dark border border-white/10 text-white/60"
+                      className="text-[8px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full glass-dark border border-brand-gold/20 text-brand-gold/80"
                     >
                       #{tag}
                     </span>
@@ -240,29 +246,42 @@ export default function LiveClassifiedsFeed() {
               </div>
 
               {/* Audio Note & Heart Actions */}
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
                 
                 {/* Audio Trigger if available */}
-                {ad.hasAudio && (
+                {ad.hasAudio ? (
                   <button
                     type="button"
                     onClick={() => toggleAudio(ad.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${
                       isPlaying
-                        ? "bg-brand-pink text-white animate-pulse"
-                        : "glass-dark border border-brand-pink/40 text-brand-pink hover:bg-brand-pink/15"
+                        ? "bg-brand-gold text-brand-black shadow-[0_0_15px_rgba(212,168,67,0.5)]"
+                        : "glass-dark border border-brand-gold/30 text-brand-gold hover:bg-brand-gold/15"
                     }`}
                   >
                     {isPlaying ? <VolumeX size={12} /> : <Volume2 size={12} />}
-                    <span>{isPlaying ? "Pausar Voz" : "Escuchar Voz"}</span>
+                    <span>{isPlaying ? "Pausar Saludo" : "Escuchar Voz"}</span>
+                    
+                    {/* Animated Soundwave bars */}
+                    {isPlaying && (
+                      <div className="flex items-center gap-0.5 ml-1">
+                        <span className="w-0.5 h-3 bg-brand-black animate-pulse rounded-full" />
+                        <span className="w-0.5 h-2 bg-brand-black animate-pulse delay-75 rounded-full" />
+                        <span className="w-0.5 h-4 bg-brand-black animate-pulse delay-150 rounded-full" />
+                      </div>
+                    )}
                   </button>
+                ) : (
+                  <span className="text-[9px] text-white/30 uppercase font-black tracking-wider flex items-center gap-1">
+                    <ShieldCheck size={11} className="text-brand-gold" /> Verificada 4K
+                  </span>
                 )}
 
                 {/* Heart Like */}
                 <button
                   type="button"
                   onClick={() => handleLike(ad.id)}
-                  className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full transition-colors ml-auto ${
+                  className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors ml-auto ${
                     isLiked ? "text-rose-400" : "text-white/40 hover:text-white"
                   }`}
                 >
@@ -271,15 +290,15 @@ export default function LiveClassifiedsFeed() {
                 </button>
               </div>
 
-              {/* WhatsApp Booking Direct Button */}
+              {/* Luxury Champagne Gold Contact Button */}
               <a
                 href={`https://wa.me/${ad.whatsapp}?text=${encodeURIComponent(`Hola ${ad.name}, vi tu clasificado exprés en Cariñosas.top (${ad.sector}, ${ad.city}). Deseo consultar tu disponibilidad hoy.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(212,168,67,0.3)] transition-all duration-300 flex items-center justify-center gap-2.5 group/btn"
               >
-                <MessageCircle size={15} fill="currentColor" />
-                <span>Contactar por WhatsApp</span>
+                <MessageCircle size={15} fill="currentColor" className="group-hover/btn:scale-110 transition-transform" />
+                <span>Contactar en WhatsApp</span>
               </a>
 
             </div>

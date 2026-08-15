@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { ChevronRight, Zap, Radar, ShieldCheck, MessageCircle, X, MapPin, Star, Navigation, LocateFixed } from "lucide-react";
+import { ChevronRight, Zap, Radar, ShieldCheck, MessageCircle, X, MapPin, Star, Navigation, LocateFixed, Sparkles, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
@@ -28,15 +28,14 @@ const Popup = dynamic(
 
 // ECUADOR CITY PRESETS
 const ECUADOR_CITIES: Record<string, { center: [number, number]; zoom: number; label: string }> = {
-  Quito:         { center: [-0.1807, -78.4678], zoom: 13, label: "Quito" },
-  Guayaquil:     { center: [-2.1894, -79.8891], zoom: 13, label: "Guayaquil" },
-  Cuenca:        { center: [-2.9001, -79.0059], zoom: 13, label: "Cuenca" },
-  Manta:         { center: [-0.9621, -80.7127], zoom: 13, label: "Manta" },
-  Machala:       { center: [-3.2581, -79.9161], zoom: 13, label: "Machala" },
+  Quito:           { center: [-0.1807, -78.4678], zoom: 13, label: "Quito" },
+  Guayaquil:       { center: [-2.1894, -79.8891], zoom: 13, label: "Guayaquil" },
+  Cuenca:          { center: [-2.9001, -79.0059], zoom: 13, label: "Cuenca" },
+  Manta:           { center: [-0.9621, -80.7127], zoom: 13, label: "Manta" },
+  Machala:         { center: [-3.2581, -79.9161], zoom: 13, label: "Machala" },
   "Santo Domingo": { center: [-0.2520, -79.1714], zoom: 13, label: "Sto. Domingo" },
-  Ambato:        { center: [-1.2417, -78.6197], zoom: 13, label: "Ambato" },
-  Loja:          { center: [-3.9931, -79.2042], zoom: 13, label: "Loja" },
-  Pasaje:        { center: [-3.3283, -79.8067], zoom: 14, label: "Pasaje" },
+  Ambato:          { center: [-1.2417, -78.6197], zoom: 13, label: "Ambato" },
+  Loja:            { center: [-3.9931, -79.2042], zoom: 13, label: "Loja" },
 };
 
 interface MapModel {
@@ -120,11 +119,12 @@ export default function LiveMap() {
           <div class="pin-core"></div>
         </div>`,
         className: "custom-div-icon",
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
       })
     : null;
 
+  // Red Pulsing active icon
   const selectedIcon = L
     ? new L.DivIcon({
         html: `<div class="live-pin-selected">
@@ -137,121 +137,143 @@ export default function LiveMap() {
       })
     : null;
 
-
-
   const initialCenter = ECUADOR_CITIES.Quito.center;
 
   return (
-    <section className="relative w-full overflow-hidden bg-brand-black">
-      {/* Floating Tactical Overlay */}
-      <div className="absolute top-28 left-10 z-30 pointer-events-none hidden md:block">
-        <div className="glass-premium border-brand-gold/10 p-8 rounded-[2.5rem] space-y-6 max-w-sm pointer-events-auto shadow-[0_40px_80px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-left-12 duration-1000">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/5 border border-brand-gold/20 rounded-2xl flex items-center justify-center text-brand-gold shadow-gold overflow-hidden relative">
-              <Radar size={24} className="animate-spin-slow opacity-20 absolute" />
-              <Zap size={20} className="animate-pulse relative z-10" />
+    <section className="relative w-full overflow-hidden bg-[#08080C] border-y border-brand-gold/20">
+      
+      {/* City Selector Bar */}
+      <div className="relative z-30 px-6 py-4 bg-black/60 backdrop-blur-2xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-brand-gold/15 border border-brand-gold/30 flex items-center justify-center text-brand-gold">
+              <Radar size={16} className="animate-spin-slow" />
             </div>
             <div>
-              <h2 className="text-3xl font-serif text-white italic leading-none">Elite <span className="text-brand-gold">Proximity</span></h2>
-              <p className="text-[9px] text-brand-white/40 uppercase font-black tracking-[0.3em] mt-2">Active Satellite Sync</p>
+              <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.25em] block">
+                Radar Satelital GPS
+              </span>
+              <span className="text-xs text-white/50 font-light">
+                Modelos verificadas en tiempo real
+              </span>
+            </div>
+          </div>
+
+          {/* City Pills */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+            {Object.entries(ECUADOR_CITIES).map(([key, val]) => (
+              <button
+                key={key}
+                onClick={() => handleCitySelect(key)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all ${
+                  selectedCity === key
+                    ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_20px_rgba(212,168,67,0.4)]"
+                    : "glass-dark border-white/10 text-white/50 hover:text-white hover:border-white/30"
+                }`}
+              >
+                {val.label}
+              </button>
+            ))}
+          </div>
+
+        </div>
+      </div>
+
+      {/* Main Container: Split Sidebar + Map */}
+      <div className="flex flex-col lg:flex-row h-[750px] relative">
+        
+        {/* === SIDEBAR COMPONENT (No Overlaps, Clean Typography) === */}
+        <div className="w-full lg:w-[420px] bg-[#0A0A0F]/95 border-r border-white/10 overflow-y-auto custom-scrollbar z-20 flex flex-col justify-between backdrop-blur-3xl">
+          
+          {/* Top Header Box */}
+          <div className="p-6 border-b border-white/10 space-y-4 bg-black/40">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-[10px] text-white/70 font-black uppercase tracking-widest">
+                  Zona: {selectedCity}
+                </span>
+              </div>
+              <span className="text-[9px] px-2.5 py-1 rounded-full bg-brand-gold/15 text-brand-gold font-bold border border-brand-gold/30">
+                {cityModels.length} Disponibles
+              </span>
+            </div>
+
+            {/* Micro HUD Status */}
+            <div className="grid grid-cols-2 gap-2 text-[10px] p-3 rounded-2xl glass-dark border border-white/5">
+              <div>
+                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Cifrado Satelital</span>
+                <span className="text-emerald-400 font-mono font-bold">AES-256 Activo</span>
+              </div>
+              <div>
+                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Tiempo Llegada</span>
+                <span className="text-brand-gold font-bold">5-15 min Suite</span>
+              </div>
             </div>
           </div>
           
-          <div className="space-y-4">
-             <div className="flex items-center justify-between text-[10px] uppercase font-black tracking-widest text-white/40">
-                <span>System Status</span>
-                <span className="text-brand-gold">Operational</span>
-             </div>
-             <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-brand-gold w-3/4 animate-pulse" />
-             </div>
-          </div>
-
-          <div className="flex gap-6 pt-4 border-t border-white/5">
-             <div className="flex flex-col">
-                <span className="text-[9px] text-white/30 uppercase font-black tracking-widest mb-1">Total Online</span>
-                <span className="text-3xl font-serif text-brand-gold leading-none">{models.length}</span>
-             </div>
-             <div className="flex flex-col border-l border-white/10 pl-6">
-                <span className="text-[9px] text-white/30 uppercase font-black tracking-widest mb-1">Local Verified</span>
-                <span className="text-3xl font-serif text-white leading-none">{cityModels.length}</span>
-             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Compact City Filters */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 z-40 w-full max-w-5xl px-6 pointer-events-none">
-        <div className="flex gap-3 p-2.5 glass-premium border-white/5 rounded-[2.5rem] overflow-x-auto no-scrollbar pointer-events-auto shadow-2xl backdrop-blur-3xl">
-          {Object.entries(ECUADOR_CITIES).map(([key, val]) => (
-            <button
-              key={key}
-              onClick={() => handleCitySelect(key)}
-              className={`flex-shrink-0 px-6 py-3.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border transition-all duration-700 ${
-                selectedCity === key
-                  ? "bg-white text-brand-black border-white shadow-lg"
-                  : "bg-white/5 border-white/5 text-white/40 hover:text-white hover:border-white/20"
-              }`}
-            >
-              {val.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Experience Container */}
-      <div className="flex flex-col lg:flex-row h-screen pt-24 lg:pt-0">
-        
-        {/* === SIDEBAR COMPONENT (Curated List) === */}
-        <div className="w-full lg:w-[400px] bg-brand-black/95 border-r border-white/5 overflow-y-auto custom-scrollbar z-20 backdrop-blur-3xl">
-          <div className="sticky top-0 bg-brand-black/80 backdrop-blur-2xl p-8 border-b border-white/5 z-10 space-y-2">
-             <div className="flex items-center justify-between">
-                <span className="text-[11px] text-brand-gold font-black uppercase tracking-[0.4em]">Curated in {selectedCity}</span>
-                <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]" />
-                   <span className="text-[8px] text-white/40 font-black uppercase">Live Now</span>
-                </div>
-             </div>
-          </div>
-          
-          <div className="divide-y divide-white/5">
-            {cityModels.map((model) => (
-              <button
-                key={model.id}
-                onClick={() => handleModelSelect(model)}
-                className={`w-full p-8 text-left flex items-center gap-6 transition-all duration-500 hover:bg-white/5 group relative overflow-hidden ${
-                  selectedModel?.id === model.id ? 'bg-brand-gold/5' : ''
-                }`}
-              >
-                {selectedModel?.id === model.id && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-gold" />
-                )}
-                
-                <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-brand-gold/40 transition-all duration-500">
-                  <Image 
-                    src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
-                    alt={model.name} 
-                    fill 
-                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-black/80 to-transparent z-10" />
-                </div>
-
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex items-center gap-2">
-                     <h4 className="text-white font-serif text-xl leading-none group-hover:text-brand-gold transition-colors">{model.name}</h4>
-                     {model.plan_type === 'VIP Elite' && <ShieldCheck size={14} className="text-brand-gold" />}
+          {/* List of Models */}
+          <div className="flex-1 divide-y divide-white/5 overflow-y-auto">
+            {cityModels.length === 0 ? (
+              <div className="p-10 text-center space-y-2 text-white/40 text-xs">
+                <MapPin size={24} className="mx-auto text-brand-gold/40" />
+                <p>No hay modelos con GPS activo en este momento en {selectedCity}.</p>
+                <p className="text-[10px] text-brand-gold">Selecciona otra ciudad arriba.</p>
+              </div>
+            ) : (
+              cityModels.map((model) => (
+                <button
+                  key={model.id}
+                  onClick={() => handleModelSelect(model)}
+                  className={`w-full p-5 text-left flex items-center gap-4 transition-all hover:bg-white/5 group relative ${
+                    selectedModel?.id === model.id ? 'bg-brand-gold/10 border-l-4 border-brand-gold' : ''
+                  }`}
+                >
+                  {/* Photo with status indicator */}
+                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-brand-gold/50 transition-all shadow-md">
+                    <Image 
+                      src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
+                      alt={model.name} 
+                      fill 
+                      className="object-cover group-hover:scale-105 transition-all duration-500" 
+                    />
+                    <div className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-black" />
                   </div>
-                  <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black truncate">
-                    {model.age} Years · {model.sector || 'Exclusive Zone'}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] text-brand-gold font-black uppercase tracking-[0.3em] opacity-60 group-hover:opacity-100 transition-opacity">5 min arrival window</span>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-white font-serif text-lg font-bold group-hover:text-brand-gold transition-colors truncate">
+                        {model.name}
+                      </h4>
+                      {model.plan_type === 'VIP Elite' && (
+                        <ShieldCheck size={14} className="text-brand-gold shrink-0" />
+                      )}
+                    </div>
+                    
+                    <p className="text-[10px] text-white/50 uppercase tracking-wider font-bold truncate">
+                      {model.age ? `${model.age} Años · ` : ''}{model.sector || 'Zona Exclusiva'}
+                    </p>
+
+                    <div className="flex items-center gap-2 text-[9px] text-emerald-400 font-bold">
+                      <span>🟢 Disponible Ahora</span>
+                      <span className="text-white/30">·</span>
+                      <span className="text-brand-gold">A ~ 1.2 km</span>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight size={18} className={`text-white/10 group-hover:text-brand-gold transition-all duration-500 ${selectedModel?.id === model.id ? 'translate-x-2' : ''}`} />
-              </button>
-            ))}
+
+                  <ChevronRight size={16} className={`text-white/20 group-hover:text-brand-gold transition-all ${selectedModel?.id === model.id ? 'translate-x-1 text-brand-gold' : ''}`} />
+                </button>
+              ))
+            )}
+          </div>
+
+          {/* Sidebar Footer */}
+          <div className="p-4 border-t border-white/10 bg-black/40 text-center">
+            <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] block">
+              Discreción Absoluta · Sin Rastro Bancario
+            </span>
           </div>
         </div>
 
@@ -283,26 +305,32 @@ export default function LiveMap() {
                     eventHandlers={{ click: () => handleModelSelect(model) }}
                   >
                     <Popup className="premium-map-popup">
-                       <div className="p-4 w-60 space-y-4">
-                           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-brand-black border border-white/5 relative">
+                       <div className="p-4 w-60 space-y-3 bg-[#0c0c10] text-white rounded-2xl border border-brand-gold/30">
+                           <div className="aspect-[4/3] rounded-xl overflow-hidden bg-black relative">
                               <Image 
                                 src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
                                 alt={model.name} 
                                 fill 
                                 className="object-cover" 
                               />
-                              <div className="absolute top-3 right-3 bg-brand-gold text-brand-black text-[8px] font-black px-2 py-1 rounded-full uppercase z-10">Verified</div>
+                              <div className="absolute top-2 right-2 bg-brand-gold text-brand-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase">
+                                4K VIP
+                              </div>
                            </div>
                           <div>
-                             <h5 className="text-white font-serif text-2xl italic leading-none">{model.name}</h5>
-                             <p className="text-[9px] text-white/40 uppercase tracking-[0.3em] font-black mt-2">{model.age} Años · Ecuador</p>
+                             <h5 className="text-white font-serif text-xl italic font-bold">{model.name}</h5>
+                             <p className="text-[9px] text-white/50 uppercase tracking-wider font-bold mt-1">
+                               {model.age ? `${model.age} Años · ` : ''}{model.sector || model.city}
+                             </p>
                           </div>
-                          <button 
-                             onClick={(e) => { e.stopPropagation(); window.location.href = `/profile/${model.id}`; }}
-                             className="block w-full py-4 bg-white text-brand-black text-[10px] font-black uppercase text-center rounded-xl tracking-[0.3em] hover:bg-brand-gold transition-all duration-500 shadow-xl"
+                          <a 
+                             href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi en el Radar GPS de Cariñosas.top (${model.city}). Deseo consultar tu disponibilidad hoy.`)}`}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="block w-full py-2.5 bg-brand-gold text-brand-black text-[10px] font-black uppercase text-center rounded-xl tracking-wider hover:bg-white transition-all shadow-lg"
                           >
-                             Access Profile
-                          </button>
+                             Contactar WhatsApp
+                          </a>
                        </div>
                     </Popup>
                   </Marker>
@@ -311,22 +339,36 @@ export default function LiveMap() {
             </MapContainer>
           )}
 
-          {/* Map Vignette & Controls */}
-          <div className="absolute inset-0 pointer-events-none z-20 shadow-[inset_0_0_150px_rgba(0,0,0,0.95)]" />
+          {/* Map Vignette Overlay */}
+          <div className="absolute inset-0 pointer-events-none z-10 shadow-[inset_0_0_100px_rgba(0,0,0,0.9)]" />
+
+          {/* Top Right Floating HUD on the Map */}
+          <div className="absolute top-6 right-6 z-30 pointer-events-none hidden md:block">
+            <div className="p-4 rounded-2xl glass-obsidian border border-brand-gold/30 shadow-2xl backdrop-blur-2xl flex items-center gap-4 pointer-events-auto">
+              <div className="w-10 h-10 rounded-xl bg-brand-gold/15 border border-brand-gold/30 flex items-center justify-center text-brand-gold">
+                <Sparkles size={18} />
+              </div>
+              <div className="text-left">
+                <span className="text-[8px] text-brand-gold font-black uppercase tracking-widest block">Sincronización Satelital</span>
+                <span className="text-xs text-white font-serif italic">100% Cifrado AES-256</span>
+              </div>
+            </div>
+          </div>
           
-          {/* Sliding Quick Preview Modal on Selected Model Pin */}
+          {/* Sliding Quick Preview Card for Selected Model */}
           {selectedModel && (
-            <div className="absolute bottom-8 left-8 right-8 md:right-auto md:max-w-md z-40 animate-in slide-in-from-bottom-8 duration-500 pointer-events-auto">
-              <div className="glass-obsidian p-6 rounded-[2.5rem] border border-brand-gold/40 shadow-[0_30px_90px_rgba(0,0,0,0.95)] relative space-y-4">
+            <div className="absolute bottom-6 left-6 right-6 md:right-auto md:max-w-sm z-30 animate-in slide-in-from-bottom-6 duration-300 pointer-events-auto">
+              <div className="glass-obsidian p-5 rounded-3xl border border-brand-gold/40 shadow-[0_30px_90px_rgba(0,0,0,0.95)] relative space-y-4">
+                
                 <button
                   onClick={() => setSelectedModel(null)}
-                  className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all"
+                  className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all text-xs"
                 >
-                  <X size={15} />
+                  <X size={14} />
                 </button>
 
-                <div className="flex items-center gap-4">
-                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-brand-gold/40 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-brand-gold/40 flex-shrink-0">
                     <Image
                       src={selectedModel.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'}
                       alt={selectedModel.name}
@@ -335,107 +377,38 @@ export default function LiveMap() {
                     />
                   </div>
 
-                  <div className="flex flex-col flex-1 min-w-0 pr-6">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-white font-serif text-2xl leading-none">{selectedModel.name}</h4>
-                      <span className="text-[8px] px-2 py-0.5 rounded-full bg-brand-gold/20 text-brand-gold font-bold">4K VIP</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-white font-serif text-xl font-bold truncate">{selectedModel.name}</h4>
+                      <span className="text-[8px] px-2 py-0.5 rounded-full bg-brand-gold/20 text-brand-gold font-bold">VIP</span>
                     </div>
-                    <p className="text-[10px] text-white/50 uppercase font-black tracking-widest mt-1.5">
-                      {selectedModel.age ? `${selectedModel.age} Años · ` : ''}{selectedModel.sector || selectedModel.city}
+                    <p className="text-[10px] text-white/50 uppercase tracking-wider font-bold">
+                      {selectedModel.sector || selectedModel.city}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 font-bold">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">A ~ 1.2 km de ti</span>
+                      <span>A ~ 1.2 km de ti</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2.5 pt-2 border-t border-white/10">
-                  <button
-                    onClick={() => {
-                      if (selectedModel.whatsapp) {
-                        const phone = selectedModel.whatsapp.replace(/\D/g, '');
-                        const fullPhone = phone.startsWith('593') ? phone : `593${phone.replace(/^0/, '')}`;
-                        window.open(`https://wa.me/${fullPhone}?text=Hola%20${encodeURIComponent(selectedModel.name)}%2C%20vi%20tu%20perfil%20en%20el%20Radar%20de%20Cari%C3%B1osas.top`, '_blank');
-                      }
-                    }}
-                    className="flex-1 py-3.5 bg-brand-gold text-brand-black text-[10px] font-black uppercase rounded-2xl tracking-widest hover:bg-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-gold/25"
-                  >
-                    <MessageCircle size={14} fill="currentColor" />
-                    WhatsApp Directo
-                  </button>
-                  <button
-                    onClick={() => window.location.href = `/profile/${selectedModel.id}`}
-                    className="px-5 py-3.5 rounded-2xl border border-white/20 text-white hover:border-brand-gold hover:text-brand-gold text-[10px] font-black uppercase tracking-widest transition-all"
-                  >
-                    Ver Perfil
-                  </button>
-                </div>
+                <a
+                  href={`https://wa.me/${selectedModel.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${selectedModel.name}, te vi en el Radar GPS de Cariñosas.top (${selectedModel.city}). Deseo consultar tu disponibilidad hoy.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={15} fill="currentColor" />
+                  <span>Contactar en WhatsApp</span>
+                </a>
               </div>
             </div>
           )}
 
-          <div className="absolute bottom-12 right-12 z-30 flex flex-col items-end gap-6 text-right animate-in fade-in duration-1000">
-             <div className="glass-premium px-8 py-5 rounded-[2rem] border-white/5 space-y-1">
-                <span className="text-[9px] text-white/30 uppercase font-black tracking-widest block">Satellite Encryption</span>
-                <span className="text-[11px] text-brand-gold font-black uppercase tracking-[0.4em]">AES-256 SECURED</span>
-             </div>
-             <div className="flex items-center gap-4">
-                <div className="flex flex-col items-end">
-                   <span className="text-[8px] text-white/40 uppercase font-black tracking-widest">Active Members</span>
-                   <span className="text-lg font-serif text-white italic">Elite Access Only</span>
-                </div>
-                <div className="w-12 h-12 rounded-2xl border border-brand-gold/30 flex items-center justify-center bg-brand-gold/5 backdrop-blur-xl">
-                   <div className="w-3 h-3 rounded-full bg-brand-gold animate-ping" />
-                </div>
-             </div>
-          </div>
         </div>
+
       </div>
 
-      <style jsx global>{`
-        .leaflet-container { background: #050505 !important; }
-        .premium-map-popup .leaflet-popup-content-wrapper {
-          background: rgba(5, 5, 5, 0.95) !important;
-          backdrop-filter: blur(40px);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 2.5rem;
-          color: white;
-          padding: 0;
-          overflow: hidden;
-          box-shadow: 0 40px 100px rgba(0,0,0,0.9);
-        }
-        .premium-map-popup .leaflet-popup-content { margin: 0; width: auto !important; }
-        .premium-map-popup .leaflet-popup-tip { background: rgba(5, 5, 5, 0.95); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        .live-pin { position: relative; width: 32px; height: 32px; }
-        .pin-pulse { position: absolute; inset: 0; background: #D4AF37; border-radius: 50%; opacity: 0.4; animation: pinPulse 2.5s infinite; }
-        .pin-core { position: absolute; inset: 10px; background: #D4AF37; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 15px #D4AF37; }
-        
-        .live-pin-selected { position: relative; width: 44px; height: 44px; }
-        .pin-pulse-red { position: absolute; inset: 0; background: #FFFFFF; border-radius: 50%; opacity: 0.6; animation: pinPulse 1.2s infinite; }
-        .pin-core-red { position: absolute; inset: 14px; background: #FFFFFF; border-radius: 50%; border: 3px solid #D4AF37; box-shadow: 0 0 30px rgba(255,255,255,0.8); }
-
-        @keyframes pinPulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(3.5); opacity: 0; }
-        }
-
-        .animate-spin-slow {
-          animation: spin 8s linear infinite;
-        }
-
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.3); }
-      `}</style>
     </section>
   );
 }
