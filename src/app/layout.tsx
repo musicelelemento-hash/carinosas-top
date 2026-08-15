@@ -93,8 +93,40 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://carinosas.top/#website",
+        "url": "https://carinosas.top",
+        "name": "Cariñosas.top",
+        "description": "Directorio Élite de Modelos y Acompañantes VIP en Ecuador",
+        "inLanguage": "es-EC",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://carinosas.top/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://carinosas.top/#organization",
+        "name": "Cariñosas.top Elite",
+        "url": "https://carinosas.top",
+        "logo": "https://carinosas.top/og-luxury.png"
+      }
+    ]
+  };
+
   return (
     <html lang="es-EC" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} antialiased bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black pb-20 md:pb-0`}
       >
