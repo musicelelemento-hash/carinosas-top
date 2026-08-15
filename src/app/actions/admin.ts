@@ -101,6 +101,8 @@ export async function createModelAction(modelData: {
   lat?: number;
   lng?: number;
   sector?: string;
+  voice_greeting_url?: string;
+  hourly_rate?: number;
 }) {
   await assertAdmin();
   if (!PLAN_TYPES.has(modelData.plan_type)) throw new Error("El plan seleccionado no es válido.");
@@ -121,6 +123,8 @@ export async function createModelAction(modelData: {
         lat: modelData.lat,
         lng: modelData.lng,
         sector: modelData.sector,
+        voice_greeting_url: modelData.voice_greeting_url,
+        hourly_rate: modelData.hourly_rate || 120,
         is_online: false
       }
     ])
@@ -153,6 +157,8 @@ export async function updateModelAction(
     sector?: string;
     is_verified_4k?: boolean;
     is_online?: boolean;
+    voice_greeting_url?: string;
+    hourly_rate?: number;
   }
 ) {
   await assertAdmin();
@@ -174,7 +180,9 @@ export async function updateModelAction(
       lng: modelData.lng,
       sector: modelData.sector,
       is_verified_4k: modelData.is_verified_4k,
-      is_online: modelData.is_online
+      is_online: modelData.is_online,
+      voice_greeting_url: modelData.voice_greeting_url,
+      hourly_rate: modelData.hourly_rate
     })
     .eq("id", id)
     .select();
@@ -185,6 +193,20 @@ export async function updateModelAction(
   }
 
   return data;
+}
+
+/**
+ * Batch updates 4K verification for multiple models.
+ */
+export async function batchVerify4KAction(modelIds: string[], isVerified: boolean) {
+  await assertAdmin();
+  const { error } = await supabaseAdmin
+    .from("models")
+    .update({ is_verified_4k: isVerified })
+    .in("id", modelIds);
+
+  if (error) throw new Error(`Error en actualización por lote: ${error.message}`);
+  return { success: true };
 }
 
 /**
@@ -220,6 +242,8 @@ export async function registerModelAction(modelData: {
   images?: string[];
   plan_type: string;
   ageConfirmed: boolean;
+  voice_greeting_url?: string;
+  hourly_rate?: number;
 }) {
   if (!modelData.ageConfirmed) throw new Error("Debes confirmar que eres mayor de edad.");
   if (!modelData.name?.trim() || modelData.name.trim().length > 80) throw new Error("El nombre no es válido.");
@@ -246,7 +270,9 @@ export async function registerModelAction(modelData: {
         plan_type: modelData.plan_type,
         age: 21,
         is_verified: false,
-        is_online: false
+        is_online: false,
+        voice_greeting_url: modelData.voice_greeting_url,
+        hourly_rate: modelData.hourly_rate || 120
       }
     ])
     .select("id");
