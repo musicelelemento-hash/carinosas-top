@@ -65,7 +65,7 @@ const TOURING_MODELS: TourModel[] = [
 ];
 
 export default function GlobalLounge() {
-  const [selectedCity, setSelectedCity] = useState<'all' | 'Quito' | 'Guayaquil' | 'Cuenca'>('all');
+  const [selectedCity, setSelectedCity] = useState<'all' | 'Quito' | 'Guayaquil' | 'Cuenca' | 'Manta' | 'Salinas'>('all');
 
   const filteredTour = TOURING_MODELS.filter(m => {
     if (selectedCity === 'all') return true;
@@ -103,12 +103,12 @@ export default function GlobalLounge() {
           </div>
 
           {/* City Filter Tabs */}
-          <div className="flex p-1.5 rounded-2xl glass-obsidian border border-white/10">
-            {(['all', 'Quito', 'Guayaquil', 'Cuenca'] as const).map(city => (
+          <div className="flex flex-wrap p-1.5 rounded-2xl glass-obsidian border border-white/10 gap-1">
+            {(['all', 'Quito', 'Guayaquil', 'Cuenca', 'Manta', 'Salinas'] as const).map(city => (
               <button
                 key={city}
                 onClick={() => setSelectedCity(city)}
-                className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all ${
+                className={`px-3 sm:px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all ${
                   selectedCity === city
                     ? 'bg-brand-gold text-brand-black shadow-[0_0_15px_rgba(212,168,67,0.4)]'
                     : 'text-white/40 hover:text-white'

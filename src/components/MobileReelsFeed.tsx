@@ -50,7 +50,7 @@ const REEL_ITEMS: ReelItem[] = [
     name: "Alessandra",
     age: 24,
     city: "Guayaquil",
-    sector: "Samborondón",
+    sector: "Samborondón VIP",
     rate: "$180/h",
     imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1080",
     description: "Presencia impecable y atención preferencial para caballeros distinguidos en Samborondón.",
@@ -61,13 +61,37 @@ const REEL_ITEMS: ReelItem[] = [
     id: "r3",
     name: "Isabella",
     age: 23,
-    city: "Quito",
-    sector: "Cumbayá VIP",
+    city: "Cuenca",
+    sector: "El Vergel / Cumbayá",
     rate: "$140/h",
     imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1080",
-    description: "Universitaria sofisticada. Conexión auténtica y compañía sin prisa en Cumbayá.",
+    description: "Universitaria sofisticada. Conexión auténtica y compañía sin prisa en Cuenca.",
     hasAudio: true,
     tags: ["Universitaria", "Sutil", "Masaje Relax"]
+  },
+  {
+    id: "r4",
+    name: "Mariana",
+    age: 22,
+    city: "Medellín",
+    sector: "El Poblado / Provenza",
+    rate: "$190/h",
+    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1080",
+    description: "Giras VIP y experiencias inolvidables en las mejores suites de El Poblado.",
+    hasAudio: true,
+    tags: ["Giras VIP", "Provenza", "Suite 5★"]
+  },
+  {
+    id: "r5",
+    name: "Sofía",
+    age: 25,
+    city: "Manta",
+    sector: "Plaza del Sol / Barbasquillo",
+    rate: "$160/h",
+    imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=1080",
+    description: "Acompañamiento exclusivo frente al mar con total discreción.",
+    hasAudio: true,
+    tags: ["Playa VIP", "Yates", "4K HD"]
   }
 ];
 

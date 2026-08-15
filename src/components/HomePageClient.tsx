@@ -24,7 +24,11 @@ import OccasionMatchmaker from "@/components/OccasionMatchmaker";
 import LiveActivityToast from "@/components/LiveActivityToast";
 import LiveClassifiedsFeed from "@/components/LiveClassifiedsFeed";
 import GoldParticles from "@/components/GoldParticles";
+import GentlemenClubSection from "@/components/GentlemenClubSection";
+import HiddenModelsLounge from "@/components/HiddenModelsLounge";
+import PanicDisguise from "@/components/PanicDisguise";
 import { Sliders } from "lucide-react";
+import { type Country, getCountryById } from "@/lib/countries";
 
 interface HomePageModel {
   id: string;
@@ -53,15 +57,42 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
   const [isFiltersSheetOpen, setIsFiltersSheetOpen] = React.useState(false);
   const { showGateway, location, handleEnter, resetLocation } = useLocationGateway();
 
+  const currentCountry = React.useMemo(() => {
+    return getCountryById(location?.countryId);
+  }, [location?.countryId]);
+
+  // When location changes or canton is picked, optionally prioritize models in that location
+  React.useEffect(() => {
+    if (location?.cantonName) {
+      const cantonClean = location.cantonName.split(" ")[0].toLowerCase();
+      const matched = initialModels.filter(m => 
+        m.location.toLowerCase().includes(cantonClean) || 
+        (m.sector && m.sector.toLowerCase().includes(cantonClean))
+      );
+      if (matched.length > 0) {
+        setDisplayModels(matched);
+      } else {
+        setDisplayModels(initialModels);
+      }
+    } else {
+      setDisplayModels(initialModels);
+    }
+  }, [location, initialModels]);
+
   React.useEffect(() => {
     const handleScroll = () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
         setIsLoading(true);
         setTimeout(() => {
+          const sampleCities = Object.keys(currentCountry.mapPresets || {});
+          const city1 = sampleCities[0] || (currentCountry.name === "Ecuador" ? "Quito" : "Medellín");
+          const city2 = sampleCities[1] || (currentCountry.name === "Ecuador" ? "Guayaquil" : "Bogotá");
+          const city3 = sampleCities[2] || (currentCountry.name === "Ecuador" ? "Cuenca" : "Cartagena");
+
           const extraModels = [
-            { id: Math.random().toString(), name: 'Elena', age: 22, location: 'Quito', imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800', plan_type: 'Premium' },
-            { id: Math.random().toString(), name: 'Sofía', age: 23, location: 'Manta', imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true, plan_type: 'VIP Elite' },
-            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: 'Cuenca', imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800', plan_type: 'Diamante' },
+            { id: Math.random().toString(), name: 'Elena', age: 22, location: city1, imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800', plan_type: 'Premium' },
+            { id: Math.random().toString(), name: 'Sofía', age: 23, location: city2, imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true, plan_type: 'VIP Elite' },
+            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: city3, imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800', plan_type: 'Diamante' },
           ];
           setDisplayModels(prev => [...prev, ...extraModels]);
           setIsLoading(false);
@@ -71,7 +102,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
+  }, [isLoading, currentCountry]);
 
   return (
     <>
@@ -84,20 +115,34 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         {/* Ambient Interactive Gold Dust Canvas */}
         <GoldParticles />
 
-        <Navbar onChangeLocation={resetLocation} />
+        <Navbar currentCountry={currentCountry} onChangeLocation={resetLocation} />
 
         <StoriesBar />
 
-        <HeroSection />
+        <HeroSection
+          currentCountry={currentCountry}
+          onSelectLocation={(locName) => {
+            if (!locName) {
+              setDisplayModels(initialModels);
+            } else {
+              const clean = locName.split(" ")[0].toLowerCase();
+              const filtered = initialModels.filter(m => 
+                m.location.toLowerCase().includes(clean) || 
+                (m.sector && m.sector.toLowerCase().includes(clean))
+              );
+              setDisplayModels(filtered.length > 0 ? filtered : initialModels);
+            }
+          }}
+        />
 
         {/* ── HIGH DOPAMINE LIVE CLASSIFIEDS FEED ── */}
-        <LiveClassifiedsFeed />
+        <LiveClassifiedsFeed currentCountry={currentCountry} />
 
         <div id="mapa">
-          <LiveMap />
+          <LiveMap currentCountry={currentCountry} userLocation={location} />
         </div>
 
-        <RecommendationSection />
+        <RecommendationSection currentCountry={currentCountry} />
 
         {/* ── 5 OCCASIONS CONCIERGE MATCHMAKER ── */}
         <OccasionMatchmaker
@@ -115,12 +160,21 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           }}
         />
 
+        {/* ── THE GENTLEMEN'S ALPHA CLUB EXPERIENCE ── */}
+        <GentlemenClubSection />
+
+        {/* ── SECRET HIDDEN MODELS (NON-PUBLIC) ── */}
+        <HiddenModelsLounge />
+
         <VIPLounge />
 
         {/* ── SECRET VAULT 4K TEASER ── */}
         <SecretVaultTeaser />
 
         <GlobalLounge />
+
+        {/* ── DISCREET PANIC DISGUISE MODE (ESC / 1-TAP) ── */}
+        <PanicDisguise />
 
         <section id="collection" className="max-w-7xl mx-auto px-6 py-28">
           {/* Section header */}

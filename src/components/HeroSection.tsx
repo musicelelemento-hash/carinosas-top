@@ -1,12 +1,18 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { getProvinces, getCitiesByProvince } from "@/lib/cities";
+import { type Country, type Province, getCountryById } from "@/lib/countries";
 import { Search, ChevronDown, Gem, Sparkles, ShieldCheck, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function HeroSection() {
-  const provinces = getProvinces();
+interface HeroSectionProps {
+  currentCountry?: Country;
+  onSelectLocation?: (locationName: string) => void;
+}
+
+export default function HeroSection({ currentCountry, onSelectLocation }: HeroSectionProps = {}) {
+  const activeCountry = currentCountry || getCountryById("ecuador");
+  const provinces = activeCountry.provinces || [];
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedLocationName, setSelectedLocationName] = useState("Todas las Ciudades");
@@ -177,25 +183,41 @@ export default function HeroSection() {
                   </button>
 
                   {isLocationOpen && (
-                    <div className="absolute top-full left-0 mt-3 w-full md:w-[480px] rounded-[2rem] p-5 z-50 no-scrollbar overflow-y-auto max-h-[340px] glass-obsidian border border-brand-gold/30 shadow-[0_40px_80px_rgba(0,0,0,0.95)]">
+                    <div className="absolute top-full left-0 mt-3 w-full md:w-[500px] rounded-[2rem] p-5 z-50 no-scrollbar overflow-y-auto max-h-[360px] glass-obsidian border border-brand-gold/30 shadow-[0_40px_80px_rgba(0,0,0,0.95)]">
                       <div className="space-y-4">
                         <button
-                          onClick={() => { setSelectedLocation(""); setSelectedLocationName("Todas las Ciudades"); setIsLocationOpen(false); }}
+                          onClick={() => {
+                            setSelectedLocation("");
+                            setSelectedLocationName(`Todas las Ciudades (${activeCountry.name})`);
+                            setIsLocationOpen(false);
+                            onSelectLocation?.("");
+                          }}
                           className={`w-full text-left py-2.5 px-5 rounded-2xl text-[9px] uppercase tracking-[0.4em] font-black transition-all ${!selectedLocation ? 'bg-brand-gold text-brand-black' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
                         >
-                          Todas las Ciudades
+                          🌐 Todas las Ciudades ({activeCountry.flag} {activeCountry.name})
                         </button>
-                        {provinces.map(prov => (
-                          <div key={prov} className="space-y-2">
-                            <span className="text-[8px] text-brand-gold font-black uppercase tracking-[0.3em] px-3 block border-l border-brand-gold/40 ml-2">{prov}</span>
+                        {provinces.map((prov) => (
+                          <div key={prov.id} className="space-y-2">
+                            <span className="text-[8px] text-brand-gold font-black uppercase tracking-[0.3em] px-3 block border-l border-brand-gold/40 ml-2">
+                              {prov.name} {prov.region ? `· ${prov.region}` : ""}
+                            </span>
                             <div className="grid grid-cols-2 gap-1.5">
-                              {getCitiesByProvince(prov).map(city => (
+                              {prov.cantons.map((canton) => (
                                 <button
-                                  key={city.id}
-                                  onClick={() => { setSelectedLocation(city.id); setSelectedLocationName(city.name); setIsLocationOpen(false); }}
-                                  className={`text-left py-2.5 px-4 rounded-xl text-[9px] font-bold transition-all ${selectedLocation === city.id ? 'bg-brand-gold text-brand-black font-black' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                                  key={canton.id}
+                                  onClick={() => {
+                                    setSelectedLocation(canton.id);
+                                    setSelectedLocationName(canton.name);
+                                    setIsLocationOpen(false);
+                                    onSelectLocation?.(canton.name);
+                                  }}
+                                  className={`text-left py-2 px-3 rounded-xl text-[9px] font-bold transition-all truncate flex items-center justify-between ${selectedLocation === canton.id ? 'bg-brand-gold text-brand-black font-black' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                                  title={canton.name}
                                 >
-                                  {city.name}
+                                  <span className="truncate">{canton.name}</span>
+                                  {canton.isPopular && (
+                                    <span className="text-[7px] text-brand-gold uppercase tracking-tighter ml-1 shrink-0 font-black">VIP</span>
+                                  )}
                                 </button>
                               ))}
                             </div>

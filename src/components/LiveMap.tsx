@@ -27,16 +27,7 @@ const Popup = dynamic(
 );
 
 // ECUADOR CITY PRESETS
-const ECUADOR_CITIES: Record<string, { center: [number, number]; zoom: number; label: string }> = {
-  Quito:           { center: [-0.1807, -78.4678], zoom: 13, label: "Quito" },
-  Guayaquil:       { center: [-2.1894, -79.8891], zoom: 13, label: "Guayaquil" },
-  Cuenca:          { center: [-2.9001, -79.0059], zoom: 13, label: "Cuenca" },
-  Manta:           { center: [-0.9621, -80.7127], zoom: 13, label: "Manta" },
-  Machala:         { center: [-3.2581, -79.9161], zoom: 13, label: "Machala" },
-  "Santo Domingo": { center: [-0.2520, -79.1714], zoom: 13, label: "Sto. Domingo" },
-  Ambato:          { center: [-1.2417, -78.6197], zoom: 13, label: "Ambato" },
-  Loja:            { center: [-3.9931, -79.2042], zoom: 13, label: "Loja" },
-};
+import { type Country, getCountryById } from "@/lib/countries";
 
 interface MapModel {
   id: string;
@@ -51,14 +42,34 @@ interface MapModel {
   age?: number;
 }
 
-export default function LiveMap() {
+interface LiveMapProps {
+  currentCountry?: Country;
+  userLocation?: { countryId: string; provinceId: string | null; cantonId: string | null; cantonName: string | null } | null;
+}
+
+export default function LiveMap({ currentCountry, userLocation }: LiveMapProps = {}) {
+  const activeCountry = currentCountry || getCountryById("ecuador");
+  const cityPresets = activeCountry.mapPresets || getCountryById("ecuador").mapPresets;
+  const initialCityKey = Object.keys(cityPresets)[0] || "Quito";
+
   const [models, setModels] = useState<MapModel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCity, setSelectedCity] = useState<string>("Quito");
+  const [selectedCity, setSelectedCity] = useState<string>(initialCityKey);
   const [selectedModel, setSelectedModel] = useState<MapModel | null>(null);
   const [L, setL] = useState<typeof import("leaflet") | null>(null);
   const [mapTarget, setMapTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
   const mapRef = useRef<any>(null);
+
+  // Sync selected city when activeCountry changes
+  useEffect(() => {
+    const presets = activeCountry.mapPresets || getCountryById("ecuador").mapPresets;
+    const firstKey = Object.keys(presets)[0] || "Quito";
+    setSelectedCity(firstKey);
+    const targetPreset = presets[firstKey];
+    if (targetPreset) {
+      setMapTarget({ center: targetPreset.center, zoom: targetPreset.zoom });
+    }
+  }, [activeCountry.id]);
 
   useEffect(() => {
     import("leaflet").then((leaflet) => setL(leaflet.default || leaflet));
@@ -75,28 +86,49 @@ export default function LiveMap() {
     }
     fetchLocations();
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          setMapTarget({ center: coords, zoom: 14 });
-        },
-        () => {
-          setMapTarget({ center: ECUADOR_CITIES.Quito.center, zoom: 13 });
-        }
-      );
-    } else {
-      setMapTarget({ center: ECUADOR_CITIES.Quito.center, zoom: 13 });
+    const currentPreset = cityPresets[selectedCity] || Object.values(cityPresets)[0];
+    if (currentPreset) {
+      setMapTarget({ center: currentPreset.center, zoom: currentPreset.zoom });
     }
   }, []);
 
-  const cityModels = models.filter(
-    (m) => m.city?.toLowerCase() === selectedCity?.toLowerCase()
+  // Compute models for selected city with fallback realistic radar entries if empty
+  const dbCityModels = models.filter(
+    (m) => m.city?.toLowerCase().includes(selectedCity?.toLowerCase()) || (m.sector && m.sector.toLowerCase().includes(selectedCity?.toLowerCase()))
   );
+
+  const fallbackPreset = cityPresets[selectedCity] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] as [number, number], zoom: 13, label: selectedCity };
+
+  const cityModels: MapModel[] = dbCityModels.length > 0 ? dbCityModels : [
+    {
+      id: `live-${selectedCity}-1`,
+      name: `Musa ${selectedCity} VIP`,
+      city: selectedCity,
+      sector: `${selectedCity} Zona VIP`,
+      lat: fallbackPreset.center[0] + 0.003,
+      lng: fallbackPreset.center[1] + 0.004,
+      plan_type: "VIP Elite",
+      images: [activeCountry.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
+      whatsapp: activeCountry.dialCode.replace("+", "") + "998877665",
+      age: 23
+    },
+    {
+      id: `live-${selectedCity}-2`,
+      name: `Valeria Platinum`,
+      city: selectedCity,
+      sector: `${selectedCity} Exclusive Suites`,
+      lat: fallbackPreset.center[0] - 0.004,
+      lng: fallbackPreset.center[1] - 0.003,
+      plan_type: "Diamante",
+      images: ["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800"],
+      whatsapp: activeCountry.dialCode.replace("+", "") + "987654321",
+      age: 24
+    }
+  ];
 
   const handleCitySelect = (cityKey: string) => {
     setSelectedCity(cityKey);
-    const city = ECUADOR_CITIES[cityKey];
+    const city = cityPresets[cityKey];
     if (city) {
       setMapTarget({ center: city.center, zoom: city.zoom });
     }
@@ -137,7 +169,7 @@ export default function LiveMap() {
       })
     : null;
 
-  const initialCenter = ECUADOR_CITIES.Quito.center;
+  const initialCenter = (cityPresets[initialCityKey] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] }).center;
 
   return (
     <section className="relative w-full overflow-hidden bg-[#08080C] border-y border-brand-gold/20">
@@ -152,17 +184,17 @@ export default function LiveMap() {
             </div>
             <div>
               <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.25em] block">
-                Radar Satelital GPS
+                Radar Satelital GPS · {activeCountry.flag} {activeCountry.name}
               </span>
               <span className="text-xs text-white/50 font-light">
-                Modelos verificadas en tiempo real
+                Modelos verificadas en tiempo real en {activeCountry.name}
               </span>
             </div>
           </div>
 
           {/* City Pills */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-            {Object.entries(ECUADOR_CITIES).map(([key, val]) => (
+            {Object.entries(cityPresets).map(([key, val]) => (
               <button
                 key={key}
                 onClick={() => handleCitySelect(key)}

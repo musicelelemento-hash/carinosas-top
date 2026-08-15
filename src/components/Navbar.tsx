@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame } from "lucide-react";
+import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame, Globe } from "lucide-react";
 import AuthModal from "./AuthModal";
 import LiveCountBanner from "./LiveCountBanner";
+import type { Country } from "@/lib/countries";
 
 interface NavbarProps {
+  currentCountry?: Country;
   onChangeLocation?: () => void;
 }
 
-export default function Navbar({ onChangeLocation }: NavbarProps) {
+export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -82,10 +84,12 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
               {onChangeLocation && (
                 <button
                   onClick={onChangeLocation}
-                  className="flex items-center gap-1.5 text-[9px] text-brand-gold hover:text-white uppercase tracking-widest font-bold transition-all px-3.5 py-1.5 rounded-full glass-obsidian border border-brand-gold/30 shadow-md"
+                  className="flex items-center gap-2 text-[9px] text-brand-gold hover:text-white uppercase tracking-widest font-bold transition-all px-3.5 py-1.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_0_15px_rgba(212,168,67,0.2)] hover:border-brand-gold"
+                  title="Cambiar país o cantón"
                 >
-                  <MapPin size={11} className="text-brand-gold" />
-                  <span>Cambiar País</span>
+                  <span className="text-xs">{currentCountry?.flag || "🇪🇨"}</span>
+                  <span className="truncate max-w-[90px] sm:max-w-none">{currentCountry?.name || "Ecuador"}</span>
+                  <span className="text-white/30 text-[8px]">▼</span>
                 </button>
               )}
 

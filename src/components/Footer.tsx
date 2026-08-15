@@ -5,7 +5,11 @@ import Link from "next/link";
 import { ShieldCheck, Lock, Gem, MapPin, Sparkles, Heart } from "lucide-react";
 
 export default function Footer() {
-  const cities = ['Quito Norte', 'Cumbayá VIP', 'Guayaquil', 'Samborondón', 'Cuenca', 'Manta 5★', 'Salinas', 'Ambato', 'Loja', 'Machala'];
+  const cities = [
+    'Quito Norte', 'Cumbayá VIP', 'Guayaquil', 'Samborondón', 'Cuenca', 
+    'Manta 5★', 'Salinas', 'Ambato', 'Loja', 'Machala', 'Santo Domingo', 
+    'Medellín', 'Bogotá', 'Lima', 'Miami'
+  ];
 
   return (
     <footer className="relative overflow-hidden bg-[#040406] border-t border-brand-gold/15">
@@ -35,19 +39,19 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-px w-6 bg-brand-gold/50" />
-                <span className="text-[8px] text-brand-gold uppercase font-black tracking-[0.5em]">Directorio Élite Digital Ecuador</span>
+                <span className="text-[8px] text-brand-gold uppercase font-black tracking-[0.5em]">Directorio Élite Digital · Ecuador & Red Internacional</span>
               </div>
             </div>
 
             <p className="text-xs text-white/50 leading-relaxed max-w-sm">
-              El círculo privado de mayor prestigio y discreción para caballeros de alto perfil y modelos independientes en Ecuador.
+              El círculo privado de mayor prestigio y discreción para caballeros de alto perfil y modelos independientes verificadas en Ecuador y las principales capitales.
             </p>
 
             {/* Coverage Cities */}
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <MapPin size={12} className="text-brand-gold" />
-                <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest">Cobertura Exclusiva Nacional</span>
+                <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest">Cobertura Exclusiva Nacional & Giras VIP</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {cities.map(city => (

@@ -17,6 +17,7 @@ import {
   Compass
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { type Country, getCountryById } from "@/lib/countries";
 
 interface NearbyModel {
   id: string;
@@ -24,6 +25,7 @@ interface NearbyModel {
   age: number;
   city: string;
   sector: string;
+  countryId: string;
   distance: string;
   responseTime: string;
   matchScore: number;
@@ -34,13 +36,15 @@ interface NearbyModel {
   tags: string[];
 }
 
-const NEARBY_MODELS: NearbyModel[] = [
+const ALL_NEARBY_MODELS: NearbyModel[] = [
+  // Ecuador
   {
-    id: "near-1",
+    id: "near-ec-1",
     name: "Valentina",
     age: 22,
     city: "Quito",
     sector: "La Carolina VIP",
+    countryId: "ecuador",
     distance: "1.2 km",
     responseTime: "2 min",
     matchScore: 99,
@@ -51,11 +55,12 @@ const NEARBY_MODELS: NearbyModel[] = [
     tags: ["Elegante", "Hotel 5★", "Discreción Total"]
   },
   {
-    id: "near-2",
+    id: "near-ec-2",
     name: "Alessandra",
     age: 24,
     city: "Guayaquil",
     sector: "Samborondón",
+    countryId: "ecuador",
     distance: "850 m",
     responseTime: "3 min",
     matchScore: 98,
@@ -66,11 +71,12 @@ const NEARBY_MODELS: NearbyModel[] = [
     tags: ["Trato VIP", "Cena & Eventos", "Bóveda 4K"]
   },
   {
-    id: "near-3",
+    id: "near-ec-3",
     name: "Isabella",
     age: 23,
-    city: "Quito",
-    sector: "Cumbayá",
+    city: "Cuenca",
+    sector: "El Vergel / Cumbayá",
+    countryId: "ecuador",
     distance: "2.8 km",
     responseTime: "5 min",
     matchScore: 96,
@@ -79,22 +85,100 @@ const NEARBY_MODELS: NearbyModel[] = [
     isOnline: false,
     hasAudio: true,
     tags: ["Universitaria", "Sutil", "Masaje Sensitivo"]
+  },
+  // Colombia
+  {
+    id: "near-co-1",
+    name: "Mariana",
+    age: 22,
+    city: "Medellín",
+    sector: "El Poblado / Provenza",
+    countryId: "colombia",
+    distance: "950 m",
+    responseTime: "1 min",
+    matchScore: 99,
+    rate: "$180/h",
+    imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800",
+    isOnline: true,
+    hasAudio: true,
+    tags: ["Provenza VIP", "Giras", "Cena Élite"]
+  },
+  {
+    id: "near-co-2",
+    name: "Camila",
+    age: 24,
+    city: "Bogotá",
+    sector: "Zona T / Chicó",
+    countryId: "colombia",
+    distance: "1.5 km",
+    responseTime: "3 min",
+    matchScore: 97,
+    rate: "$190/h",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
+    isOnline: true,
+    hasAudio: true,
+    tags: ["Zona T", "Hotel 5★", "Discreción"]
+  },
+  // Perú
+  {
+    id: "near-pe-1",
+    name: "Fiorella",
+    age: 24,
+    city: "Lima",
+    sector: "Miraflores / San Isidro",
+    countryId: "peru",
+    distance: "1.1 km",
+    responseTime: "2 min",
+    matchScore: 98,
+    rate: "$150/h",
+    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
+    isOnline: true,
+    hasAudio: true,
+    tags: ["San Isidro", "Miraflores VIP", "Elegante"]
+  },
+  // Panamá
+  {
+    id: "near-pa-1",
+    name: "Valeria",
+    age: 23,
+    city: "Ciudad de Panamá",
+    sector: "Punta Pacífica VIP",
+    countryId: "panama",
+    distance: "800 m",
+    responseTime: "2 min",
+    matchScore: 99,
+    rate: "$220/h",
+    imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800",
+    isOnline: true,
+    hasAudio: true,
+    tags: ["Punta Pacífica", "Yates VIP", "Exclusiva"]
   }
 ];
 
-export default function RecommendationSection() {
-  const [selectedRadius, setSelectedRadius] = useState<'2km' | '5km' | 'all'>('2km');
-  const [selectedCity, setSelectedCity] = useState<'all' | 'Quito' | 'Guayaquil'>('all');
+interface RecommendationSectionProps {
+  currentCountry?: Country;
+}
 
-  const filteredModels = NEARBY_MODELS.filter(m => {
-    if (selectedCity !== 'all' && m.city !== selectedCity) return false;
+export default function RecommendationSection({ currentCountry }: RecommendationSectionProps = {}) {
+  const activeCountry = currentCountry || getCountryById("ecuador");
+  const [selectedRadius, setSelectedRadius] = useState<'2km' | '5km' | 'all'>('all');
+  const [selectedCity, setSelectedCity] = useState<string>('all');
+
+  const countryModels = ALL_NEARBY_MODELS.filter((m) => m.countryId === activeCountry.id);
+  const modelsPool = countryModels.length > 0 ? countryModels : ALL_NEARBY_MODELS.slice(0, 3);
+  const availableCities = ['all', ...Array.from(new Set(modelsPool.map(m => m.city)))];
+
+  const filteredModels = modelsPool.filter(m => {
+    if (selectedCity !== 'all' && m.city.toLowerCase() !== selectedCity.toLowerCase()) return false;
     if (selectedRadius === '2km' && parseFloat(m.distance) > 2.0) return false;
+    if (selectedRadius === '5km' && parseFloat(m.distance) > 5.0) return false;
     return true;
   });
 
   const handleQuickContact = (model: NearbyModel) => {
-    const text = encodeURIComponent(`Hola ${model.name}, te vi en el Radar de Proximidad de Cariñosas.top (Sector: ${model.sector}). Me gustaría consultar tu disponibilidad para una cita.`);
-    window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
+    const text = encodeURIComponent(`Hola ${model.name}, te vi en el Radar de Proximidad de Cariñosas.top (${activeCountry.name} - Sector: ${model.sector}). Me gustaría consultar tu disponibilidad para una cita.`);
+    const cleanDial = activeCountry.dialCode.replace("+", "");
+    window.open(`https://wa.me/${cleanDial}987654321?text=${text}`, "_blank");
   };
 
   return (
@@ -153,7 +237,7 @@ export default function RecommendationSection() {
             </div>
 
             <div className="flex p-1 rounded-xl glass-obsidian border border-white/10">
-              {(['all', 'Quito', 'Guayaquil'] as const).map(city => (
+              {availableCities.map(city => (
                 <button
                   key={city}
                   onClick={() => setSelectedCity(city)}

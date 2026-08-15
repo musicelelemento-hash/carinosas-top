@@ -18,9 +18,11 @@ import {
   Eye,
   CheckCircle2,
   Lock,
-  ArrowUpRight
+  ArrowUpRight,
+  Globe
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { type Country, getCountryById } from "@/lib/countries";
 
 interface ClassifiedAd {
   id: string;
@@ -28,6 +30,7 @@ interface ClassifiedAd {
   city: string;
   sector: string;
   country: string;
+  countryId: string;
   age: number;
   rate: number;
   headline: string;
@@ -42,11 +45,12 @@ interface ClassifiedAd {
 
 const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
   {
-    id: "ad-1",
+    id: "ad-ec-1",
     name: "Valentina VIP",
     city: "Quito",
     sector: "La Carolina / Cumbayá",
     country: "🇪🇨",
+    countryId: "ecuador",
     age: 23,
     rate: 120,
     headline: "Disponible hoy para cena elegante en Cumbayá o suite ejecutiva. Fotos 100% reales de alta fidelidad.",
@@ -59,11 +63,66 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     likesCount: 142
   },
   {
-    id: "ad-2",
+    id: "ad-ec-2",
+    name: "Alessandra Gold",
+    city: "Guayaquil",
+    sector: "Samborondón VIP / Puerto Santa Ana",
+    country: "🇪🇨",
+    countryId: "ecuador",
+    age: 24,
+    rate: 150,
+    headline: "Acompañamiento selecto en Samborondón y suites ejecutivas. Discreción total y trato de primera.",
+    timeAgo: "Hace 6 min",
+    imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800",
+    whatsapp: "593981122334",
+    isLiveNow: true,
+    hasAudio: true,
+    tags: ["Samborondón", "Puerto Santa Ana", "Cena VIP"],
+    likesCount: 189
+  },
+  {
+    id: "ad-ec-3",
+    name: "Gabriela Rose",
+    city: "Cuenca",
+    sector: "El Vergel / Centro",
+    country: "🇪🇨",
+    countryId: "ecuador",
+    age: 22,
+    rate: 110,
+    headline: "Universitaria culta, dulce y encantadora. Disponible para tardes de relax y compañía selecta.",
+    timeAgo: "Hace 10 min",
+    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
+    whatsapp: "593976543210",
+    isLiveNow: true,
+    hasAudio: false,
+    tags: ["Cuenca VIP", "Relax", "Universitaria"],
+    likesCount: 95
+  },
+  {
+    id: "ad-ec-4",
+    name: "Camila Manta",
+    city: "Manta",
+    sector: "Plaza del Sol / Barbasquillo",
+    country: "🇪🇨",
+    countryId: "ecuador",
+    age: 23,
+    rate: 130,
+    headline: "Frente al mar en Barbasquillo. Exclusividad para ejecutivos, viajes de negocios y momentos únicos.",
+    timeAgo: "Hace 14 min",
+    imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800",
+    whatsapp: "593989988776",
+    isLiveNow: true,
+    hasAudio: true,
+    tags: ["Manta Sol", "Barbasquillo", "Playa VIP"],
+    likesCount: 164
+  },
+  {
+    id: "ad-co-1",
     name: "Mariana Paisa",
     city: "Medellín",
     sector: "El Poblado / Provenza",
     country: "🇨🇴",
+    countryId: "colombia",
     age: 22,
     rate: 180,
     headline: "Musa paisa en Provenza. Atención exclusiva para caballeros de alto perfil, eventos y giras.",
@@ -76,11 +135,30 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     likesCount: 230
   },
   {
-    id: "ad-3",
-    name: "Fiorella",
+    id: "ad-co-2",
+    name: "Sofía Chicó",
+    city: "Bogotá",
+    sector: "Zona T / Parque 93",
+    country: "🇨🇴",
+    countryId: "colombia",
+    age: 24,
+    rate: 190,
+    headline: "Elegancia capitalina en la Zona T. Disponible para cenas de gala y suites premium.",
+    timeAgo: "Hace 11 min",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
+    whatsapp: "573109876543",
+    isLiveNow: true,
+    hasAudio: true,
+    tags: ["Zona T", "Bogotá VIP", "Parque 93"],
+    likesCount: 175
+  },
+  {
+    id: "ad-pe-1",
+    name: "Fiorella Miraflores",
     city: "Lima",
     sector: "Miraflores / San Isidro",
     country: "🇵🇪",
+    countryId: "peru",
     age: 24,
     rate: 150,
     headline: "Compañía de alto nivel en San Isidro Golf. Total discreción, elegancia y encanto natural.",
@@ -93,11 +171,12 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     likesCount: 98
   },
   {
-    id: "ad-4",
-    name: "Valeria",
+    id: "ad-pa-1",
+    name: "Valeria Pacífica",
     city: "Ciudad de Panamá",
     sector: "Punta Pacífica",
     country: "🇵🇦",
+    countryId: "panama",
     age: 23,
     rate: 220,
     headline: "Disponible para eventos en yate privado y cenas de negocios en Punta Pacífica y Costa del Este.",
@@ -108,13 +187,46 @@ const SAMPLE_CLASSIFIEDS: ClassifiedAd[] = [
     hasAudio: true,
     tags: ["Punta Pacífica", "Yates VIP", "Discreción"],
     likesCount: 310
+  },
+  {
+    id: "ad-mx-1",
+    name: "Renata Polanco",
+    city: "Ciudad de México",
+    sector: "Polanco / Roma Norte",
+    country: "🇲🇽",
+    countryId: "mexico",
+    age: 23,
+    rate: 200,
+    headline: "Atención premium en Polanco y Lomas. Modelo verificada 4K con disponibilidad inmediata.",
+    timeAgo: "Hace 18 min",
+    imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800",
+    whatsapp: "525512345678",
+    isLiveNow: true,
+    hasAudio: true,
+    tags: ["Polanco VIP", "Roma Norte", "Suites CDMX"],
+    likesCount: 220
   }
 ];
 
-export default function LiveClassifiedsFeed() {
-  const [ads, setAds] = useState<ClassifiedAd[]>(SAMPLE_CLASSIFIEDS);
+interface LiveClassifiedsFeedProps {
+  currentCountry?: Country;
+}
+
+export default function LiveClassifiedsFeed({ currentCountry }: LiveClassifiedsFeedProps = {}) {
+  const activeCountry = currentCountry || getCountryById("ecuador");
+  const [filterMode, setFilterMode] = useState<"country" | "all">("country");
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+
+  // Filter ads according to active country tab
+  const filteredAds = SAMPLE_CLASSIFIEDS.filter((ad) => {
+    if (filterMode === "country") {
+      return ad.countryId === activeCountry.id || ad.country === activeCountry.flag;
+    }
+    return true;
+  });
+
+  const adsToDisplay = filteredAds.length > 0 ? filteredAds : SAMPLE_CLASSIFIEDS;
 
   const handleLike = (id: string) => {
     const next = new Set(likedIds);
@@ -156,8 +268,32 @@ export default function LiveClassifiedsFeed() {
           </h2>
           
           <p className="text-xs text-white/50 font-light max-w-xl">
-            Actualizaciones instantáneas en tiempo real directamente por modelos de alta gama con verificación biométrica.
+            Actualizaciones instantáneas en tiempo real directamente por modelos de alta gama con verificación biométrica en {activeCountry.name}.
           </p>
+
+          {/* Country vs Global Toggle Pills */}
+          <div className="flex items-center gap-2 pt-2">
+            <button
+              onClick={() => setFilterMode("country")}
+              className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border ${
+                filterMode === "country"
+                  ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_15px_rgba(212,168,67,0.3)]"
+                  : "glass-dark border-white/10 text-white/50 hover:text-white"
+              }`}
+            >
+              {activeCountry.flag} En {activeCountry.name} ({SAMPLE_CLASSIFIEDS.filter(a => a.countryId === activeCountry.id || a.country === activeCountry.flag).length})
+            </button>
+            <button
+              onClick={() => setFilterMode("all")}
+              className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border ${
+                filterMode === "all"
+                  ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_15px_rgba(212,168,67,0.3)]"
+                  : "glass-dark border-white/10 text-white/50 hover:text-white"
+              }`}
+            >
+              🌐 Internacional ({SAMPLE_CLASSIFIEDS.length})
+            </button>
+          </div>
         </div>
 
         {/* Action Button: Post Fast Ad */}
@@ -173,7 +309,7 @@ export default function LiveClassifiedsFeed() {
 
       {/* Grid of Dopamine Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {ads.map((ad, idx) => {
+        {adsToDisplay.map((ad, idx) => {
           const isLiked = likedIds.has(ad.id);
           const isPlaying = playingAudioId === ad.id;
 

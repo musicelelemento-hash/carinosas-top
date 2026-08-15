@@ -2,10 +2,20 @@ import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 import { getClientKey, isRateLimited } from "@/lib/rateLimit";
 
-const ECUADOR_CITIES = [
+const RECOGNIZED_CITIES = [
+  // Ecuador (Cantones Principales)
   "Quito", "Guayaquil", "Cuenca", "Manta", "Machala", "Ambato", "Loja", "Riobamba", 
   "Esmeraldas", "Ibarra", "Santo Domingo", "Quevedo", "Babahoyo", "Milagro", "Pasaje", 
-  "Portoviejo", "Salinas", "Cumbayá", "Samborondón"
+  "Portoviejo", "Salinas", "Cumbayá", "Samborondón", "Daule", "Durán", "Playas",
+  "Latacunga", "Tulcán", "Azogues", "Otavalo", "Baños", "Zaruma", "Huaquillas", 
+  "Montañita", "Atacames", "Puyo", "Tena", "El Coca", "Lago Agrio", "Macas", "Zamora",
+  // Internacional
+  "Medellín", "Bogotá", "Cartagena", "Cali", "Barranquilla",
+  "Lima", "Cusco", "Arequipa",
+  "Ciudad de Panamá", "Punta Pacífica",
+  "Ciudad de México", "Cancún", "Monterrey", "Guadalajara",
+  "Madrid", "Barcelona", "Marbella",
+  "Miami", "Brickell"
 ];
 
 const PLAN_PRIORITY: Record<string, number> = {
@@ -49,7 +59,7 @@ export async function POST(req: Request) {
     // 1. Extract potential filters from query
     // 1.1 City detection
     let detectedCity = "";
-    for (const city of ECUADOR_CITIES) {
+    for (const city of RECOGNIZED_CITIES) {
       if (query.includes(city.toLowerCase())) {
         detectedCity = city;
         break;
