@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { ChevronLeft, MapPin, Globe, Sparkles, ArrowRight, CheckCircle } from "lucide-react";
+import { ChevronLeft, MapPin, Globe, Sparkles, ArrowRight, CheckCircle, ShieldCheck, Lock, Gem } from "lucide-react";
 import { COUNTRIES, type Country, type Province, type Canton, REGION_COLORS } from "@/lib/countries";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 
 // ─── Types ───────────────────────────────────────────────────
 type Step = "country" | "province" | "canton" | "entering";
@@ -26,82 +28,121 @@ function regionColor(region?: string): string {
   return REGION_COLORS[region] || "#D4A843";
 }
 
-// ─── DOOR ANIMATION ──────────────────────────────────────────
+// ─── LUXURY VIP PORTAL DOOR ANIMATION ──────────────────────────
 function DoorAnimation({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"closed" | "opening" | "open">("closed");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("opening"), 80);
-    const t2 = setTimeout(() => setPhase("open"), 1300);
-    const t3 = setTimeout(() => onComplete(), 1700);
+    // Fire double champagne gold stardust burst
+    try {
+      confetti({
+        particleCount: 70,
+        spread: 80,
+        origin: { y: 0.5, x: 0.5 },
+        colors: ['#D4A843', '#FFE088', '#F5E0A0', '#AA7C11', '#FFFFFF'],
+        ticks: 200,
+        gravity: 0.8,
+        shapes: ['circle', 'square'],
+      });
+    } catch {
+      // safe fallback
+    }
+
+    const t1 = setTimeout(() => setPhase("opening"), 350);
+    const t2 = setTimeout(() => setPhase("open"), 1500);
+    const t3 = setTimeout(() => onComplete(), 1900);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex pointer-events-none" aria-hidden>
-      {/* Gold light burst in center */}
-      <div
-        className="absolute inset-0 z-10 flex items-center justify-center"
-        style={{
-          background: "radial-gradient(ellipse 40% 60% at 50% 50%, rgba(212,168,67,0.25) 0%, transparent 70%)",
-          opacity: phase === "opening" ? 1 : 0,
-          transition: "opacity 0.6s ease",
-        }}
-      />
+    <div className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden pointer-events-none" aria-hidden>
+      
+      {/* Central Light Beam Burst */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: phase === "opening" ? 1 : 0, scale: phase === "opening" ? 2.5 : 1 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
+      >
+        <div className="w-[800px] h-[800px] rounded-full bg-radial from-[#D4A843]/40 via-[#FFE088]/15 to-transparent blur-3xl" />
+      </motion.div>
 
-      {/* LEFT DOOR PANEL */}
+      {/* Central Holographic Iris Vault HUD */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ 
+          opacity: phase === "closed" ? 1 : phase === "opening" ? [1, 1, 0] : 0,
+          scale: phase === "opening" ? 1.3 : 1,
+          rotate: phase === "opening" ? 180 : 0
+        }}
+        transition={{ duration: 0.9, ease: "easeInOut" }}
+        className="absolute z-30 flex flex-col items-center justify-center gap-4 text-center pointer-events-none"
+      >
+        {/* Rotating Outer Ring */}
+        <div className="relative w-36 h-36 rounded-full border-2 border-dashed border-brand-gold/60 flex items-center justify-center shadow-[0_0_50px_rgba(212,168,67,0.5)]">
+          {/* Inner Glowing Core */}
+          <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#D4A843] via-[#FFE088] to-[#9A7830] p-1 shadow-[0_0_40px_rgba(212,168,67,0.7)] flex items-center justify-center">
+            <div className="w-full h-full rounded-full bg-[#08080C] flex items-center justify-center">
+              <ShieldCheck size={36} className="text-brand-gold animate-pulse" />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.4em] block">
+            ACCESO VIP CONCEDIDO
+          </span>
+          <span className="text-[8px] text-white/50 uppercase tracking-widest block font-mono">
+            IDENTIDAD BLINDADA · CIFRADO AES-256
+          </span>
+        </div>
+      </motion.div>
+
+      {/* LEFT VAULT DOOR PANEL */}
       <div
         className="relative w-1/2 h-full overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #0A0A10 0%, #08080C 100%)",
+          background: "linear-gradient(135deg, #0A0A10 0%, #06060A 100%)",
           transform: phase === "opening" || phase === "open" ? "translateX(-100%)" : "translateX(0)",
-          transition: phase === "closed" ? "none" : "transform 1.2s cubic-bezier(0.76, 0, 0.24, 1)",
-          boxShadow: phase !== "open" ? "4px 0 60px rgba(212,168,67,0.12)" : "none",
+          transition: phase === "closed" ? "none" : "transform 1.3s cubic-bezier(0.76, 0, 0.24, 1)",
+          boxShadow: phase !== "open" ? "10px 0 80px rgba(212,168,67,0.25)" : "none",
         }}
       >
         {/* Door decorations */}
-        <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none">
-          <div className="flex flex-col items-end gap-4 opacity-30">
-            <div className="h-px w-32 bg-gradient-to-l from-brand-gold to-transparent" />
-            <div className="h-px w-20 bg-gradient-to-l from-brand-gold to-transparent" />
-            <div className="h-px w-32 bg-gradient-to-l from-brand-gold to-transparent" />
+        <div className="absolute inset-0 flex items-center justify-end pr-10 pointer-events-none">
+          <div className="flex flex-col items-end gap-5 opacity-40">
+            <div className="h-px w-48 bg-gradient-to-l from-brand-gold to-transparent" />
+            <div className="h-px w-28 bg-gradient-to-l from-brand-gold to-transparent" />
+            <div className="h-px w-48 bg-gradient-to-l from-brand-gold to-transparent" />
           </div>
         </div>
-        {/* Door handle left */}
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-1.5 h-14 rounded-full"
-          style={{ background: "linear-gradient(to bottom, #E8BC50, #D4A843, #9A7830)" }}
-        />
         {/* Center gold line */}
-        <div className="absolute right-0 top-0 bottom-0 w-px"
-          style={{ background: "linear-gradient(to bottom, transparent, rgba(212,168,67,0.6), rgba(212,168,67,0.9), rgba(212,168,67,0.6), transparent)" }}
+        <div className="absolute right-0 top-0 bottom-0 w-[2px]"
+          style={{ background: "linear-gradient(to bottom, transparent, rgba(212,168,67,0.8), rgba(255,224,136,1), rgba(212,168,67,0.8), transparent)" }}
         />
       </div>
 
-      {/* RIGHT DOOR PANEL */}
+      {/* RIGHT VAULT DOOR PANEL */}
       <div
         className="relative w-1/2 h-full overflow-hidden"
         style={{
-          background: "linear-gradient(225deg, #0A0A10 0%, #08080C 100%)",
+          background: "linear-gradient(225deg, #0A0A10 0%, #06060A 100%)",
           transform: phase === "opening" || phase === "open" ? "translateX(100%)" : "translateX(0)",
-          transition: phase === "closed" ? "none" : "transform 1.2s cubic-bezier(0.76, 0, 0.24, 1)",
-          boxShadow: phase !== "open" ? "-4px 0 60px rgba(212,168,67,0.12)" : "none",
+          transition: phase === "closed" ? "none" : "transform 1.3s cubic-bezier(0.76, 0, 0.24, 1)",
+          boxShadow: phase !== "open" ? "-10px 0 80px rgba(212,168,67,0.25)" : "none",
         }}
       >
         {/* Door decorations */}
-        <div className="absolute inset-0 flex items-center justify-start pl-8 pointer-events-none">
-          <div className="flex flex-col items-start gap-4 opacity-30">
-            <div className="h-px w-32 bg-gradient-to-r from-brand-gold to-transparent" />
-            <div className="h-px w-20 bg-gradient-to-r from-brand-gold to-transparent" />
-            <div className="h-px w-32 bg-gradient-to-r from-brand-gold to-transparent" />
+        <div className="absolute inset-0 flex items-center justify-start pl-10 pointer-events-none">
+          <div className="flex flex-col items-start gap-5 opacity-40">
+            <div className="h-px w-48 bg-gradient-to-r from-brand-gold to-transparent" />
+            <div className="h-px w-28 bg-gradient-to-r from-brand-gold to-transparent" />
+            <div className="h-px w-48 bg-gradient-to-r from-brand-gold to-transparent" />
           </div>
         </div>
-        {/* Door handle right */}
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 w-1.5 h-14 rounded-full"
-          style={{ background: "linear-gradient(to bottom, #E8BC50, #D4A843, #9A7830)" }}
-        />
         {/* Center gold line */}
-        <div className="absolute left-0 top-0 bottom-0 w-px"
-          style={{ background: "linear-gradient(to bottom, transparent, rgba(212,168,67,0.6), rgba(212,168,67,0.9), rgba(212,168,67,0.6), transparent)" }}
+        <div className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: "linear-gradient(to bottom, transparent, rgba(212,168,67,0.8), rgba(255,224,136,1), rgba(212,168,67,0.8), transparent)" }}
         />
       </div>
     </div>
@@ -150,16 +191,19 @@ function CountryStep({
         {COUNTRIES.map((country, i) => {
           const isHovered = hoveredId === country.id;
           return (
-            <button
+            <motion.button
               key={country.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.05 }}
+              whileHover={{ scale: 1.04, y: -6 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => onSelect(country)}
               onMouseEnter={() => setHoveredId(country.id)}
               onMouseLeave={() => setHoveredId(null)}
-              className="relative rounded-2xl overflow-hidden group cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
+              className="relative rounded-2xl overflow-hidden group cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-brand-gold shadow-lg"
               style={{
                 aspectRatio: "3/4",
-                animation: `fadeInUp 0.5s ease forwards ${i * 60}ms`,
-                opacity: 0,
               }}
             >
               {/* Background image */}
@@ -256,7 +300,7 @@ function CountryStep({
                   <ArrowRight size={11} className="text-white/70" />
                 </div>
               </div>
-            </button>
+            </motion.button>
           );
         })}
       </div>
@@ -769,28 +813,57 @@ export default function LocationGateway({ onEnter }: LocationGatewayProps) {
           </div>
         </div>
 
-        {/* ── STEP CONTENT ── */}
+        {/* ── STEP CONTENT WITH FRAMER MOTION ── */}
         <div className="relative z-10 flex-1 overflow-y-auto no-scrollbar py-4 flex items-start justify-center">
-          <div className="w-full" style={{ animation: "fadeInUp 0.5s ease forwards" }}>
+          <AnimatePresence mode="wait">
             {step === "country" && (
-              <CountryStep onSelect={handleSelectCountry} />
+              <motion.div
+                key="country"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 30 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="w-full"
+              >
+                <CountryStep onSelect={handleSelectCountry} />
+              </motion.div>
             )}
-            {(step === "province" || step === "entering") && (
-              <ProvinceStep
-                country={selected.country}
-                onSelect={handleSelectProvince}
-                onBack={() => setStep("country")}
-              />
+
+            {(step === "province" || (step === "entering" && !selected.canton)) && (
+              <motion.div
+                key="province"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="w-full"
+              >
+                <ProvinceStep
+                  country={selected.country}
+                  onSelect={handleSelectProvince}
+                  onBack={() => setStep("country")}
+                />
+              </motion.div>
             )}
-            {step === "canton" && selected.province && (
-              <CantonStep
-                country={selected.country}
-                province={selected.province}
-                onSelect={handleSelectCanton}
-                onBack={() => setStep("province")}
-              />
+
+            {(step === "canton" || (step === "entering" && selected.canton)) && selected.province && (
+              <motion.div
+                key="canton"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="w-full"
+              >
+                <CantonStep
+                  country={selected.country}
+                  province={selected.province}
+                  onSelect={handleSelectCanton}
+                  onBack={() => setStep("province")}
+                />
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
 
         {/* ── BOTTOM TAGLINE ── */}
