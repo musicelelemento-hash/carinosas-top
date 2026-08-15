@@ -69,8 +69,15 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
   const handleContact = () => {
     if (model.whatsapp) {
+      const clean = model.whatsapp.replace(/\D/g, '');
+      const fullPhone = clean.startsWith('0') 
+        ? `593${clean.slice(1)}` 
+        : (clean.length === 9 || clean.length === 10) && !clean.startsWith('593') && !clean.startsWith('57') && !clean.startsWith('51') && !clean.startsWith('52') && !clean.startsWith('34') && !clean.startsWith('507')
+        ? `593${clean}`
+        : clean;
+
       const message = `Hola ${model.name}, vi tu perfil en Cariñosas.top. ¿Podrías confirmarme tu disponibilidad?`;
-      window.open(`https://wa.me/${model.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+      window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
     }
   };
 

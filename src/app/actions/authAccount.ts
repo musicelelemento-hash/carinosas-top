@@ -12,6 +12,10 @@ export interface AuthResponse {
     role?: string;
     fullName?: string;
   };
+  session?: {
+    access_token: string;
+    refresh_token: string;
+  };
   sessionUrl?: string;
 }
 
@@ -40,9 +44,11 @@ export async function signUpWithEmailAction(
       return { success: false, message: "El nombre es obligatorio." };
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+
     // 3. Create user in Supabase Auth
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
-      email: email.trim().toLowerCase(),
+      email: cleanEmail,
       password: password,
       email_confirm: true, // Auto-confirm for frictionless onboarding
       user_metadata: {
@@ -74,9 +80,27 @@ export async function signUpWithEmailAction(
           tier_type: "gentleman",
           tier_level: "Plata",
           status: "active",
-          payment_method: "complimentary"
+          payment_method: "complimentary",
+          user_id: data.user.id
         }
       ]);
+    }
+
+    // 5. Sign in to obtain session tokens for client
+    let sessionData: { access_token: string; refresh_token: string } | undefined;
+    try {
+      const { data: loginData } = await supabaseAdmin.auth.signInWithPassword({
+        email: cleanEmail,
+        password: password
+      });
+      if (loginData?.session) {
+        sessionData = {
+          access_token: loginData.session.access_token,
+          refresh_token: loginData.session.refresh_token
+        };
+      }
+    } catch {
+      // Non-fatal if session token generation fallback fails
     }
 
     return {
@@ -87,7 +111,8 @@ export async function signUpWithEmailAction(
         email: data.user.email,
         role: role,
         fullName: fullName.trim()
-      }
+      },
+      session: sessionData
     };
   } catch (err) {
     console.error("signUpWithEmailAction exception:", err);
@@ -132,7 +157,11 @@ export async function signInWithEmailAction(
         email: data.user.email,
         role: (data.user.user_metadata?.role as string) || "client",
         fullName: (data.user.user_metadata?.full_name as string) || "Socio VIP"
-      }
+      },
+      session: data.session ? {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token
+      } : undefined
     };
   } catch (err) {
     console.error("signInWithEmailAction error:", err);

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { ShieldCheck, Lock, Gem, MapPin, Sparkles, Heart } from "lucide-react";
 
 export default function Footer() {
@@ -121,9 +122,9 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-6 text-[10px] text-white/40 uppercase tracking-widest font-black">
-            <a href="/registro" className="hover:text-brand-gold transition-colors">Registro de Modelos</a>
-            <a href="/admin" className="hover:text-brand-gold transition-colors">Administración</a>
-            <a href="https://wa.me/593987654321" target="_blank" className="text-brand-gold hover:underline">Soporte VIP</a>
+            <Link href="/registro" className="hover:text-brand-gold transition-colors">Registro de Modelos</Link>
+            <Link href="/admin" className="hover:text-brand-gold transition-colors">Administración</Link>
+            <a href="https://wa.me/593987654321" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte VIP</a>
           </div>
         </div>
 

@@ -94,7 +94,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-EC" className="dark">
+    <html lang="es-EC" className="dark" suppressHydrationWarning>
       <body
         className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} antialiased bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black pb-20 md:pb-0`}
       >

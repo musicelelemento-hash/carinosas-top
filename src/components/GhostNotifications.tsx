@@ -16,6 +16,9 @@ export default function GhostNotifications() {
   const [data, setData] = useState({ city: "", model: "", action: "" });
 
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    let hideTimer: NodeJS.Timeout | null = null;
+
     const showNotification = () => {
       const city = CITIES[Math.floor(Math.random() * CITIES.length)];
       const model = MODELS[Math.floor(Math.random() * MODELS.length)];
@@ -23,19 +26,23 @@ export default function GhostNotifications() {
       setData({ city, model, action });
       setIsVisible(true);
 
-      setTimeout(() => {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
         setIsVisible(false);
       }, 5500);
     };
 
     const initialDelay = Math.random() * 8000 + 4000;
-    const timer = setTimeout(() => {
+    const initialTimer = setTimeout(() => {
       showNotification();
-      const interval = setInterval(showNotification, 25000); // Every 25 seconds
-      return () => clearInterval(interval);
+      interval = setInterval(showNotification, 25000); // Every 25 seconds
     }, initialDelay);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(initialTimer);
+      if (hideTimer) clearTimeout(hideTimer);
+      if (interval) clearInterval(interval);
+    };
   }, []);
 
   if (!isVisible) return null;

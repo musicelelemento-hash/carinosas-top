@@ -5,6 +5,14 @@ const requests = new Map<string, Entry>();
 /** Lightweight process-local protection for API routes and server actions. */
 export function isRateLimited(key: string, limit: number, windowMs: number) {
   const now = Date.now();
+
+  // Periodic cleanup if cache size exceeds threshold
+  if (requests.size > 2000) {
+    for (const [k, v] of requests.entries()) {
+      if (v.resetAt <= now) requests.delete(k);
+    }
+  }
+
   const entry = requests.get(key);
 
   if (!entry || entry.resetAt <= now) {

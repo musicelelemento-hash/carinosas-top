@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Star, ShieldCheck, Crown, Award, ChevronRight, Sparkles, MessageCircle, CheckCircle2, Lock } from "lucide-react";
+import { getVIPReviewsAction, type VIPReviewItem } from "@/app/actions/reviews";
 
 interface Rating {
   id: string;
   user: string;
-  tier: 'Alpha Founder' | 'Diamante VIP' | 'Oro Member';
+  tier: string;
   rating: number;
   comment: string;
   city: string;
@@ -52,6 +53,30 @@ const TIERS = [
 
 export default function VIPRatings() {
   const [activeTierIndex, setActiveTierIndex] = useState(2); // Diamante
+  const [reviews, setReviews] = useState<Rating[]>(MOCK_RATINGS);
+
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        const data = await getVIPReviewsAction();
+        if (data && data.length > 0) {
+          const mapped: Rating[] = data.slice(0, 6).map((r: VIPReviewItem) => ({
+            id: r.id,
+            user: r.author_alias || "Caballero VIP",
+            tier: r.tier_badge || "Diamante VIP",
+            rating: r.rating || 5,
+            comment: r.comment,
+            city: r.city || "Ecuador VIP",
+            date: new Date(r.created_at).toLocaleDateString("es-EC", { day: "numeric", month: "short" })
+          }));
+          setReviews(mapped);
+        }
+      } catch (err) {
+        console.warn("VIP reviews live fetch notice:", err);
+      }
+    }
+    loadReviews();
+  }, []);
 
   const handleUpgradeTier = (tierName: string) => {
     const text = encodeURIComponent(`Hola Concierge de Cariñosas.top, deseo solicitar la subida de mi membresía al rango ${tierName}.`);
@@ -127,7 +152,7 @@ export default function VIPRatings() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {MOCK_RATINGS.map((r) => (
+          {reviews.map((r) => (
             <div key={r.id} className="glass-obsidian p-5 rounded-2xl border border-white/10 hover:border-brand-gold/30 transition-all space-y-3">
               <div className="flex items-center justify-between">
                 <div>

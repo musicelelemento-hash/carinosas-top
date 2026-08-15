@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, Heart, Send, MessageCircle, Sparkles, Volume2, ShieldCheck, Flame, Wine, Gem } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { incrementStoryViewAction } from "@/app/actions/stories";
 
 export interface StoryData {
   id: string;
@@ -39,6 +40,11 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
       setCurrentSegment(0);
       setReactionEffect(null);
       setMessage("");
+
+      // Record live story view metric in database
+      if (story.id && !story.id.startsWith("fallback")) {
+        incrementStoryViewAction(story.id);
+      }
 
       const interval = setInterval(() => {
         setCurrentSegment((prev) => {

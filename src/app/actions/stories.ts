@@ -62,8 +62,22 @@ export async function getActiveStoriesAction(): Promise<StoryItem[]> {
  */
 export async function incrementStoryViewAction(storyId: string): Promise<void> {
   try {
-    await supabaseAdmin.rpc("increment_story_view", { story_id: storyId });
+    const { error } = await supabaseAdmin.rpc("increment_story_view", { story_id: storyId });
+    if (error) {
+      // Fallback direct atomic-style update
+      const { data: story } = await supabaseAdmin
+        .from("stories")
+        .select("views_count")
+        .eq("id", storyId)
+        .single();
+      if (story) {
+        await supabaseAdmin
+          .from("stories")
+          .update({ views_count: (story.views_count || 0) + 1 })
+          .eq("id", storyId);
+      }
+    }
   } catch {
-    // Fallback if rpc is not created: silent catch
+    // Silent catch so UI never breaks on view telemetry
   }
 }

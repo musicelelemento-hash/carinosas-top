@@ -3,12 +3,14 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export interface VIPPassData {
-  pass_code: string;
+  pass_code?: string;
   holder_name: string;
   tier_type: 'gentleman' | 'muse';
   tier_level: 'Plata' | 'Oro' | 'Diamante' | 'Alpha Founder';
   payment_method: 'crypto_usdt' | 'crypto_btc' | 'bank_transfer' | 'complimentary';
   payment_hash?: string;
+  user_id?: string;
+  origin_country?: string;
 }
 
 /**
@@ -40,9 +42,11 @@ export async function verifyVIPPassAction(passCode: string): Promise<{
       return { isValid: false, error: `El pase se encuentra en estado: ${data.status}` };
     }
 
-    const isExpired = new Date(data.expires_at) < new Date();
-    if (isExpired) {
-      return { isValid: false, error: "El pase ha expirado." };
+    if (data.expires_at) {
+      const isExpired = new Date(data.expires_at) < new Date();
+      if (isExpired) {
+        return { isValid: false, error: "El pase ha expirado." };
+      }
     }
 
     return {
@@ -82,7 +86,10 @@ export async function registerVIPPassAction(passData: VIPPassData): Promise<{
           tier_level: passData.tier_level || "Diamante",
           status: "active",
           payment_method: passData.payment_method,
-          payment_hash: passData.payment_hash || `TX-${Date.now()}`
+          payment_hash: passData.payment_hash || `TX-${Date.now()}`,
+          user_id: passData.user_id || null,
+          origin_country: passData.origin_country || "EC",
+          is_international_valid: true
         }
       ]);
 

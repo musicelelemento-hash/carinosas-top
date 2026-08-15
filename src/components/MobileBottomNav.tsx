@@ -66,7 +66,7 @@ export default function MobileBottomNav() {
 
             if (isAi) {
               return (
-                <a
+                <Link
                   key={id}
                   href={href}
                   onClick={() => handleHaptic(id)}
@@ -80,12 +80,12 @@ export default function MobileBottomNav() {
                   <span className="text-[8px] font-black uppercase tracking-wider text-brand-gold mt-1">
                     {label}
                   </span>
-                </a>
+                </Link>
               );
             }
 
             return (
-              <a
+              <Link
                 key={id}
                 href={href}
                 onClick={() => handleHaptic(id)}
@@ -99,7 +99,7 @@ export default function MobileBottomNav() {
                 }`}>
                   {label}
                 </span>
-              </a>
+              </Link>
             );
           })}
         </nav>

@@ -15,7 +15,7 @@ export default function PanicButton() {
       if (e.key === "Escape") {
         const now = Date.now();
         if (now - lastEsc < 600) {
-          window.location.href = "https://www.google.com";
+          window.location.replace("https://www.google.com");
         }
         lastEsc = now;
       }
@@ -26,7 +26,7 @@ export default function PanicButton() {
   }, []);
 
   const handlePanic = () => {
-    window.location.href = "https://www.google.com";
+    window.location.replace("https://www.google.com");
   };
 
   if (!mounted) return null;
@@ -34,7 +34,7 @@ export default function PanicButton() {
   return (
     <button
       onClick={handlePanic}
-      className="fixed bottom-6 right-6 md:right-24 z-[80] group flex items-center gap-2.5 glass-obsidian border border-white/15 px-4 py-2.5 rounded-full hover:border-brand-pink/60 hover:bg-brand-pink/15 transition-all active:scale-95 shadow-2xl"
+      className="fixed bottom-20 md:bottom-6 left-4 md:left-auto md:right-28 z-[80] group flex items-center gap-2.5 glass-obsidian border border-white/15 px-3.5 sm:px-4 py-2.5 rounded-full hover:border-brand-pink/60 hover:bg-brand-pink/15 transition-all active:scale-95 shadow-2xl"
       title="Salida Rápida Discreta (Doble Esc)"
     >
       <div className="relative">

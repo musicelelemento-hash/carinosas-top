@@ -16,6 +16,7 @@ import {
   EyeOff
 } from "lucide-react";
 import { EmailValidator } from "@/lib/emailValidator";
+import { supabase } from "@/lib/supabase";
 import { 
   signUpWithEmailAction, 
   signInWithEmailAction, 
@@ -104,6 +105,16 @@ export default function AuthModal({
         setIsLoading(false);
 
         if (res.success) {
+          if (res.session) {
+            try {
+              await supabase.auth.setSession({
+                access_token: res.session.access_token,
+                refresh_token: res.session.refresh_token
+              });
+            } catch (authErr) {
+              console.warn("Client setSession notice:", authErr);
+            }
+          }
           setStatusMsg({ text: res.message, isError: false });
           setTimeout(() => {
             onClose();
@@ -118,6 +129,16 @@ export default function AuthModal({
         setIsLoading(false);
 
         if (res.success) {
+          if (res.session) {
+            try {
+              await supabase.auth.setSession({
+                access_token: res.session.access_token,
+                refresh_token: res.session.refresh_token
+              });
+            } catch (authErr) {
+              console.warn("Client setSession notice:", authErr);
+            }
+          }
           setStatusMsg({ text: res.message, isError: false });
           setTimeout(() => {
             onClose();

@@ -87,6 +87,25 @@ async function assertAdmin() {
 }
 
 /**
+ * Fetches all models for the admin panel using service role to bypass RLS,
+ * allowing admins to audit unverified models.
+ */
+export async function getAdminModelsAction() {
+  await assertAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("models")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Admin fetch models error:", error);
+    throw new Error(`Error al obtener modelos: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+/**
  * Inserts a new model into the database after validating admin session.
  */
 export async function createModelAction(modelData: {
@@ -103,6 +122,10 @@ export async function createModelAction(modelData: {
   sector?: string;
   voice_greeting_url?: string;
   hourly_rate?: number;
+  is_verified?: boolean;
+  is_verified_4k?: boolean;
+  personal_note?: string;
+  country_code?: string;
 }) {
   await assertAdmin();
   if (!PLAN_TYPES.has(modelData.plan_type)) throw new Error("El plan seleccionado no es válido.");
@@ -125,7 +148,11 @@ export async function createModelAction(modelData: {
         sector: modelData.sector,
         voice_greeting_url: modelData.voice_greeting_url,
         hourly_rate: modelData.hourly_rate || 120,
-        is_online: false
+        is_verified: modelData.is_verified ?? true,
+        is_verified_4k: modelData.is_verified_4k ?? false,
+        is_online: false,
+        personal_note: modelData.personal_note || "Cada encuentro es una historia que merece ser contada con elegancia.",
+        country_code: modelData.country_code || "EC"
       }
     ])
     .select();
@@ -155,35 +182,44 @@ export async function updateModelAction(
     lat?: number;
     lng?: number;
     sector?: string;
+    is_verified?: boolean;
     is_verified_4k?: boolean;
     is_online?: boolean;
     voice_greeting_url?: string;
     hourly_rate?: number;
+    personal_note?: string;
+    country_code?: string;
   }
 ) {
   await assertAdmin();
   if (modelData.plan_type && !PLAN_TYPES.has(modelData.plan_type)) throw new Error("El plan seleccionado no es válido.");
   if (modelData.age !== undefined && modelData.age < 18) throw new Error("La edad mínima es 18 años.");
 
+  const updatePayload: Record<string, unknown> = {
+    name: modelData.name,
+    city: modelData.city,
+    whatsapp: modelData.whatsapp,
+    description: modelData.description,
+    tags: modelData.tags,
+    images: modelData.images,
+    plan_type: modelData.plan_type,
+    age: modelData.age,
+    lat: modelData.lat,
+    lng: modelData.lng,
+    sector: modelData.sector,
+    is_verified_4k: modelData.is_verified_4k,
+    is_online: modelData.is_online,
+    voice_greeting_url: modelData.voice_greeting_url,
+    hourly_rate: modelData.hourly_rate
+  };
+
+  if (modelData.is_verified !== undefined) updatePayload.is_verified = modelData.is_verified;
+  if (modelData.personal_note !== undefined) updatePayload.personal_note = modelData.personal_note;
+  if (modelData.country_code !== undefined) updatePayload.country_code = modelData.country_code;
+
   const { data, error } = await supabaseAdmin
     .from("models")
-    .update({
-      name: modelData.name,
-      city: modelData.city,
-      whatsapp: modelData.whatsapp,
-      description: modelData.description,
-      tags: modelData.tags,
-      images: modelData.images,
-      plan_type: modelData.plan_type,
-      age: modelData.age,
-      lat: modelData.lat,
-      lng: modelData.lng,
-      sector: modelData.sector,
-      is_verified_4k: modelData.is_verified_4k,
-      is_online: modelData.is_online,
-      voice_greeting_url: modelData.voice_greeting_url,
-      hourly_rate: modelData.hourly_rate
-    })
+    .update(updatePayload)
     .eq("id", id)
     .select();
 
@@ -241,8 +277,13 @@ export async function registerModelAction(modelData: {
   images?: string[];
   plan_type: string;
   ageConfirmed: boolean;
+  age?: number;
+  country_code?: string;
+  is_phone_verified?: boolean;
+  user_id?: string;
   voice_greeting_url?: string;
   hourly_rate?: number;
+  personal_note?: string;
 }) {
   if (!modelData.name?.trim()) throw new Error("El nombre artístico es obligatorio.");
   if (!modelData.city?.trim()) throw new Error("La ciudad o cantón es obligatorio.");
@@ -252,6 +293,8 @@ export async function registerModelAction(modelData: {
   if (cleanPhone.length < 7) {
     throw new Error("El número de WhatsApp debe tener al menos 7 dígitos.");
   }
+
+  const modelAge = modelData.age && modelData.age >= 18 ? modelData.age : 22;
 
   try {
     const { data, error } = await supabaseAdmin
@@ -266,11 +309,15 @@ export async function registerModelAction(modelData: {
           tags: modelData.tags || [],
           images: modelData.images && modelData.images.length > 0 ? modelData.images : ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
           plan_type: modelData.plan_type || "VIP Elite",
-          age: 22,
+          age: modelAge,
+          country_code: modelData.country_code || "EC",
+          is_phone_verified: Boolean(modelData.is_phone_verified),
+          user_id: modelData.user_id || null,
           is_verified: true,
           is_online: true,
           voice_greeting_url: modelData.voice_greeting_url,
-          hourly_rate: modelData.hourly_rate || 120
+          hourly_rate: modelData.hourly_rate || 120,
+          personal_note: modelData.personal_note || "Cada encuentro es una historia que merece ser contada con elegancia."
         }
       ])
       .select("id");

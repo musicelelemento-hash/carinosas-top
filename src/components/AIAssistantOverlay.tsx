@@ -90,7 +90,7 @@ export default function AIAssistantOverlay() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-[100] group flex items-center gap-3 bg-brand-gold text-brand-black px-6 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.25em] shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-105 active:scale-95 transition-all duration-500 border border-white/20"
+        className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-[100] group flex items-center gap-3 bg-brand-gold text-brand-black px-5 sm:px-6 py-3.5 sm:py-4 rounded-full font-black text-[10px] uppercase tracking-[0.25em] shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-105 active:scale-95 transition-all duration-500 border border-white/20"
       >
         <div className="relative">
           <Sparkles size={16} className="animate-pulse" />

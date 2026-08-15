@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { supabase } from "@/lib/supabase";
-import { updateModelAction, deleteModelAction } from "@/app/actions/admin";
+import { getAdminModelsAction, updateModelAction, deleteModelAction } from "@/app/actions/admin";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { 
   Trash2, 
@@ -35,8 +34,11 @@ interface Model {
   plan_type?: string;
   images?: string[];
   description?: string;
+  is_verified?: boolean;
   is_verified_4k?: boolean;
   is_online?: boolean;
+  personal_note?: string;
+  country_code?: string;
   created_at: string;
 }
 
@@ -57,25 +59,27 @@ export default function AdminModelList() {
   const [editPlan, setEditPlan] = useState("");
   const [editImages, setEditImages] = useState<string[]>([]);
   const [editDesc, setEditDesc] = useState("");
+  const [editVerified, setEditVerified] = useState(true);
   const [editVerified4k, setEditVerified4k] = useState(false);
   const [editOnline, setEditOnline] = useState(false);
 
   const fetchModels = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('models')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (data) {
-      const PLAN_PRIORITY: Record<string, number> = {
-        'VIP Elite': 0, 'Diamante': 1, 'Premium': 2, 'Básico': 3
-      };
-      setModels([...data].sort((a, b) => 
-        (PLAN_PRIORITY[a.plan_type] ?? 99) - (PLAN_PRIORITY[b.plan_type] ?? 99)
-      ));
+    try {
+      const data = await getAdminModelsAction();
+      if (data) {
+        const PLAN_PRIORITY: Record<string, number> = {
+          'VIP Elite': 0, 'Diamante': 1, 'Premium': 2, 'Básico': 3
+        };
+        setModels([...(data as unknown as Model[])].sort((a, b) => 
+          (PLAN_PRIORITY[a.plan_type || ''] ?? 99) - (PLAN_PRIORITY[b.plan_type || ''] ?? 99)
+        ));
+      }
+    } catch (err) {
+      console.error("Admin fetch models error:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -95,6 +99,7 @@ export default function AdminModelList() {
     setEditPlan(model.plan_type || "Anuncio Gratis");
     setEditImages(model.images || []);
     setEditDesc(model.description || "");
+    setEditVerified(model.is_verified ?? true);
     setEditVerified4k(Boolean(model.is_verified_4k));
     setEditOnline(Boolean(model.is_online));
   };
@@ -114,6 +119,7 @@ export default function AdminModelList() {
         plan_type: editPlan,
         images: editImages,
         description: editDesc,
+        is_verified: editVerified,
         is_verified_4k: editVerified4k,
         is_online: editOnline
       });

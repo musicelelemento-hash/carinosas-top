@@ -1,12 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import StoryModal from "./StoryModal";
 import MobileReelsFeed from "./MobileReelsFeed";
 import { Flame, Sparkles } from "lucide-react";
+import { getActiveStoriesAction, type StoryItem } from "@/app/actions/stories";
 
-const STORIES = [
+interface StoryCardItem {
+  id: string;
+  name: string;
+  age: number;
+  city: string;
+  sector: string;
+  avatar: string;
+  story: string;
+  audioName?: string;
+  whatsapp?: string;
+  isOnline: boolean;
+}
+
+const FALLBACK_STORIES: StoryCardItem[] = [
   { 
     id: '1', 
     name: 'Valentina S.', 
@@ -70,8 +84,34 @@ const STORIES = [
 ];
 
 export default function StoriesBar() {
-  const [activeStory, setActiveStory] = useState<typeof STORIES[0] | null>(null);
+  const [storiesList, setStoriesList] = useState<StoryCardItem[]>(FALLBACK_STORIES);
+  const [activeStory, setActiveStory] = useState<StoryCardItem | null>(null);
   const [isReelsOpen, setIsReelsOpen] = useState(false);
+
+  useEffect(() => {
+    async function loadLiveStories() {
+      try {
+        const liveStories = await getActiveStoriesAction();
+        if (liveStories && liveStories.length > 0) {
+          const mapped: StoryCardItem[] = liveStories.map((s: StoryItem) => ({
+            id: s.id,
+            name: s.model_name || "Modelo VIP",
+            age: 22,
+            city: "Ecuador VIP",
+            sector: s.caption || "Disponible 4K",
+            avatar: s.media_url,
+            story: s.media_url,
+            audioName: `Historia de ${s.model_name || 'Modelo'}`,
+            isOnline: true
+          }));
+          setStoriesList(mapped);
+        }
+      } catch (err) {
+        console.warn("Live stories fetch notice:", err);
+      }
+    }
+    loadLiveStories();
+  }, []);
 
   return (
     <section className="w-full relative overflow-hidden bg-[#0A0A0F]/80 backdrop-blur-2xl border-b border-brand-gold/15">
@@ -103,7 +143,7 @@ export default function StoriesBar() {
           <div className="flex-shrink-0 h-12 w-[1px] bg-white/10" />
 
           {/* Model Stories with Beveled Rotating Gold Bezel */}
-          {STORIES.map((model) => (
+          {storiesList.map((model) => (
             <button
               key={model.id}
               type="button"

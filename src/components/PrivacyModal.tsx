@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { ShieldCheck, Scale, EyeOff, Camera } from "lucide-react";
 
 interface PrivacyModalProps {
@@ -9,7 +9,25 @@ interface PrivacyModalProps {
 }
 
 export default function PrivacyModal({ isOpen, onAccept }: PrivacyModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onAccept();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onAccept]);
+
   if (!isOpen) return null;
+
+  const handleConfirm = () => {
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+      try { navigator.vibrate(15); } catch {}
+    }
+    onAccept();
+  };
 
   return (
     <div className="fixed inset-0 z-[500] bg-brand-black/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
@@ -72,7 +90,7 @@ export default function PrivacyModal({ isOpen, onAccept }: PrivacyModalProps) {
         {/* Footer Actions */}
         <div className="p-8 md:p-12 border-t border-white/5 flex flex-col items-center gap-6 bg-brand-black/50 backdrop-blur-md">
            <button 
-             onClick={onAccept}
+             onClick={handleConfirm}
              className="w-full bg-brand-gold text-brand-black py-5 rounded-2xl font-black text-xs md:text-sm uppercase tracking-[0.3em] shadow-gold hover:scale-[1.02] active:scale-[0.98] transition-all"
            >
              Acepto los Términos de Élite

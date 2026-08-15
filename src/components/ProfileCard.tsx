@@ -259,6 +259,7 @@ export default function ProfileCard({
                 src={img}
                 alt={`${name}`}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover absolute inset-0 transition-all duration-1000"
                 style={{
                   opacity: i === currentImageIndex ? 1 : 0,

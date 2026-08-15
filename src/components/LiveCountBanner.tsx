@@ -33,12 +33,14 @@ export default function LiveCountBanner() {
         }
         return next;
       });
-      setCityIndex(prev => (prev + 1) % popularCities.length);
+      if (popularCities.length > 0) {
+        setCityIndex(prev => (prev + 1) % popularCities.length);
+      }
     }, 5000);
     return () => clearInterval(timer);
   }, [popularCities.length]);
 
-  const currentCity = popularCities[cityIndex].name;
+  const currentCity = popularCities[cityIndex]?.name || 'Quito VIP';
   const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (

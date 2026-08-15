@@ -42,15 +42,31 @@ export default async function Home() {
   let allModels: DisplayModel[] = [];
 
   try {
-    const { data, error } = await supabase
+    let rawModels: Record<string, unknown>[] | null = null;
+
+    const primaryQuery = await supabase
       .from('models')
       .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, description, whatsapp, tags, personal_note')
       .order('created_at', { ascending: false });
 
-    if (data && !error) {
+    if (!primaryQuery.error && primaryQuery.data) {
+      rawModels = primaryQuery.data as unknown as Record<string, unknown>[];
+    } else {
+      // Fallback if personal_note column is not yet migrated in Supabase
+      const fallbackQuery = await supabase
+        .from('models')
+        .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, description, whatsapp, tags')
+        .order('created_at', { ascending: false });
+      
+      if (fallbackQuery.data) {
+        rawModels = fallbackQuery.data as unknown as Record<string, unknown>[];
+      }
+    }
+
+    if (rawModels && rawModels.length > 0) {
       const fallbackImage = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800';
       
-      const mappedLiveModels: DisplayModel[] = (data as unknown as DbModel[]).map((m: DbModel) => ({
+      const mappedLiveModels: DisplayModel[] = (rawModels as unknown as DbModel[]).map((m: DbModel) => ({
         id: m.id,
         name: m.name,
         age: m.age,

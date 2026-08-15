@@ -97,12 +97,12 @@ export default function PhoneVerificationModal({
     // Support pasted multi-digit string (e.g. 6 digits pasted into box 0)
     if (numeric.length > 1) {
       const chars = numeric.slice(0, 6).split("");
-      chars.forEach((c, idx) => {
-        if (idx < 6) newPin[idx] = c;
-      });
+      for (let i = 0; i < 6; i++) {
+        newPin[i] = chars[i] || "";
+      }
       setPin(newPin);
-      const targetIndex = Math.min(5, chars.length);
-      inputRefs.current[targetIndex]?.focus();
+      const targetIndex = Math.min(5, chars.length - 1);
+      setTimeout(() => inputRefs.current[targetIndex]?.focus(), 50);
       return;
     }
 

@@ -14,8 +14,10 @@ import {
   CreditCard,
   CheckCircle2,
   ArrowRight,
-  Globe
+  Globe,
+  Loader2
 } from "lucide-react";
+import { registerVIPPassAction } from "@/app/actions/vip";
 
 interface VIPCheckoutModalProps {
   isOpen: boolean;
@@ -36,6 +38,8 @@ export default function VIPCheckoutModal({
   const [cryptoSubtype, setCryptoSubtype] = useState<"usdt_bep20" | "usdt_trc20" | "binance_id">("usdt_bep20");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [receiptCode] = useState(() => `ALPHA-${Math.floor(1000 + Math.random() * 9000)}-VIP`);
 
   if (!isOpen) return null;
 
@@ -48,6 +52,30 @@ export default function VIPCheckoutModal({
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
+  const handleCompletePayment = async () => {
+    setIsRegistering(true);
+    try {
+      let method: 'crypto_usdt' | 'crypto_btc' | 'bank_transfer' | 'complimentary' = 'crypto_usdt';
+      if (tab === "banco_pichincha" || tab === "banco_guayaquil" || tab === "paypal_skrill") {
+        method = "bank_transfer";
+      }
+
+      await registerVIPPassAction({
+        pass_code: receiptCode,
+        holder_name: "Socio VIP Confidencial",
+        tier_type: "gentleman",
+        tier_level: planName.includes("Founder") ? "Alpha Founder" : "Diamante",
+        payment_method: method,
+        payment_hash: `TX-${receiptCode}`
+      });
+    } catch (err) {
+      console.warn("Pass registration notice:", err);
+    } finally {
+      setIsRegistering(false);
+      setIsSuccess(true);
+    }
+  };
+
   const handleConfirmWhatsApp = () => {
     let methodText = "Cripto Binance / USDT";
     if (tab === "banco_pichincha") methodText = "Transferencia Banco Pichincha";
@@ -57,7 +85,7 @@ export default function VIPCheckoutModal({
     const text = encodeURIComponent(
       `👑 *CARIÑOSAS.TOP — CONFIRMACIÓN DE PAGO CONFIDENCIAL*\n\n` +
       `Hola Concierge, acabo de realizar el pago de mi *${planName}* (${planPrice}) mediante *${methodText}*.\n` +
-      `Código de Recibo: *#TX-9482-ALPHA*\n\n` +
+      `Código de Recibo: *#${receiptCode}*\n\n` +
       `Adjunto comprobante para activación instantánea de mi Bóveda y Pase VIP.`
     );
     window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
@@ -94,7 +122,7 @@ export default function VIPCheckoutModal({
               <span className="text-[9px] text-emerald-400 font-black uppercase tracking-[0.3em] block">Recibo Cifrado Generado</span>
               <h3 className="text-2xl font-serif text-white italic font-bold">¡Pago Confidencial Registrado!</h3>
               <p className="text-xs text-white/60 max-w-xs mx-auto">
-                Código de Auditoría: <span className="font-mono text-brand-gold font-bold">#TX-9482-ALPHA</span>
+                Código de Auditoría: <span className="font-mono text-brand-gold font-bold">#{receiptCode}</span>
               </p>
             </div>
 
@@ -381,11 +409,21 @@ export default function VIPCheckoutModal({
             <div className="space-y-2 pt-1">
               <button
                 type="button"
-                onClick={() => setIsSuccess(true)}
-                className="w-full py-4 rounded-2xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] transition-all flex items-center justify-center gap-2"
+                disabled={isRegistering}
+                onClick={handleCompletePayment}
+                className="w-full py-4 rounded-2xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <span>Ya Realicé el Pago · Generar Recibo</span>
-                <ArrowRight size={15} />
+                {isRegistering ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Encriptando y Registrando...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Ya Realicé el Pago · Generar Recibo</span>
+                    <ArrowRight size={15} />
+                  </>
+                )}
               </button>
 
               <button

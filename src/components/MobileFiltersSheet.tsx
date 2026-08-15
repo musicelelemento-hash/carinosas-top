@@ -13,9 +13,18 @@ import {
   Lock 
 } from "lucide-react";
 
+interface FilterValues {
+  maxRate?: number;
+  onlyOnline?: boolean;
+  only4K?: boolean;
+  onlyVIP?: boolean;
+  category?: string;
+}
+
 interface MobileFiltersSheetProps {
   isOpen: boolean;
   onClose: () => void;
+  initialFilters?: FilterValues;
   onApplyFilters?: (filters: {
     maxRate: number;
     onlyOnline: boolean;
@@ -28,13 +37,24 @@ interface MobileFiltersSheetProps {
 export default function MobileFiltersSheet({
   isOpen,
   onClose,
+  initialFilters,
   onApplyFilters
 }: MobileFiltersSheetProps) {
-  const [maxRate, setMaxRate] = useState<number>(200);
-  const [onlyOnline, setOnlyOnline] = useState<boolean>(false);
-  const [only4K, setOnly4K] = useState<boolean>(true);
-  const [onlyVIP, setOnlyVIP] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
+  const [maxRate, setMaxRate] = useState<number>(initialFilters?.maxRate ?? 200);
+  const [onlyOnline, setOnlyOnline] = useState<boolean>(initialFilters?.onlyOnline ?? false);
+  const [only4K, setOnly4K] = useState<boolean>(initialFilters?.only4K ?? true);
+  const [onlyVIP, setOnlyVIP] = useState<boolean>(initialFilters?.onlyVIP ?? false);
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialFilters?.category ?? "Todas");
+
+  React.useEffect(() => {
+    if (initialFilters) {
+      if (initialFilters.maxRate !== undefined) setMaxRate(initialFilters.maxRate);
+      if (initialFilters.onlyOnline !== undefined) setOnlyOnline(initialFilters.onlyOnline);
+      if (initialFilters.only4K !== undefined) setOnly4K(initialFilters.only4K);
+      if (initialFilters.onlyVIP !== undefined) setOnlyVIP(initialFilters.onlyVIP);
+      if (initialFilters.category !== undefined) setSelectedCategory(initialFilters.category);
+    }
+  }, [initialFilters, isOpen]);
 
   if (!isOpen) return null;
 

@@ -297,17 +297,28 @@ export default function LiveClassifiedsFeed() {
               </div>
 
               {/* Luxury Champagne Gold Contact Button */}
-              <motion.a
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                href={`https://wa.me/${ad.whatsapp}?text=${encodeURIComponent(`Hola ${ad.name}, vi tu clasificado exprés en Cariñosas.top (${ad.sector}, ${ad.city}). Deseo consultar tu disponibilidad hoy.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(212,168,67,0.3)] transition-all duration-300 flex items-center justify-center gap-2.5 group/btn"
-              >
-                <MessageCircle size={15} fill="currentColor" className="group-hover/btn:scale-110 transition-transform" />
-                <span>Contactar en WhatsApp</span>
-              </motion.a>
+              {(() => {
+                const cleanPhone = (ad.whatsapp || "").replace(/\D/g, "");
+                const fullPhone = cleanPhone.startsWith("0") 
+                  ? `593${cleanPhone.slice(1)}`
+                  : (cleanPhone.length === 9 || cleanPhone.length === 10) && !cleanPhone.startsWith("593")
+                  ? `593${cleanPhone}`
+                  : cleanPhone || "593987654321";
+
+                return (
+                  <motion.a
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    href={`https://wa.me/${fullPhone}?text=${encodeURIComponent(`Hola ${ad.name}, vi tu clasificado exprés en Cariñosas.top (${ad.sector}, ${ad.city}). Deseo consultar tu disponibilidad hoy.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(212,168,67,0.3)] transition-all duration-300 flex items-center justify-center gap-2.5 group/btn"
+                  >
+                    <MessageCircle size={15} fill="currentColor" className="group-hover/btn:scale-110 transition-transform" />
+                    <span>Contactar en WhatsApp</span>
+                  </motion.a>
+                );
+              })()}
 
             </motion.div>
           );

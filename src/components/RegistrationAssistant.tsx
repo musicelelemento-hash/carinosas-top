@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { StitchEngine } from "@/lib/stitch";
 import { registerModelAction } from "@/app/actions/admin";
+import { signUpWithEmailAction } from "@/app/actions/authAccount";
 import { ImageOptimizer } from "@/lib/imageOptimizer";
 import { StorageEngine } from "@/lib/storage";
 import { UploadDropzone } from "@/components/Uploadthing";
@@ -230,7 +231,9 @@ export default function RegistrationAssistant() {
   };
 
   const handleRegister = async () => {
-    // 1. Account Mode Validation
+    let createdUserId: string | undefined;
+
+    // 1. Account Mode Validation & User Creation
     if (registrationMode === "account") {
       const emailRes = EmailValidator.validate(email);
       if (!emailRes.isValid) {
@@ -242,6 +245,20 @@ export default function RegistrationAssistant() {
         alert("La contraseña debe tener al menos 6 caracteres.");
         setStep(2);
         return;
+      }
+
+      setLoading(true);
+      try {
+        const authRes = await signUpWithEmailAction(email, password, name || "Modelo VIP", "model");
+        if (!authRes.success) {
+          alert(authRes.message || "Error al crear la cuenta.");
+          setLoading(false);
+          setStep(2);
+          return;
+        }
+        createdUserId = authRes.user?.id;
+      } catch (authErr) {
+        console.error("Auth creation error:", authErr);
       }
     }
 
@@ -266,7 +283,13 @@ export default function RegistrationAssistant() {
         tags: tags.length > 0 ? tags : StitchEngine.generateTags(city),
         images,
         plan_type: plan,
-        ageConfirmed
+        ageConfirmed,
+        age: Number(age) || 22,
+        country_code: selectedCountry.id,
+        is_phone_verified: isPhoneVerified,
+        user_id: createdUserId,
+        voice_greeting_url: audioUrl || undefined,
+        hourly_rate: Number(hourlyRate) || 120
       });
       setStep(5);
     } catch (err) {
