@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import StoryModal from "./StoryModal";
+import MobileReelsFeed from "./MobileReelsFeed";
+import { Flame } from "lucide-react";
 
 const STORIES = [
   { 
@@ -69,6 +71,7 @@ const STORIES = [
 
 export default function StoriesBar() {
   const [activeStory, setActiveStory] = useState<typeof STORIES[0] | null>(null);
+  const [isReelsOpen, setIsReelsOpen] = useState(false);
 
   return (
     <section className="w-full relative overflow-hidden"
@@ -84,16 +87,22 @@ export default function StoriesBar() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-5">
 
-          {/* LIVE badge */}
-          <div className="flex-shrink-0 flex flex-col items-center gap-2 mr-2">
-            <div className="relative w-[60px] h-[60px] rounded-full flex items-center justify-center"
-              style={{ border: '1.5px dashed rgba(232,0,90,0.35)', background: 'rgba(232,0,90,0.06)' }}
+          {/* LIVE badge & Reels Trigger */}
+          <button
+            onClick={() => setIsReelsOpen(true)}
+            className="flex-shrink-0 flex flex-col items-center gap-2 mr-2 group outline-none cursor-pointer"
+          >
+            <div className="relative w-[60px] h-[60px] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform"
+              style={{ border: '1.5px dashed rgba(232,0,90,0.45)', background: 'rgba(232,0,90,0.1)' }}
             >
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand-pink shadow-[0_0_8px_rgba(232,0,90,0.8)] live-dot" />
-              <span className="text-[10px] text-brand-pink font-bold uppercase text-center leading-tight tracking-wider">EN<br/>VIVO</span>
+              <div className="text-center">
+                <Flame size={14} className="text-brand-pink fill-brand-pink mx-auto mb-0.5 animate-pulse" />
+                <span className="text-[8px] text-white font-black uppercase tracking-wider block">REELS 4K</span>
+              </div>
             </div>
-            <span className="label-xs text-white/45">Historias</span>
-          </div>
+            <span className="label-xs text-brand-pink font-bold group-hover:text-white transition-colors">🔥 Ver Reels</span>
+          </button>
 
           {/* Vertical divider */}
           <div className="flex-shrink-0 h-12 w-[1px]" style={{ background: 'rgba(255,255,255,0.05)' }} />
@@ -153,6 +162,11 @@ export default function StoriesBar() {
         isOpen={!!activeStory}
         onClose={() => setActiveStory(null)}
         story={activeStory}
+      />
+
+      <MobileReelsFeed
+        isOpen={isReelsOpen}
+        onClose={() => setIsReelsOpen(false)}
       />
     </section>
   );

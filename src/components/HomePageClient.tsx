@@ -17,6 +17,9 @@ import GlobalLounge from "@/components/GlobalLounge";
 import VIPGuide from "@/components/VIPGuide";
 import PushPrompt from "@/components/PushPrompt";
 import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
+import MobileFiltersSheet from "@/components/MobileFiltersSheet";
+import MobileSpeedDial from "@/components/MobileSpeedDial";
+import { Sliders } from "lucide-react";
 
 interface HomePageModel {
   id: string;
@@ -42,6 +45,7 @@ interface HomePageClientProps {
 export default function HomePageClient({ initialModels }: HomePageClientProps) {
   const [displayModels, setDisplayModels] = React.useState<HomePageModel[]>(initialModels);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isFiltersSheetOpen, setIsFiltersSheetOpen] = React.useState(false);
   const { showGateway, location, handleEnter, resetLocation } = useLocationGateway();
 
   React.useEffect(() => {
@@ -71,7 +75,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <LocationGateway onEnter={handleEnter} />
       )}
 
-      <main className="min-h-screen bg-mesh pb-0">
+      <main className="min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden">
         <Navbar onChangeLocation={resetLocation} />
 
         <LiveCountBanner />
@@ -112,20 +116,31 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
               Filtra por nivel de exclusividad y discreción
             </p>
 
-            {/* VIP Circle Quick Switch */}
-            <div className="flex items-center gap-3 p-1.5 rounded-2xl glass-obsidian border border-white/10 z-10 shadow-2xl">
+            {/* VIP Circle Quick Switch & Mobile Filters Button */}
+            <div className="flex flex-wrap items-center justify-center gap-3 z-10">
+              <div className="flex items-center gap-2 p-1.5 rounded-2xl glass-obsidian border border-white/10 shadow-2xl">
+                <button
+                  onClick={() => setDisplayModels(initialModels)}
+                  className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-brand-gold text-brand-black shadow-md"
+                >
+                  🌐 Catálogo General
+                </button>
+                <a
+                  href="#vip-lounge"
+                  className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider text-brand-gold hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  🔒 Círculo Secreto VIP
+                </a>
+              </div>
+
+              {/* Mobile Filter Sheet Trigger Button */}
               <button
-                onClick={() => setDisplayModels(initialModels)}
-                className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-brand-gold text-brand-black shadow-md"
+                onClick={() => setIsFiltersSheetOpen(true)}
+                className="md:hidden px-4 py-2.5 rounded-2xl glass-obsidian border border-brand-gold/40 text-brand-gold text-[10px] font-black uppercase tracking-wider flex items-center gap-2 shadow-lg"
               >
-                🌐 Catálogo General
+                <Sliders size={14} />
+                <span>Filtros Táctiles</span>
               </button>
-              <a
-                href="#vip-lounge"
-                className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider text-brand-gold hover:text-white transition-colors flex items-center gap-1.5"
-              >
-                🔒 Círculo Secreto VIP (Pase Requerido)
-              </a>
             </div>
 
             {/* Divider */}
@@ -158,6 +173,12 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <GhostNotifications />
         <AIAssistantOverlay />
         <PushPrompt />
+        <MobileSpeedDial />
+
+        <MobileFiltersSheet
+          isOpen={isFiltersSheetOpen}
+          onClose={() => setIsFiltersSheetOpen(false)}
+        />
 
         <Footer />
       </main>
