@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Shield, EyeOff, TrendingUp, DollarSign, BarChart3, X, RefreshCw } from "lucide-react";
+import { soundFX } from "@/lib/soundFX";
 
 export default function PanicDisguise() {
   const [isPanicActive, setIsPanicActive] = useState(false);
@@ -11,6 +12,7 @@ export default function PanicDisguise() {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Toggle stealth camouflage with ESC key
       if (e.key === "Escape") {
+        try { soundFX?.playPanicDisguise(); } catch {}
         setIsPanicActive(prev => !prev);
       }
     };

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Crown, ShieldCheck, Sparkles, Wifi, Copy, Check, Lock, QrCode } from "lucide-react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { soundFX } from "@/lib/soundFX";
 
 interface VIPCard3DProps {
   memberCode?: string;
@@ -53,6 +54,7 @@ export default function VIPCard3D({
 
   const handleCopyCode = () => {
     if (typeof window !== "undefined") {
+      try { soundFX?.playCardFlip(); } catch {}
       navigator.clipboard?.writeText(memberCode);
       setCopied(true);
       if ("vibrate" in navigator) {

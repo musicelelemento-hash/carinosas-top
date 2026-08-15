@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { registerVIPPassAction } from "@/app/actions/vip";
+import { soundFX } from "@/lib/soundFX";
 
 interface VIPCheckoutModalProps {
   isOpen: boolean;
@@ -93,6 +94,7 @@ export default function VIPCheckoutModal({
     if (res.success && res.passCode) {
       setPassCreated(res.passCode);
       try {
+        soundFX?.playGoldChime();
         confetti({
           particleCount: 80,
           spread: 90,

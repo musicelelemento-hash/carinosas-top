@@ -19,6 +19,7 @@ import {
 import { COUNTRIES, type Country, type Province, type Canton, REGION_COLORS } from "@/lib/countries";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+import { soundFX } from "@/lib/soundFX";
 
 // ─── Types ───────────────────────────────────────────────────
 type Step = "country" | "province" | "canton" | "entering";
@@ -52,6 +53,11 @@ function DoorAnimation({ onComplete, countryName, cantonName }: { onComplete: ()
   const [phase, setPhase] = useState<"closed" | "opening" | "open">("closed");
 
   useEffect(() => {
+    // Sound FX: Iris Aperture and Confetti
+    try {
+      soundFX?.playIrisAperture();
+    } catch {}
+
     // Fire double champagne gold stardust burst
     try {
       confetti({
