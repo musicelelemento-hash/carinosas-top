@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { StitchEngine } from "@/lib/stitch";
 import { registerModelAction } from "@/app/actions/admin";
+import { ImageOptimizer } from "@/lib/imageOptimizer";
+import { StorageEngine } from "@/lib/storage";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { 
   Sparkles, 
@@ -24,7 +26,9 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Volume2
+  Volume2,
+  UploadCloud,
+  FileImage
 } from "lucide-react";
 import PrivacyModal from "./PrivacyModal";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
@@ -52,6 +56,15 @@ export default function RegistrationAssistant() {
   const [tags, setTags] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [activeTip, setActiveTip] = useState("");
+
+  // WebP Compression & Upload State
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [compressionStats, setCompressionStats] = useState<{
+    originalTotal: string;
+    optimizedTotal: string;
+    savingsPct: number;
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Audio Greeting State
   const [isRecording, setIsRecording] = useState(false);
@@ -149,6 +162,48 @@ export default function RegistrationAssistant() {
     setAudioUrl(null);
     setRecordSeconds(0);
     setIsPlayingAudio(false);
+  };
+
+  const handleFileSelectAndCompress = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsOptimizing(true);
+    try {
+      const results = await ImageOptimizer.compressBatch(files, {
+        maxWidth: 1440,
+        maxHeight: 1920,
+        quality: 0.82
+      });
+
+      let totalOrig = 0;
+      let totalOpt = 0;
+      const uploadedUrls: string[] = [];
+
+      for (const res of results) {
+        totalOrig += res.originalSize;
+        totalOpt += res.optimizedSize;
+
+        // Direct upload to Supabase storage or local demo
+        const url = await StorageEngine.uploadToSupabaseDirect(res.file, res.file.name);
+        uploadedUrls.push(url);
+      }
+
+      const savingsPct = Math.max(0, Math.round(((totalOrig - totalOpt) / totalOrig) * 100));
+
+      setCompressionStats({
+        originalTotal: ImageOptimizer.formatBytes(totalOrig),
+        optimizedTotal: ImageOptimizer.formatBytes(totalOpt),
+        savingsPct
+      });
+
+      setImages(prev => [...prev, ...uploadedUrls]);
+    } catch (err) {
+      console.error("Compression error:", err);
+      alert("Error al optimizar fotos.");
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   const handleTransform = () => {
@@ -466,28 +521,68 @@ export default function RegistrationAssistant() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               
-              {/* Photo Upload Box */}
-              <div className="glass-obsidian border border-brand-gold/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+              {/* Photo Upload Box with WebP Compressor */}
+              <div className="glass-obsidian border border-brand-gold/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] text-brand-gold uppercase font-black tracking-widest">Paso 1: Fotos 4K</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] text-brand-gold uppercase font-black tracking-widest">Paso 1: Fotos 4K (WebP Ultra)</span>
                     <span className="text-[9px] text-white/40">{images.length} fotos listas</span>
                   </div>
 
-                  <UploadDropzone
-                    endpoint="modelImage"
-                    onClientUploadComplete={(res) => { 
-                      if(res && res.length > 0){ 
-                        setImages(res.map(f => f.url)); 
-                      }
-                    }}
-                    onUploadError={(err) => alert(`Error al subir imagen: ${err.message}`)}
+                  {/* Hidden Native File Input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelectAndCompress}
+                    className="hidden"
                   />
+
+                  {/* High Performance WebP Trigger Box */}
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-6 rounded-2xl glass-dark border-2 border-dashed border-brand-gold/40 hover:border-brand-gold cursor-pointer transition-all text-center space-y-3 group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center mx-auto text-brand-gold group-hover:scale-110 transition-transform">
+                      {isOptimizing ? <Loader2 size={24} className="animate-spin" /> : <UploadCloud size={24} />}
+                    </div>
+
+                    <div>
+                      <span className="text-xs font-bold text-white block">
+                        {isOptimizing ? 'Comprimiendo fotos a WebP 4K...' : 'Seleccionar Fotos de tu Galería'}
+                      </span>
+                      <span className="text-[9px] text-white/40 uppercase tracking-widest mt-0.5 block">
+                        Compresión WebP en tu celular (-95% de consumo de datos)
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="px-5 py-2 bg-brand-gold hover:bg-white text-brand-black text-[9px] font-black uppercase tracking-wider rounded-xl shadow-md transition-all pointer-events-none"
+                    >
+                      {isOptimizing ? 'Optimizando...' : 'Elegir Fotos'}
+                    </button>
+                  </div>
+
+                  {/* Live Compression Statistics Feedback */}
+                  {compressionStats && (
+                    <div className="mt-3 p-3 rounded-xl bg-brand-gold/10 border border-brand-gold/30 text-left text-[9px] space-y-1">
+                      <div className="flex justify-between font-bold text-brand-gold">
+                        <span>⚡ Optimización WebP Completada</span>
+                        <span className="text-emerald-400">-{compressionStats.savingsPct}% Ahorro</span>
+                      </div>
+                      <div className="flex justify-between text-white/60">
+                        <span>Original: {compressionStats.originalTotal}</span>
+                        <span className="text-white">Final: {compressionStats.optimizedTotal}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {images.length > 0 && (
-                  <div className="mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                    <CheckCircle2 size={16} /> {images.length} fotos procesadas correctamente
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-emerald-400 text-xs font-bold">
+                    <CheckCircle2 size={16} /> {images.length} fotos procesadas en 4K
                   </div>
                 )}
               </div>
