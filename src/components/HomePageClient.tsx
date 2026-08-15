@@ -86,7 +86,6 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
         <Navbar onChangeLocation={resetLocation} />
 
-        <LiveCountBanner />
         <StoriesBar />
 
         <HeroSection />

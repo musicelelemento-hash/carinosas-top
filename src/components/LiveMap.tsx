@@ -283,7 +283,10 @@ export default function LiveMap() {
             <MapContainer
               center={initialCenter}
               zoom={13}
-              scrollWheelZoom={true}
+              scrollWheelZoom={false}
+              dragging={true}
+              touchZoom={true}
+              doubleClickZoom={true}
               className="w-full h-full grayscale-[0.8] contrast-125"
               zoomControl={false}
               ref={mapRef}

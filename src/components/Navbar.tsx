@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame } from "lucide-react";
 import AuthModal from "./AuthModal";
+import LiveCountBanner from "./LiveCountBanner";
 
 interface NavbarProps {
   onChangeLocation?: () => void;
@@ -22,16 +23,13 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
 
   return (
     <>
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-        scrolled
-          ? "bg-[#08080C]/90 backdrop-blur-2xl border-b border-brand-gold/20 shadow-[0_10px_35px_rgba(0,0,0,0.8)]"
-          : "bg-transparent"
-      }`}>
+      <header className="sticky top-0 w-full z-50 bg-[#08080C]/95 backdrop-blur-2xl border-b border-brand-gold/20 shadow-[0_10px_35px_rgba(0,0,0,0.8)]">
+        
+        {/* Top Ticker Bar: NEVER overlaps with navbar logo */}
+        <LiveCountBanner />
 
-        {/* Top gold line */}
-        <div className={`h-[1px] w-full transition-opacity duration-700 ${scrolled ? 'opacity-0' : 'opacity-100'}`}
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(212,168,67,0.6), rgba(212,168,67,0.9), rgba(212,168,67,0.6), transparent)' }}
-        />
+        {/* Main Navbar */}
+        <nav className="w-full">
 
         <div className="max-w-[1700px] mx-auto px-6 md:px-12">
           <div className={`flex justify-between items-center transition-all duration-700 ${scrolled ? 'h-[70px]' : 'h-[90px]'}`}>
@@ -146,11 +144,12 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
           </div>
         </div>
       </nav>
+    </header>
 
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-      />
-    </>
+    <AuthModal
+      isOpen={isAuthOpen}
+      onClose={() => setIsAuthOpen(false)}
+    />
+  </>
   );
 }
