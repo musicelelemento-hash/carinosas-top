@@ -19,6 +19,9 @@ import PushPrompt from "@/components/PushPrompt";
 import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
 import MobileFiltersSheet from "@/components/MobileFiltersSheet";
 import MobileSpeedDial from "@/components/MobileSpeedDial";
+import SecretVaultTeaser from "@/components/SecretVaultTeaser";
+import OccasionMatchmaker from "@/components/OccasionMatchmaker";
+import LiveActivityToast from "@/components/LiveActivityToast";
 import { Sliders } from "lucide-react";
 
 interface HomePageModel {
@@ -89,7 +92,26 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
         <RecommendationSection />
 
+        {/* ── 5 OCCASIONS CONCIERGE MATCHMAKER ── */}
+        <OccasionMatchmaker
+          onSelectOccasion={(tagKeyword) => {
+            if (!tagKeyword) {
+              setDisplayModels(initialModels);
+            } else {
+              const filtered = initialModels.filter(m => 
+                (m.tags && m.tags.some(t => t.toLowerCase().includes(tagKeyword.toLowerCase()))) ||
+                (m.description && m.description.toLowerCase().includes(tagKeyword.toLowerCase())) ||
+                (m.sector && m.sector.toLowerCase().includes(tagKeyword.toLowerCase()))
+              );
+              setDisplayModels(filtered.length > 0 ? filtered : initialModels);
+            }
+          }}
+        />
+
         <VIPLounge />
+
+        {/* ── SECRET VAULT 4K TEASER ── */}
+        <SecretVaultTeaser />
 
         <GlobalLounge />
 
@@ -174,6 +196,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <AIAssistantOverlay />
         <PushPrompt />
         <MobileSpeedDial />
+        <LiveActivityToast />
 
         <MobileFiltersSheet
           isOpen={isFiltersSheetOpen}

@@ -136,6 +136,9 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
             <Link href="/#collection" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
               <Sparkles size={14} className="text-brand-gold" /> Catálogo 4K
             </Link>
+            <Link href="/panel-modelo" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-brand-pink hover:text-white uppercase tracking-widest font-bold transition-colors">
+              <Sparkles size={14} className="text-brand-pink" /> Panel de la Modelo (Studio)
+            </Link>
             <Link href="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
               <ShieldCheck size={14} className="text-brand-gold" /> Panel de Administración
             </Link>
