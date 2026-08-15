@@ -86,6 +86,8 @@ export const metadata: Metadata = {
   },
 };
 
+import MobileBottomNav from "@/components/MobileBottomNav";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -94,9 +96,10 @@ export default function RootLayout({
   return (
     <html lang="es-EC" className="dark">
       <body
-        className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} antialiased bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black`}
+        className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} antialiased bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black pb-20 md:pb-0`}
       >
         {children}
+        <MobileBottomNav />
       </body>
     </html>
   );
