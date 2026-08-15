@@ -34,6 +34,7 @@ import PrivacyModal from "./PrivacyModal";
 import PhoneVerificationModal from "./PhoneVerificationModal";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
 import { COUNTRIES, type Country } from "@/lib/countries";
+import { EmailValidator } from "@/lib/emailValidator";
 
 export default function RegistrationAssistant() {
   const [mounted, setMounted] = useState(false);
@@ -43,6 +44,13 @@ export default function RegistrationAssistant() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   
+  // Registration Mode: Express (Phone OTP) vs Account (Email + Password)
+  const [registrationMode, setRegistrationMode] = useState<'express' | 'account'>('express');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
+
   // Earnings Calculator State
   const [appointmentsPerWeek, setAppointmentsPerWeek] = useState(5);
   const [hourlyRate, setHourlyRate] = useState(120);
@@ -222,7 +230,23 @@ export default function RegistrationAssistant() {
   };
 
   const handleRegister = async () => {
-    if (!isPhoneVerified) {
+    // 1. Account Mode Validation
+    if (registrationMode === "account") {
+      const emailRes = EmailValidator.validate(email);
+      if (!emailRes.isValid) {
+        alert(emailRes.error || "Por favor ingresa un correo electrónico válido (no desechable).");
+        setStep(2);
+        return;
+      }
+      if (!password || password.length < 6) {
+        alert("La contraseña debe tener al menos 6 caracteres.");
+        setStep(2);
+        return;
+      }
+    }
+
+    // 2. Express Mode Validation (Phone OTP Gate)
+    if (registrationMode === "express" && !isPhoneVerified) {
       setIsPhoneModalOpen(true);
       return;
     }
@@ -442,6 +466,89 @@ export default function RegistrationAssistant() {
             </div>
 
             <div className="space-y-6">
+              {/* Registration Mode Selector (Express vs Account) */}
+              <div>
+                <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">Modalidad de Registro</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRegistrationMode('express')}
+                    className={`p-4 rounded-2xl border text-left transition-all space-y-1 ${
+                      registrationMode === 'express'
+                        ? 'border-brand-gold bg-brand-gold/15 text-white shadow-md'
+                        : 'border-white/10 glass-dark text-white/50 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">⚡ Anuncio Express</span>
+                      <span className="text-[8px] bg-brand-gold/20 text-brand-gold px-2 py-0.5 rounded-full font-bold uppercase">Rápido</span>
+                    </div>
+                    <span className="text-[9px] text-white/40 block">Validación por Teléfono (WhatsApp o SMS)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRegistrationMode('account')}
+                    className={`p-4 rounded-2xl border text-left transition-all space-y-1 ${
+                      registrationMode === 'account'
+                        ? 'border-brand-gold bg-brand-gold/15 text-white shadow-md'
+                        : 'border-white/10 glass-dark text-white/50 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">👑 Cuenta Élite Completa</span>
+                      <span className="text-[8px] bg-brand-pink/20 text-brand-pink px-2 py-0.5 rounded-full font-bold uppercase">Recomendado</span>
+                    </div>
+                    <span className="text-[9px] text-white/40 block">Email Validado + Contraseña + Panel Privado</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Conditional Email & Password for Full Account */}
+              {registrationMode === 'account' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-2xl glass-dark border border-brand-gold/20 animate-in fade-in duration-300">
+                  <div>
+                    <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">Correo Electrónico Oficial</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEmail(val);
+                        setEmailError(null);
+                        setEmailSuggestion(null);
+                        if (val.includes('@') && val.includes('.')) {
+                          const res = EmailValidator.validate(val);
+                          if (!res.isValid) setEmailError(res.error || 'Correo inválido');
+                          if (res.suggestion) setEmailSuggestion(res.suggestion);
+                        }
+                      }}
+                      className={`w-full glass-dark border rounded-2xl px-4 py-3.5 text-white outline-none text-sm transition-all ${
+                        emailError ? 'border-red-500/80 bg-red-500/5' : 'border-white/15 focus:border-brand-gold'
+                      }`}
+                      placeholder="ejemplo@gmail.com"
+                    />
+                    {emailError && (
+                      <span className="text-[10px] text-red-400 font-bold mt-1 block">⚠️ {emailError}</span>
+                    )}
+                    {emailSuggestion && (
+                      <span className="text-[10px] text-brand-gold font-bold mt-1 block">💡 {emailSuggestion}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">Contraseña Segura</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full glass-dark border border-white/15 rounded-2xl px-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm"
+                      placeholder="••••••••••••"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Country Selection Chips */}
               <div>
                 <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">País de Residencia</label>

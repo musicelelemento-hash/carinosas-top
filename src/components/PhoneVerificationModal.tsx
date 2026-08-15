@@ -6,20 +6,15 @@ import {
   ShieldCheck, 
   MessageCircle, 
   Smartphone, 
-  Mail, 
-  Sparkles, 
+  Lock, 
   RotateCcw, 
   CheckCircle2, 
   Loader2, 
-  ArrowRight,
-  ExternalLink,
-  Lock
+  AlertTriangle,
+  Send,
+  Clock
 } from "lucide-react";
-import { 
-  sendPhoneOtpAction, 
-  verifyPhoneOtpAction, 
-  getWhatsAppHandshakeUrl 
-} from "@/app/actions/authPhone";
+import { sendPhoneOtpAction, verifyPhoneOtpAction } from "@/app/actions/authPhone";
 
 interface PhoneVerificationModalProps {
   isOpen: boolean;
@@ -29,7 +24,7 @@ interface PhoneVerificationModalProps {
   onSuccess: (verifiedPhone: string) => void;
 }
 
-type Channel = "whatsapp_handshake" | "whatsapp_otp" | "sms_otp";
+type Channel = "whatsapp_otp" | "sms_otp";
 
 export default function PhoneVerificationModal({
   isOpen,
@@ -38,33 +33,26 @@ export default function PhoneVerificationModal({
   onClose,
   onSuccess
 }: PhoneVerificationModalProps) {
-  const [channel, setChannel] = useState<Channel>("whatsapp_handshake");
+  const [channel, setChannel] = useState<Channel>("whatsapp_otp");
+  const [hasSentCode, setHasSentCode] = useState(false);
   const [pin, setPin] = useState<string[]>(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [cooldown, setCooldown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
-  const [handshakeUrl, setHandshakeUrl] = useState<string>("");
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    if (isOpen) {
-      // Auto generate handshake URL
-      getWhatsAppHandshakeUrl(phoneNumber, userName).then(setHandshakeUrl);
-      startCooldown();
-    }
-  }, [isOpen, phoneNumber, userName]);
-
-  useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (cooldown > 0 && !canResend) {
+    if (hasSentCode && cooldown > 0 && !canResend) {
       timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
-    } else {
+    } else if (hasSentCode && cooldown === 0) {
       setCanResend(true);
     }
     return () => clearTimeout(timer);
-  }, [cooldown, canResend]);
+  }, [cooldown, canResend, hasSentCode]);
 
   if (!isOpen) return null;
 
@@ -73,26 +61,30 @@ export default function PhoneVerificationModal({
     setCanResend(false);
   };
 
-  const handleChannelSwitch = async (newChannel: Channel) => {
-    setChannel(newChannel);
+  const handleSendCode = async () => {
+    setIsLoading(true);
     setStatusMsg(null);
-    setPin(["", "", "", "", "", ""]);
-
-    if (newChannel === "whatsapp_handshake") {
-      const url = await getWhatsAppHandshakeUrl(phoneNumber, userName);
-      setHandshakeUrl(url);
-    } else {
-      setIsLoading(true);
-      const res = await sendPhoneOtpAction(phoneNumber, newChannel);
+    try {
+      const res = await sendPhoneOtpAction(phoneNumber, channel);
       setIsLoading(false);
+
+      if (res.isLocked) {
+        setIsLocked(true);
+        setStatusMsg({ text: res.message, isError: true });
+        return;
+      }
+
       if (res.success) {
+        setHasSentCode(true);
         setStatusMsg({ text: res.message, isError: false });
         startCooldown();
-        // Focus first box
-        setTimeout(() => inputRefs.current[0]?.focus(), 100);
+        setTimeout(() => inputRefs.current[0]?.focus(), 150);
       } else {
         setStatusMsg({ text: res.message, isError: true });
       }
+    } catch {
+      setIsLoading(false);
+      setStatusMsg({ text: "Error de conexión al enviar el código.", isError: true });
     }
   };
 
@@ -145,6 +137,14 @@ export default function PhoneVerificationModal({
     setStatusMsg(null);
     try {
       const res = await verifyPhoneOtpAction(phoneNumber, fullPin);
+      setIsLoading(false);
+
+      if (res.isLocked) {
+        setIsLocked(true);
+        setStatusMsg({ text: res.message, isError: true });
+        return;
+      }
+
       if (res.success) {
         setStatusMsg({ text: res.message, isError: false });
         if (typeof window !== "undefined" && "vibrate" in navigator) {
@@ -153,27 +153,13 @@ export default function PhoneVerificationModal({
         setTimeout(() => {
           onSuccess(phoneNumber);
           onClose();
-        }, 1000);
+        }, 800);
       } else {
         setStatusMsg({ text: res.message, isError: true });
       }
     } catch {
-      setStatusMsg({ text: "Error al validar código.", isError: true });
-    } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    if (!canResend) return;
-    setIsLoading(true);
-    const res = await sendPhoneOtpAction(phoneNumber, channel);
-    setIsLoading(false);
-    if (res.success) {
-      setStatusMsg({ text: "Nuevo código enviado.", isError: false });
-      startCooldown();
-    } else {
-      setStatusMsg({ text: res.message, isError: true });
+      setStatusMsg({ text: "Error al validar el código.", isError: true });
     }
   };
 
@@ -184,7 +170,7 @@ export default function PhoneVerificationModal({
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Modal Window */}
-      <div className="relative w-full max-w-lg glass-obsidian border border-brand-gold/40 rounded-[2.5rem] p-8 shadow-[0_20px_80px_rgba(0,0,0,0.9)] space-y-6 z-10 animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-lg glass-obsidian border border-brand-gold/40 rounded-[2.5rem] p-8 shadow-[0_20px_80px_rgba(0,0,0,0.95)] space-y-6 z-10 animate-in zoom-in-95 duration-300">
         
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -193,7 +179,7 @@ export default function PhoneVerificationModal({
               <ShieldCheck size={22} />
             </div>
             <div>
-              <h3 className="text-xl font-serif text-white italic font-bold">Autenticación 4K Anti-Fakes</h3>
+              <h3 className="text-xl font-serif text-white italic font-bold">Verificación Telefónica</h3>
               <p className="text-[10px] text-white/50 uppercase tracking-widest">{phoneNumber}</p>
             </div>
           </div>
@@ -206,129 +192,160 @@ export default function PhoneVerificationModal({
           </button>
         </div>
 
-        {/* ── 3 CHANNEL SELECTION TABS ── */}
-        <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl glass-dark border border-white/10">
-          
-          <button
-            type="button"
-            onClick={() => handleChannelSwitch("whatsapp_handshake")}
-            className={`py-2.5 px-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex flex-col items-center gap-1 ${
-              channel === "whatsapp_handshake"
-                ? "bg-brand-gold text-brand-black shadow-md font-extrabold"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            <MessageCircle size={14} />
-            <span>1-Toque WhatsApp</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleChannelSwitch("whatsapp_otp")}
-            className={`py-2.5 px-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex flex-col items-center gap-1 ${
-              channel === "whatsapp_otp"
-                ? "bg-brand-gold text-brand-black shadow-md font-extrabold"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            <Sparkles size={14} />
-            <span>OTP WhatsApp</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleChannelSwitch("sms_otp")}
-            className={`py-2.5 px-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex flex-col items-center gap-1 ${
-              channel === "sms_otp"
-                ? "bg-brand-gold text-brand-black shadow-md font-extrabold"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            <Smartphone size={14} />
-            <span>SMS Clásico</span>
-          </button>
-
-        </div>
-
-        {/* ── TAB CONTENT ── */}
-        {channel === "whatsapp_handshake" ? (
-          /* OPTION 1: 1-TAP HANDSHAKE ($0 COST) */
-          <div className="space-y-5 text-center py-2">
-            <div className="p-4 rounded-2xl glass-dark border border-brand-gold/30 text-xs text-white/80 space-y-2">
-              <p className="leading-relaxed">
-                Toca el botón dorado a continuación para enviar un mensaje pre-llenado a nuestro <strong>WhatsApp Concierge Oficial</strong>.
-              </p>
-              <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest block">
-                ✓ Verificación instantánea sin costo de SMS
-              </span>
+        {/* ── LOCKOUT WARNING IF ACTIVE ── */}
+        {isLocked ? (
+          <div className="p-6 rounded-3xl bg-red-600/15 border border-red-500/50 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-red-600/20 flex items-center justify-center mx-auto text-red-400">
+              <Lock size={24} />
             </div>
-
-            <a
-              href={handshakeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                // Auto verify after opening WhatsApp handshake
-                setTimeout(() => {
-                  onSuccess(phoneNumber);
-                  onClose();
-                }, 3000);
-              }}
-              className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-[0.18em] shadow-[0_10px_35px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2.5"
-            >
-              <MessageCircle size={18} fill="currentColor" />
-              <span>Verificar en 1 Clic por WhatsApp</span>
-              <ExternalLink size={14} />
-            </a>
-
-            <p className="text-[9px] text-white/40 italic">
-              Al abrirse WhatsApp, solo dale clic a &quot;Enviar&quot; y tu perfil quedará autenticado.
+            <h4 className="text-base font-serif text-white font-bold">Acceso Bloqueado Temporalmente</h4>
+            <p className="text-xs text-red-300 leading-relaxed">
+              Por medidas anti-fraude y seguridad de tokens, tu número ha sido bloqueado por <strong>15 minutos</strong> debido a múltiples intentos erróneos.
             </p>
+            <button
+              onClick={onClose}
+              className="mt-2 px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[10px] font-black uppercase tracking-wider transition-all"
+            >
+              Entendido / Cerrar
+            </button>
           </div>
         ) : (
-          /* OPTION 2 & 3: 6-DIGIT PIN PAD FOR OTP */
-          <div className="space-y-6 py-2">
-            
-            <div className="text-center space-y-1">
-              <p className="text-xs text-white/70">
-                Ingresa el código de 6 dígitos que enviamos por {channel === "whatsapp_otp" ? "WhatsApp" : "SMS"}:
-              </p>
-            </div>
+          <>
+            {/* ── STEP A: CHANNEL SELECTOR (WHATSAPP vs SMS) ── */}
+            {!hasSentCode ? (
+              <div className="space-y-6">
+                <div className="text-center space-y-1">
+                  <span className="text-xs text-white/70 block">
+                    Elige por dónde prefieres recibir tu código de seguridad de 6 dígitos:
+                  </span>
+                </div>
 
-            {/* 6 PIN BOXES */}
-            <div className="flex justify-center items-center gap-2.5 sm:gap-3">
-              {pin.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={(el) => { inputRefs.current[idx] = el; }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handlePinChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  className="w-11 h-14 sm:w-13 sm:h-16 text-center text-xl sm:text-2xl font-mono font-bold text-brand-gold glass-dark border-2 border-brand-gold/30 rounded-2xl focus:border-brand-gold focus:scale-105 outline-none transition-all shadow-inner"
-                />
-              ))}
-            </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Channel 1: WhatsApp */}
+                  <button
+                    type="button"
+                    onClick={() => setChannel("whatsapp_otp")}
+                    className={`p-4 rounded-2xl border text-left transition-all space-y-2 ${
+                      channel === "whatsapp_otp"
+                        ? "border-emerald-400 bg-emerald-500/15 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                        : "border-white/10 glass-dark text-white/60 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <MessageCircle size={20} className={channel === "whatsapp_otp" ? "text-emerald-400" : "text-white/40"} />
+                      <span className="text-[8px] bg-emerald-400/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold uppercase">Recomendado</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">WhatsApp OTP</span>
+                      <span className="text-[9px] text-white/50 block mt-0.5">Envío instantáneo a tu chat</span>
+                    </div>
+                  </button>
 
-            {/* Cooldown & Resend */}
-            <div className="flex justify-between items-center text-[10px] text-white/50 px-2">
-              <span>¿No recibiste el código?</span>
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={!canResend || isLoading}
-                className={`font-bold uppercase tracking-wider flex items-center gap-1 ${
-                  canResend ? "text-brand-gold hover:underline cursor-pointer" : "text-white/25 cursor-not-allowed"
-                }`}
-              >
-                <RotateCcw size={11} />
-                {canResend ? "Reenviar Código" : `Reenviar en 00:${cooldown < 10 ? `0${cooldown}` : cooldown}`}
-              </button>
-            </div>
+                  {/* Channel 2: SMS */}
+                  <button
+                    type="button"
+                    onClick={() => setChannel("sms_otp")}
+                    className={`p-4 rounded-2xl border text-left transition-all space-y-2 ${
+                      channel === "sms_otp"
+                        ? "border-brand-gold bg-brand-gold/15 shadow-[0_0_20px_rgba(212,168,67,0.3)]"
+                        : "border-white/10 glass-dark text-white/60 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Smartphone size={20} className={channel === "sms_otp" ? "text-brand-gold" : "text-white/40"} />
+                      <span className="text-[8px] bg-brand-gold/20 text-brand-gold px-2 py-0.5 rounded-full font-bold uppercase">Clásico</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">Mensaje SMS</span>
+                      <span className="text-[9px] text-white/50 block mt-0.5">Mensaje de texto a tu móvil</span>
+                    </div>
+                  </button>
+                </div>
 
-            {/* Status Feedback Message */}
+                {/* Explicit Send Button */}
+                <button
+                  type="button"
+                  onClick={handleSendCode}
+                  disabled={isLoading}
+                  className="w-full py-4 rounded-2xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] transition-all flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Send size={15} />
+                      <span>Enviar Código por {channel === "whatsapp_otp" ? "WhatsApp" : "SMS"}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              /* ── STEP B: 6-PIN BOXES PAD ── */
+              <div className="space-y-6">
+                
+                <div className="text-center space-y-1">
+                  <p className="text-xs text-white/70">
+                    Ingresa el código de 6 dígitos enviado por <strong>{channel === "whatsapp_otp" ? "WhatsApp" : "SMS"}</strong> a {phoneNumber}:
+                  </p>
+                </div>
+
+                {/* 6 PIN BOXES */}
+                <div className="flex justify-center items-center gap-2 sm:gap-3">
+                  {pin.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => { inputRefs.current[idx] = el; }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handlePinChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(idx, e)}
+                      className="w-11 h-14 sm:w-13 sm:h-16 text-center text-xl sm:text-2xl font-mono font-bold text-brand-gold glass-dark border-2 border-brand-gold/30 rounded-2xl focus:border-brand-gold focus:scale-105 outline-none transition-all shadow-inner"
+                    />
+                  ))}
+                </div>
+
+                {/* Cooldown & Resend */}
+                <div className="flex justify-between items-center text-[10px] text-white/50 px-2">
+                  <span>¿No recibiste el código?</span>
+                  <button
+                    type="button"
+                    onClick={handleSendCode}
+                    disabled={!canResend || isLoading}
+                    className={`font-bold uppercase tracking-wider flex items-center gap-1 ${
+                      canResend ? "text-brand-gold hover:underline cursor-pointer" : "text-white/25 cursor-not-allowed"
+                    }`}
+                  >
+                    <RotateCcw size={11} />
+                    {canResend ? "Reenviar Código" : `Reenviar en 00:${cooldown < 10 ? `0${cooldown}` : cooldown}`}
+                  </button>
+                </div>
+
+                {/* Confirm PIN Button */}
+                <button
+                  type="button"
+                  onClick={handleVerifyPin}
+                  disabled={isLoading || pin.join("").length !== 6}
+                  className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all flex items-center justify-center gap-2 ${
+                    pin.join("").length === 6
+                      ? "bg-brand-gold hover:bg-white text-brand-black shadow-[0_10px_35px_rgba(212,168,67,0.4)] cursor-pointer"
+                      : "bg-white/10 text-white/30 cursor-not-allowed"
+                  }`}
+                >
+                  {isLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} />
+                      <span>Confirmar y Validar Número</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Status Message */}
             {statusMsg && (
               <div className={`p-3 rounded-xl text-center text-xs font-bold ${
                 statusMsg.isError ? "bg-red-500/10 border border-red-500/30 text-red-400" : "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
@@ -336,29 +353,7 @@ export default function PhoneVerificationModal({
                 {statusMsg.text}
               </div>
             )}
-
-            {/* Confirm PIN Button */}
-            <button
-              type="button"
-              onClick={handleVerifyPin}
-              disabled={isLoading || pin.join("").length !== 6}
-              className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all flex items-center justify-center gap-2 ${
-                pin.join("").length === 6
-                  ? "bg-brand-gold hover:bg-white text-brand-black shadow-[0_10px_35px_rgba(212,168,67,0.4)]"
-                  : "bg-white/10 text-white/30 cursor-not-allowed"
-              }`}
-            >
-              {isLoading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <>
-                  <CheckCircle2 size={16} />
-                  <span>Validar Código y Activar</span>
-                </>
-              )}
-            </button>
-
-          </div>
+          </>
         )}
 
       </div>
