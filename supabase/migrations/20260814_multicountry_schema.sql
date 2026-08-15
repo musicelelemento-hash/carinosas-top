@@ -3,11 +3,13 @@
 -- Supports: Ecuador (EC), Colombia (CO), Perú (PE), Panamá (PA), México (MX), España (ES), USA (US)
 -- ==============================================================================
 
--- 1. ADD COUNTRY_CODE COLUMN TO MODELS
+-- 1. ADD COUNTRY_CODE AND IS_PHONE_VERIFIED COLUMNS TO MODELS
 ALTER TABLE IF EXISTS public.models
-ADD COLUMN IF NOT EXISTS country_code VARCHAR(10) DEFAULT 'EC';
+ADD COLUMN IF NOT EXISTS country_code VARCHAR(10) DEFAULT 'EC',
+ADD COLUMN IF NOT EXISTS is_phone_verified BOOLEAN DEFAULT FALSE;
 
 CREATE INDEX IF NOT EXISTS idx_models_country ON public.models(country_code);
+CREATE INDEX IF NOT EXISTS idx_models_phone_verified ON public.models(is_phone_verified);
 
 -- 2. ADD COUNTRY_CODE COLUMN TO VIP_PASSES (Cross-border passport)
 ALTER TABLE IF EXISTS public.vip_passes

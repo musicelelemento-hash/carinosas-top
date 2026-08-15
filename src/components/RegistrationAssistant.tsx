@@ -31,6 +31,7 @@ import {
   FileImage
 } from "lucide-react";
 import PrivacyModal from "./PrivacyModal";
+import PhoneVerificationModal from "./PhoneVerificationModal";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
 import { COUNTRIES, type Country } from "@/lib/countries";
 
@@ -58,6 +59,10 @@ export default function RegistrationAssistant() {
   const [tags, setTags] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [activeTip, setActiveTip] = useState("");
+
+  // Phone Verification State
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
   // WebP Compression & Upload State
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -217,6 +222,11 @@ export default function RegistrationAssistant() {
   };
 
   const handleRegister = async () => {
+    if (!isPhoneVerified) {
+      setIsPhoneModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const fullWhatsApp = whatsapp.startsWith("+") 
@@ -859,6 +869,16 @@ export default function RegistrationAssistant() {
           {renderContent()}
         </div>
       </div>
+
+      <PhoneVerificationModal
+        isOpen={isPhoneModalOpen}
+        phoneNumber={whatsapp.startsWith("+") ? whatsapp : `${selectedCountry.dialCode}${whatsapp.replace(/^0+/, "")}`}
+        userName={name}
+        onClose={() => setIsPhoneModalOpen(false)}
+        onSuccess={() => {
+          setIsPhoneVerified(true);
+        }}
+      />
     </div>
   );
 }
