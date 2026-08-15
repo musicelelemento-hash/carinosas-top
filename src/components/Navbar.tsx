@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck } from "lucide-react";
+import AuthModal from "./AuthModal";
 
 interface NavbarProps {
   onChangeLocation?: () => void;
@@ -11,6 +12,7 @@ interface NavbarProps {
 export default function Navbar({ onChangeLocation }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -88,13 +90,14 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
                 </button>
               )}
 
-              <Link
-                href="/admin"
-                className="hidden sm:flex items-center gap-2 text-[10px] text-white/50 hover:text-white uppercase tracking-widest font-bold transition-all"
+              {/* Account / Login Trigger */}
+              <button
+                onClick={() => setIsAuthOpen(true)}
+                className="hidden sm:flex items-center gap-2 text-[10px] text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-all px-3 py-1.5 rounded-full glass-dark border border-white/10"
               >
                 <User size={13} className="text-brand-gold" />
-                Admin
-              </Link>
+                <span>Mi Cuenta</span>
+              </button>
 
               {/* Join as Model CTA */}
               <Link
@@ -121,6 +124,12 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
         {/* Mobile menu dropdown */}
         <div className={`lg:hidden transition-all duration-500 overflow-hidden ${menuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="glass-obsidian border-t border-brand-gold/20 px-8 py-6 space-y-4 shadow-2xl">
+            <button 
+              onClick={() => { setMenuOpen(false); setIsAuthOpen(true); }} 
+              className="w-full text-left flex items-center gap-3 text-xs text-brand-gold uppercase tracking-widest font-bold transition-colors"
+            >
+              <User size={14} className="text-brand-gold" /> Mi Cuenta / Iniciar Sesión
+            </button>
             <Link href="/#mapa" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
               <MapPin size={14} className="text-brand-gold" /> Radar GPS en Vivo
             </Link>
@@ -128,11 +137,16 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
               <Sparkles size={14} className="text-brand-gold" /> Catálogo 4K
             </Link>
             <Link href="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
-              <User size={14} className="text-brand-gold" /> Panel de Administración
+              <ShieldCheck size={14} className="text-brand-gold" /> Panel de Administración
             </Link>
           </div>
         </div>
       </nav>
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+      />
     </>
   );
 }
