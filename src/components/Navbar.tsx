@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck } from "lucide-react";
+import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame } from "lucide-react";
 import AuthModal from "./AuthModal";
 
 interface NavbarProps {
@@ -64,11 +64,12 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
             {/* CENTER: Navigation Links */}
             <div className="hidden lg:flex items-center gap-2">
               {[
+                { href: '/#clasificados-express', icon: <Flame size={13} className="text-emerald-400 fill-current animate-pulse" />, label: 'Clasificados' },
                 { href: '/#mapa', icon: <MapPin size={13} />, label: 'Radar GPS' },
                 { href: '/#collection', icon: <Sparkles size={13} />, label: 'Catálogo 4K' },
               ].map(({ href, icon, label }) => (
                 <Link key={href} href={href}
-                  className="group flex items-center gap-2 px-5 py-2 rounded-full text-[10px] text-white/60 hover:text-white font-black uppercase tracking-[0.2em] transition-all glass-obsidian border border-transparent hover:border-brand-gold/30"
+                  className="group flex items-center gap-2 px-4 py-2 rounded-full text-[10px] text-white/60 hover:text-white font-black uppercase tracking-[0.2em] transition-all glass-obsidian border border-transparent hover:border-brand-gold/30"
                 >
                   <span className="text-brand-gold group-hover:scale-110 transition-transform">{icon}</span>
                   {label}

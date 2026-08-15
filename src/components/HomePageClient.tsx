@@ -22,6 +22,7 @@ import MobileSpeedDial from "@/components/MobileSpeedDial";
 import SecretVaultTeaser from "@/components/SecretVaultTeaser";
 import OccasionMatchmaker from "@/components/OccasionMatchmaker";
 import LiveActivityToast from "@/components/LiveActivityToast";
+import LiveClassifiedsFeed from "@/components/LiveClassifiedsFeed";
 import { Sliders } from "lucide-react";
 
 interface HomePageModel {
@@ -85,6 +86,9 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <StoriesBar />
 
         <HeroSection />
+
+        {/* ── HIGH DOPAMINE LIVE CLASSIFIEDS FEED ── */}
+        <LiveClassifiedsFeed />
 
         <div id="mapa">
           <LiveMap />
