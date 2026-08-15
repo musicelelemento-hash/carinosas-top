@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import PrivacyModal from "./PrivacyModal";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
+import { COUNTRIES, type Country } from "@/lib/countries";
 
 export default function RegistrationAssistant() {
   const [mounted, setMounted] = useState(false);
@@ -45,7 +46,8 @@ export default function RegistrationAssistant() {
   const [appointmentsPerWeek, setAppointmentsPerWeek] = useState(5);
   const [hourlyRate, setHourlyRate] = useState(120);
 
-  // Form State
+  // Form State Multi-Country
+  const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]);
   const [city, setCity] = useState("Quito");
   const [sector, setSector] = useState("");
   const [age, setAge] = useState(23);
@@ -217,11 +219,15 @@ export default function RegistrationAssistant() {
   const handleRegister = async () => {
     setLoading(true);
     try {
+      const fullWhatsApp = whatsapp.startsWith("+") 
+        ? whatsapp 
+        : `${selectedCountry.dialCode}${whatsapp.replace(/^0+/, "")}`;
+
       await registerModelAction({
         name,
-        city,
+        city: `${city}, ${selectedCountry.name}`,
         sector,
-        whatsapp,
+        whatsapp: fullWhatsApp,
         description: transformed || StitchEngine.transformDescription(desc, city),
         tags: tags.length > 0 ? tags : StitchEngine.generateTags(city),
         images,
@@ -426,6 +432,35 @@ export default function RegistrationAssistant() {
             </div>
 
             <div className="space-y-6">
+              {/* Country Selection Chips */}
+              <div>
+                <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">País de Residencia</label>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                  {COUNTRIES.map((c) => {
+                    const isSelected = selectedCountry.id === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedCountry(c);
+                          const firstCanton = c.provinces[0]?.cantons[0]?.name || "Centro";
+                          setCity(firstCanton);
+                        }}
+                        className={`p-2.5 rounded-2xl border text-center transition-all ${
+                          isSelected
+                            ? 'border-brand-gold bg-brand-gold/15 text-white shadow-md'
+                            : 'border-white/10 glass-dark text-white/60 hover:text-white'
+                        }`}
+                      >
+                        <span className="text-xl block">{c.flag}</span>
+                        <span className="text-[9px] font-bold block mt-1 truncate">{c.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">Nombre Artístico</label>
@@ -436,25 +471,28 @@ export default function RegistrationAssistant() {
                   <input type="number" min="18" max="45" value={age} onChange={(e) => setAge(Number(e.target.value))} className="w-full glass-dark border border-white/15 rounded-2xl px-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" placeholder="23" />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">WhatsApp Directo</label>
-                  <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="w-full glass-dark border border-white/15 rounded-2xl px-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" placeholder="0991234567" />
+                  <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">WhatsApp ({selectedCountry.dialCode})</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-3.5 text-xs text-brand-gold font-bold">{selectedCountry.dialCode}</span>
+                    <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="w-full glass-dark border border-white/15 rounded-2xl pl-16 pr-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" placeholder="991234567" />
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">Ciudad Principal</label>
+                  <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">Ciudad / Cantón en {selectedCountry.name}</label>
                   <select value={city} onChange={(e) => setCity(e.target.value)} className="w-full glass-dark border border-white/15 rounded-2xl px-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm">
-                    {provinces.map(prov => (
-                      <optgroup key={prov} label={prov} className="bg-brand-black text-brand-gold">
-                        {getCitiesByProvince(prov).map(c => <option key={c.id} value={c.name} className="bg-brand-black text-white">{c.name}</option>)}
+                    {selectedCountry.provinces.map(prov => (
+                      <optgroup key={prov.id} label={`${prov.name} (${prov.region || selectedCountry.name})`} className="bg-brand-black text-brand-gold">
+                        {prov.cantons.map(c => <option key={c.id} value={c.name} className="bg-brand-black text-white">{c.name}</option>)}
                       </optgroup>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">Sector / Zona Exclusiva</label>
-                  <input type="text" value={sector} onChange={(e) => setSector(e.target.value)} className="w-full glass-dark border border-white/15 rounded-2xl px-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" placeholder="Ej: La Carolina / Samborondón" />
+                  <input type="text" value={sector} onChange={(e) => setSector(e.target.value)} className="w-full glass-dark border border-white/15 rounded-2xl px-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" placeholder="Ej: Zona Hotelera / Hotel 5★" />
                 </div>
               </div>
 

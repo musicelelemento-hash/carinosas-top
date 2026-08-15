@@ -54,7 +54,7 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
               <div className="flex items-center gap-2 group-hover:opacity-80 transition-opacity">
                 <div className="h-px w-5 bg-brand-gold/60" />
                 <span className="text-[8px] md:text-[9px] text-brand-gold/70 uppercase tracking-[0.4em] font-bold">
-                  Directorio Élite Ecuador
+                  Red Élite Iberoamérica
                 </span>
               </div>
             </Link>
@@ -77,14 +77,14 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
             {/* RIGHT: Actions */}
             <div className="flex items-center gap-3 md:gap-5">
 
-              {/* Change Location */}
+              {/* Change Location / Country */}
               {onChangeLocation && (
                 <button
                   onClick={onChangeLocation}
-                  className="hidden sm:flex items-center gap-1.5 text-[9px] text-white/50 hover:text-brand-gold uppercase tracking-widest font-bold transition-all px-3 py-1.5 rounded-full glass-dark border border-white/10"
+                  className="flex items-center gap-1.5 text-[9px] text-brand-gold hover:text-white uppercase tracking-widest font-bold transition-all px-3.5 py-1.5 rounded-full glass-obsidian border border-brand-gold/30 shadow-md"
                 >
                   <MapPin size={11} className="text-brand-gold" />
-                  <span>Ciudad</span>
+                  <span>Cambiar País</span>
                 </button>
               )}
 
