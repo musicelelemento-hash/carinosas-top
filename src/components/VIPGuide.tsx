@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Volume2
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FAQItem {
   q: string;
@@ -50,7 +51,13 @@ export default function VIPGuide() {
       <div className="max-w-7xl mx-auto space-y-16 relative z-10">
 
         {/* ── HEADER ── */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4 max-w-3xl mx-auto"
+        >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-obsidian border border-brand-gold/30 text-brand-gold">
             <ShieldCheck size={14} />
             <span className="text-[9px] font-black uppercase tracking-[0.35em]">Protocolo de Excelencia & Privacidad</span>
@@ -63,13 +70,20 @@ export default function VIPGuide() {
           <p className="text-xs sm:text-sm text-white/50 leading-relaxed font-serif italic max-w-xl mx-auto">
             Consejos de etiqueta, seguridad hotelera y verificación para una experiencia sin contratiempos en Ecuador.
           </p>
-        </div>
+        </motion.div>
 
         {/* ── 3 PROTOCOL PILLARS ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Pillar 1 */}
-          <div className="glass-obsidian p-8 rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 transition-all space-y-4 group">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ y: -6 }}
+            className="glass-obsidian p-8 rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 transition-colors space-y-4 group"
+          >
             <div className="w-14 h-14 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center text-brand-gold group-hover:scale-110 transition-transform">
               <Hotel size={26} />
             </div>
@@ -80,10 +94,17 @@ export default function VIPGuide() {
             <div className="text-[9px] text-brand-gold font-bold uppercase tracking-wider flex items-center gap-1.5 pt-2">
               <CheckCircle2 size={12} /> Máxima Privacidad
             </div>
-          </div>
+          </motion.div>
 
           {/* Pillar 2 */}
-          <div className="glass-obsidian p-8 rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 transition-all space-y-4 group">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{ y: -6 }}
+            className="glass-obsidian p-8 rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 transition-colors space-y-4 group"
+          >
             <div className="w-14 h-14 rounded-2xl bg-brand-pink/15 border border-brand-pink/40 flex items-center justify-center text-brand-pink group-hover:scale-110 transition-transform">
               <Volume2 size={26} />
             </div>
@@ -94,10 +115,17 @@ export default function VIPGuide() {
             <div className="text-[9px] text-brand-pink font-bold uppercase tracking-wider flex items-center gap-1.5 pt-2">
               <CheckCircle2 size={12} /> 100% Cero Suplantación
             </div>
-          </div>
+          </motion.div>
 
           {/* Pillar 3 */}
-          <div className="glass-obsidian p-8 rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 transition-all space-y-4 group">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{ y: -6 }}
+            className="glass-obsidian p-8 rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 transition-colors space-y-4 group"
+          >
             <div className="w-14 h-14 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center text-brand-gold group-hover:scale-110 transition-transform">
               <EyeOff size={26} />
             </div>
@@ -108,46 +136,65 @@ export default function VIPGuide() {
             <div className="text-[9px] text-brand-gold font-bold uppercase tracking-wider flex items-center gap-1.5 pt-2">
               <CheckCircle2 size={12} /> Blindaje Total
             </div>
-          </div>
+          </motion.div>
 
         </div>
 
         {/* ── INTERACTIVE FAQ ACCORDION ── */}
-        <div className="glass-obsidian border border-brand-gold/30 rounded-[2.5rem] p-8 md:p-12 shadow-2xl space-y-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="glass-obsidian border border-brand-gold/30 rounded-[2.5rem] p-8 md:p-12 shadow-2xl space-y-8"
+        >
           <div className="flex items-center gap-3">
             <HelpCircle size={24} className="text-brand-gold" />
             <div>
               <h3 className="text-2xl font-serif text-white italic font-bold">Preguntas Frecuentes Confidenciales</h3>
-              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest mt-0.5">Respuestas claras para socios y acompañantes</p>
+              <p className="text-xs text-white/50">Resolviendo inquietudes para un acceso sin riesgos.</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            {FAQS.map((faq, i) => (
+            {FAQS.map((faq, idx) => (
               <div 
-                key={i}
-                className="rounded-2xl border border-white/10 glass-dark overflow-hidden transition-all"
+                key={idx}
+                className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden transition-colors"
               >
                 <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 hover:text-brand-gold transition-colors"
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 group cursor-pointer"
                 >
-                  <span className="text-xs sm:text-sm font-bold text-white tracking-wide">{faq.q}</span>
+                  <span className="font-serif text-sm md:text-base text-white group-hover:text-brand-gold transition-colors font-medium">
+                    {faq.q}
+                  </span>
                   <ChevronDown 
                     size={16} 
-                    className={`text-brand-gold transition-transform duration-300 shrink-0 ${openFaq === i ? 'rotate-180' : ''}`} 
+                    className={`text-brand-gold shrink-0 transition-transform duration-300 ${openFaq === idx ? 'rotate-180' : ''}`} 
                   />
                 </button>
-
-                {openFaq === i && (
-                  <div className="p-5 pt-0 text-xs text-white/60 leading-relaxed border-t border-white/5 animate-in fade-in duration-300">
-                    {faq.a}
-                  </div>
-                )}
+                
+                <AnimatePresence>
+                  {openFaq === idx && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 pb-5 text-xs text-white/60 leading-relaxed border-t border-white/5 pt-3">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
       </div>
     </section>

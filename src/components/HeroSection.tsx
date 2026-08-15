@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
 import { Search, ChevronDown, Gem, Sparkles, ShieldCheck, MapPin } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HeroSection() {
   const provinces = getProvinces();
@@ -27,7 +28,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-20 noise-overlay bg-[#08080C]">
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 pb-20 noise-overlay bg-[#08080C]">
 
       {/* ── CINEMATIC BACKGROUND ── */}
       <div className="absolute inset-0 -z-30 bg-[#08080C]" />
@@ -48,14 +49,27 @@ export default function HeroSection() {
       </div>
 
       {/* ── FLOATING OBSIDIAN ORBS ── */}
-      <div className="absolute top-[20%] left-[5%] w-[600px] h-[600px] -z-10 pointer-events-none rounded-full bg-brand-gold/5 blur-[120px]" />
-      <div className="absolute bottom-[15%] right-[5%] w-[500px] h-[500px] -z-10 pointer-events-none rounded-full bg-brand-pink/5 blur-[120px]" />
+      <motion.div 
+        animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[20%] left-[5%] w-[600px] h-[600px] -z-10 pointer-events-none rounded-full bg-brand-gold/5 blur-[120px]" 
+      />
+      <motion.div 
+        animate={{ y: [0, 20, 0], scale: [1, 1.05, 1] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-[15%] right-[5%] w-[500px] h-[500px] -z-10 pointer-events-none rounded-full bg-brand-pink/5 blur-[120px]" 
+      />
 
       {/* ── MAIN CONTENT ── */}
-      <div className={`max-w-7xl mx-auto px-6 w-full text-center z-10 space-y-12 transition-all duration-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="max-w-7xl mx-auto px-6 w-full text-center z-10 space-y-10">
 
         {/* Live Status Badge */}
-        <div className="flex justify-center">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="flex justify-center"
+        >
           <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_0_35px_rgba(212,168,67,0.25)] pulse-gold-aura">
             <Gem size={14} className="text-brand-gold animate-pulse" />
             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-gold">
@@ -64,10 +78,15 @@ export default function HeroSection() {
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">En Vivo</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── TITLE ── */}
-        <div className="space-y-6 relative">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="space-y-6 relative"
+        >
           
           {/* Subtle Ambient Light behind text */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-brand-gold/10 rounded-full blur-[90px] pointer-events-none -z-10" />
@@ -82,39 +101,60 @@ export default function HeroSection() {
           </h1>
 
           {/* Subtitle */}
-          <div className="flex flex-col items-center gap-4 max-w-xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-col items-center gap-4 max-w-xl mx-auto"
+          >
             <div className="w-28 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
             <p className="text-xs sm:text-sm text-white/80 uppercase tracking-[0.3em] font-medium">
               El Máximo Círculo de Acompañamiento VIP & Modelos 4K
             </p>
             <div className="w-28 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
-          </div>
+          </motion.div>
 
           {/* Stats Row */}
-          <div className="flex items-center justify-center gap-8 sm:gap-14 pt-3">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex items-center justify-center gap-8 sm:gap-14 pt-3"
+          >
             {[
               { value: '500+', label: 'Modelos Verificadas' },
               { value: '4K', label: 'Ultra HD & Audio' },
               { value: '100%', label: 'Discreción Blindada' },
               { value: '24/7', label: 'Concierge Directo' },
             ].map(({ value, label }) => (
-              <div key={label} className="flex flex-col items-center gap-1 group">
-                <span className="font-serif text-2xl sm:text-4xl font-bold text-brand-gold leading-none group-hover:scale-110 transition-transform">{value}</span>
+              <motion.div 
+                key={label} 
+                whileHover={{ scale: 1.1, y: -2 }}
+                className="flex flex-col items-center gap-1 group cursor-default transition-all"
+              >
+                <span className="font-serif text-2xl sm:text-4xl font-bold text-brand-gold leading-none">{value}</span>
                 <span className="text-[8px] sm:text-[9px] uppercase font-black tracking-widest text-white/40">{label}</span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="pt-3">
-            <a
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="pt-3"
+          >
+            <motion.a
               href="#collection"
-              className="px-9 py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black font-black text-[10px] uppercase tracking-[0.25em] transition-all transform hover:scale-105 inline-flex items-center gap-2.5 shadow-[0_10px_35px_rgba(212,168,67,0.35)]"
+              whileHover={{ scale: 1.05, boxShadow: "0 15px 45px rgba(212,168,67,0.5)" }}
+              whileTap={{ scale: 0.97 }}
+              className="px-9 py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black font-black text-[10px] uppercase tracking-[0.25em] transition-all inline-flex items-center gap-2.5 shadow-[0_10px_35px_rgba(212,168,67,0.35)] cursor-pointer"
             >
               <span>Explorar Catálogo 4K</span>
               <span aria-hidden="true" className="animate-bounce">↓</span>
-            </a>
-          </div>
-        </div>
+            </motion.a>
+          </motion.div>
+        </motion.div>
 
         {/* ── SEARCH BAR ── */}
         <div className="max-w-4xl mx-auto">

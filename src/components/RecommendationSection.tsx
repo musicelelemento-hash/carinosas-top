@@ -16,6 +16,7 @@ import {
   Crown,
   Compass
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface NearbyModel {
   id: string;
@@ -169,10 +170,15 @@ export default function RecommendationSection() {
 
         {/* ── RADAR CARDS GRID ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredModels.map((model) => (
-            <div 
+          {filteredModels.map((model, idx) => (
+            <motion.div 
               key={model.id}
-              className="group glass-obsidian rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 p-5 shadow-2xl transition-all duration-500 hover:-translate-y-1.5 relative flex flex-col justify-between"
+              initial={{ opacity: 0, y: 35 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              whileHover={{ y: -8 }}
+              className="group glass-obsidian rounded-[2.5rem] border border-white/10 hover:border-brand-gold/40 p-5 shadow-2xl transition-colors duration-500 relative flex flex-col justify-between"
             >
               {/* Image Container */}
               <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-5">
@@ -236,20 +242,21 @@ export default function RecommendationSection() {
               <div className="flex items-center gap-2 pt-1">
                 <Link
                   href="/profile/valentina"
-                  className="flex-1 py-3 rounded-xl glass-dark border border-white/10 hover:border-brand-gold/40 text-center text-[9px] font-black uppercase tracking-widest text-white/80 hover:text-white transition-all"
+                  className="flex-1 py-3 rounded-xl glass-dark border border-white/10 hover:border-brand-gold/40 text-center text-[9px] font-black uppercase tracking-widest text-white/80 hover:text-white transition-all active:scale-95"
                 >
                   Ver Perfil 4K
                 </Link>
 
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => handleQuickContact(model)}
-                  className="flex-1 py-3 rounded-xl bg-brand-gold hover:bg-white text-brand-black text-[9px] font-black uppercase tracking-widest transition-all shadow-[0_4px_20px_rgba(212,168,67,0.3)] flex items-center justify-center gap-1.5"
+                  className="flex-1 py-3 rounded-xl bg-brand-gold hover:bg-white text-brand-black text-[9px] font-black uppercase tracking-widest transition-all shadow-[0_4px_20px_rgba(212,168,67,0.3)] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <MessageCircle size={13} fill="currentColor" />
                   Agendar Cita
-                </button>
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

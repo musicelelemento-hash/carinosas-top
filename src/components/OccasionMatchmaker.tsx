@@ -11,6 +11,7 @@ import {
   Check, 
   ArrowRight 
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export interface OccasionCategory {
   id: string;
@@ -86,7 +87,13 @@ export default function OccasionMatchmaker({
   };
 
   return (
-    <div className="space-y-4 max-w-[1700px] mx-auto px-4 md:px-12 my-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 25 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.6 }}
+      className="space-y-4 max-w-[1700px] mx-auto px-4 md:px-12 my-8"
+    >
       
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
@@ -109,17 +116,23 @@ export default function OccasionMatchmaker({
 
       {/* 5 Cards Carousel / Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {OCCASIONS.map((occ) => {
+        {OCCASIONS.map((occ, idx) => {
           const isCurrent = selected === occ.tagKeyword;
           return (
-            <button
+            <motion.button
               key={occ.id}
               type="button"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: idx * 0.08 }}
+              whileHover={{ scale: 1.03, y: -4 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => handleSelect(occ)}
-              className={`p-5 rounded-3xl border text-left transition-all duration-300 relative overflow-hidden group ${
+              className={`p-5 rounded-3xl border text-left transition-colors duration-300 relative overflow-hidden group cursor-pointer ${
                 isCurrent
-                  ? "border-brand-gold bg-brand-gold/20 shadow-[0_0_35px_rgba(212,168,67,0.35)] scale-[1.03]"
-                  : "border-brand-gold/20 glass-obsidian hover:border-brand-gold/50 hover:scale-[1.01]"
+                  ? "border-brand-gold bg-brand-gold/20 shadow-[0_0_35px_rgba(212,168,67,0.35)]"
+                  : "border-brand-gold/20 glass-obsidian hover:border-brand-gold/50"
               }`}
             >
               {/* Subtle background glow */}
@@ -149,11 +162,11 @@ export default function OccasionMatchmaker({
                   {occ.tagline}
                 </p>
               </div>
-            </button>
+            </motion.button>
           );
         })}
       </div>
 
-    </div>
+    </motion.div>
   );
 }

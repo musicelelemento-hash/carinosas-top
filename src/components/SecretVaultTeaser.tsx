@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Lock, Sparkles, Key, Crown, ShieldAlert, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import VIPCheckoutModal from "./VIPCheckoutModal";
 
 interface VaultItem {
@@ -49,35 +50,44 @@ const SAMPLE_VAULT_ITEMS: VaultItem[] = [
     title: "Paseo Privado en Yate Punta Pacífica",
     previewImageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800",
     viewsCount: 289,
-    badge: "Ultra Exclusivo"
+    badge: "VIP Platino"
   },
   {
     id: "vault-4",
-    modelName: "Fiorella",
-    city: "Lima",
-    country: "🇵🇪 Perú",
+    modelName: "Camila",
+    city: "Guayaquil",
+    country: "🇪🇨 Ecuador",
     itemType: "backstage",
-    title: "Backstage Suite San Isidro 4K",
+    title: "Detrás de Cámaras Fashion Week 4K",
     previewImageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
-    viewsCount: 415,
-    badge: "Bóveda Secreta"
+    viewsCount: 610,
+    badge: "Exclusivo VIP"
   }
 ];
 
 export default function SecretVaultTeaser() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [selectedVaultItem, setSelectedVaultItem] = useState<VaultItem | null>(null);
+  const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
 
   const handleUnlock = (item: VaultItem) => {
-    setSelectedVaultItem(item);
+    setSelectedVault(item);
     setIsCheckoutOpen(true);
   };
 
   return (
-    <section id="boveda-vip" className="py-20 px-4 md:px-12 max-w-[1700px] mx-auto">
+    <section className="py-20 px-6 max-w-7xl mx-auto relative overflow-hidden">
       
-      {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
+      {/* Background Accent Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-brand-gold/5 rounded-full blur-[140px] pointer-events-none -z-10" />
+
+      {/* Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.6 }}
+        className="text-center max-w-3xl mx-auto space-y-3 mb-12"
+      >
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-[10px] font-black uppercase tracking-[0.3em]">
           <Lock size={12} />
           <span>Acceso Restringido · Pase Alpha</span>
@@ -90,15 +100,20 @@ export default function SecretVaultTeaser() {
         <p className="text-xs md:text-sm text-white/50 leading-relaxed font-light">
           Contenido íntimo y exclusivo reservado únicamente para caballeros con Membresía VIP Alpha verificada.
         </p>
-      </div>
+      </motion.div>
 
       {/* Grid of Frosted Vault Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {SAMPLE_VAULT_ITEMS.map((item) => (
-          <div
+        {SAMPLE_VAULT_ITEMS.map((item, idx) => (
+          <motion.div
             key={item.id}
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: idx * 0.1 }}
+            whileHover={{ y: -8, scale: 1.02 }}
             onClick={() => handleUnlock(item)}
-            className="group relative rounded-3xl overflow-hidden glass-obsidian border border-brand-gold/25 aspect-[3/4] cursor-pointer shadow-2xl transition-all duration-500 hover:border-brand-gold hover:scale-[1.02]"
+            className="group relative rounded-3xl overflow-hidden glass-obsidian border border-brand-gold/25 aspect-[3/4] cursor-pointer shadow-2xl transition-colors duration-500 hover:border-brand-gold"
           >
             {/* Background Image with Liquid Glass Blur */}
             <Image
@@ -154,7 +169,7 @@ export default function SecretVaultTeaser() {
                 <Sparkles size={11} /> 4K Nativo
               </span>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 

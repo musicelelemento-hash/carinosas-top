@@ -20,6 +20,7 @@ import {
   Lock,
   ArrowUpRight
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ClassifiedAd {
   id: string;
@@ -172,14 +173,19 @@ export default function LiveClassifiedsFeed() {
 
       {/* Grid of Dopamine Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {ads.map((ad) => {
+        {ads.map((ad, idx) => {
           const isLiked = likedIds.has(ad.id);
           const isPlaying = playingAudioId === ad.id;
 
           return (
-            <div
+            <motion.div
               key={ad.id}
-              className="glass-obsidian border border-brand-gold/25 hover:border-brand-gold rounded-[2.5rem] overflow-hidden p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col justify-between space-y-4 group hover:scale-[1.02] transition-all duration-500 relative"
+              initial={{ opacity: 0, y: 35 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
+              whileHover={{ y: -8 }}
+              className="glass-obsidian border border-brand-gold/25 hover:border-brand-gold rounded-[2.5rem] overflow-hidden p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col justify-between space-y-4 group transition-colors duration-500 relative"
             >
               {/* Subtle Gold Aura Accent */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
@@ -253,7 +259,7 @@ export default function LiveClassifiedsFeed() {
                   <button
                     type="button"
                     onClick={() => toggleAudio(ad.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all active:scale-95 ${
                       isPlaying
                         ? "bg-brand-gold text-brand-black shadow-[0_0_15px_rgba(212,168,67,0.5)]"
                         : "glass-dark border border-brand-gold/30 text-brand-gold hover:bg-brand-gold/15"
@@ -281,7 +287,7 @@ export default function LiveClassifiedsFeed() {
                 <button
                   type="button"
                   onClick={() => handleLike(ad.id)}
-                  className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors ml-auto ${
+                  className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full transition-transform active:scale-125 ml-auto ${
                     isLiked ? "text-rose-400" : "text-white/40 hover:text-white"
                   }`}
                 >
@@ -291,7 +297,9 @@ export default function LiveClassifiedsFeed() {
               </div>
 
               {/* Luxury Champagne Gold Contact Button */}
-              <a
+              <motion.a
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 href={`https://wa.me/${ad.whatsapp}?text=${encodeURIComponent(`Hola ${ad.name}, vi tu clasificado exprés en Cariñosas.top (${ad.sector}, ${ad.city}). Deseo consultar tu disponibilidad hoy.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -299,9 +307,9 @@ export default function LiveClassifiedsFeed() {
               >
                 <MessageCircle size={15} fill="currentColor" className="group-hover/btn:scale-110 transition-transform" />
                 <span>Contactar en WhatsApp</span>
-              </a>
+              </motion.a>
 
-            </div>
+            </motion.div>
           );
         })}
       </div>

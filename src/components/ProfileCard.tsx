@@ -5,6 +5,7 @@ import Image from "next/image";
 import { MessageCircle, Star, ShieldCheck, Zap, Heart, Crown, Diamond, Fingerprint, Eye, Volume2, VolumeX, MapPin, Radio } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface ProfileCardProps {
   id?: string;
@@ -146,8 +147,9 @@ export default function ProfileCard({
         />
       )}
 
-      <div
+      <motion.div
         ref={cardRef}
+        whileTap={{ scale: 0.98 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => router.push(`/profile/${id}`)}
@@ -397,7 +399,7 @@ export default function ProfileCard({
             <span className="body-sm font-bold italic text-brand-gold">&lt; 5 min</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <WhatsAppTransition
         modelName={name}
