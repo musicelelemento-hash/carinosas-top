@@ -89,10 +89,14 @@ export async function sendPhoneOtpAction(
     const channelName = channel === 'whatsapp_otp' ? 'WhatsApp' : 'SMS';
     console.log(`[OTP Engine] Code ${generatedOtp} sent to ${cleanPhone} via ${channelName}`);
 
+    const whatsAppMessage = encodeURIComponent(`Hola Cariñosas.top, mi código de verificación de seguridad es: ${generatedOtp}`);
+    const whatsAppLink = `https://wa.me/593987654321?text=${whatsAppMessage}`;
+
     return {
       success: true,
-      message: `Código de seguridad enviado por ${channelName} a ${cleanPhone}`,
-      debugOtp: process.env.NODE_ENV === 'development' ? generatedOtp : undefined
+      message: `Código de seguridad generado por ${channelName} para ${cleanPhone}`,
+      debugOtp: generatedOtp,
+      whatsAppLink
     };
   } catch (err) {
     console.error("sendPhoneOtpAction error:", err);

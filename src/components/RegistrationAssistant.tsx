@@ -230,7 +230,7 @@ export default function RegistrationAssistant() {
     setStep(3); // Go to photos & audio
   };
 
-  const handleRegister = async () => {
+  const handleRegister = async (forceProceed = false) => {
     let createdUserId: string | undefined;
 
     // 1. Account Mode Validation & User Creation
@@ -263,7 +263,7 @@ export default function RegistrationAssistant() {
     }
 
     // 2. Express Mode Validation (Phone OTP Gate)
-    if (registrationMode === "express" && !isPhoneVerified) {
+    if (registrationMode === "express" && !isPhoneVerified && !forceProceed) {
       setIsPhoneModalOpen(true);
       return;
     }
@@ -286,7 +286,7 @@ export default function RegistrationAssistant() {
         ageConfirmed,
         age: Number(age) || 22,
         country_code: selectedCountry.id,
-        is_phone_verified: isPhoneVerified,
+        is_phone_verified: isPhoneVerified || forceProceed,
         user_id: createdUserId,
         voice_greeting_url: audioUrl || undefined,
         hourly_rate: Number(hourlyRate) || 120
@@ -611,10 +611,34 @@ export default function RegistrationAssistant() {
                   <input type="number" min="18" max="45" value={age} onChange={(e) => setAge(Number(e.target.value))} className="w-full glass-dark border border-white/15 rounded-2xl px-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" placeholder="23" />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-white/50 mb-2 uppercase tracking-wider font-bold">WhatsApp ({selectedCountry.dialCode})</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-[10px] text-white/50 uppercase tracking-wider font-bold">WhatsApp ({selectedCountry.dialCode})</label>
+                    {isPhoneVerified ? (
+                      <span className="text-[9px] text-emerald-400 font-black uppercase flex items-center gap-1">
+                        <CheckCircle2 size={11} /> Verificado
+                      </span>
+                    ) : whatsapp.length >= 8 ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsPhoneModalOpen(true)}
+                        className="text-[9px] text-brand-gold font-black uppercase tracking-wider hover:underline flex items-center gap-1"
+                      >
+                        <Zap size={10} className="fill-current" /> Validar Ahora
+                      </button>
+                    ) : null}
+                  </div>
                   <div className="relative">
                     <span className="absolute left-4 top-3.5 text-xs text-brand-gold font-bold">{selectedCountry.dialCode}</span>
-                    <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="w-full glass-dark border border-white/15 rounded-2xl pl-16 pr-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" placeholder="991234567" />
+                    <input 
+                      type="text" 
+                      value={whatsapp} 
+                      onChange={(e) => { 
+                        setWhatsapp(e.target.value); 
+                        setIsPhoneVerified(false); 
+                      }} 
+                      className="w-full glass-dark border border-white/15 rounded-2xl pl-16 pr-4 py-3.5 text-white outline-none focus:border-brand-gold text-sm" 
+                      placeholder="991234567" 
+                    />
                   </div>
                 </div>
               </div>
@@ -1007,6 +1031,10 @@ export default function RegistrationAssistant() {
         onClose={() => setIsPhoneModalOpen(false)}
         onSuccess={() => {
           setIsPhoneVerified(true);
+          setIsPhoneModalOpen(false);
+          if (step === 4) {
+            handleRegister(true);
+          }
         }}
       />
     </div>
