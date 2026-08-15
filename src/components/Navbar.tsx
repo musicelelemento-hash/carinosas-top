@@ -103,7 +103,7 @@ export default function Navbar({ onChangeLocation }: NavbarProps) {
               {/* Join as Model CTA */}
               <Link
                 href="/registro"
-                className="relative group overflow-hidden px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-[0_4px_20px_rgba(212,168,67,0.35)] bg-brand-gold text-brand-black hover:bg-white flex items-center gap-2"
+                className="relative group overflow-hidden px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-[0_4px_25px_rgba(212,168,67,0.4)] bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black hover:brightness-110 flex items-center gap-2"
               >
                 <Diamond size={12} className="fill-current" />
                 <span>Únete a la Élite</span>

@@ -23,6 +23,7 @@ import SecretVaultTeaser from "@/components/SecretVaultTeaser";
 import OccasionMatchmaker from "@/components/OccasionMatchmaker";
 import LiveActivityToast from "@/components/LiveActivityToast";
 import LiveClassifiedsFeed from "@/components/LiveClassifiedsFeed";
+import GoldParticles from "@/components/GoldParticles";
 import { Sliders } from "lucide-react";
 
 interface HomePageModel {
@@ -79,7 +80,10 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <LocationGateway onEnter={handleEnter} />
       )}
 
-      <main className="min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden">
+      <main className="min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden relative">
+        {/* Ambient Interactive Gold Dust Canvas */}
+        <GoldParticles />
+
         <Navbar onChangeLocation={resetLocation} />
 
         <LiveCountBanner />

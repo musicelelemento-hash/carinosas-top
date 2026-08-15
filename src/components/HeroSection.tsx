@@ -56,58 +56,62 @@ export default function HeroSection() {
 
         {/* Live Status Badge */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-obsidian border border-brand-gold/30 shadow-[0_0_25px_rgba(212,168,67,0.2)]">
-            <Gem size={13} className="text-brand-gold animate-pulse" />
+          <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_0_35px_rgba(212,168,67,0.25)] pulse-gold-aura">
+            <Gem size={14} className="text-brand-gold animate-pulse" />
             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-gold">
-              Directorio de Lujo en Ecuador
+              Directorio de Lujo · Círculo Élite
             </span>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest">En Vivo</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">En Vivo</span>
           </div>
         </div>
 
         {/* ── TITLE ── */}
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+          
+          {/* Subtle Ambient Light behind text */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-brand-gold/10 rounded-full blur-[90px] pointer-events-none -z-10" />
+
           <h1 className="font-serif font-bold leading-[0.88] tracking-[-0.02em] select-none">
-            <span className="block text-5xl sm:text-8xl lg:text-[10rem] bg-gradient-to-b from-white via-white/90 to-white/60 bg-clip-text text-transparent">
+            <span className="block text-5xl sm:text-8xl lg:text-[9.5rem] bg-gradient-to-b from-white via-white/90 to-white/60 bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)]">
               CARIÑOSAS
             </span>
-            <span className="block text-5xl sm:text-8xl lg:text-[10rem] italic bg-gradient-to-r from-[#F5E0A0] via-[#D4A843] to-[#F5E0A0] bg-clip-text text-transparent drop-shadow-[0_0_50px_rgba(212,168,67,0.35)]">
+            <span className="block text-5xl sm:text-8xl lg:text-[9.5rem] italic text-gold-shimmer drop-shadow-[0_0_60px_rgba(212,168,67,0.5)]">
               .TOP
             </span>
           </h1>
 
           {/* Subtitle */}
           <div className="flex flex-col items-center gap-4 max-w-xl mx-auto">
-            <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
-            <p className="text-xs sm:text-sm text-white/70 uppercase tracking-[0.3em] font-medium">
+            <div className="w-28 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
+            <p className="text-xs sm:text-sm text-white/80 uppercase tracking-[0.3em] font-medium">
               El Máximo Círculo de Acompañamiento VIP & Modelos 4K
             </p>
-            <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
+            <div className="w-28 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
           </div>
 
           {/* Stats Row */}
-          <div className="flex items-center justify-center gap-8 sm:gap-14 pt-2">
+          <div className="flex items-center justify-center gap-8 sm:gap-14 pt-3">
             {[
               { value: '500+', label: 'Modelos Verificadas' },
               { value: '4K', label: 'Ultra HD & Audio' },
               { value: '100%', label: 'Discreción Blindada' },
               { value: '24/7', label: 'Concierge Directo' },
             ].map(({ value, label }) => (
-              <div key={label} className="flex flex-col items-center gap-1">
-                <span className="font-serif text-2xl sm:text-4xl font-bold text-brand-gold leading-none">{value}</span>
+              <div key={label} className="flex flex-col items-center gap-1 group">
+                <span className="font-serif text-2xl sm:text-4xl font-bold text-brand-gold leading-none group-hover:scale-110 transition-transform">{value}</span>
                 <span className="text-[8px] sm:text-[9px] uppercase font-black tracking-widest text-white/40">{label}</span>
               </div>
             ))}
           </div>
 
-          <div className="pt-2">
+          <div className="pt-3">
             <a
-              href="#catalog"
-              className="px-8 py-4 rounded-2xl bg-brand-gold hover:bg-white text-brand-black font-black text-[10px] uppercase tracking-[0.25em] transition-all transform hover:scale-105 inline-flex items-center gap-2 shadow-[0_10px_30px_rgba(212,168,67,0.3)]"
+              href="#collection"
+              className="px-9 py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black font-black text-[10px] uppercase tracking-[0.25em] transition-all transform hover:scale-105 inline-flex items-center gap-2.5 shadow-[0_10px_35px_rgba(212,168,67,0.35)]"
             >
               <span>Explorar Catálogo 4K</span>
-              <span aria-hidden="true">↓</span>
+              <span aria-hidden="true" className="animate-bounce">↓</span>
             </a>
           </div>
         </div>

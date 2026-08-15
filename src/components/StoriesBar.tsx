@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import StoryModal from "./StoryModal";
 import MobileReelsFeed from "./MobileReelsFeed";
-import { Flame } from "lucide-react";
+import { Flame, Sparkles } from "lucide-react";
 
 const STORIES = [
   { 
@@ -74,96 +74,92 @@ export default function StoriesBar() {
   const [isReelsOpen, setIsReelsOpen] = useState(false);
 
   return (
-    <section className="w-full relative overflow-hidden"
-      style={{
-        background: 'rgba(10,10,14,0.7)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
-      }}
-    >
-      {/* Top border gradient */}
-      <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.1), transparent)' }} />
+    <section className="w-full relative overflow-hidden bg-[#0A0A0F]/80 backdrop-blur-2xl border-b border-brand-gold/15">
+      {/* Top Hairline Gold Glow */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-gold/30 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-5">
+        <div className="flex items-center gap-5 overflow-x-auto no-scrollbar py-4">
 
           {/* LIVE badge & Reels Trigger */}
           <button
+            type="button"
             onClick={() => setIsReelsOpen(true)}
-            className="flex-shrink-0 flex flex-col items-center gap-2 mr-2 group outline-none cursor-pointer"
+            className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none cursor-pointer"
           >
-            <div className="relative w-[60px] h-[60px] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform"
-              style={{ border: '1.5px dashed rgba(232,0,90,0.45)', background: 'rgba(232,0,90,0.1)' }}
-            >
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand-pink shadow-[0_0_8px_rgba(232,0,90,0.8)] live-dot" />
+            <div className="relative w-[68px] h-[68px] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 border-2 border-dashed border-brand-pink/60 bg-brand-pink/10 shadow-[0_0_15px_rgba(255,0,98,0.2)]">
+              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-brand-pink border-2 border-black pulse-crimson" />
               <div className="text-center">
-                <Flame size={14} className="text-brand-pink fill-brand-pink mx-auto mb-0.5 animate-pulse" />
-                <span className="text-[8px] text-white font-black uppercase tracking-wider block">REELS 4K</span>
+                <Flame size={18} className="text-brand-pink fill-brand-pink mx-auto mb-0.5 animate-pulse" />
+                <span className="text-[7px] text-white font-black uppercase tracking-wider block">REELS 4K</span>
               </div>
             </div>
-            <span className="label-xs text-brand-pink font-bold group-hover:text-white transition-colors">🔥 Ver Reels</span>
+            <span className="text-[10px] text-brand-pink font-bold group-hover:text-white uppercase tracking-wider transition-colors">
+              🔥 Ver Reels
+            </span>
           </button>
 
           {/* Vertical divider */}
-          <div className="flex-shrink-0 h-12 w-[1px]" style={{ background: 'rgba(255,255,255,0.05)' }} />
+          <div className="flex-shrink-0 h-12 w-[1px] bg-white/10" />
 
-          {/* Stories */}
-          {STORIES.map((story, i) => (
+          {/* Model Stories with Beveled Rotating Gold Bezel */}
+          {STORIES.map((model) => (
             <button
-              key={story.id}
-              onClick={() => setActiveStory(story)}
-              className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none"
-              style={{ animationDelay: `${i * 60}ms`, animation: 'fadeInUp 0.5s ease forwards', opacity: 0 }}
+              key={model.id}
+              type="button"
+              onClick={() => setActiveStory(model)}
+              className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none cursor-pointer relative"
             >
-              {/* Ring container */}
-              <div className="relative w-[66px] h-[66px] rounded-full flex items-center justify-center">
-                {/* Spinning gradient ring */}
-                <div className="absolute inset-0 rounded-full overflow-hidden">
-                  <div className="absolute inset-[-50%] animate-gradient-spin"
-                    style={{
-                      background: 'conic-gradient(from 0deg, #C9A84C, #F5E0A0, #E8005A, #C9A84C)',
-                      opacity: 0.8,
-                    }}
-                  />
-                </div>
-                {/* Inner black ring */}
-                <div className="absolute inset-[2.5px] rounded-full z-10"
-                  style={{ background: '#060608' }}
-                />
-                {/* Photo */}
-                <div className="absolute inset-[5px] rounded-full overflow-hidden z-20 group-hover:scale-105 transition-transform duration-500">
+              {/* Rotating Bezel container */}
+              <div className="relative w-[68px] h-[68px] rounded-full p-[2px] bg-gradient-to-tr from-[#D4A843] via-[#FFE088] to-[#9A7830] group-hover:scale-105 transition-transform duration-300 shadow-[0_0_15px_rgba(212,168,67,0.25)] group-hover:shadow-[0_0_25px_rgba(212,168,67,0.5)]">
+                
+                {/* Inner Black Gap */}
+                <div className="w-full h-full rounded-full p-[2px] bg-[#08080C] overflow-hidden relative">
                   <Image
-                    src={story.avatar}
-                    alt={story.name}
+                    src={model.avatar}
+                    alt={model.name}
                     fill
-                    className="object-cover transition-all duration-700 grayscale group-hover:grayscale-0 group-hover:scale-110"
+                    sizes="68px"
+                    className="object-cover rounded-full group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                   />
                 </div>
-                {/* Hover glow */}
-                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ boxShadow: '0 0 20px rgba(201,168,76,0.3), inset 0 0 20px rgba(201,168,76,0.05)' }}
-                />
+
+                {/* Soundwave badge for audio preview */}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-black/90 border border-brand-gold/40 text-[7px] text-brand-gold font-bold flex items-center gap-0.5 shadow-md">
+                  <span className="w-0.5 h-1.5 bg-brand-gold rounded-full animate-pulse" />
+                  <span className="w-0.5 h-2.5 bg-brand-gold rounded-full animate-pulse delay-75" />
+                  <span className="w-0.5 h-1.5 bg-brand-gold rounded-full animate-pulse delay-150" />
+                </div>
+
+                {/* Live Neon Crimson Dot */}
+                <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-black animate-pulse" />
               </div>
 
-              {/* Name */}
-              <span className="text-[10px] text-white/60 font-bold uppercase tracking-[0.25em] group-hover:text-brand-gold transition-colors duration-300">
-                {story.name}
-              </span>
-              {/* City */}
-              <span className="text-[9px] text-white/30 font-bold uppercase tracking-[0.2em] group-hover:text-white/50 transition-colors">
-                {story.city}
-              </span>
+              {/* Name & City */}
+              <div className="text-center">
+                <span className="text-[11px] text-white/90 group-hover:text-brand-gold font-medium block leading-tight transition-colors">
+                  {model.name}
+                </span>
+                <span className="text-[8px] text-brand-gold/70 uppercase tracking-widest font-black block mt-0.5">
+                  {model.city}
+                </span>
+              </div>
             </button>
           ))}
+
         </div>
       </div>
 
-      <StoryModal
-        isOpen={!!activeStory}
-        onClose={() => setActiveStory(null)}
-        story={activeStory}
-      />
+      {/* Story Viewer Modal */}
+      {activeStory && (
+        <StoryModal
+          isOpen={Boolean(activeStory)}
+          story={activeStory}
+          onClose={() => setActiveStory(null)}
+        />
+      )}
 
+      {/* Full-Screen 4K Reels Feed Modal */}
       <MobileReelsFeed
         isOpen={isReelsOpen}
         onClose={() => setIsReelsOpen(false)}

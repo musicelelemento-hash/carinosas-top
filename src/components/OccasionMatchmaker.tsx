@@ -116,29 +116,32 @@ export default function OccasionMatchmaker({
               key={occ.id}
               type="button"
               onClick={() => handleSelect(occ)}
-              className={`p-4 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group ${
+              className={`p-5 rounded-3xl border text-left transition-all duration-300 relative overflow-hidden group ${
                 isCurrent
-                  ? "border-brand-gold bg-brand-gold/15 shadow-[0_0_30px_rgba(212,168,67,0.3)] scale-[1.02]"
-                  : "border-white/10 glass-dark hover:border-brand-gold/40 hover:bg-white/5"
+                  ? "border-brand-gold bg-brand-gold/20 shadow-[0_0_35px_rgba(212,168,67,0.35)] scale-[1.03]"
+                  : "border-brand-gold/20 glass-obsidian hover:border-brand-gold/50 hover:scale-[1.01]"
               }`}
             >
+              {/* Subtle background glow */}
+              <div className="absolute top-0 right-0 w-20 h-20 bg-brand-gold/5 rounded-full blur-xl pointer-events-none" />
+
               {/* Top Icon */}
-              <div className="flex items-center justify-between mb-2.5">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                  isCurrent ? "bg-brand-gold text-brand-black" : "bg-white/5 text-brand-gold group-hover:text-white"
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  isCurrent ? "bg-brand-gold text-brand-black shadow-lg" : "glass-dark border border-brand-gold/30 text-brand-gold group-hover:bg-brand-gold/15"
                 }`}>
                   {occ.icon}
                 </div>
 
                 {isCurrent && (
-                  <span className="w-5 h-5 rounded-full bg-brand-gold text-brand-black flex items-center justify-center text-xs">
+                  <span className="w-5 h-5 rounded-full bg-brand-gold text-brand-black flex items-center justify-center text-xs shadow-md">
                     <Check size={12} />
                   </span>
                 )}
               </div>
 
               {/* Text */}
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 <h4 className="text-xs font-serif font-bold text-white group-hover:text-brand-gold transition-colors leading-snug">
                   {occ.name}
                 </h4>

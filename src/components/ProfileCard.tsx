@@ -353,13 +353,13 @@ export default function ProfileCard({
 
         {/* ── ACTION BAR ── */}
         <div className={`px-5 py-4 flex items-center justify-between transition-all duration-500 card-action-bar ${isHovered ? 'opacity-100' : 'opacity-90'}`}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={e => { e.stopPropagation(); handleContact(); }}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] transition-all duration-300 hover:scale-[1.04] active:scale-95 pointer-events-auto ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-300 hover:scale-[1.04] active:scale-95 pointer-events-auto shadow-lg ${
                 isFree
                   ? 'btn-ghost'
-                  : 'btn-gold'
+                  : 'bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black shadow-[0_4px_20px_rgba(212,168,67,0.35)] hover:brightness-110'
               }`}
             >
               <MessageCircle size={14} fill="currentColor" />
