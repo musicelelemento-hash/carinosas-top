@@ -252,7 +252,7 @@ export default function HeroSection() {
                 {/* Search button */}
                 <div className="p-3 flex items-stretch">
                   <a
-                    href="#catalog"
+                    href="#collection"
                     className="flex items-center gap-3 px-10 py-4 rounded-2xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-widest w-full md:w-auto justify-center transition-all shadow-lg shadow-brand-gold/20"
                   >
                     <Search size={16} strokeWidth={2.5} />
@@ -274,7 +274,7 @@ export default function HeroSection() {
             ].map(({ label, city }) => (
               <a
                 key={label}
-                href="#catalog"
+                href="#collection"
                 className="flex items-center gap-2 px-4 py-2 rounded-full glass-obsidian border border-white/10 hover:border-brand-gold/50 text-[9px] text-white/60 hover:text-brand-gold font-bold uppercase tracking-wider transition-all"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse" />

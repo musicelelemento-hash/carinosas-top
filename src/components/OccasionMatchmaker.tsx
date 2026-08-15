@@ -76,6 +76,10 @@ export default function OccasionMatchmaker({
 }: OccasionMatchmakerProps) {
   const [selected, setSelected] = useState<string | null>(activeOccasion || null);
 
+  React.useEffect(() => {
+    setSelected(activeOccasion || null);
+  }, [activeOccasion]);
+
   const handleSelect = (occ: OccasionCategory) => {
     if (selected === occ.tagKeyword) {
       setSelected(null);
