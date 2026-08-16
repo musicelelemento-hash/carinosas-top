@@ -12,6 +12,7 @@ import {
   Flame, 
   Lock 
 } from "lucide-react";
+import { sound } from "@/lib/soundEngine";
 
 interface FilterValues {
   maxRate?: number;
@@ -61,6 +62,7 @@ export default function MobileFiltersSheet({
   const categories = ["Todas", "Cena VIP", "Hotel 5★", "Masaje Relax", "Viajes & Giras", "Universitaria"];
 
   const handleApply = () => {
+    sound.playGoldChime();
     if (onApplyFilters) {
       onApplyFilters({
         maxRate,

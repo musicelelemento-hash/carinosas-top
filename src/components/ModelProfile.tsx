@@ -36,6 +36,7 @@ import Link from "next/link";
 import VIPRatings from "@/components/VIPRatings";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+import { sound } from "@/lib/soundEngine";
 
 // Swiper styles
 import "swiper/css";
@@ -87,7 +88,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
   // Voice player progress interval
   useEffect(() => {
-    let interval: any;
+    let interval: NodeJS.Timeout | number | undefined;
     if (isPlayingVoice) {
       interval = setInterval(() => {
         setVoiceProgress((prev) => {
@@ -101,7 +102,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
     } else if (voiceProgress >= 100) {
       setVoiceProgress(0);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isPlayingVoice, voiceProgress]);
 
   const toggleVoiceAudio = () => {
@@ -110,6 +113,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
     }
 
     if (!isPlayingVoice) {
+      sound.playVoiceGreeting(7.5);
       setIsPlayingVoice(true);
     } else {
       setIsPlayingVoice(false);
@@ -118,6 +122,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
   const handleLike = () => {
     if (!isLiked) {
+      sound.playGoldChime();
       setIsLiked(true);
       setLikesCount(prev => prev + 1);
       try {
@@ -129,12 +134,14 @@ export default function ModelProfile({ model }: ModelProfileProps) {
         });
       } catch {}
     } else {
+      sound.playSubtleClick();
       setIsLiked(false);
       setLikesCount(prev => prev - 1);
     }
   };
 
   const handleShare = () => {
+    sound.playSubtleClick();
     if (typeof window !== "undefined") {
       navigator.clipboard?.writeText(window.location.href);
       setCopiedLink(true);

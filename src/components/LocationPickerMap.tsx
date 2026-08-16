@@ -5,7 +5,7 @@ import { MapPin, Navigation, Target, RefreshCw } from "lucide-react";
 
 // ── All react-leaflet imports are STATIC here (this file is client-only via "use client")
 // ── We guard rendering with an `isClient` check, so SSR never executes Leaflet code.
-import type { MapContainerProps, TileLayerProps, MarkerProps } from "react-leaflet";
+import type * as ReactLeaflet from "react-leaflet";
 import type L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -22,7 +22,7 @@ interface LocationPickerMapProps {
 // ---------------------------------------------------------------------------
 interface MapClickHandlerProps {
   onMapClick: (lat: number, lng: number) => void;
-  useMapEvents: (events: Record<string, (e: L.LeafletMouseEvent) => void>) => void;
+  useMapEvents: typeof ReactLeaflet.useMapEvents;
 }
 
 function MapClickHandler({ onMapClick, useMapEvents }: MapClickHandlerProps) {
@@ -46,10 +46,10 @@ export default function LocationPickerMap({
   const [isClient, setIsClient] = useState(false);
   const [LeafletLib, setLeafletLib] = useState<typeof L | null>(null);
   const [MapComponents, setMapComponents] = useState<{
-    MapContainer: React.ComponentType<any>;
-    TileLayer: React.ComponentType<any>;
-    Marker: React.ComponentType<any>;
-    useMapEvents: any;
+    MapContainer: typeof ReactLeaflet.MapContainer;
+    TileLayer: typeof ReactLeaflet.TileLayer;
+    Marker: typeof ReactLeaflet.Marker;
+    useMapEvents: typeof ReactLeaflet.useMapEvents;
   } | null>(null);
   const [reversedAddress, setReversedAddress] = useState("");
   const [isGeocoding, setIsGeocoding] = useState(false);

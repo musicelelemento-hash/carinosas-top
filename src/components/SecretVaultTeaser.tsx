@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Lock, Sparkles, Key, Crown, ShieldAlert, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import VIPCheckoutModal from "./VIPCheckoutModal";
+import { sound } from "@/lib/soundEngine";
 
 interface VaultItem {
   id: string;
@@ -70,6 +71,7 @@ export default function SecretVaultTeaser() {
   const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
 
   const handleUnlock = (item: VaultItem) => {
+    sound.playIrisAperture();
     setSelectedVault(item);
     setIsCheckoutOpen(true);
   };

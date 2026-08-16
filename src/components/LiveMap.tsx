@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import LiveMapAnimator from "./LiveMapAnimator";
+import { sound } from "@/lib/soundEngine";
 
 // Dynamic imports for leaflet (SSR-safe)
 const MapContainer = dynamic(
@@ -127,6 +128,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
   ];
 
   const handleCitySelect = (cityKey: string) => {
+    sound.playSonarPing();
     setSelectedCity(cityKey);
     const city = cityPresets[cityKey];
     if (city) {
@@ -136,6 +138,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
   };
 
   const handleModelSelect = (model: MapModel) => {
+    sound.playSubtleClick();
     setSelectedModel(model);
     if (model.lat && model.lng) {
       const coords: [number, number] = [model.lat, model.lng];

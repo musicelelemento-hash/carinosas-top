@@ -12,6 +12,7 @@ import {
   ArrowRight 
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { sound } from "@/lib/soundEngine";
 
 export interface OccasionCategory {
   id: string;
@@ -81,6 +82,7 @@ export default function OccasionMatchmaker({
   }, [activeOccasion]);
 
   const handleSelect = (occ: OccasionCategory) => {
+    sound.playSubtleClick();
     if (selected === occ.tagKeyword) {
       setSelected(null);
       onSelectOccasion(null);

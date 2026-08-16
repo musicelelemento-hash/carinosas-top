@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame, Globe, Crown } from "lucide-react";
+import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame, Globe, Crown, Volume2, VolumeX } from "lucide-react";
 import AuthModal from "./AuthModal";
 import LiveCountBanner from "./LiveCountBanner";
 import type { Country } from "@/lib/countries";
+import { sound } from "@/lib/soundEngine";
 
 interface NavbarProps {
   currentCountry?: Country;
@@ -16,12 +17,19 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    setIsMuted(sound.getMuted());
   }, []);
+
+  const handleToggleSound = () => {
+    const nextMute = sound.toggleMute();
+    setIsMuted(nextMute);
+    if (!nextMute) {
+      sound.playGoldChime();
+    }
+  };
 
   return (
     <>
@@ -80,6 +88,15 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
 
             {/* RIGHT: Actions */}
             <div className="flex items-center gap-3 md:gap-5">
+
+              {/* Sound Toggle Button */}
+              <button
+                onClick={handleToggleSound}
+                className="w-9 h-9 rounded-full glass-obsidian border border-white/10 flex items-center justify-center text-brand-gold hover:border-brand-gold/50 transition-all hover:scale-105 active:scale-95 shadow-sm"
+                title={isMuted ? "Activar audio de lujo" : "Silenciar efectos"}
+              >
+                {isMuted ? <VolumeX size={14} className="text-white/40" /> : <Volume2 size={14} className="text-brand-gold animate-pulse" />}
+              </button>
 
               {/* Change Location / Country */}
               {onChangeLocation && (

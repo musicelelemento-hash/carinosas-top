@@ -6,6 +6,7 @@ import { MessageCircle, Star, ShieldCheck, Zap, Heart, Crown, Diamond, Fingerpri
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { sound } from "@/lib/soundEngine";
 
 interface ProfileCardProps {
   id?: string;
@@ -122,6 +123,7 @@ export default function ProfileCard({
   }, [isAnimating]);
 
   const handleContact = () => {
+    sound.playGoldChime();
     setIsTransitioning(true);
     if (whatsapp) {
       const phone = whatsapp.replace(/\D/g, '');
@@ -184,7 +186,11 @@ export default function ProfileCard({
         {/* ── Action Buttons ── */}
         <div className="absolute top-4 right-4 z-40 flex flex-col gap-2 transition-all duration-500 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100">
           <button
-            onClick={e => { e.stopPropagation(); setIsLiked(!isLiked); }}
+            onClick={e => {
+              e.stopPropagation();
+              sound.playSubtleClick();
+              setIsLiked(!isLiked);
+            }}
             className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
               background: isLiked ? 'rgba(255,0,98,0.25)' : 'rgba(0,0,0,0.6)',
@@ -373,7 +379,13 @@ export default function ProfileCard({
             <button
               onClick={e => {
                 e.stopPropagation();
-                setIsPlayingAudio(!isPlayingAudio);
+                if (!isPlayingAudio) {
+                  sound.playVoiceGreeting(3);
+                  setIsPlayingAudio(true);
+                  setTimeout(() => setIsPlayingAudio(false), 3000);
+                } else {
+                  setIsPlayingAudio(false);
+                }
               }}
               title="Escuchar audio de voz"
               className={`p-3 rounded-xl border transition-all duration-300 active:scale-95 flex items-center justify-center pointer-events-auto ${
