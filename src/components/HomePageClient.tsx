@@ -161,15 +161,32 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           activeTag={activeTag}
           onSelectTag={handleSelectTag}
           onSelectLocation={(locName) => {
-            if (!locName) {
+            if (!locName || locName === "Todas las Ciudades") {
               setDisplayModels(initialModels);
             } else {
-              const clean = locName.split(" ")[0].toLowerCase();
-              const filtered = initialModels.filter(m => 
+              const clean = locName.toLowerCase().trim();
+              const matched = initialModels.filter(m => 
                 m.location.toLowerCase().includes(clean) || 
-                (m.sector && m.sector.toLowerCase().includes(clean))
+                (m.sector && m.sector.toLowerCase().includes(clean)) ||
+                m.name.toLowerCase().includes(clean) ||
+                (m.tags && m.tags.some(t => t.toLowerCase().includes(clean))) ||
+                (m.description && m.description.toLowerCase().includes(clean))
               );
-              setDisplayModels(filtered.length > 0 ? filtered : initialModels);
+
+              if (matched.length > 0) {
+                setDisplayModels(matched);
+              } else {
+                // If it's a canton in El Oro (like Pasaje or Santa Rosa), fallback to Machala / El Oro models
+                if (["pasaje", "santa rosa", "puerto bolívar", "huaquillas", "arenillas"].some(c => clean.includes(c))) {
+                  const elOroModels = initialModels.filter(m => 
+                    m.location.toLowerCase().includes("machala") || 
+                    (m.sector && m.sector.toLowerCase().includes("puerto"))
+                  );
+                  setDisplayModels(elOroModels.length > 0 ? elOroModels : initialModels);
+                } else {
+                  setDisplayModels(initialModels);
+                }
+              }
             }
           }}
         />

@@ -1008,19 +1008,31 @@ export function useLocationGateway() {
     provinceId: string | null;
     cantonId: string | null;
     cantonName: string | null;
-  } | null>(null);
+  }>({
+    countryId: "ecuador",
+    provinceId: "el-oro",
+    cantonId: "machala",
+    cantonName: "Machala",
+  });
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         setLocation(JSON.parse(saved));
-        setShowGateway(false);
       } else {
-        setShowGateway(true);
+        const defaultLoc = {
+          countryId: "ecuador",
+          provinceId: "el-oro",
+          cantonId: "machala",
+          cantonName: "Machala",
+        };
+        setLocation(defaultLoc);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultLoc));
       }
+      setShowGateway(false);
     } catch {
-      setShowGateway(true);
+      setShowGateway(false);
     }
   }, []);
 
@@ -1028,14 +1040,18 @@ export function useLocationGateway() {
     (loc: { countryId: string; provinceId: string | null; cantonId: string | null; cantonName: string | null }) => {
       setLocation(loc);
       setShowGateway(false);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(loc));
     },
     []
   );
 
   const resetLocation = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setLocation(null);
-    setShowGateway(true);
+    setShowGateway(false);
+    // Smooth scroll to search bar instead of blocking popup
+    const searchEl = document.getElementById("search-box-hero");
+    if (searchEl) {
+      searchEl.scrollIntoView({ behavior: "smooth" });
+    }
   }, []);
 
   return { showGateway, location, handleEnter, resetLocation };
