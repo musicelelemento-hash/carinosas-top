@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame, Globe } from "lucide-react";
+import { User, Sparkles, MapPin, Diamond, Bot, ShieldCheck, Flame, Globe, Crown } from "lucide-react";
 import AuthModal from "./AuthModal";
 import LiveCountBanner from "./LiveCountBanner";
 import type { Country } from "@/lib/countries";
@@ -64,15 +64,16 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
             {/* CENTER: Navigation Links */}
             <div className="hidden lg:flex items-center gap-2">
               {[
-                { href: '/#clasificados-express', icon: <Flame size={13} className="text-emerald-400 fill-current animate-pulse" />, label: 'Clasificados' },
-                { href: '/#mapa', icon: <MapPin size={13} />, label: 'Radar GPS' },
-                { href: '/#collection', icon: <Sparkles size={13} />, label: 'Catálogo 4K' },
+                { href: '/radar', icon: <MapPin size={13} />, label: 'Geo-Radar' },
+                { href: '/concierge', icon: <Bot size={13} className="text-brand-gold" />, label: 'Concierge VIP' },
+                { href: '/boveda-secreta', icon: <Diamond size={13} className="text-brand-gold" />, label: 'Bóveda 4K' },
+                { href: '/#collection', icon: <Sparkles size={13} />, label: 'Catálogo' },
               ].map(({ href, icon, label }) => (
                 <Link key={href} href={href}
-                  className="group flex items-center gap-2 px-4 py-2 rounded-full text-[10px] text-white/60 hover:text-white font-black uppercase tracking-[0.2em] transition-all glass-obsidian border border-transparent hover:border-brand-gold/30"
+                  className="group flex items-center gap-2 px-4 py-2 rounded-full text-[10px] text-white/70 hover:text-white font-black uppercase tracking-[0.2em] transition-all glass-obsidian border border-transparent hover:border-brand-gold/40 shadow-sm"
                 >
                   <span className="text-brand-gold group-hover:scale-110 transition-transform">{icon}</span>
-                  {label}
+                  <span>{label}</span>
                 </Link>
               ))}
             </div>
@@ -93,22 +94,13 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
                 </button>
               )}
 
-              {/* Account / Login Trigger */}
-              <button
-                onClick={() => setIsAuthOpen(true)}
-                className="hidden sm:flex items-center gap-2 text-[10px] text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-all px-3 py-1.5 rounded-full glass-dark border border-white/10"
-              >
-                <User size={13} className="text-brand-gold" />
-                <span>Mi Cuenta</span>
-              </button>
-
-              {/* Join as Model CTA */}
+              {/* Publish Ad CTA */}
               <Link
-                href="/registro"
+                href="/publicar-anuncio"
                 className="relative group overflow-hidden px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-[0_4px_25px_rgba(212,168,67,0.4)] bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black hover:brightness-110 flex items-center gap-2"
               >
                 <Diamond size={12} className="fill-current" />
-                <span>Únete a la Élite</span>
+                <span>Publicar Anuncio VIP</span>
               </Link>
 
               {/* Mobile Hamburger */}
@@ -125,26 +117,29 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
         </div>
 
         {/* Mobile menu dropdown */}
-        <div className={`lg:hidden transition-all duration-500 overflow-hidden ${menuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={`lg:hidden transition-all duration-500 overflow-hidden ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="glass-obsidian border-t border-brand-gold/20 px-8 py-6 space-y-4 shadow-2xl">
-            <button 
-              onClick={() => { setMenuOpen(false); setIsAuthOpen(true); }} 
-              className="w-full text-left flex items-center gap-3 text-xs text-brand-gold uppercase tracking-widest font-bold transition-colors"
-            >
-              <User size={14} className="text-brand-gold" /> Mi Cuenta / Iniciar Sesión
-            </button>
-            <Link href="/#mapa" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
-              <MapPin size={14} className="text-brand-gold" /> Radar GPS en Vivo
+            <Link href="/radar" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-brand-gold uppercase tracking-widest font-bold transition-colors">
+              <MapPin size={14} className="text-brand-gold" /> Geo-Radar GPS en Vivo
+            </Link>
+            <Link href="/concierge" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/80 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
+              <Bot size={14} className="text-brand-gold" /> Concierge VIP 24/7
+            </Link>
+            <Link href="/boveda-secreta" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/80 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
+              <Diamond size={14} className="text-brand-gold" /> Bóveda Secreta 4K
+            </Link>
+            <Link href="/publicar-anuncio" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-brand-gold uppercase tracking-widest font-bold transition-colors">
+              <Crown size={14} className="text-brand-gold" /> Publicar Anuncio VIP
             </Link>
             <Link href="/#collection" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
-              <Sparkles size={14} className="text-brand-gold" /> Catálogo 4K
+              <Sparkles size={14} className="text-brand-gold" /> Catálogo General
             </Link>
-            <Link href="/panel-modelo" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-brand-pink hover:text-white uppercase tracking-widest font-bold transition-colors">
-              <Sparkles size={14} className="text-brand-pink" /> Panel de la Modelo (Studio)
-            </Link>
-            <Link href="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
-              <ShieldCheck size={14} className="text-brand-gold" /> Panel de Administración
-            </Link>
+            <button 
+              onClick={() => { setMenuOpen(false); setIsAuthOpen(true); }} 
+              className="w-full text-left flex items-center gap-3 text-xs text-white/50 hover:text-white uppercase tracking-widest font-bold transition-colors pt-2 border-t border-white/5"
+            >
+              <User size={14} /> Iniciar Sesión / Mi Cuenta
+            </button>
           </div>
         </div>
       </nav>
