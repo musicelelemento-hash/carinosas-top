@@ -27,8 +27,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Cariñosas.top | Directorio VIP & Acompañantes Élite en Ecuador",
-  description: "El estándar de oro en discreción y exclusividad. Perfiles 4K verificados, notas de voz auténticas y reservas directas en Quito, Guayaquil, Cuenca y Manta.",
+  title: {
+    default: "Cariñosas.top | Directorio VIP & Acompañantes Élite en Ecuador e Internacional",
+    template: "%s | Cariñosas.top Elite"
+  },
+  description: "El estándar de oro en discreción, sofisticación y exclusividad. Perfiles 4K verificados biométricamente, notas de voz auténticas y reservas directas en Quito, Guayaquil, Cuenca, Medellín, Lima, Panamá y Miami.",
   keywords: [
     "Cariñosas Ecuador", 
     "Acompañantes VIP Quito", 
@@ -36,19 +39,42 @@ export const metadata: Metadata = {
     "Escorts Samborondón", 
     "Cumbayá VIP", 
     "Modelos 4K Ecuador", 
-    "Directorio de Lujo"
+    "Directorio de Lujo",
+    "Modelos Medellín VIP",
+    "Acompañantes Lima Miraflores",
+    "Escorts Ciudad de Panamá",
+    "Modelos Polanco CDMX",
+    "Acompañantes Miami VIP"
   ],
-  authors: [{ name: "Cariñosas.top Elite" }],
+  authors: [{ name: "Cariñosas.top Obsidian Elite" }],
   creator: "Cariñosas.top",
   publisher: "Cariñosas.top",
   manifest: "/manifest.json",
   metadataBase: new URL("https://carinosas.top"),
   alternates: {
     canonical: "https://carinosas.top",
+    languages: {
+      "es-EC": "https://carinosas.top",
+      "es-CO": "https://carinosas.top?country=colombia",
+      "es-PE": "https://carinosas.top?country=peru",
+      "es-PA": "https://carinosas.top?country=panama",
+      "es-MX": "https://carinosas.top?country=mexico",
+      "es-ES": "https://carinosas.top?country=espana",
+      "es-US": "https://carinosas.top?country=usa",
+      "x-default": "https://carinosas.top",
+    },
+  },
+  other: {
+    "geo.region": "EC",
+    "geo.placename": "Quito, Guayaquil, Cuenca, Samborondón",
+    "geo.position": "-0.180653;-78.467834",
+    "ICBM": "-0.180653, -78.467834",
+    "rating": "adult",
+    "content-language": "es",
   },
   openGraph: {
-    title: "Cariñosas.top | Experiencias de Alto Nivel en Ecuador",
-    description: "Perfiles 4K verificados con total discreción y encriptación de grado militar en Quito, Guayaquil y Cuenca.",
+    title: "Cariñosas.top | Experiencias de Alto Nivel & Modelos VIP 4K",
+    description: "Perfiles 4K verificados con total discreción y encriptación de grado militar en Quito, Guayaquil, Cuenca y destinos internacionales.",
     url: "https://carinosas.top",
     siteName: "Cariñosas.top",
     images: [
@@ -64,8 +90,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cariñosas.top | Acompañantes VIP en Ecuador",
-    description: "Directorio selecto 4K en Quito, Guayaquil y Cuenca. Máxima privacidad.",
+    title: "Cariñosas.top | Directorio Selecto VIP 4K",
+    description: "Modelos 4K verificadas con notas de voz y total privacidad en Ecuador e Internacional.",
     images: ["/og-luxury.png"],
   },
   appleWebApp: {
@@ -101,8 +127,8 @@ export default function RootLayout({
         "@id": "https://carinosas.top/#website",
         "url": "https://carinosas.top",
         "name": "Cariñosas.top",
-        "description": "Directorio Élite de Modelos y Acompañantes VIP en Ecuador",
-        "inLanguage": "es-EC",
+        "description": "Directorio Élite de Modelos y Acompañantes VIP en Ecuador e Internacional",
+        "inLanguage": "es",
         "potentialAction": {
           "@type": "SearchAction",
           "target": "https://carinosas.top/?q={search_term_string}",
@@ -114,13 +140,31 @@ export default function RootLayout({
         "@id": "https://carinosas.top/#organization",
         "name": "Cariñosas.top Elite",
         "url": "https://carinosas.top",
-        "logo": "https://carinosas.top/og-luxury.png"
+        "logo": "https://carinosas.top/og-luxury.png",
+        "sameAs": [
+          "https://t.me/carinosas_top",
+          "https://twitter.com/carinosas_top"
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://carinosas.top/#directory",
+        "name": "Directorio de Ciudades Élite",
+        "itemListElement": [
+          { "@type": "SiteNavigationElement", "position": 1, "name": "Quito VIP", "url": "https://carinosas.top/?city=Quito" },
+          { "@type": "SiteNavigationElement", "position": 2, "name": "Guayaquil VIP", "url": "https://carinosas.top/?city=Guayaquil" },
+          { "@type": "SiteNavigationElement", "position": 3, "name": "Cuenca VIP", "url": "https://carinosas.top/?city=Cuenca" },
+          { "@type": "SiteNavigationElement", "position": 4, "name": "Samborondón VIP", "url": "https://carinosas.top/?city=Samborondón" },
+          { "@type": "SiteNavigationElement", "position": 5, "name": "Medellín VIP", "url": "https://carinosas.top/?country=colombia&city=Medellín" },
+          { "@type": "SiteNavigationElement", "position": 6, "name": "Lima VIP", "url": "https://carinosas.top/?country=peru&city=Lima" },
+          { "@type": "SiteNavigationElement", "position": 7, "name": "Ciudad de Panamá VIP", "url": "https://carinosas.top/?country=panama&city=Panamá" }
+        ]
       }
     ]
   };
 
   return (
-    <html lang="es-EC" className="dark" suppressHydrationWarning>
+    <html lang="es" className="dark" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

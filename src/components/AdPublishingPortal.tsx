@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 interface PlanTier {
   id: string;
@@ -551,6 +552,12 @@ export default function AdPublishingPortal() {
                   <strong>Garantía de Activación en 5 Minutos:</strong> Una vez confirmado el pago, tu perfil se destacará en la posición #1 de tu ciudad de forma inmediata.
                 </span>
               </div>
+
+              {/* Bot Protection with Cloudflare Turnstile */}
+              <TurnstileWidget 
+                theme="dark" 
+                onSuccess={(token) => console.log("Turnstile validado:", token.substring(0, 10) + "...")} 
+              />
 
             </div>
 

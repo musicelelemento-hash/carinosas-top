@@ -37,9 +37,6 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
   useEffect(() => {
     if (isOpen && story) {
       document.body.style.overflow = "hidden";
-      setCurrentSegment(0);
-      setReactionEffect(null);
-      setMessage("");
 
       // Record live story view metric in database
       if (story.id && !story.id.startsWith("fallback")) {

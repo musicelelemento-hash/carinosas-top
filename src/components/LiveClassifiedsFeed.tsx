@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -269,16 +269,19 @@ interface LiveClassifiedsFeedProps {
 export default function LiveClassifiedsFeed({ currentCountry }: LiveClassifiedsFeedProps = {}) {
   const activeCountry = currentCountry || getCountryById("ecuador");
   const [filterMode, setFilterMode] = useState<"country" | "all">("country");
+  const [isPending, startTransition] = useTransition();
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
 
-  // Filter ads according to active country tab
-  const filteredAds = SAMPLE_CLASSIFIEDS.filter((ad) => {
-    if (filterMode === "country") {
-      return ad.countryId === activeCountry.id || ad.country === activeCountry.flag;
-    }
-    return true;
-  });
+  // Memoized filter for 60fps performance on mobile
+  const filteredAds = useMemo(() => {
+    return SAMPLE_CLASSIFIEDS.filter((ad) => {
+      if (filterMode === "country") {
+        return ad.countryId === activeCountry.id || ad.country === activeCountry.flag;
+      }
+      return true;
+    });
+  }, [filterMode, activeCountry.id, activeCountry.flag]);
 
   const adsToDisplay = filteredAds.length > 0 ? filteredAds : SAMPLE_CLASSIFIEDS;
 
@@ -328,7 +331,8 @@ export default function LiveClassifiedsFeed({ currentCountry }: LiveClassifiedsF
           {/* Country vs Global Toggle Pills */}
           <div className="flex items-center gap-2 pt-2">
             <button
-              onClick={() => setFilterMode("country")}
+              onClick={() => startTransition(() => setFilterMode("country"))}
+              aria-label={`Filtrar clasificados en ${activeCountry.name}`}
               className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border ${
                 filterMode === "country"
                   ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_15px_rgba(212,168,67,0.3)]"
@@ -338,7 +342,8 @@ export default function LiveClassifiedsFeed({ currentCountry }: LiveClassifiedsF
               {activeCountry.flag} En {activeCountry.name} ({SAMPLE_CLASSIFIEDS.filter(a => a.countryId === activeCountry.id || a.country === activeCountry.flag).length})
             </button>
             <button
-              onClick={() => setFilterMode("all")}
+              onClick={() => startTransition(() => setFilterMode("all"))}
+              aria-label="Ver todos los clasificados internacionales"
               className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border ${
                 filterMode === "all"
                   ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_15px_rgba(212,168,67,0.3)]"
