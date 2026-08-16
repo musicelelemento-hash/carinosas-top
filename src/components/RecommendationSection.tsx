@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { type Country, getCountryById } from "@/lib/countries";
+import { sound } from "@/lib/soundEngine";
 
 interface NearbyModel {
   id: string;
@@ -176,6 +177,7 @@ export default function RecommendationSection({ currentCountry }: Recommendation
   });
 
   const handleQuickContact = (model: NearbyModel) => {
+    sound.playGoldChime();
     const text = encodeURIComponent(`Hola ${model.name}, te vi en el Radar de Proximidad de Cariñosas.top (${activeCountry.name} - Sector: ${model.sector}). Me gustaría consultar tu disponibilidad para una cita.`);
     const cleanDial = activeCountry.dialCode.replace("+", "");
     window.open(`https://wa.me/${cleanDial}987654321?text=${text}`, "_blank");
@@ -211,24 +213,33 @@ export default function RecommendationSection({ currentCountry }: Recommendation
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex p-1 rounded-xl glass-obsidian border border-white/10">
               <button
-                onClick={() => setSelectedRadius('2km')}
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                onClick={() => {
+                  sound.playSubtleClick();
+                  setSelectedRadius('2km');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                   selectedRadius === '2km' ? 'bg-brand-gold text-brand-black shadow-md' : 'text-white/40 hover:text-white'
                 }`}
               >
                 &lt; 2 km
               </button>
               <button
-                onClick={() => setSelectedRadius('5km')}
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                onClick={() => {
+                  sound.playSubtleClick();
+                  setSelectedRadius('5km');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                   selectedRadius === '5km' ? 'bg-brand-gold text-brand-black shadow-md' : 'text-white/40 hover:text-white'
                 }`}
               >
                 &lt; 5 km
               </button>
               <button
-                onClick={() => setSelectedRadius('all')}
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                onClick={() => {
+                  sound.playSubtleClick();
+                  setSelectedRadius('all');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                   selectedRadius === 'all' ? 'bg-brand-gold text-brand-black shadow-md' : 'text-white/40 hover:text-white'
                 }`}
               >
@@ -240,8 +251,11 @@ export default function RecommendationSection({ currentCountry }: Recommendation
               {availableCities.map(city => (
                 <button
                   key={city}
-                  onClick={() => setSelectedCity(city)}
-                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                  onClick={() => {
+                    sound.playSubtleClick();
+                    setSelectedCity(city);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                     selectedCity === city ? 'bg-brand-pink text-white shadow-md' : 'text-white/40 hover:text-white'
                   }`}
                 >
