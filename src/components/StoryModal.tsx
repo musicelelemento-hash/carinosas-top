@@ -5,6 +5,7 @@ import Image from "next/image";
 import { X, Heart, Send, MessageCircle, Sparkles, Volume2, ShieldCheck, Flame, Wine, Gem } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementStoryViewAction } from "@/app/actions/stories";
+import { sound } from "@/lib/soundEngine";
 
 export interface StoryData {
   id: string;
@@ -63,11 +64,13 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
   if (!isOpen || !story) return null;
 
   const triggerReaction = (emoji: string) => {
+    sound.playGoldChime();
     setReactionEffect(emoji);
     setTimeout(() => setReactionEffect(null), 1200);
   };
 
   const handleWhatsAppDirect = () => {
+    sound.playGoldChime();
     const rawPhone = story.whatsapp || "593987654321";
     const cleanPhone = rawPhone.replace(/\D/g, "");
     const fullPhone = cleanPhone.startsWith("593") ? cleanPhone : `593${cleanPhone.replace(/^0/, "")}`;

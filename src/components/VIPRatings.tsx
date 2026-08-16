@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Star, ShieldCheck, Crown, Award, ChevronRight, Sparkles, MessageCircle, CheckCircle2, Lock } from "lucide-react";
 import { getVIPReviewsAction, type VIPReviewItem } from "@/app/actions/reviews";
+import { sound } from "@/lib/soundEngine";
 
 interface Rating {
   id: string;
@@ -79,6 +80,7 @@ export default function VIPRatings() {
   }, []);
 
   const handleUpgradeTier = (tierName: string) => {
+    sound.playGoldChime();
     const text = encodeURIComponent(`Hola Concierge de Cariñosas.top, deseo solicitar la subida de mi membresía al rango ${tierName}.`);
     window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
   };
@@ -106,7 +108,10 @@ export default function VIPRatings() {
           {TIERS.map((tier, idx) => (
             <button
               key={tier.name}
-              onClick={() => setActiveTierIndex(idx)}
+              onClick={() => {
+                sound.playSubtleClick();
+                setActiveTierIndex(idx);
+              }}
               className={`p-4 rounded-2xl border text-left transition-all relative ${
                 activeTierIndex === idx
                   ? 'border-brand-gold bg-brand-gold/15 shadow-[0_0_20px_rgba(212,168,67,0.3)]'

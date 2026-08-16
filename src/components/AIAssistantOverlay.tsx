@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Sparkles, X, Send, Loader2, MessageCircle, ShieldCheck, Zap, Bot, Star, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { sound } from "@/lib/soundEngine";
 
 interface AssistantModel {
   id: string;
@@ -71,6 +72,7 @@ export default function AIAssistantOverlay() {
       });
 
       const data = await response.json();
+      sound.playGoldChime();
       setMessages(prev => [...prev, { role: "assistant", content: data.reply, models: data.models }]);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "Disculpa, hubo una interrupción con el satélite de concierge. ¿Podrías reintentar tu búsqueda?" }]);
@@ -86,6 +88,7 @@ export default function AIAssistantOverlay() {
   };
 
   const handleWhatsAppConcierge = () => {
+    sound.playGoldChime();
     const text = encodeURIComponent("Hola Concierge VIP de Cariñosas.top, deseo asistencia personalizada para una reserva exclusiva.");
     window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
   };
@@ -93,7 +96,10 @@ export default function AIAssistantOverlay() {
   if (!isOpen) {
     return (
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          sound.playSubtleClick();
+          setIsOpen(true);
+        }}
         className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-[100] group flex items-center gap-3 bg-brand-gold text-brand-black px-5 sm:px-6 py-3.5 sm:py-4 rounded-full font-black text-[10px] uppercase tracking-[0.25em] shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-105 active:scale-95 transition-all duration-500 border border-white/20"
       >
         <div className="relative">

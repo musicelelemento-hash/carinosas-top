@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Sparkles, ShieldCheck, Crown, Flame, MapPin, X } from "lucide-react";
+import { sound } from "@/lib/soundEngine";
 
 interface ActivityItem {
   id: string;
