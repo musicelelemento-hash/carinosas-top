@@ -18,9 +18,13 @@ import {
   UserCheck,
   Zap
 } from "lucide-react";
-
+import dynamic from "next/dynamic";
 import VIPCheckoutModal from "@/components/VIPCheckoutModal";
-import VIP3DToken from "@/components/VIP3DToken";
+
+const VIP3DToken = dynamic(() => import("@/components/VIP3DToken"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function VIPLounge() {
   const [activeTab, setActiveTab] = useState<'gentleman' | 'muse'>('gentleman');

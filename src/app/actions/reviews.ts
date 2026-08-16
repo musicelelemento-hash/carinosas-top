@@ -86,16 +86,25 @@ export async function submitVIPReviewAction(reviewData: {
       isVerified = true;
     }
 
+    // Sanitize user inputs against XSS and excessive payloads
+    const cleanComment = reviewData.comment.replace(/<[^>]*>?/gm, "").trim().slice(0, 1000);
+    const cleanAlias = (reviewData.author_alias || "Caballero VIP").replace(/<[^>]*>?/gm, "").trim().slice(0, 50);
+    const cleanCity = (reviewData.city || "Quito").replace(/<[^>]*>?/gm, "").trim().slice(0, 50);
+
+    if (cleanComment.length < 5) {
+      return { success: false, error: "El comentario debe tener al menos 5 caracteres válidos." };
+    }
+
     const { error } = await supabaseAdmin
       .from("vip_reviews")
       .insert([
         {
           model_id: reviewData.model_id,
-          author_alias: (reviewData.author_alias || "Caballero VIP").trim(),
+          author_alias: cleanAlias,
           tier_badge: assignedBadge,
-          rating: reviewData.rating,
-          comment: reviewData.comment.trim(),
-          city: (reviewData.city || "Quito").trim(),
+          rating: Math.min(5, Math.max(1, reviewData.rating)),
+          comment: cleanComment,
+          city: cleanCity,
           is_verified_booking: isVerified
         }
       ]);

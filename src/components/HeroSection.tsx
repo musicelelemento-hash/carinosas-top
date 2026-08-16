@@ -15,7 +15,12 @@ import {
   Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Hero3DCanvas from "./Hero3DCanvas";
+import dynamic from "next/dynamic";
+
+const Hero3DCanvas = dynamic(() => import("./Hero3DCanvas"), {
+  ssr: false,
+  loading: () => null,
+});
 
 interface HeroSectionProps {
   currentCountry?: Country;
