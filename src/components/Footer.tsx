@@ -1,10 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShieldCheck, Lock, Gem, MapPin, Sparkles, Heart } from "lucide-react";
+import { ShieldCheck, Lock, Gem, MapPin, Sparkles, Heart, Volume2, VolumeX } from "lucide-react";
+import { sound } from "@/lib/soundEngine";
 
 export default function Footer() {
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    setIsMuted(sound.getMuted());
+  }, []);
+
+  const handleToggleSound = () => {
+    const nextMuted = sound.toggleMute();
+    setIsMuted(nextMuted);
+    if (!nextMuted) {
+      sound.playGoldChime();
+    }
+  };
+
   const cities = [
     'Quito Norte', 'Cumbayá VIP', 'Guayaquil', 'Samborondón', 'Cuenca', 
     'Manta 5★', 'Salinas', 'Ambato', 'Loja', 'Machala', 'Santo Domingo', 
@@ -125,7 +140,20 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="flex items-center gap-6 text-[10px] text-white/40 uppercase tracking-widest font-black">
+          <div className="flex flex-wrap items-center gap-5 text-[10px] text-white/40 uppercase tracking-widest font-black">
+            <button
+              onClick={handleToggleSound}
+              title={isMuted ? "Activar Sonido VIP" : "Silenciar Sonido"}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                isMuted
+                  ? "bg-white/5 border-white/10 text-white/40 hover:text-white"
+                  : "bg-brand-gold/15 border-brand-gold/40 text-brand-gold hover:bg-brand-gold/25"
+              }`}
+            >
+              {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              <span className="text-[9px]">{isMuted ? "Sonido: Mute" : "Sonido: HD"}</span>
+            </button>
+
             <Link href="/registro" className="hover:text-brand-gold transition-colors">Registro de Modelos</Link>
             <Link href="/admin" className="hover:text-brand-gold transition-colors">Administración</Link>
             <a href="https://wa.me/593987654321" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte VIP</a>
