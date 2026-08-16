@@ -5,7 +5,7 @@ import Image from "next/image";
 import { MessageCircle, Star, ShieldCheck, Zap, Heart, Crown, Diamond, Fingerprint, Eye, Volume2, VolumeX, MapPin, Radio } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { sound } from "@/lib/soundEngine";
 
 interface ProfileCardProps {
@@ -40,6 +40,32 @@ export default function ProfileCard({
   const [progress, setProgress] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+
+  // 3D Motion Physics for multi-plane depth
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseXSpring = useSpring(x, { stiffness: 260, damping: 22 });
+  const mouseYSpring = useSpring(y, { stiffness: 260, damping: 22 });
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["9deg", "-9deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-9deg", "9deg"]);
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    x.set(mouseX / width - 0.5);
+    y.set(mouseY / height - 0.5);
+  };
+
+  const handleCardMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+    setIsHovered(false);
+  };
 
   const isFree = useMemo(() =>
     !plan_type || plan_type === 'Gratis' || plan_type === 'Anuncio Gratis' || plan_type === 'Básico'
@@ -138,10 +164,10 @@ export default function ProfileCard({
   };
 
   return (
-    <div className="relative group">
+    <div className="relative group" style={{ perspective: 1200 }}>
       {/* Glow layer for boosted */}
       {isBoosted && (
-        <div className="absolute -inset-[1px] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+        <div className="absolute -inset-[1px] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
           style={{
             background: 'linear-gradient(135deg, rgba(212,168,67,0.6), rgba(212,168,67,0.12), rgba(212,168,67,0.6))',
             filter: 'blur(8px)',
@@ -152,19 +178,22 @@ export default function ProfileCard({
       <motion.div
         ref={cardRef}
         whileTap={{ scale: 0.98 }}
+        onMouseMove={handleCardMouseMove}
         onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseLeave={handleCardMouseLeave}
         onClick={() => router.push(`/profile/${id}`)}
         className={`relative group cursor-pointer rounded-[2rem] overflow-hidden border card-premium ${
           isBoosted ? 'boost-pulse border-brand-gold/25' : 'border-white/8'
         } ${isHovered ? 'border-brand-gold/40' : ''}`}
         style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
           background: 'rgba(14,14,20,0.97)',
           boxShadow: isHovered
-            ? '0 30px 80px rgba(0,0,0,0.65), 0 0 60px rgba(212,168,67,0.08)'
+            ? '0 30px 80px rgba(0,0,0,0.75), 0 0 60px rgba(212,168,67,0.15)'
             : '0 8px 30px rgba(0,0,0,0.45)',
-          transform: isHovered ? 'translateY(-8px) scale(1.012)' : 'translateY(0) scale(1)',
-          transition: 'transform 0.6s cubic-bezier(0.23,1,0.32,1), box-shadow 0.6s ease, border-color 0.4s ease',
+          transition: 'box-shadow 0.4s ease, border-color 0.4s ease',
         }}
       >
         {/* ── Story Progress Bars ── */}
@@ -184,7 +213,10 @@ export default function ProfileCard({
         </div>
 
         {/* ── Action Buttons ── */}
-        <div className="absolute top-4 right-4 z-40 flex flex-col gap-2 transition-all duration-500 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100">
+        <div 
+          className="absolute top-4 right-4 z-40 flex flex-col gap-2 transition-all duration-500 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+          style={{ transform: "translateZ(40px)" }}
+        >
           <button
             onClick={e => {
               e.stopPropagation();
@@ -215,7 +247,13 @@ export default function ProfileCard({
         {/* ── Tier Badge ── */}
         {tierConfig && (
           <div className="absolute top-10 left-4 z-30 tier-badge"
-            style={{ background: tierConfig.bg, border: `1px solid ${tierConfig.border}`, backdropFilter: 'blur(12px)', color: tierConfig.color }}
+            style={{ 
+              transform: "translateZ(35px)",
+              background: tierConfig.bg, 
+              border: `1px solid ${tierConfig.border}`, 
+              backdropFilter: 'blur(12px)', 
+              color: tierConfig.color 
+            }}
           >
             <tierConfig.Icon size={10} style={{ fill: tierConfig.color }} />
             <span>{tierConfig.label}</span>
@@ -361,7 +399,10 @@ export default function ProfileCard({
         </div>
 
         {/* ── ACTION BAR ── */}
-        <div className={`px-5 py-4 flex items-center justify-between transition-all duration-500 card-action-bar ${isHovered ? 'opacity-100' : 'opacity-90'}`}>
+        <div 
+          className={`px-5 py-4 flex items-center justify-between transition-all duration-500 card-action-bar ${isHovered ? 'opacity-100' : 'opacity-90'}`}
+          style={{ transform: "translateZ(45px)" }}
+        >
           <div className="flex items-center gap-2.5">
             <button
               onClick={e => { e.stopPropagation(); handleContact(); }}

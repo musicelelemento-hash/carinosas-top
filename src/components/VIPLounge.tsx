@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import VIPCheckoutModal from "@/components/VIPCheckoutModal";
+import VIP3DToken from "@/components/VIP3DToken";
 
 export default function VIPLounge() {
   const [activeTab, setActiveTab] = useState<'gentleman' | 'muse'>('gentleman');
@@ -179,6 +180,11 @@ export default function VIPLounge() {
           {/* RIGHT: 3D Holographic Digital Member Pass (Gentleman / Muse) */}
           <div className="relative flex flex-col items-center justify-center">
             
+            {/* 3D Physical Floating Token */}
+            <div className="w-28 h-28 sm:w-36 sm:h-36 -mb-6 z-20 pointer-events-none drop-shadow-[0_10px_25px_rgba(212,168,67,0.4)]">
+              <VIP3DToken />
+            </div>
+
             {/* Ambient slow spinning ring */}
             <div className="absolute -inset-8 rounded-full border border-brand-gold/15 animate-spin-slow pointer-events-none" />
 

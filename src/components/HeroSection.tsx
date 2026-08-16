@@ -15,6 +15,7 @@ import {
   Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Hero3DCanvas from "./Hero3DCanvas";
 
 interface HeroSectionProps {
   currentCountry?: Country;
@@ -121,7 +122,12 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
       <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] -z-10 pointer-events-none rounded-full bg-brand-gold/5 blur-[100px]" />
       <div className="absolute bottom-[10%] right-[5%] w-[350px] h-[350px] -z-10 pointer-events-none rounded-full bg-brand-pink/5 blur-[100px]" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full text-center z-10 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full text-center z-10 space-y-6 relative">
+
+        {/* ── 3D FLOATING WEBGL CRYSTAL & PARTICLES ── */}
+        <div className="absolute left-1/2 top-[-20px] -translate-x-1/2 pointer-events-none opacity-40 sm:opacity-60 -z-10 w-full flex justify-center">
+          <Hero3DCanvas />
+        </div>
 
         {/* ── TOP BADGE & LOGO ── */}
         <div className="flex flex-col items-center gap-2.5">
