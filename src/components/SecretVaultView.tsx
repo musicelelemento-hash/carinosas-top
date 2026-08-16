@@ -18,9 +18,11 @@ import {
   ArrowLeft,
   Flame,
   KeyRound,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { sound } from "@/lib/soundEngine";
 
 const VAULT_ITEMS = [
   {
@@ -135,8 +137,11 @@ export default function SecretVaultView() {
 
               <div className="flex items-center gap-3 pt-2">
                 <button
-                  onClick={() => setActiveMedia("360-valeria")}
-                  className="px-6 py-3 rounded-2xl bg-brand-gold hover:bg-white text-brand-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-gold/30 flex items-center gap-2"
+                  onClick={() => {
+                    sound.playGoldChime();
+                    setActiveMedia("360-valeria");
+                  }}
+                  className="px-6 py-3 rounded-2xl bg-brand-gold hover:bg-white text-brand-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-gold/30 flex items-center gap-2 cursor-pointer"
                 >
                   <Play size={14} fill="currentColor" />
                   <span>Reproducir en 360°</span>
@@ -145,7 +150,13 @@ export default function SecretVaultView() {
               </div>
             </div>
 
-            <div className="relative w-full lg:w-72 h-48 rounded-2xl overflow-hidden border border-brand-gold/30 shrink-0">
+            <div 
+              onClick={() => {
+                sound.playGoldChime();
+                setActiveMedia("360-valeria");
+              }}
+              className="relative w-full lg:w-72 h-48 rounded-2xl overflow-hidden border border-brand-gold/30 shrink-0 cursor-pointer"
+            >
               <Image
                 src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800"
                 alt="Valeria 360"
@@ -153,7 +164,7 @@ export default function SecretVaultView() {
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                <div className="w-14 h-14 rounded-full bg-brand-gold text-brand-black flex items-center justify-center shadow-2xl">
+                <div className="w-14 h-14 rounded-full bg-brand-gold text-brand-black flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
                   <Play size={20} fill="currentColor" />
                 </div>
               </div>
@@ -201,6 +212,7 @@ export default function SecretVaultView() {
 
                   <Link
                     href="/concierge"
+                    onClick={() => sound.playSubtleClick()}
                     className="w-full py-2.5 rounded-xl glass-dark border border-brand-gold/30 hover:bg-brand-gold hover:text-brand-black text-brand-gold text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all text-center"
                   >
                     <span>Coordinar Encuentro Privado</span>
@@ -238,6 +250,7 @@ export default function SecretVaultView() {
 
           <Link
             href="/concierge"
+            onClick={() => sound.playGoldChime()}
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-brand-gold text-brand-black font-black text-xs uppercase tracking-widest hover:brightness-110 shadow-lg shadow-brand-gold/30"
           >
             <span>Hablar con el Concierge Privado</span>
@@ -245,6 +258,83 @@ export default function SecretVaultView() {
         </div>
 
       </div>
+
+      {/* ── 360° LUXURY SUITE INTERACTIVE MODAL ── */}
+      <AnimatePresence>
+        {activeMedia && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-8"
+          >
+            <div className="relative w-full max-w-4xl max-h-[90vh] glass-obsidian border border-brand-gold/50 rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(212,168,67,0.3)] flex flex-col justify-between">
+              
+              {/* Header */}
+              <div className="p-5 flex items-center justify-between border-b border-white/10 relative z-20">
+                <div className="flex items-center gap-3">
+                  <Compass className="text-brand-gold animate-spin" size={20} />
+                  <div>
+                    <h3 className="font-serif text-lg font-bold text-white">Experiencia 360° · Valeria VIP</h3>
+                    <span className="text-[9px] text-brand-gold font-mono uppercase tracking-widest">Suite Presidencial Hotel Oro Verde · 4K UHD</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    sound.playSubtleClick();
+                    setActiveMedia(null);
+                  }}
+                  className="p-2 rounded-full glass-dark text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* 360 Viewer Canvas Container */}
+              <div className="relative aspect-video w-full overflow-hidden bg-black flex items-center justify-center group">
+                <Image
+                  src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200"
+                  alt="360 Player"
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                
+                {/* 360 Compass Overlay */}
+                <div className="absolute inset-0 bg-radial from-transparent via-black/30 to-black/80 pointer-events-none" />
+                
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center p-6">
+                  <div className="w-16 h-16 rounded-full bg-brand-gold/90 text-brand-black flex items-center justify-center shadow-2xl shadow-brand-gold/50 animate-pulse">
+                    <Play size={28} fill="currentColor" className="ml-1" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-mono uppercase tracking-[0.3em] text-brand-gold font-bold">Giroscopio y Arrastre 360° Activo</p>
+                    <p className="text-[11px] text-white/60">Gira tu dispositivo para explorar la suite en tiempo real.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Controls */}
+              <div className="p-4 bg-[#08080C] border-t border-white/10 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-[10px] text-white/50 font-mono">
+                  <ShieldCheck size={14} className="text-brand-gold" />
+                  <span>Transmisión Segura Encriptada</span>
+                </div>
+                <Link
+                  href="/concierge"
+                  onClick={() => {
+                    sound.playGoldChime();
+                    setActiveMedia(null);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-brand-gold hover:bg-white text-brand-black font-black text-[10px] uppercase tracking-wider transition-all"
+                >
+                  Reservar Cita con Valeria
+                </Link>
+              </div>
+
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
