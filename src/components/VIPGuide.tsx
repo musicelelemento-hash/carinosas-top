@@ -14,6 +14,7 @@ import {
   Volume2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { sound } from "@/lib/soundEngine";
 
 interface FAQItem {
   q: string;
@@ -164,7 +165,10 @@ export default function VIPGuide() {
               >
                 <button
                   type="button"
-                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  onClick={() => {
+                    sound.playSubtleClick();
+                    setOpenFaq(openFaq === idx ? null : idx);
+                  }}
                   className="w-full p-5 text-left flex items-center justify-between gap-4 group cursor-pointer"
                 >
                   <span className="font-serif text-sm md:text-base text-white group-hover:text-brand-gold transition-colors font-medium">

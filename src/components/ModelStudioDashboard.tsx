@@ -32,6 +32,7 @@ import {
 import { COUNTRIES } from "@/lib/countries";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
+import { sound } from "@/lib/soundEngine";
 
 type AvailabilityState = "online" | "in_appointment" | "hotel_vip" | "offline";
 
@@ -72,6 +73,7 @@ export default function ModelStudioDashboard() {
 
   const handleAddTour = () => {
     if (!newTourCity.trim()) return;
+    sound.playSubtleClick();
     const newTour: TourSchedule = {
       id: Date.now().toString(),
       city: newTourCity,
@@ -87,10 +89,12 @@ export default function ModelStudioDashboard() {
   };
 
   const handleDeleteTour = (id: string) => {
+    sound.playSubtleClick();
     setTours(tours.filter(t => t.id !== id));
   };
 
   const handleBoost = () => {
+    sound.playGoldChime();
     setIsBoosted(true);
     try {
       confetti({
@@ -103,6 +107,7 @@ export default function ModelStudioDashboard() {
   };
 
   const handleSaveSettings = () => {
+    sound.playGoldChime();
     setSavedSuccess(true);
     if (typeof window !== "undefined" && "vibrate" in navigator) {
       try { navigator.vibrate(20); } catch {}
@@ -162,7 +167,10 @@ export default function ModelStudioDashboard() {
             ].map((st) => (
               <button
                 key={st.id}
-                onClick={() => setAvailability(st.id as AvailabilityState)}
+                onClick={() => {
+                  sound.playSubtleClick();
+                  setAvailability(st.id as AvailabilityState);
+                }}
                 className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all ${
                   availability === st.id
                     ? "bg-white/15 text-white border border-white/20 shadow-md"
