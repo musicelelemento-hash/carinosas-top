@@ -27,7 +27,8 @@ import GoldParticles from "@/components/GoldParticles";
 import GentlemenClubSection from "@/components/GentlemenClubSection";
 import HiddenModelsLounge from "@/components/HiddenModelsLounge";
 import PanicDisguise from "@/components/PanicDisguise";
-import { Sliders } from "lucide-react";
+import MobileReelsFeed from "@/components/MobileReelsFeed";
+import { Sliders, LayoutGrid, Film, Radio, MapPin, Sparkles, Flame, ShieldCheck } from "lucide-react";
 import { type Country, getCountryById } from "@/lib/countries";
 
 interface HomePageModel {
@@ -137,6 +138,9 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
     setDisplayModels(filtered.length > 0 ? filtered : initialModels);
   };
 
+  const [isReelsOpen, setIsReelsOpen] = React.useState(false);
+  const [viewMode, setViewMode] = React.useState<'grid' | 'reels' | 'feed' | 'map'>('grid');
+
   return (
     <>
       {/* Location Gateway — shown before home if no location saved */}
@@ -170,16 +174,133 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           }}
         />
 
-        {/* ── HIGH DOPAMINE LIVE CLASSIFIEDS FEED ── */}
-        <LiveClassifiedsFeed currentCountry={currentCountry} />
+        {/* ── TRI-MODE VIEW SWITCHER BAR (FUSION A + B + C) ── */}
+        <div className="sticky top-16 z-30 py-3 backdrop-blur-xl bg-[#08080C]/85 border-y border-white/5 shadow-2xl">
+          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
+            
+            {/* Mode buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setViewMode('grid');
+                  const el = document.getElementById('collection');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
+                  viewMode === 'grid'
+                    ? 'bg-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.4)] scale-105'
+                    : 'glass-obsidian border border-white/10 text-white/70 hover:text-white'
+                }`}
+              >
+                <LayoutGrid size={13} />
+                <span>Catálogo 4K</span>
+              </button>
 
+              {/* TikTok / Reels Mode Trigger */}
+              <button
+                onClick={() => {
+                  setIsReelsOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider glass-obsidian border border-brand-pink/50 text-brand-pink hover:bg-brand-pink/10 transition-all shadow-[0_0_15px_rgba(255,0,98,0.25)] animate-pulse"
+              >
+                <Film size={13} />
+                <span>🎬 Reels Feed (TikTok)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setViewMode('feed');
+                  const el = document.getElementById('clasificados-feed');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
+                  viewMode === 'feed'
+                    ? 'bg-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.4)]'
+                    : 'glass-obsidian border border-white/10 text-white/70 hover:text-white'
+                }`}
+              >
+                <Radio size={13} />
+                <span>⚡ En Vivo</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setViewMode('map');
+                  const el = document.getElementById('mapa');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
+                  viewMode === 'map'
+                    ? 'bg-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.4)]'
+                    : 'glass-obsidian border border-white/10 text-white/70 hover:text-white'
+                }`}
+              >
+                <MapPin size={13} />
+                <span>🗺️ Geo-Radar</span>
+              </button>
+            </div>
+
+            {/* Mobile Touch Filters Button */}
+            <button
+              onClick={() => setIsFiltersSheetOpen(true)}
+              className="px-3.5 py-2 rounded-xl glass-obsidian border border-brand-gold/40 text-brand-gold text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 shadow-lg"
+            >
+              <Sliders size={13} />
+              <span className="hidden sm:inline">Filtros Táctiles</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── 1. MAIN COLLECTION GRID (IMMEDIATE FIRST VIEWPORT REWARD) ── */}
+        <section id="collection" className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20">
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 mb-2">
+                <Flame size={12} className="text-brand-gold animate-pulse" />
+                <span className="text-[8px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto {currentCountry.name}</span>
+              </div>
+              <h2 className="font-serif font-bold text-2xl sm:text-4xl italic text-white">
+                Modelos & Acompañantes <span className="text-gold-shimmer">VIP</span>
+              </h2>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono block">Disponibles</span>
+              <span className="font-serif text-xl sm:text-2xl font-bold text-brand-gold">{displayModels.length} Perfiles</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+            {displayModels.map((model) => (
+              <ProfileCard key={model.id} {...model} />
+            ))}
+          </div>
+
+          {isLoading && (
+            <div className="mt-20 flex justify-center py-10">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative w-12 h-12">
+                  <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
+                  <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+                </div>
+                <span className="text-[10px] text-brand-gold/60 italic font-mono uppercase tracking-widest">Cargando más perfiles...</span>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ── 2. LIVE CLASSIFIEDS FEED (HIGH ENGAGEMENT) ── */}
+        <div id="clasificados-feed">
+          <LiveClassifiedsFeed currentCountry={currentCountry} />
+        </div>
+
+        {/* ── 3. GEO-RADAR LIVE MAP ── */}
         <div id="mapa">
           <LiveMap currentCountry={currentCountry} userLocation={location} />
         </div>
 
+        {/* ── 4. RECOMMENDATIONS & OCCASIONS ── */}
         <RecommendationSection currentCountry={currentCountry} />
 
-        {/* ── 5 OCCASIONS CONCIERGE MATCHMAKER ── */}
         <OccasionMatchmaker
           onSelectOccasion={(tagKeyword) => {
             if (!tagKeyword) {
@@ -195,97 +316,20 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           }}
         />
 
-        {/* ── THE GENTLEMEN'S ALPHA CLUB EXPERIENCE ── */}
+        {/* ── 5. ELITE CLUBS & SECRET VAULT ── */}
         <GentlemenClubSection />
-
-        {/* ── SECRET HIDDEN MODELS (NON-PUBLIC) ── */}
         <HiddenModelsLounge />
-
         <VIPLounge />
-
-        {/* ── SECRET VAULT 4K TEASER ── */}
         <SecretVaultTeaser />
-
         <GlobalLounge />
-
-        {/* ── DISCREET PANIC DISGUISE MODE (ESC / 1-TAP) ── */}
+        <VIPGuide />
         <PanicDisguise />
 
-        <section id="collection" className="max-w-7xl mx-auto px-6 py-28">
-          {/* Section header */}
-          <div className="flex flex-col items-center gap-6 mb-16 relative">
-            {/* Background signature */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-              <span className="font-signature text-[180px] leading-none" style={{ color: 'rgba(212,168,67,0.03)' }}>Collection</span>
-            </div>
-
-            {/* Badge */}
-            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-obsidian border border-brand-gold/30 z-10 shadow-[0_0_20px_rgba(212,168,67,0.2)]">
-              <span className="text-[9px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto</span>
-            </div>
-
-            {/* Title */}
-            <h2 className="font-serif font-bold text-5xl md:text-6xl text-center italic leading-none tracking-tight z-10 bg-gradient-to-r from-brand-gold via-white to-brand-gold bg-clip-text text-transparent">
-              El Catálogo
-            </h2>
-
-            {/* Subtitle */}
-            <p className="text-xs text-white/50 uppercase tracking-widest font-bold z-10 text-center">
-              Filtra por nivel de exclusividad y discreción
-            </p>
-
-            {/* VIP Circle Quick Switch & Mobile Filters Button */}
-            <div className="flex flex-wrap items-center justify-center gap-3 z-10">
-              <div className="flex items-center gap-2 p-1.5 rounded-2xl glass-obsidian border border-white/10 shadow-2xl">
-                <button
-                  onClick={() => setDisplayModels(initialModels)}
-                  className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-brand-gold text-brand-black shadow-md"
-                >
-                  🌐 Catálogo General
-                </button>
-                <a
-                  href="#vip-lounge"
-                  className="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider text-brand-gold hover:text-white transition-colors flex items-center gap-1.5"
-                >
-                  🔒 Círculo Secreto VIP
-                </a>
-              </div>
-
-              {/* Mobile Filter Sheet Trigger Button */}
-              <button
-                onClick={() => setIsFiltersSheetOpen(true)}
-                className="md:hidden px-4 py-2.5 rounded-2xl glass-obsidian border border-brand-gold/40 text-brand-gold text-[10px] font-black uppercase tracking-wider flex items-center gap-2 shadow-lg"
-              >
-                <Sliders size={14} />
-                <span>Filtros Táctiles</span>
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent z-10" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
-            {displayModels.map((model) => (
-              <ProfileCard key={model.id} {...model} />
-            ))}
-          </div>
-
-          {isLoading && (
-            <div className="mt-32 flex justify-center py-20">
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative w-16 h-16">
-                  <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
-                  <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
-                  <div className="absolute inset-4 border border-brand-gold/20 rounded-full animate-pulse" />
-                </div>
-                <span className="label-xs text-brand-gold/50 italic">Ampliando el Directorio...</span>
-              </div>
-            </div>
-          )}
-        </section>
-
-        <VIPGuide />
+        {/* ── 6. MOBILE REELS FEED (TIKTOK / REELS OVERLAY) ── */}
+        <MobileReelsFeed
+          isOpen={isReelsOpen}
+          onClose={() => setIsReelsOpen(false)}
+        />
 
         <PanicButton />
         <GhostNotifications />

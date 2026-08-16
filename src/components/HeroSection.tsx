@@ -37,133 +37,59 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 pb-20 noise-overlay bg-[#08080C]">
+    <section className="relative overflow-hidden pt-6 pb-6 noise-overlay bg-[#08080C]">
 
       {/* ── CINEMATIC BACKGROUND ── */}
       <div className="absolute inset-0 -z-30 bg-[#08080C]" />
 
       {/* Grid lines */}
-      <div className="absolute inset-0 -z-20 grid-lines opacity-100" />
+      <div className="absolute inset-0 -z-20 grid-lines opacity-60" />
 
       {/* Video Overlay with Vignette */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#08080C] via-transparent to-[#08080C]" />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#08080C]/90 via-transparent to-[#08080C]/90" />
+      <div className="absolute inset-0 -z-10 opacity-10">
         <video
           autoPlay muted loop playsInline
-          className="w-full h-full object-cover opacity-15 grayscale contrast-125"
+          className="w-full h-full object-cover grayscale contrast-125"
         >
           <source src="https://assets.mixkit.co/videos/preview/mixkit-luxury-expensive-watch-detail-32431-large.mp4" type="video/mp4" />
         </video>
       </div>
 
       {/* ── FLOATING OBSIDIAN ORBS ── */}
-      <motion.div 
-        animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[20%] left-[5%] w-[600px] h-[600px] -z-10 pointer-events-none rounded-full bg-brand-gold/5 blur-[120px]" 
-      />
-      <motion.div 
-        animate={{ y: [0, 20, 0], scale: [1, 1.05, 1] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-[15%] right-[5%] w-[500px] h-[500px] -z-10 pointer-events-none rounded-full bg-brand-pink/5 blur-[120px]" 
-      />
+      <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] -z-10 pointer-events-none rounded-full bg-brand-gold/5 blur-[100px]" />
+      <div className="absolute bottom-[10%] right-[5%] w-[350px] h-[350px] -z-10 pointer-events-none rounded-full bg-brand-pink/5 blur-[100px]" />
 
       {/* ── MAIN CONTENT ── */}
-      <div className="max-w-7xl mx-auto px-6 w-full text-center z-10 space-y-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full text-center z-10 space-y-6">
 
-        {/* Live Status Badge */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex justify-center"
-        >
-          <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_0_35px_rgba(212,168,67,0.25)] pulse-gold-aura">
-            <Gem size={14} className="text-brand-gold animate-pulse" />
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-gold">
+        {/* Top Header Badge & Micro Title */}
+        <div className="flex flex-col items-center gap-3">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2.5 px-5 py-1.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_0_25px_rgba(212,168,67,0.2)]"
+          >
+            <Gem size={13} className="text-brand-gold animate-pulse" />
+            <span className="text-[9px] font-black uppercase tracking-[0.35em] text-brand-gold">
               Directorio de Lujo · Círculo Élite
             </span>
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">En Vivo</span>
-          </div>
-        </motion.div>
+            <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">En Vivo</span>
+          </motion.div>
 
-        {/* ── TITLE ── */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="space-y-6 relative"
-        >
-          
-          {/* Subtle Ambient Light behind text */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-brand-gold/10 rounded-full blur-[90px] pointer-events-none -z-10" />
-
-          <h1 className="font-serif font-bold leading-[0.88] tracking-[-0.02em] select-none">
-            <span className="block text-5xl sm:text-8xl lg:text-[9.5rem] bg-gradient-to-b from-white via-white/90 to-white/60 bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)]">
+          <h1 className="font-serif font-bold text-3xl sm:text-5xl md:text-6xl tracking-tight select-none">
+            <span className="bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
               CARIÑOSAS
             </span>
-            <span className="block text-5xl sm:text-8xl lg:text-[9.5rem] italic text-gold-shimmer drop-shadow-[0_0_60px_rgba(212,168,67,0.5)]">
+            <span className="italic text-gold-shimmer ml-2 drop-shadow-[0_0_30px_rgba(212,168,67,0.4)]">
               .TOP
             </span>
           </h1>
 
-          {/* Subtitle */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col items-center gap-4 max-w-xl mx-auto"
-          >
-            <div className="w-28 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
-            <p className="text-xs sm:text-sm text-white/80 uppercase tracking-[0.3em] font-medium">
-              El Máximo Círculo de Acompañamiento VIP & Modelos 4K
-            </p>
-            <div className="w-28 h-[1px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
-          </motion.div>
-
-          {/* Stats Row */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex items-center justify-center gap-8 sm:gap-14 pt-3"
-          >
-            {[
-              { value: '500+', label: 'Modelos Verificadas' },
-              { value: '4K', label: 'Ultra HD & Audio' },
-              { value: '100%', label: 'Discreción Blindada' },
-              { value: '24/7', label: 'Concierge Directo' },
-            ].map(({ value, label }) => (
-              <motion.div 
-                key={label} 
-                whileHover={{ scale: 1.1, y: -2 }}
-                className="flex flex-col items-center gap-1 group cursor-default transition-all"
-              >
-                <span className="font-serif text-2xl sm:text-4xl font-bold text-brand-gold leading-none">{value}</span>
-                <span className="text-[8px] sm:text-[9px] uppercase font-black tracking-widest text-white/40">{label}</span>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="pt-3"
-          >
-            <motion.a
-              href="#collection"
-              whileHover={{ scale: 1.05, boxShadow: "0 15px 45px rgba(212,168,67,0.5)" }}
-              whileTap={{ scale: 0.97 }}
-              className="px-9 py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black font-black text-[10px] uppercase tracking-[0.25em] transition-all inline-flex items-center gap-2.5 shadow-[0_10px_35px_rgba(212,168,67,0.35)] cursor-pointer"
-            >
-              <span>Explorar Catálogo 4K</span>
-              <span aria-hidden="true" className="animate-bounce">↓</span>
-            </motion.a>
-          </motion.div>
-        </motion.div>
+          <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-[0.25em] font-medium max-w-lg">
+            Acompañamiento VIP & Modelos 4K Verificadas en {activeCountry.name}
+          </p>
+        </div>
 
         {/* ── SEARCH BAR ── */}
         <div className="max-w-4xl mx-auto">
