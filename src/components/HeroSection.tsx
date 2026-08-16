@@ -8,9 +8,11 @@ import { motion, AnimatePresence } from "framer-motion";
 interface HeroSectionProps {
   currentCountry?: Country;
   onSelectLocation?: (locationName: string) => void;
+  onSelectTag?: (tag: string) => void;
+  activeTag?: string;
 }
 
-export default function HeroSection({ currentCountry, onSelectLocation }: HeroSectionProps = {}) {
+export default function HeroSection({ currentCountry, onSelectLocation, onSelectTag, activeTag }: HeroSectionProps = {}) {
   const activeCountry = currentCountry || getCountryById("ecuador");
   const provinces = activeCountry.provinces || [];
   const [isLocationOpen, setIsLocationOpen] = useState(false);
@@ -19,6 +21,7 @@ export default function HeroSection({ currentCountry, onSelectLocation }: HeroSe
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("todas");
   const [selectedCategoryName, setSelectedCategoryName] = useState("Explorar Todo");
+  const [currentTag, setCurrentTag] = useState(activeTag || "");
   const [mounted, setMounted] = useState(false);
   const locationRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
@@ -285,25 +288,69 @@ export default function HeroSection({ currentCountry, onSelectLocation }: HeroSe
             </div>
           </div>
 
-          {/* Quick Zone Chips */}
-          <div className="flex flex-wrap justify-center gap-2.5 mt-8">
-            {[
-              { label: 'QUITO NORTE', city: 'La Carolina' },
-              { label: 'CUMBAYÁ VIP', city: 'Cumbayá' },
-              { label: 'SAMBORONDÓN', city: 'Guayaquil' },
-              { label: 'PLAZA DEL SOL', city: 'Manta' },
-              { label: 'HOTEL 5★', city: 'Servicio Express' },
-            ].map(({ label, city }) => (
-              <a
-                key={label}
-                href="#collection"
-                className="flex items-center gap-2 px-4 py-2 rounded-full glass-obsidian border border-white/10 hover:border-brand-gold/50 text-[9px] text-white/60 hover:text-brand-gold font-bold uppercase tracking-wider transition-all"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse" />
-                <span>{label}</span>
-                <span className="text-white/30 hidden sm:inline">· {city}</span>
-              </a>
-            ))}
+          {/* ── FAST FILTER PILLS (SKOKKA-KILLER HIGH-SPEED TAG BAR) ── */}
+          <div className="mt-8 space-y-3">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles size={13} className="text-brand-gold animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-gold/80">
+                Filtros Rápidos Populares
+              </span>
+            </div>
+
+            {/* Scrollable Pill Tags Bar */}
+            <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto no-scrollbar py-2 px-2">
+              {[
+                { id: 'all', label: '🌐 Todo', type: 'all', val: '' },
+                { id: 'top-vip', label: '🔥 TOP VIP', type: 'tag', val: 'vip' },
+                { id: 'verificadas', label: '⭐ Verificadas 4K', type: 'tag', val: 'verificada' },
+                { id: 'machala', label: '📍 Machala', type: 'location', val: 'Machala' },
+                { id: 'guayaquil', label: '📍 Guayaquil', type: 'location', val: 'Guayaquil' },
+                { id: 'quito', label: '📍 Quito', type: 'location', val: 'Quito' },
+                { id: 'cuenca', label: '📍 Cuenca', type: 'location', val: 'Cuenca' },
+                { id: 'culonas', label: '🍑 Culonas', type: 'tag', val: 'culona' },
+                { id: 'tetonas', label: '🍒 Tetonas', type: 'tag', val: 'tetona' },
+                { id: 'masajes', label: '💆 Masajes Eróticos', type: 'tag', val: 'masaje' },
+                { id: 'video-360', label: '🔞 Vídeo 360°', type: 'tag', val: 'video' },
+                { id: 'novios', label: '🤝 Trato de Novios', type: 'tag', val: 'novios' },
+              ].map((pill) => {
+                const isActive = currentTag === pill.val || (pill.type === 'location' && selectedLocationName.includes(pill.val));
+                return (
+                  <button
+                    key={pill.id}
+                    onClick={() => {
+                      if (pill.type === 'all') {
+                        setCurrentTag('');
+                        setSelectedLocation('');
+                        setSelectedLocationName('Todas las Ciudades');
+                        onSelectLocation?.('');
+                        onSelectTag?.('');
+                      } else if (pill.type === 'location') {
+                        setCurrentTag('');
+                        setSelectedLocation(pill.val);
+                        setSelectedLocationName(pill.val);
+                        onSelectLocation?.(pill.val);
+                      } else {
+                        const newTag = currentTag === pill.val ? '' : pill.val;
+                        setCurrentTag(newTag);
+                        onSelectTag?.(newTag);
+                      }
+                      
+                      const collectionEl = document.getElementById('collection');
+                      if (collectionEl) {
+                        collectionEl.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className={`whitespace-nowrap flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-brand-gold via-[#FFE088] to-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.5)] scale-105'
+                        : 'glass-obsidian border border-white/10 hover:border-brand-gold/50 text-white/70 hover:text-brand-gold hover:bg-white/5'
+                    }`}
+                  >
+                    <span>{pill.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

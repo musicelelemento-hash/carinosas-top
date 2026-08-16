@@ -104,6 +104,39 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading, currentCountry]);
 
+  const [activeTag, setActiveTag] = React.useState<string>("");
+
+  const handleSelectTag = (tagKey: string) => {
+    setActiveTag(tagKey);
+    if (!tagKey) {
+      setDisplayModels(initialModels);
+      return;
+    }
+    const clean = tagKey.toLowerCase();
+    let filtered: HomePageModel[] = [];
+
+    if (clean === "vip") {
+      filtered = initialModels.filter(m => 
+        m.isBoosted || 
+        m.plan_type === 'VIP Elite' || 
+        m.plan_type === 'Diamante' || 
+        m.plan_type === 'Oro'
+      );
+    } else if (clean === "verificada") {
+      filtered = initialModels.filter(m => m.is_verified_4k);
+    } else {
+      filtered = initialModels.filter(m => 
+        (m.tags && m.tags.some(t => t.toLowerCase().includes(clean))) ||
+        (m.description && m.description.toLowerCase().includes(clean)) ||
+        (m.sector && m.sector.toLowerCase().includes(clean)) ||
+        (m.location && m.location.toLowerCase().includes(clean)) ||
+        (m.name && m.name.toLowerCase().includes(clean))
+      );
+    }
+
+    setDisplayModels(filtered.length > 0 ? filtered : initialModels);
+  };
+
   return (
     <>
       {/* Location Gateway — shown before home if no location saved */}
@@ -121,6 +154,8 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
         <HeroSection
           currentCountry={currentCountry}
+          activeTag={activeTag}
+          onSelectTag={handleSelectTag}
           onSelectLocation={(locName) => {
             if (!locName) {
               setDisplayModels(initialModels);
