@@ -283,7 +283,22 @@ export default function AdPublishingPortal() {
 
             <div className="glass-obsidian border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6">
               
-              {/* Row 1 */}
+              {/* Pinned Country Header with discreet change button */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-brand-gold/20">
+                <div className="flex items-center gap-2 text-xs font-bold text-white">
+                  <span className="text-base">🇪🇨</span>
+                  <span>País de Publicación: <strong className="text-brand-gold">Ecuador</strong></span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => alert("Cariñosas.top está optimizado para Ecuador. Próximamente disponible en más países.")}
+                  className="text-[9px] text-white/40 hover:text-brand-gold uppercase tracking-wider font-mono"
+                >
+                  (Cambiar país)
+                </button>
+              </div>
+
+              {/* Row 1: Nombre & Tarifa */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-wider text-brand-gold/90">
@@ -296,58 +311,6 @@ export default function AdPublishingPortal() {
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-brand-gold outline-none text-white text-sm placeholder:text-white/30"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-brand-gold/90">
-                    Edad *
-                  </label>
-                  <input
-                    type="number"
-                    min="18"
-                    max="50"
-                    required
-                    value={formData.age}
-                    onChange={e => setFormData({ ...formData, age: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-brand-gold outline-none text-white text-sm"
-                  />
-                </div>
-              </div>
-
-              {/* Row 2 */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-brand-gold/90">
-                    Ciudad (Ecuador) *
-                  </label>
-                  <select
-                    value={formData.city}
-                    onChange={e => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-2xl bg-[#141419] border border-white/10 focus:border-brand-gold outline-none text-white text-sm"
-                  >
-                    <option value="Machala">Machala (El Oro)</option>
-                    <option value="Guayaquil">Guayaquil (Guayas)</option>
-                    <option value="Quito">Quito (Pichincha)</option>
-                    <option value="Cuenca">Cuenca (Azuay)</option>
-                    <option value="Santo Domingo">Santo Domingo</option>
-                    <option value="Ambato">Ambato (Tungurahua)</option>
-                    <option value="Manta">Manta (Manabí)</option>
-                    <option value="Salinas">Salinas (Santa Elena)</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-brand-gold/90">
-                    Sector o Zona *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej: Puerto Bolívar / Centro"
-                    value={formData.sector}
-                    onChange={e => setFormData({ ...formData, sector: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-brand-gold outline-none text-white text-sm"
                   />
                 </div>
 
@@ -366,14 +329,14 @@ export default function AdPublishingPortal() {
                 </div>
               </div>
 
-              {/* WhatsApp */}
+              {/* Row 2: WhatsApp Directo */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-wider text-brand-gold/90 flex items-center justify-between">
                   <span>Número de WhatsApp para Clientes (Directo) *</span>
-                  <span className="text-emerald-400 font-mono text-[9px]">🔒 Encriptado</span>
+                  <span className="text-emerald-400 font-mono text-[9px]">🔒 Cero Códigos SMS</span>
                 </label>
                 <div className="flex items-center gap-2">
-                  <span className="px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-mono text-sm">
+                  <span className="px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-brand-gold font-mono text-sm font-bold">
                     +593
                   </span>
                   <input
@@ -384,6 +347,41 @@ export default function AdPublishingPortal() {
                     onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
                     className="flex-1 px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-brand-gold outline-none text-white text-sm font-mono placeholder:text-white/30"
                   />
+                </div>
+              </div>
+
+              {/* Row 3: Ciudad Base & Rotación / Giras */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-brand-gold/90">
+                    Ciudad Base Actual & Giras (1-Toque) *
+                  </label>
+                  <span className="text-[9px] text-emerald-400 font-mono">✈️ Cobertura Nacional</span>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "Machala", label: "📍 Machala VIP (El Oro)" },
+                    { id: "Guayaquil", label: "📍 Guayaquil / Samborondón" },
+                    { id: "Quito", label: "📍 Quito (La Carolina)" },
+                    { id: "Cuenca", label: "📍 Cuenca" },
+                    { id: "Manta", label: "📍 Manta" },
+                    { id: "Santo Domingo", label: "📍 Santo Domingo" },
+                    { id: "Ambato", label: "📍 Ambato" },
+                  ].map((cityOption) => (
+                    <button
+                      key={cityOption.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, city: cityOption.id, sector: `${cityOption.id} Centro / Hotel 5★` })}
+                      className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                        formData.city === cityOption.id
+                          ? 'bg-brand-gold text-brand-black shadow-md scale-105'
+                          : 'glass-dark border border-white/10 text-white/70 hover:text-white'
+                      }`}
+                    >
+                      {cityOption.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 

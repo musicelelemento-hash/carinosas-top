@@ -212,19 +212,29 @@ export default function AdminQuickUpload() {
         {/* Input Side */}
         <div className="lg:col-span-2 space-y-6">
           <div className="glass-dark rounded-[2rem] p-8 border-white/5 space-y-6">
+            
+            {/* Pinned Country Indicator */}
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-brand-gold/20">
+              <div className="flex items-center gap-2 text-xs font-bold text-white">
+                <span className="text-base">🇪🇨</span>
+                <span>País Predefinido: <strong className="text-brand-gold">Ecuador</strong></span>
+              </div>
+              <span className="text-[9px] text-white/40 font-mono">Publicación Directa Sin SMS</span>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Nombre Artístico</label>
+                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Nombre Artístico *</label>
                 <input 
                   type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: Sofia V."
+                  placeholder="Ej: Valeria VIP"
                   className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">WhatsApp (Número Real)</label>
+                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">WhatsApp Directo *</label>
                 <div className="relative">
                   <Phone size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-gold/40" />
                   <input 
@@ -232,35 +242,40 @@ export default function AdminQuickUpload() {
                     value={whatsapp}
                     onChange={(e) => setWhatsapp(e.target.value)}
                     placeholder="0991234567"
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all"
+                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all font-mono"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Ciudad y Edad */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2 lg:col-span-1">
-                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Ciudad Destino</label>
-                <div className="relative">
-                   <MapPin size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-gold/40" />
-                   <select 
-                    value={city}
-                    onChange={(e) => {
-                      setCity(e.target.value);
-                      updateCoordsFromCity(e.target.value);
+            {/* Ciudad Base 1-Toque & Plan */}
+            <div className="space-y-3">
+              <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">
+                Ciudad Base Actual (Las modelos pueden rotar libremente)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {["Machala", "Guayaquil", "Quito", "Cuenca", "Manta", "Santo Domingo", "Ambato", "Pasaje"].map((cName) => (
+                  <button
+                    key={cName}
+                    type="button"
+                    onClick={() => {
+                      setCity(cName);
+                      updateCoordsFromCity(cName);
                     }}
-                    className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer"
-                   >
-                     {provinces.map(prov => (
-                        <optgroup key={prov} label={prov} className="bg-brand-black text-brand-gold">
-                          {getCitiesByProvince(prov).map(c => <option key={c.id} value={c.name} className="bg-brand-black text-brand-white">{c.name}</option>)}
-                        </optgroup>
-                      ))}
-                   </select>
-                </div>
+                    className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                      city === cName
+                        ? 'bg-brand-gold text-brand-black shadow-md scale-105'
+                        : 'glass-dark border border-white/10 text-white/60 hover:text-white'
+                    }`}
+                  >
+                    📍 {cName}
+                  </button>
+                ))}
               </div>
-              <div className="space-y-2 lg:col-span-1">
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Edad</label>
                 <input 
                   type="number" 
@@ -269,17 +284,17 @@ export default function AdminQuickUpload() {
                   className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all"
                 />
               </div>
-              <div className="space-y-2 lg:col-span-1">
-                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Plan de Visibilidad</label>
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/30 uppercase font-black tracking-widest ml-1">Plan Asignado</label>
                 <select 
                   value={planType}
                   onChange={(e) => setPlanType(e.target.value)}
-                  className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer capitalize"
+                  className="w-full bg-brand-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer capitalize font-bold"
                 >
-                  <option value="Anuncio Gratis">Anuncio Gratis</option>
-                  <option value="Premium">Premium</option>
-                  <option value="Diamante">Diamante</option>
-                  <option value="VIP Elite">VIP Elite</option>
+                  <option value="VIP Elite">👑 VIP Elite (Máxima Exposición #1)</option>
+                  <option value="Diamante">💎 Diamante ($180 - Destacado)</option>
+                  <option value="Premium">⭐ Premium ($99)</option>
+                  <option value="Anuncio Gratis">🆓 Anuncio Gratis / Prueba</option>
                 </select>
               </div>
             </div>
