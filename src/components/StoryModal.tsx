@@ -32,11 +32,26 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
   const [isPlayingAudio, setIsPlayingAudio] = useState(true);
   const [reactionEffect, setReactionEffect] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
 
   const totalSegments = 3;
 
+  const nextSegment = () => {
+    setCurrentSegment((prev) => {
+      if (prev >= totalSegments - 1) {
+        onClose();
+        return 0;
+      }
+      return prev + 1;
+    });
+  };
+
+  const prevSegment = () => {
+    setCurrentSegment((prev) => Math.max(0, prev - 1));
+  };
+
   useEffect(() => {
-    if (isOpen && story) {
+    if (isOpen && story && !isPaused) {
       document.body.style.overflow = "hidden";
 
       // Record live story view metric in database
@@ -45,13 +60,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
       }
 
       const interval = setInterval(() => {
-        setCurrentSegment((prev) => {
-          if (prev >= totalSegments - 1) {
-            onClose();
-            return 0;
-          }
-          return prev + 1;
-        });
+        nextSegment();
       }, 5000); // 5s per segment = 15s total
 
       return () => {
@@ -59,7 +68,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
         clearInterval(interval);
       };
     }
-  }, [isOpen, story, onClose]);
+  }, [isOpen, story, onClose, isPaused, currentSegment]);
 
   if (!isOpen || !story) return null;
 
@@ -74,7 +83,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
     const rawPhone = story.whatsapp || "593987654321";
     const cleanPhone = rawPhone.replace(/\D/g, "");
     const fullPhone = cleanPhone.startsWith("593") ? cleanPhone : `593${cleanPhone.replace(/^0/, "")}`;
-    const text = encodeURIComponent(`Hola ${story.name}, vi tu Historia 4K en Cariñosas.top y me gustaría coordinar una cita.`);
+    const text = encodeURIComponent(`Hola ${story.name}, vi tu Historia 4K en Cariñosas.top y me gustaría coordinar una cita privada hoy. ¿Tienes disponibilidad?`);
     window.open(`https://wa.me/${fullPhone}?text=${text}`, "_blank");
   };
 
@@ -91,10 +100,16 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
 
   return (
     <div className="fixed inset-0 z-[300] bg-black/90 backdrop-blur-3xl flex items-center justify-center p-0 md:p-6 animate-in fade-in duration-300">
-      <div className="relative w-full max-w-[430px] h-full md:h-[92vh] max-h-[860px] bg-[#08080C] md:rounded-[2.5rem] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.95)] border border-white/10 flex flex-col justify-between">
+      <div 
+        className="relative w-full max-w-[430px] h-full md:h-[92vh] max-h-[860px] bg-[#08080C] md:rounded-[2.5rem] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.95)] border border-white/10 flex flex-col justify-between select-none"
+        onMouseDown={() => setIsPaused(true)}
+        onMouseUp={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+      >
         
         {/* Background Image / Canvas */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src={story.story}
             alt={story.name}
@@ -107,6 +122,20 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
           <div className="absolute inset-0 bg-gradient-to-t from-[#08080C] via-transparent to-transparent z-10" />
         </div>
 
+        {/* ── TOUCH TAP NAVIGATION HITBOXES (Left & Right halves) ── */}
+        <div className="absolute inset-0 z-10 flex">
+          <div 
+            onClick={(e) => { e.stopPropagation(); prevSegment(); }}
+            className="w-1/2 h-full cursor-pointer"
+            aria-label="Historia anterior"
+          />
+          <div 
+            onClick={(e) => { e.stopPropagation(); nextSegment(); }}
+            className="w-1/2 h-full cursor-pointer"
+            aria-label="Siguiente historia"
+          />
+        </div>
+
         {/* Reaction Animated Flying Emoji */}
         {reactionEffect && (
           <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none animate-in zoom-in-50 fade-in duration-300">
@@ -117,7 +146,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
         )}
 
         {/* TOP CONTROLS */}
-        <div className="relative z-30 p-5 space-y-3 pt-6 md:pt-5">
+        <div className="relative z-30 p-5 space-y-3 pt-6 md:pt-5 pointer-events-auto">
           {/* Segmented Progress Bars */}
           <div className="flex gap-1.5 px-1">
             {[...Array(totalSegments)].map((_, idx) => (

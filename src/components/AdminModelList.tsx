@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { getAdminModelsAction, updateModelAction, deleteModelAction } from "@/app/actions/admin";
+import { getAdminModelsAction, updateModelAction, deleteModelAction, quickChangeCityAction, duplicateModelAction } from "@/app/actions/admin";
 import { UploadDropzone } from "@/components/Uploadthing";
 import { 
   Trash2, 
@@ -21,7 +21,8 @@ import {
   Phone,
   ShieldCheck,
   Zap,
-  Sparkles
+  Sparkles,
+  Copy
 } from "lucide-react";
 
 interface Model {
@@ -273,23 +274,63 @@ export default function AdminModelList() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-white/40 uppercase tracking-widest font-black">
-                  <span className="flex items-center gap-1.5 text-white/60"><MapPin size={12} className="text-brand-gold" /> {model.city} {model.sector && `· ${model.sector}`}</span>
+                  {/* Express City Rotation Dropdown */}
+                  <div className="flex items-center gap-1.5 bg-brand-gold/10 border border-brand-gold/30 rounded-xl px-2.5 py-1 text-brand-gold">
+                    <MapPin size={12} className="text-brand-gold shrink-0" />
+                    <select
+                      value={model.city}
+                      onChange={async (e) => {
+                        const newCity = e.target.value;
+                        try {
+                          await quickChangeCityAction(model.id, newCity);
+                          fetchModels();
+                        } catch (err: any) {
+                          alert(err.message || "Error al rotar ciudad");
+                        }
+                      }}
+                      className="bg-transparent text-[9px] font-black text-brand-gold uppercase tracking-wider outline-none cursor-pointer"
+                      title="Rotación Express de Ciudad"
+                    >
+                      {['Quito', 'Guayaquil', 'Cuenca', 'Manta', 'Machala', 'Santo Domingo', 'Ambato', 'Salinas'].map(c => (
+                        <option key={c} value={c} className="bg-[#08080C] text-white font-sans">{c}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <span className="flex items-center gap-1.5 text-emerald-400"><MessageCircle size={12} /> {model.whatsapp}</span>
                   <span className="flex items-center gap-1.5 opacity-50"><Clock size={12} /> {new Date(model.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {/* Clone Profile Button */}
+                <button
+                  onClick={async () => {
+                    if (confirm(`¿Deseas duplicar el perfil de ${model.name}?`)) {
+                      try {
+                        await duplicateModelAction(model.id);
+                        fetchModels();
+                      } catch (err: any) {
+                        alert(err.message || "Error al duplicar perfil");
+                      }
+                    }
+                  }}
+                  className="p-3 rounded-2xl glass-dark border border-white/10 text-white/60 hover:text-brand-gold hover:border-brand-gold/50 transition-all"
+                  title="Clonar / Duplicar Perfil"
+                >
+                  <Copy size={16} />
+                </button>
+
                 <a href={`/profile/${model.id}`} target="_blank"
                   className="p-3 rounded-2xl glass-dark border border-white/10 text-white/50 hover:text-brand-gold hover:border-brand-gold transition-all" title="Ver perfil público">
-                  <ExternalLink size={18} />
+                  <ExternalLink size={16} />
                 </a>
                 <button onClick={() => handleDelete(model.id)}
                   className="p-3 rounded-2xl bg-brand-pink/10 border border-brand-pink/20 text-brand-pink/70 hover:bg-brand-pink hover:text-white transition-all" title="Eliminar">
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </button>
-                <div className="ml-2 h-10 w-[1px] bg-white/10 hidden md:block" />
+                <div className="ml-1 h-10 w-[1px] bg-white/10 hidden md:block" />
                 <button onClick={() => openEdit(model)}
                   className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 text-brand-gold text-[10px] font-black uppercase tracking-widest hover:bg-brand-gold hover:text-brand-black transition-all shadow-md">
                   Editar <ChevronRight size={14} />

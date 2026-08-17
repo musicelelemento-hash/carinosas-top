@@ -714,3 +714,70 @@ export async function batchBoostCityAction(city: string, isBoosted: boolean) {
 
   return { success: true, count: data?.length || 0 };
 }
+
+/**
+ * Quick changes a model's city and GPS center with 1 click.
+ */
+export async function quickChangeCityAction(modelId: string, newCity: string) {
+  await assertAdmin();
+
+  const CITY_COORDS: Record<string, [number, number]> = {
+    'Quito': [-0.1807, -78.4678],
+    'Guayaquil': [-2.1894, -79.8891],
+    'Cuenca': [-2.9001, -79.0059],
+    'Manta': [-0.9621, -80.7127],
+    'Machala': [-3.2581, -79.9161],
+    'Santo Domingo': [-0.2520, -79.1714],
+    'Ambato': [-1.2417, -78.6197],
+    'Salinas': [-2.2150, -80.9750],
+  };
+
+  const coords = CITY_COORDS[newCity] || [-0.1807, -78.4678];
+
+  const { data, error } = await supabaseAdmin
+    .from("models")
+    .update({ 
+      city: newCity,
+      sector: `${newCity} VIP`,
+      lat: coords[0] + (Math.random() - 0.5) * 0.02,
+      lng: coords[1] + (Math.random() - 0.5) * 0.02,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", modelId)
+    .select();
+
+  if (error) throw new Error(`Error al cambiar ciudad: ${error.message}`);
+  return data?.[0];
+}
+
+/**
+ * Clones a model profile into a new profile in 1 click.
+ */
+export async function duplicateModelAction(modelId: string) {
+  await assertAdmin();
+  
+  const { data: original, error: fetchErr } = await supabaseAdmin
+    .from("models")
+    .select("*")
+    .eq("id", modelId)
+    .single();
+
+  if (fetchErr || !original) throw new Error("No se encontró el perfil original a duplicar.");
+
+  const { id, created_at, updated_at, ...cloneData } = original;
+
+  const { data: created, error: createErr } = await supabaseAdmin
+    .from("models")
+    .insert([
+      {
+        ...cloneData,
+        name: `${cloneData.name} (Copia)`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ])
+    .select();
+
+  if (createErr) throw new Error(`Error al clonar modelo: ${createErr.message}`);
+  return created?.[0];
+}

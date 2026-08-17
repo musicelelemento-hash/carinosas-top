@@ -76,9 +76,26 @@ export default function ModelProfile({ model }: ModelProfileProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [likesCount, setLikesCount] = useState(148);
   const [isLiked, setIsLiked] = useState(false);
+  const [hasVIPPass, setHasVIPPass] = useState<string | null>(null);
 
   // Audio voice note simulation / Web Audio oscillator
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    const checkPass = () => {
+      try {
+        const stored = localStorage.getItem("vip_pass_code") || localStorage.getItem("carinosas_vip_pass");
+        setHasVIPPass(stored);
+      } catch {}
+    };
+    checkPass();
+    window.addEventListener("storage", checkPass);
+    window.addEventListener("vip_pass_updated", checkPass);
+    return () => {
+      window.removeEventListener("storage", checkPass);
+      window.removeEventListener("vip_pass_updated", checkPass);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -503,44 +520,85 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Blurred locked preview grid */}
-                  <div className="grid grid-cols-3 gap-3">
-                    {[1, 2, 3, 4, 5, 6].map(i => (
-                      <div 
-                        key={i} 
-                        onClick={() => setIsVaultModalOpen(true)}
-                        className="aspect-square bg-brand-black rounded-2xl border border-brand-gold/30 overflow-hidden relative group/item cursor-pointer shadow-lg"
-                      >
-                        <Image src={model.images[0] || ""} fill className="object-cover blur-md brightness-50" alt="Locked vault preview" />
-                        <div className="absolute inset-0 bg-brand-gold/10 backdrop-blur-md" />
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 relative z-10">
-                          <div className="w-8 h-8 rounded-full bg-brand-gold/20 border border-brand-gold/50 flex items-center justify-center text-brand-gold">
-                            <Lock size={13} />
+                  {hasVIPPass ? (
+                    <>
+                      {/* Unlocked Vault Grid */}
+                      <div className="p-4 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-between shadow-[0_0_25px_rgba(212,168,67,0.25)]">
+                        <div className="flex items-center gap-3">
+                          <Crown size={20} className="text-brand-gold fill-brand-gold animate-pulse" />
+                          <div>
+                            <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest block">
+                              Bóveda Secreta Desbloqueada
+                            </span>
+                            <span className="text-xs text-white font-serif font-bold">
+                              Pase VIP Activo: {hasVIPPass}
+                            </span>
                           </div>
-                          <span className="text-[7px] text-brand-gold font-black uppercase tracking-widest">VIP #{i}</span>
                         </div>
+                        <span className="text-[8px] px-2 py-1 rounded-full bg-brand-gold text-brand-black font-black uppercase tracking-wider">
+                          Acceso Total 4K
+                        </span>
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Secret Vault Call to Action Box */}
-                  <div className="p-6 rounded-3xl glass-obsidian border border-brand-gold/35 text-center space-y-4 shadow-[0_10px_35px_rgba(0,0,0,0.8)]">
-                    <div className="w-12 h-12 rounded-full bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center text-brand-gold mx-auto">
-                      <Crown size={22} />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-xl font-serif text-white italic">Bóveda Privada de {model.name}</h4>
-                      <p className="text-[10px] text-white/50 uppercase tracking-widest font-light max-w-sm mx-auto">
-                        Desbloquea 6 fotos y videos sin censura con verificación biométrica 4K.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setIsVaultModalOpen(true)}
-                      className="px-8 py-3.5 bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black text-[10px] font-black uppercase tracking-[0.25em] rounded-full hover:scale-105 transition-all shadow-[0_0_25px_rgba(212,168,67,0.4)]"
-                    >
-                      Desbloquear Bóveda VIP
-                    </button>
-                  </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {model.images.map((img, i) => (
+                          <div 
+                            key={i} 
+                            onClick={() => setStoryOpenIndex(i)}
+                            className="aspect-[4/5] bg-brand-black rounded-2xl border border-brand-gold/40 overflow-hidden relative group/item cursor-pointer shadow-xl hover:scale-105 transition-all"
+                          >
+                            <Image src={img} fill className="object-cover" alt={`Foto exclusiva ${i + 1}`} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity flex items-end p-2.5">
+                              <span className="text-[8px] text-brand-gold font-black uppercase tracking-wider">
+                                ✨ Ver en 4K Ultra HD
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Blurred locked preview grid */}
+                      <div className="grid grid-cols-3 gap-3">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                          <div 
+                            key={i} 
+                            onClick={() => setIsVaultModalOpen(true)}
+                            className="aspect-square bg-brand-black rounded-2xl border border-brand-gold/30 overflow-hidden relative group/item cursor-pointer shadow-lg hover:border-brand-gold"
+                          >
+                            <Image src={model.images[0] || ""} fill className="object-cover blur-md brightness-50" alt="Locked vault preview" />
+                            <div className="absolute inset-0 bg-brand-gold/10 backdrop-blur-md" />
+                            <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 relative z-10">
+                              <div className="w-8 h-8 rounded-full bg-brand-gold/20 border border-brand-gold/50 flex items-center justify-center text-brand-gold">
+                                <Lock size={13} />
+                              </div>
+                              <span className="text-[7px] text-brand-gold font-black uppercase tracking-widest">VIP #{i}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Secret Vault Call to Action Box */}
+                      <div className="p-6 rounded-3xl glass-obsidian border border-brand-gold/35 text-center space-y-4 shadow-[0_10px_35px_rgba(0,0,0,0.8)]">
+                        <div className="w-12 h-12 rounded-full bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center text-brand-gold mx-auto">
+                          <Crown size={22} />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-xl font-serif text-white italic">Bóveda Privada de {model.name}</h4>
+                          <p className="text-[10px] text-white/50 uppercase tracking-widest font-light max-w-sm mx-auto">
+                            Desbloquea 6 fotos y videos sin censura con verificación biométrica 4K.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setIsVaultModalOpen(true)}
+                          className="px-8 py-3.5 bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black text-[10px] font-black uppercase tracking-[0.25em] rounded-full hover:scale-105 transition-all shadow-[0_0_25px_rgba(212,168,67,0.4)]"
+                        >
+                          Desbloquear Bóveda VIP
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

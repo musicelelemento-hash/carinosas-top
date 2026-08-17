@@ -27,6 +27,13 @@ export default function AdminDashboardHUD({ onSelectTab }: AdminDashboardHUDProp
   const [loading, setLoading] = useState(true);
   const [boostingCity, setBoostingCity] = useState<string | null>(null);
   const [boostSuccess, setBoostSuccess] = useState<string | null>(null);
+  const [showSimulator, setShowSimulator] = useState(false);
+
+  // Simulator sliders
+  const [simDiamante, setSimDiamante] = useState(12);
+  const [simOro, setSimOro] = useState(15);
+  const [simPlata, setSimPlata] = useState(20);
+  const [simPasses, setSimPasses] = useState(35);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -133,6 +140,17 @@ export default function AdminDashboardHUD({ onSelectTab }: AdminDashboardHUDProp
               <span>Backup JSON</span>
             </button>
 
+            <button
+              onClick={() => {
+                sound.playGoldChime();
+                setShowSimulator(!showSimulator);
+              }}
+              className="px-4 py-3 rounded-2xl bg-gradient-to-r from-brand-gold via-[#FFE088] to-brand-gold text-brand-black text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(212,168,67,0.4)] hover:scale-105 transition-all cursor-pointer"
+            >
+              <DollarSign size={15} className="fill-brand-black" />
+              <span>Simulador $</span>
+            </button>
+
             <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-dark border border-brand-gold/30">
               <span className="text-[9px] text-[#A1A1AA] uppercase font-bold px-2">Boost 1-Clic:</span>
               {["Quito", "Guayaquil", "Machala", "Cuenca"].map((city) => (
@@ -159,6 +177,131 @@ export default function AdminDashboardHUD({ onSelectTab }: AdminDashboardHUDProp
         )}
 
       </div>
+
+      {/* ── INTERACTIVE FINANCIAL REVENUE SIMULATOR MODAL ── */}
+      {showSimulator && (
+        <div className="glass-obsidian border-2 border-brand-gold/40 rounded-[2.5rem] p-6 sm:p-8 shadow-[0_20px_80px_rgba(212,168,67,0.25)] space-y-6 animate-in zoom-in-95 duration-300 bg-gradient-to-br from-[#101016] to-[#08080C]">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-brand-gold text-brand-black flex items-center justify-center font-bold">
+                <DollarSign size={22} />
+              </div>
+              <div>
+                <h3 className="text-xl font-serif font-bold text-white">Simulador Financiero VIP en Tiempo Real</h3>
+                <p className="text-[10px] text-brand-gold uppercase font-bold tracking-widest">
+                  Proyección de facturación neta mensual y anual
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowSimulator(false)}
+              className="text-xs text-[#A1A1AA] hover:text-white uppercase font-bold"
+            >
+              ✕ Cerrar
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Slider 1 */}
+            <div className="space-y-2 glass-dark p-4 rounded-2xl border border-white/10">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-brand-gold">Diamante ($180/m)</span>
+                <span className="text-white font-mono">{simDiamante} modelos</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="50"
+                value={simDiamante}
+                onChange={(e) => setSimDiamante(Number(e.target.value))}
+                className="w-full accent-[#D4A843] cursor-pointer"
+              />
+              <span className="text-[9px] text-[#A1A1AA] block font-mono">Subtotal: ${(simDiamante * 180).toLocaleString()} USD</span>
+            </div>
+
+            {/* Slider 2 */}
+            <div className="space-y-2 glass-dark p-4 rounded-2xl border border-white/10">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-white">Oro Elite ($99/m)</span>
+                <span className="text-white font-mono">{simOro} modelos</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="50"
+                value={simOro}
+                onChange={(e) => setSimOro(Number(e.target.value))}
+                className="w-full accent-[#D4A843] cursor-pointer"
+              />
+              <span className="text-[9px] text-[#A1A1AA] block font-mono">Subtotal: ${(simOro * 99).toLocaleString()} USD</span>
+            </div>
+
+            {/* Slider 3 */}
+            <div className="space-y-2 glass-dark p-4 rounded-2xl border border-white/10">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-white/70">Plata ($49/m)</span>
+                <span className="text-white font-mono">{simPlata} modelos</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="50"
+                value={simPlata}
+                onChange={(e) => setSimPlata(Number(e.target.value))}
+                className="w-full accent-[#D4A843] cursor-pointer"
+              />
+              <span className="text-[9px] text-[#A1A1AA] block font-mono">Subtotal: ${(simPlata * 49).toLocaleString()} USD</span>
+            </div>
+
+            {/* Slider 4 */}
+            <div className="space-y-2 glass-dark p-4 rounded-2xl border border-white/10">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-brand-pink">Pases VIP ($75/u)</span>
+                <span className="text-white font-mono">{simPasses} pases</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={simPasses}
+                onChange={(e) => setSimPasses(Number(e.target.value))}
+                className="w-full accent-[#FF0062] cursor-pointer"
+              />
+              <span className="text-[9px] text-[#A1A1AA] block font-mono">Subtotal: ${(simPasses * 75).toLocaleString()} USD</span>
+            </div>
+          </div>
+
+          {/* Revenue Calculation Totals Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div className="p-5 rounded-3xl bg-brand-gold/15 border border-brand-gold/40 text-center">
+              <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest block">
+                Facturación Mensual
+              </span>
+              <span className="text-3xl font-serif font-bold text-white mt-1 block">
+                ${((simDiamante * 180) + (simOro * 99) + (simPlata * 49) + (simPasses * 75)).toLocaleString()} USD
+              </span>
+            </div>
+
+            <div className="p-5 rounded-3xl bg-emerald-500/15 border border-emerald-500/40 text-center">
+              <span className="text-[9px] text-emerald-400 uppercase font-black tracking-widest block">
+                Facturación Anual Estimada
+              </span>
+              <span className="text-3xl font-serif font-bold text-emerald-300 mt-1 block">
+                ${(((simDiamante * 180) + (simOro * 99) + (simPlata * 49) + (simPasses * 75)) * 12).toLocaleString()} USD
+              </span>
+            </div>
+
+            <div className="p-5 rounded-3xl glass-dark border border-white/15 text-center">
+              <span className="text-[9px] text-[#A1A1AA] uppercase font-black tracking-widest block">
+                Margen Operativo Neto
+              </span>
+              <span className="text-3xl font-serif font-bold text-brand-gold mt-1 block">
+                ~96.4%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── 4 MASTER STATS METRICS ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
