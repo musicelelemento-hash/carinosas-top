@@ -40,6 +40,7 @@ export default function ProfileCard({
   const [progress, setProgress] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   // 3D Motion Physics for multi-plane depth
   const x = useMotionValue(0);
@@ -294,7 +295,14 @@ export default function ProfileCard({
         </div>
 
         {/* ── IMAGE ── */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-brand-black">
+        <div className="relative aspect-[3/4] overflow-hidden bg-[#08080C]">
+          {/* Dark Skeleton Loader Placeholder */}
+          {!isImageLoaded && (
+            <div className="absolute inset-0 z-20 skeleton-dark flex items-center justify-center pointer-events-none">
+              <div className="w-8 h-8 rounded-full border-2 border-[#D4AF37]/20 border-t-[#D4AF37] animate-spin" />
+            </div>
+          )}
+
           {allImages.map((img, i) => {
             if (i > 0 && !isAnimating) return null;
             return (
@@ -305,19 +313,23 @@ export default function ProfileCard({
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover absolute inset-0 transition-all duration-1000"
+                onLoad={() => {
+                  if (i === 0) setIsImageLoaded(true);
+                }}
                 style={{
                   opacity: i === currentImageIndex ? 1 : 0,
                   transform: i === currentImageIndex ? (isAnimating ? 'scale(1.08)' : 'scale(1)') : 'scale(1.12)',
                   filter: isAnimating ? 'brightness(0.32) saturate(0.8)' : 'brightness(0.88)',
                   transition: 'opacity 0.8s ease, transform 1.2s cubic-bezier(0.23,1,0.32,1), filter 0.8s ease',
                 }}
-                priority={i === 0}
+                priority={i === 0 && (is_verified_4k || isBoosted)}
+                loading={i === 0 && (is_verified_4k || isBoosted) ? undefined : "lazy"}
               />
             );
           })}
 
           {/* Gradient overlay */}
-          <div className="absolute inset-0 magazine-overlay pointer-events-none" />
+          <div className="absolute inset-0 magazine-overlay pointer-events-none z-10" />
 
           {/* ── STATIC INFO (bottom) ── */}
           <div className={`absolute inset-x-0 bottom-0 p-6 space-y-2.5 transition-all duration-500 ${isHovered ? 'translate-y-6 opacity-0' : 'translate-y-0 opacity-100'}`}>

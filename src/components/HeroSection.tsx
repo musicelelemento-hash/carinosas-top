@@ -301,84 +301,90 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
           )}
         </div>
 
-        {/* ── INSTANT CITY & CANTON PILLS (1-TAP DIRECT GRAIN) ── */}
-        <div className="space-y-2 pt-1">
-          <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto no-scrollbar py-1 px-2">
-            {[
-              { id: "all", label: "🌐 Todo Ecuador", val: "" },
-              { id: "machala", label: "📍 Machala VIP", val: "Machala" },
-              { id: "pasaje", label: "📍 Pasaje", val: "Pasaje" },
-              { id: "pto-bolivar", label: "📍 Puerto Bolívar", val: "Puerto Bolívar" },
-              { id: "santa-rosa", label: "📍 Santa Rosa", val: "Santa Rosa" },
-              { id: "guayaquil", label: "📍 Guayaquil", val: "Guayaquil" },
-              { id: "quito", label: "📍 Quito", val: "Quito" },
-              { id: "cuenca", label: "📍 Cuenca", val: "Cuenca" },
-              { id: "manta", label: "📍 Manta", val: "Manta" },
-              { id: "santo-domingo", label: "📍 Sto. Domingo", val: "Santo Domingo" },
-            ].map((pill) => {
-              const isActive = (pill.val === "" && selectedCity === "Todas las Ciudades") || selectedCity === pill.val;
-              return (
-                <button
-                  key={pill.id}
-                  onClick={() => {
-                    if (pill.val === "") {
-                      setSelectedCity("Todas las Ciudades");
-                      onSelectLocation?.("");
-                    } else {
-                      setSelectedCity(pill.val);
-                      onSelectLocation?.(pill.val);
-                    }
-                    const collectionEl = document.getElementById("collection");
-                    if (collectionEl) {
-                      collectionEl.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                  className={`whitespace-nowrap flex-shrink-0 flex items-center gap-1 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
-                    isActive
-                      ? "bg-gradient-to-r from-brand-gold via-[#FFE088] to-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.5)] scale-105"
-                      : "glass-obsidian border border-white/10 hover:border-brand-gold/50 text-white/70 hover:text-brand-gold hover:bg-white/5"
-                  }`}
-                >
-                  <span>{pill.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        {/* ── CONSOLIDATED HORIZONTAL FILTER BAR (MOBILE FIRST · SMOOTH SCROLL) ── */}
+        <div className="pt-2 pb-1">
+          <div className="w-full overflow-x-auto no-scrollbar py-2 px-1 flex items-center justify-start md:justify-center gap-2 select-none">
+            
+            {/* Quick Location Pills */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {[
+                { id: "all", label: "🌐 Todo el País", val: "" },
+                { id: "machala", label: "📍 Machala VIP", val: "Machala" },
+                { id: "pasaje", label: "📍 Pasaje", val: "Pasaje" },
+                { id: "pto-bolivar", label: "📍 Pto. Bolívar", val: "Puerto Bolívar" },
+                { id: "santa-rosa", label: "📍 Santa Rosa", val: "Santa Rosa" },
+                { id: "guayaquil", label: "📍 Guayaquil", val: "Guayaquil" },
+                { id: "quito", label: "📍 Quito", val: "Quito" },
+                { id: "cuenca", label: "📍 Cuenca", val: "Cuenca" },
+                { id: "manta", label: "📍 Manta", val: "Manta" },
+                { id: "santo-domingo", label: "📍 Sto. Domingo", val: "Santo Domingo" },
+              ].map((pill) => {
+                const isActive = (pill.val === "" && selectedCity === "Todas las Ciudades") || selectedCity === pill.val;
+                return (
+                  <button
+                    key={pill.id}
+                    onClick={() => {
+                      if (pill.val === "") {
+                        setSelectedCity("Todas las Ciudades");
+                        onSelectLocation?.("");
+                      } else {
+                        setSelectedCity(pill.val);
+                        onSelectLocation?.(pill.val);
+                      }
+                      const collectionEl = document.getElementById("collection");
+                      if (collectionEl) {
+                        collectionEl.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className={`whitespace-nowrap flex items-center gap-1 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                      isActive
+                        ? "bg-gradient-to-r from-[#D4AF37] via-[#FFF1C2] to-[#D4AF37] text-black shadow-[0_0_20px_rgba(212,168,67,0.5)] scale-105"
+                        : "glass-obsidian border border-white/10 hover:border-[#D4AF37]/50 text-white/70 hover:text-[#D4AF37]"
+                    }`}
+                  >
+                    <span>{pill.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Special Category Pills */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-2">
-            {[
-              { id: "top-vip", label: "🔥 TOP VIP", val: "vip" },
-              { id: "verificadas", label: "⭐ Verificadas 4K", val: "verificada" },
-              { id: "culonas", label: "🍑 Culonas", val: "culona" },
-              { id: "tetonas", label: "🍒 Tetonas", val: "tetona" },
-              { id: "masajes", label: "💆 Masajes", val: "masaje" },
-              { id: "video-360", label: "🔞 Vídeo 360°", val: "video" },
-              { id: "novios", label: "🤝 Trato de Novios", val: "novios" },
-            ].map((pill) => {
-              const isActive = currentTag === pill.val;
-              return (
-                <button
-                  key={pill.id}
-                  onClick={() => {
-                    const newTag = currentTag === pill.val ? "" : pill.val;
-                    setCurrentTag(newTag);
-                    onSelectTag?.(newTag);
-                    const collectionEl = document.getElementById("collection");
-                    if (collectionEl) {
-                      collectionEl.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                  className={`whitespace-nowrap flex-shrink-0 flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all ${
-                    isActive
-                      ? "bg-brand-pink text-white shadow-[0_0_15px_rgba(255,0,98,0.4)]"
-                      : "glass-dark border border-white/10 hover:border-brand-pink/40 text-white/60 hover:text-white"
-                  }`}
-                >
-                  <span>{pill.label}</span>
-                </button>
-              );
-            })}
+            {/* Vertical Separator */}
+            <div className="h-5 w-px bg-[#D4AF37]/30 shrink-0 mx-1" />
+
+            {/* Verified Experience Category Chips */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {[
+                { id: "verificadas", label: "⭐ Verificación 4K", val: "verificada" },
+                { id: "top-vip", label: "👑 Selección TOP VIP", val: "vip" },
+                { id: "cenas", label: "🥂 Cenas & Eventos", val: "cena" },
+                { id: "masajes", label: "💆 Masaje Relax", val: "masaje" },
+                { id: "discreta", label: "🔒 Discreción Total", val: "discrecion" },
+              ].map((pill) => {
+                const isActive = currentTag === pill.val;
+                return (
+                  <button
+                    key={pill.id}
+                    onClick={() => {
+                      const newTag = currentTag === pill.val ? "" : pill.val;
+                      setCurrentTag(newTag);
+                      onSelectTag?.(newTag);
+                      const collectionEl = document.getElementById("collection");
+                      if (collectionEl) {
+                        collectionEl.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className={`whitespace-nowrap flex items-center gap-1 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-[#D4AF37] text-black font-black shadow-[0_0_15px_rgba(212,168,67,0.4)] scale-105"
+                        : "glass-dark border border-[#D4AF37]/25 text-white/80 hover:border-[#D4AF37]/60 hover:text-white"
+                    }`}
+                  >
+                    <span>{pill.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
           </div>
         </div>
 

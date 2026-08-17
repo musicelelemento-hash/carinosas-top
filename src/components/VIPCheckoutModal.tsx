@@ -114,12 +114,16 @@ export default function VIPCheckoutModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-xl glass-obsidian border border-brand-gold/40 rounded-[2.5rem] p-6 md:p-8 shadow-[0_25px_90px_rgba(0,0,0,0.95)] space-y-6 max-h-[90vh] overflow-y-auto no-scrollbar"
+        className="relative w-full max-w-xl glass-obsidian border border-[#D4AF37]/40 rounded-[2.5rem] p-6 md:p-8 shadow-[0_25px_90px_rgba(0,0,0,0.95)] space-y-6 max-h-[85dvh] overflow-y-auto no-scrollbar"
+        style={{
+          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 16px))",
+        }}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white/40 hover:text-white"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer"
+          aria-label="Cerrar modal"
         >
           <X size={15} />
         </button>

@@ -74,7 +74,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Cariñosas.top | Experiencias de Alto Nivel & Modelos VIP 4K",
-    description: "Perfiles 4K verificados con total discreción y encriptación de grado militar en Quito, Guayaquil, Cuenca y destinos internacionales.",
+    description: "Perfiles 4K verificados biométricamente con total privacidad, discreción absoluta y canal directo en Quito, Guayaquil, Cuenca y destinos internacionales.",
     url: "https://carinosas.top",
     siteName: "Cariñosas.top",
     images: [

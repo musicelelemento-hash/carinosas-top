@@ -187,7 +187,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
             </div>
             <div>
               <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.25em] block">
-                Radar Satelital GPS · {activeCountry.flag} {activeCountry.name}
+                Radar GPS Seguro · {activeCountry.flag} {activeCountry.name}
               </span>
               <span className="text-xs text-white/50 font-light">
                 Modelos verificadas en tiempo real en {activeCountry.name}
@@ -238,8 +238,8 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
             {/* Micro HUD Status */}
             <div className="grid grid-cols-2 gap-2 text-[10px] p-3 rounded-2xl glass-dark border border-white/5">
               <div>
-                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Cifrado Satelital</span>
-                <span className="text-emerald-400 font-mono font-bold">AES-256 Activo</span>
+                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Privacidad & Discreción</span>
+                <span className="text-emerald-400 font-mono font-bold">100% Blindada</span>
               </div>
               <div>
                 <span className="text-white/40 block text-[8px] uppercase tracking-wider">Tiempo Llegada</span>
@@ -387,8 +387,8 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
                 <Sparkles size={18} />
               </div>
               <div className="text-left">
-                <span className="text-[8px] text-brand-gold font-black uppercase tracking-widest block">Sincronización Satelital</span>
-                <span className="text-xs text-white font-serif italic">100% Cifrado AES-256</span>
+                <span className="text-[8px] text-brand-gold font-black uppercase tracking-widest block">Geolocalización Inmediata</span>
+                <span className="text-xs text-white font-serif italic">Privacidad & Discreción Total</span>
               </div>
             </div>
           </div>

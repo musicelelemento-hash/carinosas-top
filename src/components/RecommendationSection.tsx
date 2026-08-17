@@ -195,9 +195,9 @@ export default function RecommendationSection({ currentCountry }: Recommendation
         {/* ── HEADER & CONTROLS ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-obsidian border border-brand-gold/30 text-brand-gold">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-obsidian border border-[#D4AF37]/30 text-[#D4AF37]">
               <Compass size={13} className="animate-spin-slow" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em]">Radar de Proximidad Satelital</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em]">Geolocalización Inmediata & Radar Seguro</span>
             </div>
 
             <h2 className="text-3xl sm:text-5xl font-serif font-bold text-white italic tracking-tight">

@@ -24,7 +24,7 @@ interface FAQItem {
 const FAQS: FAQItem[] = [
   {
     q: "¿Cómo se garantiza que mi visita o llamada sea 100% privada?",
-    a: "Cariñosas.top no almacena registros de navegación ni cookies de rastreo comercial. La plataforma utiliza cifrado SSL de grado militar AES-256 y todas las conversaciones se canalizan directamente a WhatsApp sin intermediarios ni bases de datos intermedias."
+    a: "Cariñosas.top no almacena registros de navegación ni cookies de rastreo comercial. La plataforma cuenta con protocolos avanzados de privacidad y discreción total, y todas las conversaciones se canalizan directamente a WhatsApp sin intermediarios ni bases de datos de terceros."
   },
   {
     q: "¿Cómo reservar una suite o habitación en un Hotel 5★ con discreción?",

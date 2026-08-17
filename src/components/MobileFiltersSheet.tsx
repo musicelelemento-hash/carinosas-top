@@ -5,12 +5,7 @@ import {
   X, 
   Sliders, 
   Sparkles, 
-  ShieldCheck, 
-  DollarSign, 
-  MapPin, 
-  Check, 
-  Flame, 
-  Lock 
+  Check 
 } from "lucide-react";
 import { sound } from "@/lib/soundEngine";
 
@@ -59,7 +54,7 @@ export default function MobileFiltersSheet({
 
   if (!isOpen) return null;
 
-  const categories = ["Todas", "Cena VIP", "Hotel 5★", "Masaje Relax", "Viajes & Giras", "Universitaria"];
+  const categories = ["Todas", "Cena VIP", "Hotel 5★", "Masaje Relax", "Viajes & Giras", "Discreción Total"];
 
   const handleApply = () => {
     sound.playGoldChime();
@@ -81,8 +76,13 @@ export default function MobileFiltersSheet({
       {/* Backdrop tap to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
-      {/* Bottom Sheet Modal */}
-      <div className="relative w-full max-w-lg glass-obsidian border-t border-brand-gold/40 rounded-t-[3rem] p-6 pb-10 shadow-[0_-20px_80px_rgba(0,0,0,0.95)] space-y-6 z-10 animate-in slide-in-from-bottom duration-300">
+      {/* Bottom Sheet Modal with Safe Area & Max Height Containment */}
+      <div 
+        className="relative w-full max-w-lg glass-obsidian border-t border-[#D4AF37]/40 rounded-t-[2.5rem] p-6 shadow-[0_-20px_80px_rgba(0,0,0,0.95)] space-y-6 z-10 animate-in slide-in-from-bottom duration-300 max-h-[90dvh] overflow-y-auto overscroll-contain"
+        style={{
+          paddingBottom: "max(2.5rem, env(safe-area-inset-bottom, 24px))",
+        }}
+      >
         
         {/* Top Drag Handle Indicator */}
         <div className="w-12 h-1.5 rounded-full bg-white/20 mx-auto" />
@@ -90,13 +90,14 @@ export default function MobileFiltersSheet({
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <Sliders size={18} className="text-brand-gold" />
+            <Sliders size={18} className="text-[#D4AF37]" />
             <h3 className="text-xl font-serif text-white italic font-bold">Filtros Táctiles VIP</h3>
           </div>
 
           <button 
             onClick={onClose}
-            className="w-8 h-8 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white/40 hover:text-white"
+            className="w-8 h-8 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer"
+            aria-label="Cerrar filtros"
           >
             <X size={14} />
           </button>
@@ -106,7 +107,7 @@ export default function MobileFiltersSheet({
         <div className="space-y-3">
           <div className="flex justify-between items-center text-xs">
             <span className="text-white/60 font-bold uppercase tracking-wider">Tarifa Máxima por Hora:</span>
-            <span className="text-base font-serif font-bold text-brand-gold">${maxRate} USD</span>
+            <span className="text-base font-serif font-bold text-[#D4AF37]">${maxRate} USD</span>
           </div>
 
           <input
@@ -116,10 +117,10 @@ export default function MobileFiltersSheet({
             step="10"
             value={maxRate}
             onChange={(e) => setMaxRate(Number(e.target.value))}
-            className="w-full accent-brand-gold h-2 bg-white/10 rounded-lg cursor-pointer"
+            className="w-full accent-[#D4AF37] h-2 bg-white/10 rounded-lg cursor-pointer"
           />
 
-          <div className="flex justify-between text-[8px] text-white/30 uppercase font-black tracking-widest">
+          <div className="flex justify-between text-[8px] text-white/40 uppercase font-black tracking-widest">
             <span>$60 / h</span>
             <span>$150 / h</span>
             <span>$300+ / h</span>
@@ -134,7 +135,7 @@ export default function MobileFiltersSheet({
             {/* Online Toggle */}
             <button
               onClick={() => setOnlyOnline(!onlyOnline)}
-              className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
+              className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                 onlyOnline ? 'border-emerald-400 bg-emerald-500/15 text-emerald-400' : 'border-white/10 glass-dark text-white/60'
               }`}
             >
@@ -145,11 +146,11 @@ export default function MobileFiltersSheet({
             {/* 4K Verified Toggle */}
             <button
               onClick={() => setOnly4K(!only4K)}
-              className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                only4K ? 'border-brand-gold bg-brand-gold/15 text-brand-gold' : 'border-white/10 glass-dark text-white/60'
+              className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer ${
+                only4K ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#D4AF37]' : 'border-white/10 glass-dark text-white/60'
               }`}
             >
-              <span className="text-[10px] font-bold">✨ Solo 4K Verified</span>
+              <span className="text-[10px] font-bold">✨ Verificación 4K</span>
               {only4K && <Check size={12} />}
             </button>
           </div>
@@ -157,16 +158,16 @@ export default function MobileFiltersSheet({
 
         {/* 3. Category Chips */}
         <div className="space-y-2.5">
-          <span className="text-[9px] text-white/40 uppercase font-black tracking-widest block">Tipo de Encuentro:</span>
+          <span className="text-[9px] text-white/40 uppercase font-black tracking-widest block">Propuesta de Encuentro:</span>
           <div className="flex flex-wrap gap-2">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-brand-pink text-white shadow-md'
-                    : 'glass-dark border border-white/10 text-white/50 hover:text-white'
+                    ? 'bg-[#D4AF37] text-black shadow-md font-black'
+                    : 'glass-dark border border-white/10 text-white/60 hover:text-white'
                 }`}
               >
                 {cat}
@@ -178,7 +179,7 @@ export default function MobileFiltersSheet({
         {/* Apply Action Button */}
         <button
           onClick={handleApply}
-          className="w-full py-4 rounded-2xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] transition-all flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-[#D4AF37] hover:bg-white text-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <Sparkles size={16} />
           Aplicar Filtros & Ver Modelos

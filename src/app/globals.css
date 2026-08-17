@@ -885,3 +885,42 @@ animation: boostPulse 2.5s infinite ease-in-out;
   border: 1px solid rgba(212, 168, 67, 0.22);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(212, 168, 67, 0.2);
 }
+
+/* ===== SAFE AREA & MOBILE KEYBOARD UTILITIES ===== */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 16px));
+}
+
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top, 16px));
+}
+
+.bottom-safe {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.top-safe {
+  top: env(safe-area-inset-top, 0px);
+}
+
+/* ===== SKELETON LOADER PREVIEWS ===== */
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-dark {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(212, 168, 67, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 2s infinite ease-in-out;
+}
+

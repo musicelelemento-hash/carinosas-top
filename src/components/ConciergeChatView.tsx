@@ -151,7 +151,7 @@ export default function ConciergeChatView() {
                 </span>
               </div>
               <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1 mt-0.5">
-                <Lock size={10} /> Encriptación Militar 256-bit · En Línea
+                <Lock size={10} /> Privacidad y Discreción Total · Canal Directo
               </span>
             </div>
           </div>

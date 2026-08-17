@@ -6,7 +6,7 @@ import GeoRadarFullscreen from "@/components/GeoRadarFullscreen";
 
 export const metadata: Metadata = {
   title: "Geo-Radar 4K GPS | Cariñosas.top Ecuador",
-  description: "Ubica acompañantes y modelos VIP en tiempo real con geolocalización satelital en Machala, Guayaquil, Quito y todo Ecuador.",
+  description: "Ubica acompañantes y modelos VIP en tiempo real con geolocalización inmediata en Machala, Guayaquil, Quito y todo Ecuador.",
 };
 
 export default function RadarPage() {

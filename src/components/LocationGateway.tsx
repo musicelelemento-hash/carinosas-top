@@ -991,7 +991,7 @@ export default function LocationGateway({ onEnter }: LocationGatewayProps) {
         {/* ── FOOTER SEAL ── */}
         <footer className="relative z-20 text-center py-4 px-6 shrink-0 border-t border-white/5 bg-[#08080C]/80 backdrop-blur-md">
           <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase">
-            🔒 Discreción Total Blindada · Encriptación Satelital · Red Élite Iberoamérica
+            🔒 Discreción Total Blindada · Verificación Biométrica 4K · Red Élite Iberoamérica
           </p>
         </footer>
 

@@ -78,18 +78,18 @@ export default function PushPrompt() {
 
   return (
     <>
-      {/* ── Discreet Corner Floating Button ── */}
+      {/* ── Discreet Corner Floating Button (Desktop) ── */}
       {isVisible && !isModalOpen && (
-        <div className="fixed bottom-20 right-6 z-[80] animate-in slide-in-from-right-6 duration-500">
+        <div className="hidden md:block fixed bottom-6 left-6 z-[50] animate-in slide-in-from-left-6 duration-500">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="group flex items-center gap-2.5 px-4 py-2.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_10px_35px_rgba(0,0,0,0.85)] hover:border-brand-gold transition-all"
+            className="group flex items-center gap-2.5 px-4 py-2.5 rounded-full glass-obsidian border border-[#D4AF37]/40 shadow-[0_10px_35px_rgba(0,0,0,0.85)] hover:border-[#D4AF37] transition-all cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-full bg-brand-gold/15 flex items-center justify-center text-brand-gold group-hover:scale-110 transition-transform">
+            <div className="w-7 h-7 rounded-full bg-[#D4AF37]/15 flex items-center justify-center text-[#D4AF37] group-hover:scale-110 transition-transform">
               <Smartphone size={14} />
             </div>
             <div className="text-left">
-              <span className="text-[9px] font-black uppercase tracking-wider text-brand-gold block leading-none">App Secreta</span>
+              <span className="text-[9px] font-black uppercase tracking-wider text-[#D4AF37] block leading-none">App Secreta</span>
               <span className="text-[7px] text-white/50 uppercase tracking-widest font-bold">Modo Camuflaje</span>
             </div>
           </button>

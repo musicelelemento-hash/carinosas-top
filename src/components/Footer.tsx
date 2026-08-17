@@ -90,9 +90,9 @@ export default function Footer() {
             </h4>
             <div className="space-y-3.5">
               {[
-                { icon: ShieldCheck, text: 'Verificación 4K Manual', color: 'text-brand-gold' },
-                { icon: Lock, text: 'Encriptación AES-256', color: 'text-brand-gold' },
-                { icon: Gem, text: 'Discreción Absoluta', color: 'text-brand-gold' },
+                { icon: ShieldCheck, text: 'Verificación Biométrica 4K', color: 'text-[#D4AF37]' },
+                { icon: Lock, text: 'Privacidad y Discreción Total', color: 'text-[#D4AF37]' },
+                { icon: Gem, text: 'Canal Directo y Seguro', color: 'text-[#D4AF37]' },
               ].map(({ icon: Icon, text, color }) => (
                 <div key={text} className="flex items-center gap-3 group">
                   <Icon size={16} className={`${color} transition-transform group-hover:scale-110`} />

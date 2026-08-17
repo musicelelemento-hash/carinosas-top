@@ -65,7 +65,7 @@ const PLANS: PlanTier[] = [
       "Badge 'Verificada'",
       "Hasta 6 Fotos HD + 1 Vídeo Corto",
       "Botón WhatsApp Directo",
-      "Presencia en el Geo-Radar Satelital"
+      "Presencia en el Geo-Radar Inmediato"
     ],
     gradient: "from-white/20 via-white/10 to-transparent"
   },

@@ -6,10 +6,7 @@ import {
   X, 
   MessageCircle, 
   EyeOff, 
-  Smartphone, 
-  Crown, 
-  ShieldAlert, 
-  Zap 
+  Crown
 } from "lucide-react";
 
 export default function MobileSpeedDial() {
@@ -25,43 +22,48 @@ export default function MobileSpeedDial() {
   };
 
   return (
-    <div className="md:hidden fixed bottom-24 right-5 z-[130] select-none">
+    <div 
+      className="md:hidden fixed bottom-[88px] right-4 z-[55] select-none"
+      style={{
+        marginBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
+    >
       
       {/* Radial Expanded Actions */}
       {isOpen && (
-        <div className="flex flex-col items-end gap-3 mb-3 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="flex flex-col items-end gap-2.5 mb-3 animate-in slide-in-from-bottom-5 duration-300">
           
           {/* Action 1: Panic Exit */}
           <button
             onClick={handlePanicExit}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-red-600/90 text-white shadow-xl hover:bg-red-500 active:scale-95 transition-all"
+            className="flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-red-600/90 text-white shadow-xl hover:bg-red-500 active:scale-95 transition-all"
           >
             <span className="text-[9px] font-black uppercase tracking-wider">Salida Rápida (Google)</span>
-            <div className="w-7 h-7 rounded-full bg-black/30 flex items-center justify-center">
-              <EyeOff size={14} />
+            <div className="w-6 h-6 rounded-full bg-black/30 flex items-center justify-center">
+              <EyeOff size={13} />
             </div>
           </button>
 
           {/* Action 2: WhatsApp Concierge */}
           <button
             onClick={handleConcierge}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-brand-gold text-brand-black shadow-xl hover:bg-white active:scale-95 transition-all"
+            className="flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[#D4AF37] text-black shadow-xl hover:bg-white active:scale-95 transition-all font-bold"
           >
             <span className="text-[9px] font-black uppercase tracking-wider">Concierge VIP 24/7</span>
-            <div className="w-7 h-7 rounded-full bg-black/20 flex items-center justify-center">
-              <MessageCircle size={14} fill="currentColor" />
+            <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
+              <MessageCircle size={13} fill="currentColor" />
             </div>
           </button>
 
-          {/* Action 3: Camouflage App */}
+          {/* Action 3: Club Alpha 3D */}
           <a
-            href="#vip-lounge"
+            href="/#vip-lounge"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full glass-obsidian border border-brand-gold/40 text-brand-gold shadow-xl active:scale-95 transition-all"
+            className="flex items-center gap-2.5 px-3.5 py-2 rounded-full glass-obsidian border border-[#D4AF37]/40 text-[#D4AF37] shadow-xl active:scale-95 transition-all"
           >
             <span className="text-[9px] font-black uppercase tracking-wider text-white">Club Alpha 3D</span>
-            <div className="w-7 h-7 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold">
-              <Crown size={14} />
+            <div className="w-6 h-6 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37]">
+              <Crown size={13} />
             </div>
           </a>
 
@@ -71,10 +73,11 @@ export default function MobileSpeedDial() {
       {/* Main Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-13 h-13 w-12 h-12 rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] transition-all duration-300 active:scale-90 ${
+        aria-label="Acciones Rápidas VIP"
+        className={`w-12 h-12 rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all duration-300 active:scale-90 ${
           isOpen
-            ? 'bg-brand-pink text-white rotate-45 shadow-[0_0_25px_rgba(255,0,98,0.6)]'
-            : 'bg-brand-gold text-brand-black shadow-[0_0_25px_rgba(212,168,67,0.5)]'
+            ? 'bg-[#FF0062] text-white rotate-45 shadow-[0_0_25px_rgba(255,0,98,0.6)]'
+            : 'bg-[#D4AF37] text-black shadow-[0_0_25px_rgba(212,168,67,0.45)] hover:scale-105'
         }`}
         title="Acciones Rápidas VIP"
       >
