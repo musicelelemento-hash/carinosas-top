@@ -1,13 +1,32 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
-import { ChevronRight, Zap, Radar, ShieldCheck, MessageCircle, X, MapPin, Star, Navigation, LocateFixed, Sparkles, Lock } from "lucide-react";
+import { 
+  ChevronRight, 
+  Zap, 
+  Radar, 
+  ShieldCheck, 
+  MessageCircle, 
+  X, 
+  MapPin, 
+  Star, 
+  Navigation, 
+  LocateFixed, 
+  Sparkles, 
+  Lock, 
+  Unlock,
+  Crosshair,
+  Volume2,
+  CheckCircle2,
+  Compass
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import LiveMapAnimator from "./LiveMapAnimator";
 import { sound } from "@/lib/soundEngine";
+import { type Country, getCountryById } from "@/lib/countries";
 
 // Dynamic imports for leaflet (SSR-safe)
 const MapContainer = dynamic(
@@ -26,9 +45,10 @@ const Popup = dynamic(
   () => import("react-leaflet").then((m) => m.Popup),
   { ssr: false }
 );
-
-// ECUADOR CITY PRESETS
-import { type Country, getCountryById } from "@/lib/countries";
+const Circle = dynamic(
+  () => import("react-leaflet").then((m) => m.Circle),
+  { ssr: false }
+);
 
 interface MapModel {
   id: string;
@@ -41,6 +61,8 @@ interface MapModel {
   sector?: string;
   whatsapp?: string;
   age?: number;
+  rate?: number;
+  distanceKm?: number;
 }
 
 interface LiveMapProps {
@@ -59,7 +81,20 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
   const [selectedModel, setSelectedModel] = useState<MapModel | null>(null);
   const [L, setL] = useState<typeof import("leaflet") | null>(null);
   const [mapTarget, setMapTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
+  const [activeRadius, setActiveRadius] = useState<"1km" | "3km" | "5km" | "all">("5km");
+  
+  // Mobile touch lock state: on small screens, default to false so page scroll is unhindered
+  const [isMapInteractive, setIsMapInteractive] = useState<boolean>(true);
+  const [showTouchNotice, setShowTouchNotice] = useState<boolean>(false);
   const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Detect if on mobile on mount to default touch lock
+    if (typeof window !== "undefined") {
+      const isMobile = window.innerWidth < 1024;
+      setIsMapInteractive(!isMobile);
+    }
+  }, []);
 
   // Sync selected city when activeCountry changes
   useEffect(() => {
@@ -93,65 +128,92 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
     }
   }, []);
 
-  // Compute models for selected city with realistic radar entries
-  const dbCityModels = models.filter(
-    (m) => m.city?.toLowerCase().includes(selectedCity?.toLowerCase()) || (m.sector && m.sector.toLowerCase().includes(selectedCity?.toLowerCase()))
-  );
-
+  // Fallback realistic models per city with coordinates
   const fallbackPreset = cityPresets[selectedCity] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] as [number, number], zoom: 13, label: selectedCity };
 
-  const cityModels: MapModel[] = dbCityModels.length > 0 ? dbCityModels : [
-    {
-      id: `live-${selectedCity}-1`,
-      name: `Valentina S.`,
-      city: selectedCity,
-      sector: `${selectedCity} Zona VIP Élite`,
-      lat: fallbackPreset.center[0] + 0.003,
-      lng: fallbackPreset.center[1] + 0.004,
-      plan_type: "VIP Elite",
-      images: ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
-      whatsapp: "593987654321",
-      age: 23
-    },
-    {
-      id: `live-${selectedCity}-2`,
-      name: `Camila R.`,
-      city: selectedCity,
-      sector: `${selectedCity} Suites 5★`,
-      lat: fallbackPreset.center[0] - 0.004,
-      lng: fallbackPreset.center[1] - 0.003,
-      plan_type: "Diamante",
-      images: ["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800"],
-      whatsapp: "593987654322",
-      age: 24
-    },
-    {
-      id: `live-${selectedCity}-3`,
-      name: `Luciana M.`,
-      city: selectedCity,
-      sector: `${selectedCity} Zona Residencial`,
-      lat: fallbackPreset.center[0] + 0.005,
-      lng: fallbackPreset.center[1] - 0.004,
-      plan_type: "VIP Elite",
-      images: ["https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800"],
-      whatsapp: "593987654323",
-      age: 22
-    },
-    {
-      id: `live-${selectedCity}-4`,
-      name: `Elena V.`,
-      city: selectedCity,
-      sector: `${selectedCity} Plaza VIP`,
-      lat: fallbackPreset.center[0] - 0.002,
-      lng: fallbackPreset.center[1] + 0.006,
-      plan_type: "Oro",
-      images: ["https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"],
-      whatsapp: "593987654324",
-      age: 25
-    }
-  ];
+  const cityModels: MapModel[] = useMemo(() => {
+    const dbCityModels = models.filter(
+      (m) => m.city?.toLowerCase().includes(selectedCity?.toLowerCase()) || (m.sector && m.sector.toLowerCase().includes(selectedCity?.toLowerCase()))
+    );
 
-  const displayMapModels = dbCityModels.length > 0 ? dbCityModels : cityModels;
+    if (dbCityModels.length > 0) return dbCityModels;
+
+    return [
+      {
+        id: `live-${selectedCity}-1`,
+        name: `Valentina S.`,
+        city: selectedCity,
+        sector: `${selectedCity} Zona VIP Élite`,
+        lat: fallbackPreset.center[0] + 0.0035,
+        lng: fallbackPreset.center[1] + 0.0042,
+        plan_type: "VIP Elite",
+        images: ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
+        whatsapp: "593987654321",
+        age: 23,
+        rate: 130,
+        distanceKm: 0.8
+      },
+      {
+        id: `live-${selectedCity}-2`,
+        name: `Camila R.`,
+        city: selectedCity,
+        sector: `${selectedCity} Suites 5★`,
+        lat: fallbackPreset.center[0] - 0.0045,
+        lng: fallbackPreset.center[1] - 0.0035,
+        plan_type: "Diamante",
+        images: ["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800"],
+        whatsapp: "593987654322",
+        age: 24,
+        rate: 150,
+        distanceKm: 1.2
+      },
+      {
+        id: `live-${selectedCity}-3`,
+        name: `Luciana M.`,
+        city: selectedCity,
+        sector: `${selectedCity} Centro Residencial`,
+        lat: fallbackPreset.center[0] + 0.0062,
+        lng: fallbackPreset.center[1] - 0.0048,
+        plan_type: "VIP Elite",
+        images: ["https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800"],
+        whatsapp: "593987654323",
+        age: 22,
+        rate: 120,
+        distanceKm: 1.6
+      },
+      {
+        id: `live-${selectedCity}-4`,
+        name: `Elena V.`,
+        city: selectedCity,
+        sector: `${selectedCity} Plaza VIP`,
+        lat: fallbackPreset.center[0] - 0.0028,
+        lng: fallbackPreset.center[1] + 0.0065,
+        plan_type: "Oro",
+        images: ["https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"],
+        whatsapp: "593987654324",
+        age: 25,
+        rate: 140,
+        distanceKm: 2.1
+      }
+    ];
+  }, [models, selectedCity, fallbackPreset]);
+
+  // Radius filtering (meters)
+  const radiusMeters = useMemo(() => {
+    switch (activeRadius) {
+      case "1km": return 1200;
+      case "3km": return 3200;
+      case "5km": return 5500;
+      case "all": return 18000;
+    }
+  }, [activeRadius]);
+
+  const displayMapModels = useMemo(() => {
+    if (activeRadius === "all") return cityModels;
+    // Filter by approx distance
+    const maxKm = activeRadius === "1km" ? 1.5 : activeRadius === "3km" ? 3.5 : 6.0;
+    return cityModels.filter(m => (m.distanceKm || 1.0) <= maxKm);
+  }, [cityModels, activeRadius]);
 
   const handleCitySelect = (cityKey: string) => {
     sound.playSonarPing();
@@ -177,10 +239,10 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
     if (!L) return undefined;
     return new L.DivIcon({
       html: `<div class="relative group cursor-pointer">
-        <div class="absolute -inset-2 rounded-full ${isSelected ? 'bg-[#FF0062]/40 animate-ping' : 'bg-[#D4AF37]/30 animate-pulse'} blur-sm"></div>
-        <div class="relative w-11 h-11 rounded-full p-[2px] ${isSelected ? 'bg-gradient-to-tr from-[#FF0062] to-[#FF80A0] scale-110 shadow-[0_0_20px_rgba(255,0,98,0.7)]' : 'bg-gradient-to-tr from-[#D4AF37] via-[#FFE088] to-[#AA7C11] shadow-[0_0_15px_rgba(212,175,55,0.6)]'} transition-transform duration-300">
+        <div class="absolute -inset-2 rounded-full ${isSelected ? 'bg-[#FF0062]/50 animate-ping' : 'bg-[#D4AF37]/35 animate-pulse'} blur-sm"></div>
+        <div class="relative w-11 h-11 rounded-full p-[2px] ${isSelected ? 'bg-gradient-to-tr from-[#FF0062] to-[#FF80A0] scale-110 shadow-[0_0_25px_rgba(255,0,98,0.8)]' : 'bg-gradient-to-tr from-[#D4AF37] via-[#FFF1C2] to-[#AA7C11] shadow-[0_0_18px_rgba(212,175,55,0.65)]'} transition-transform duration-300">
           <img src="${imgUrl}" alt="VIP" class="w-full h-full object-cover rounded-full" />
-          <div class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-black"></div>
+          <div class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-black"></div>
         </div>
       </div>`,
       className: "custom-avatar-pin",
@@ -192,36 +254,42 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
   const initialCenter = (cityPresets[initialCityKey] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] }).center;
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#08080C] border-y border-brand-gold/20">
+    <section className="relative w-full overflow-hidden bg-[#08080C] border-y border-[#D4AF37]/20" id="geo-radar-live">
       
-      {/* City Selector Bar */}
-      <div className="relative z-30 px-6 py-4 bg-black/60 backdrop-blur-2xl border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      {/* ── TOP TACTICAL HUD BAR ── */}
+      <div className="relative z-30 px-4 sm:px-6 py-4 bg-[#0A0A0F]/90 backdrop-blur-2xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-brand-gold/15 border border-brand-gold/30 flex items-center justify-center text-brand-gold">
-              <Radar size={16} className="animate-spin-slow" />
+            <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-[0_0_20px_rgba(212,168,67,0.3)]">
+              <Radar size={20} className="animate-spin-slow text-[#D4AF37]" />
             </div>
             <div>
-              <span className="text-[10px] text-brand-gold font-black uppercase tracking-[0.25em] block">
-                Radar GPS Seguro · {activeCountry.flag} {activeCountry.name}
-              </span>
-              <span className="text-xs text-white/50 font-light">
-                Modelos verificadas en tiempo real en {activeCountry.name}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#D4AF37] font-black uppercase tracking-[0.3em] block">
+                  Geo-Radar 4K Táctico
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[8px] font-black uppercase tracking-wider flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live GPS
+                </span>
+              </div>
+              <span className="text-xs text-white/60 font-light">
+                Detección de suites y acompañantes verificadas en {activeCountry.name}
               </span>
             </div>
           </div>
 
-          {/* City Pills */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+          {/* City Selector Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full md:w-auto">
             {Object.entries(cityPresets).map(([key, val]) => (
               <button
                 key={key}
                 onClick={() => handleCitySelect(key)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all ${
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
                   selectedCity === key
-                    ? "bg-brand-gold text-brand-black border-brand-gold shadow-[0_0_20px_rgba(212,168,67,0.4)]"
-                    : "glass-dark border-white/10 text-white/50 hover:text-white hover:border-white/30"
+                    ? "bg-gradient-to-r from-[#D4AF37] via-[#FFF1C2] to-[#D4AF37] text-black border-[#D4AF37] shadow-[0_0_20px_rgba(212,168,67,0.4)] scale-105"
+                    : "glass-dark border-white/10 text-white/50 hover:text-white hover:border-[#D4AF37]/40"
                 }`}
               >
                 {val.label}
@@ -232,58 +300,86 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
         </div>
       </div>
 
-      {/* Main Container: Split Sidebar + Map */}
-      <div className="flex flex-col lg:flex-row h-[750px] relative">
+      {/* ── MAIN COCKPIT WORKSPACE (DESKTOP SPLIT + MOBILE COOPERATIVE TOUCH) ── */}
+      <div className="flex flex-col lg:flex-row h-[620px] lg:h-[720px] relative">
         
-        {/* === SIDEBAR COMPONENT (No Overlaps, Clean Typography) === */}
-        <div className="w-full lg:w-[420px] bg-[#0A0A0F]/95 border-r border-white/10 overflow-y-auto custom-scrollbar z-20 flex flex-col justify-between backdrop-blur-3xl">
+        {/* === SIDEBAR COMPONENT (DESKTOP COCKPIT) === */}
+        <div className="hidden lg:flex w-[420px] bg-[#0A0A0F]/95 border-r border-white/10 overflow-y-auto custom-scrollbar z-20 flex-col justify-between backdrop-blur-3xl shrink-0">
           
           {/* Top Header Box */}
           <div className="p-6 border-b border-white/10 space-y-4 bg-black/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-[10px] text-white/70 font-black uppercase tracking-widest">
-                  Zona: {selectedCity}
+                <span className="text-[10px] text-white/80 font-black uppercase tracking-widest">
+                  Zona Radar: {selectedCity}
                 </span>
               </div>
-              <span className="text-[9px] px-2.5 py-1 rounded-full bg-brand-gold/15 text-brand-gold font-bold border border-brand-gold/30">
-                {cityModels.length} Disponibles
+              <span className="text-[9px] px-2.5 py-1 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] font-bold border border-[#D4AF37]/35 shadow-sm">
+                {displayMapModels.length} Modelos en Rango
               </span>
             </div>
 
-            {/* Micro HUD Status */}
+            {/* Range Selector Buttons in Sidebar */}
+            <div className="space-y-1.5">
+              <span className="text-[8px] text-white/40 uppercase font-black tracking-widest block">Radio de Proximidad:</span>
+              <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl glass-dark border border-white/10">
+                {(["1km", "3km", "5km", "all"] as const).map((rad) => (
+                  <button
+                    key={rad}
+                    onClick={() => {
+                      sound.playSubtleClick();
+                      setActiveRadius(rad);
+                    }}
+                    className={`py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer text-center ${
+                      activeRadius === rad
+                        ? "bg-[#D4AF37] text-black shadow-md font-black"
+                        : "text-white/40 hover:text-white"
+                    }`}
+                  >
+                    {rad === "all" ? "Todo" : rad}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Micro HUD Telemetry */}
             <div className="grid grid-cols-2 gap-2 text-[10px] p-3 rounded-2xl glass-dark border border-white/5">
               <div>
-                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Privacidad & Discreción</span>
+                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Discreción</span>
                 <span className="text-emerald-400 font-mono font-bold">100% Blindada</span>
               </div>
               <div>
-                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Tiempo Llegada</span>
-                <span className="text-brand-gold font-bold">5-15 min Suite</span>
+                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Llegada a Suite</span>
+                <span className="text-[#D4AF37] font-bold">5-12 min</span>
               </div>
             </div>
           </div>
           
           {/* List of Models */}
           <div className="flex-1 divide-y divide-white/5 overflow-y-auto">
-            {cityModels.length === 0 ? (
+            {displayMapModels.length === 0 ? (
               <div className="p-10 text-center space-y-2 text-white/40 text-xs">
-                <MapPin size={24} className="mx-auto text-brand-gold/40" />
-                <p>No hay modelos con GPS activo en este momento en {selectedCity}.</p>
-                <p className="text-[10px] text-brand-gold">Selecciona otra ciudad arriba.</p>
+                <MapPin size={24} className="mx-auto text-[#D4AF37]/40" />
+                <p>No hay modelos en el radio de {activeRadius} en {selectedCity}.</p>
+                <button
+                  onClick={() => setActiveRadius("all")}
+                  className="text-[10px] text-[#D4AF37] hover:underline block mx-auto mt-2 cursor-pointer"
+                >
+                  Ampliar a toda la ciudad
+                </button>
               </div>
             ) : (
-              cityModels.map((model) => (
+              displayMapModels.map((model) => (
                 <button
                   key={model.id}
                   onClick={() => handleModelSelect(model)}
-                  className={`w-full p-5 text-left flex items-center gap-4 transition-all hover:bg-white/5 group relative ${
-                    selectedModel?.id === model.id ? 'bg-brand-gold/10 border-l-4 border-brand-gold' : ''
+                  className={`w-full p-4 text-left flex items-center gap-3.5 transition-all hover:bg-white/5 group relative cursor-pointer ${
+                    selectedModel?.id === model.id ? 'bg-[#D4AF37]/10 border-l-4 border-[#D4AF37]' : ''
                   }`}
                 >
                   {/* Photo with status indicator */}
-                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-brand-gold/50 transition-all shadow-md">
+                  <div className="relative w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-[#D4AF37]/50 transition-all shadow-md">
                     <Image 
                       src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
                       alt={model.name} 
@@ -295,50 +391,58 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
 
                   {/* Info */}
                   <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-white font-serif text-lg font-bold group-hover:text-brand-gold transition-colors truncate">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-white font-serif text-base font-bold group-hover:text-[#D4AF37] transition-colors truncate">
                         {model.name}
                       </h4>
-                      {model.plan_type === 'VIP Elite' && (
-                        <ShieldCheck size={14} className="text-brand-gold shrink-0" />
-                      )}
+                      <span className="text-[10px] font-mono font-bold text-[#D4AF37]">
+                        ${model.rate || 130}/h
+                      </span>
                     </div>
                     
-                    <p className="text-[10px] text-white/50 uppercase tracking-wider font-bold truncate">
+                    <p className="text-[9px] text-white/50 uppercase tracking-wider font-bold truncate">
                       {model.age ? `${model.age} Años · ` : ''}{model.sector || 'Zona Exclusiva'}
                     </p>
 
                     <div className="flex items-center gap-2 text-[9px] text-emerald-400 font-bold">
-                      <span>🟢 Disponible Ahora</span>
+                      <span>🟢 En Línea</span>
                       <span className="text-white/30">·</span>
-                      <span className="text-brand-gold">A ~ 1.2 km</span>
+                      <span className="text-[#D4AF37]">A ~ {model.distanceKm || 1.2} km</span>
                     </div>
                   </div>
 
-                  <ChevronRight size={16} className={`text-white/20 group-hover:text-brand-gold transition-all ${selectedModel?.id === model.id ? 'translate-x-1 text-brand-gold' : ''}`} />
+                  <ChevronRight size={15} className={`text-white/20 group-hover:text-[#D4AF37] transition-all ${selectedModel?.id === model.id ? 'translate-x-1 text-[#D4AF37]' : ''}`} />
                 </button>
               ))
             )}
           </div>
 
           {/* Sidebar Footer */}
-          <div className="p-4 border-t border-white/10 bg-black/40 text-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] block">
-              Discreción Absoluta · Sin Rastro Bancario
+          <div className="p-3.5 border-t border-white/10 bg-black/40 text-center">
+            <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] block font-mono">
+              🔒 Privacidad & Discreción 100% Blindada
             </span>
           </div>
         </div>
 
-        {/* === TACTICAL MAP ENGINE === */}
-        <div className="flex-1 relative z-10">
+        {/* === TACTICAL MAP ENGINE & MOBILE OVERLAYS === */}
+        <div 
+          className="flex-1 relative z-10 overflow-hidden"
+          onClick={() => {
+            if (!isMapInteractive) {
+              setShowTouchNotice(true);
+              setTimeout(() => setShowTouchNotice(false), 2500);
+            }
+          }}
+        >
           {!loading && typeof window !== "undefined" && (
             <MapContainer
               center={initialCenter}
               zoom={13}
               scrollWheelZoom={false}
-              dragging={true}
-              touchZoom={true}
-              doubleClickZoom={true}
+              dragging={isMapInteractive}
+              touchZoom={isMapInteractive}
+              doubleClickZoom={isMapInteractive}
               className="w-full h-full"
               zoomControl={false}
               ref={mapRef}
@@ -349,6 +453,21 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
               />
               
               {mapTarget && <LiveMapAnimator target={mapTarget} />}
+
+              {/* Dynamic Range Circle Halo */}
+              {fallbackPreset && activeRadius !== "all" && (
+                <Circle
+                  center={fallbackPreset.center}
+                  radius={radiusMeters}
+                  pathOptions={{
+                    color: "#D4AF37",
+                    fillColor: "#D4AF37",
+                    fillOpacity: 0.05,
+                    weight: 1.5,
+                    dashArray: "6 10"
+                  }}
+                />
+              )}
 
               {/* Verified Models Avatar Pins with Sonar Pulse */}
               {displayMapModels.map((model) => (
@@ -363,7 +482,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
                     eventHandlers={{ click: () => handleModelSelect(model) }}
                   >
                     <Popup className="premium-map-popup">
-                       <div className="p-4 w-60 space-y-3 bg-[#0c0c10] text-white rounded-2xl border border-brand-gold/30">
+                       <div className="p-4 w-60 space-y-3 bg-[#0c0c10] text-white rounded-2xl border border-[#D4AF37]/35 shadow-2xl">
                            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-black relative">
                               <Image 
                                 src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
@@ -371,13 +490,13 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
                                 fill 
                                 className="object-cover" 
                               />
-                              <div className="absolute top-2 right-2 bg-brand-gold text-brand-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase">
+                              <div className="absolute top-2 right-2 bg-[#D4AF37] text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase shadow-md">
                                 4K VIP
                               </div>
                            </div>
                           <div>
-                             <h5 className="text-white font-serif text-xl italic font-bold">{model.name}</h5>
-                             <p className="text-[9px] text-white/50 uppercase tracking-wider font-bold mt-1">
+                             <h5 className="text-white font-serif text-lg italic font-bold">{model.name}</h5>
+                             <p className="text-[9px] text-white/50 uppercase tracking-wider font-bold mt-0.5">
                                {model.age ? `${model.age} Años · ` : ''}{model.sector || model.city}
                              </p>
                           </div>
@@ -385,7 +504,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
                              href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi en el Radar GPS de Cariñosas.top (${model.city}). Deseo consultar tu disponibilidad hoy.`)}`}
                              target="_blank"
                              rel="noopener noreferrer"
-                             className="block w-full py-2.5 bg-brand-gold text-brand-black text-[10px] font-black uppercase text-center rounded-xl tracking-wider hover:bg-white transition-all shadow-lg"
+                             className="block w-full py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#FFE088] text-black text-[10px] font-black uppercase text-center rounded-xl tracking-wider hover:brightness-110 transition-all shadow-lg"
                           >
                              Contactar WhatsApp
                           </a>
@@ -397,71 +516,122 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
             </MapContainer>
           )}
 
-          {/* Map Vignette Overlay */}
-          <div className="absolute inset-0 pointer-events-none z-10 shadow-[inset_0_0_100px_rgba(0,0,0,0.9)]" />
+          {/* ── 360° TACTICAL RADAR SWEEP BEAM OVERLAY ── */}
+          <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center overflow-hidden">
+            {/* Rotating Conic Beam */}
+            <div className="w-[580px] h-[580px] rounded-full radar-sweep-beam opacity-45 pointer-events-none" />
+            {/* Concentric Reticle Rings */}
+            <div className="absolute w-[460px] h-[460px] rounded-full border border-[#D4AF37]/15 pointer-events-none" />
+            <div className="absolute w-[280px] h-[280px] rounded-full border border-emerald-500/10 pointer-events-none" />
+            <div className="absolute w-[120px] h-[120px] rounded-full border border-[#D4AF37]/20 pointer-events-none" />
+          </div>
 
-          {/* Top Right Floating HUD on the Map */}
-          <div className="absolute top-6 right-6 z-30 pointer-events-none hidden md:block">
-            <div className="p-4 rounded-2xl glass-obsidian border border-brand-gold/30 shadow-2xl backdrop-blur-2xl flex items-center gap-4 pointer-events-auto">
-              <div className="w-10 h-10 rounded-xl bg-brand-gold/15 border border-brand-gold/30 flex items-center justify-center text-brand-gold">
-                <Sparkles size={18} />
-              </div>
-              <div className="text-left">
-                <span className="text-[8px] text-brand-gold font-black uppercase tracking-widest block">Geolocalización Inmediata</span>
-                <span className="text-xs text-white font-serif italic">Privacidad & Discreción Total</span>
-              </div>
+          {/* Map Vignette Edge Glow */}
+          <div className="absolute inset-0 pointer-events-none z-10 shadow-[inset_0_0_90px_rgba(0,0,0,0.92)]" />
+
+          {/* ── TOP RIGHT MAP CONTROLS (TOUCH LOCK TOGGLE & RADIUS PILLS) ── */}
+          <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2 pointer-events-auto">
+            
+            {/* Mobile Touch Lock / Cooperative Scroll Toggle */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                sound.playSubtleClick();
+                setIsMapInteractive(prev => !prev);
+              }}
+              className={`px-3 py-1.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-xl border cursor-pointer ${
+                isMapInteractive
+                  ? "bg-emerald-500/25 border-emerald-500/60 text-emerald-300 backdrop-blur-md"
+                  : "bg-black/80 border-[#D4AF37]/40 text-[#D4AF37] backdrop-blur-md hover:border-[#D4AF37]"
+              }`}
+              title={isMapInteractive ? "Mapa Desbloqueado: Mueve el mapa con 1 dedo" : "Mapa Bloqueado: Desliza la página libremente sin trabas"}
+            >
+              {isMapInteractive ? <Unlock size={11} /> : <Lock size={11} />}
+              <span>{isMapInteractive ? "Navegación Mapa: ON" : "Scroll Libre: ON"}</span>
+            </button>
+
+            {/* Range Selector Pills for Mobile & Fullscreen */}
+            <div className="flex items-center gap-1 p-1 rounded-full glass-obsidian border border-white/10 shadow-xl backdrop-blur-xl">
+              {(["1km", "3km", "5km", "all"] as const).map((rad) => (
+                <button
+                  key={rad}
+                  onClick={() => {
+                    sound.playSubtleClick();
+                    setActiveRadius(rad);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                    activeRadius === rad
+                      ? "bg-[#D4AF37] text-black shadow-md"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  {rad === "all" ? "Todo" : rad}
+                </button>
+              ))}
             </div>
           </div>
-          
-          {/* Sliding Quick Preview Card for Selected Model */}
-          {selectedModel && (
-            <div className="absolute bottom-6 left-6 right-6 md:right-auto md:max-w-sm z-30 animate-in slide-in-from-bottom-6 duration-300 pointer-events-auto">
-              <div className="glass-obsidian p-5 rounded-3xl border border-brand-gold/40 shadow-[0_30px_90px_rgba(0,0,0,0.95)] relative space-y-4">
-                
-                <button
-                  onClick={() => setSelectedModel(null)}
-                  className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all text-xs"
-                >
-                  <X size={14} />
-                </button>
 
-                <div className="flex items-center gap-3">
-                  <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-brand-gold/40 flex-shrink-0">
-                    <Image
-                      src={selectedModel.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'}
-                      alt={selectedModel.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h4 className="text-white font-serif text-xl font-bold truncate">{selectedModel.name}</h4>
-                      <span className="text-[8px] px-2 py-0.5 rounded-full bg-brand-gold/20 text-brand-gold font-bold">VIP</span>
-                    </div>
-                    <p className="text-[10px] text-white/50 uppercase tracking-wider font-bold">
-                      {selectedModel.sector || selectedModel.city}
-                    </p>
-                    <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 font-bold">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>A ~ 1.2 km de ti</span>
-                    </div>
-                  </div>
-                </div>
-
-                <a
-                  href={`https://wa.me/${selectedModel.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${selectedModel.name}, te vi en el Radar GPS de Cariñosas.top (${selectedModel.city}). Deseo consultar tu disponibilidad hoy.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 rounded-xl bg-brand-gold hover:bg-white text-brand-black font-black text-xs uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
-                >
-                  <MessageCircle size={15} fill="currentColor" />
-                  <span>Contactar en WhatsApp</span>
-                </a>
-              </div>
+          {/* Touch Notice Toast when locked */}
+          {showTouchNotice && !isMapInteractive && (
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full glass-obsidian border border-[#D4AF37]/50 text-white text-[10px] font-medium tracking-wide shadow-2xl animate-in fade-in duration-200 pointer-events-none">
+              💡 Pulsa <strong className="text-[#D4AF37]">Scroll Libre</strong> arriba para mover el mapa
             </div>
           )}
+
+          {/* ── MOBILE HORIZONTAL CAROUSEL (OVER-THE-MAP THUMB DRAWER) ── */}
+          <div className="lg:hidden absolute bottom-3 inset-x-3 z-30 pointer-events-auto">
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory py-1 px-1">
+              {displayMapModels.map((model) => {
+                const isSelected = selectedModel?.id === model.id;
+                return (
+                  <div
+                    key={model.id}
+                    onClick={() => handleModelSelect(model)}
+                    className={`snap-center flex-shrink-0 w-[240px] p-3 rounded-2xl glass-obsidian border transition-all cursor-pointer shadow-2xl ${
+                      isSelected
+                        ? "border-[#D4AF37] bg-black/90 shadow-[0_0_25px_rgba(212,168,67,0.4)] scale-102"
+                        : "border-white/15 bg-[#0A0A0F]/85 hover:border-white/30"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="relative w-11 h-11 rounded-xl overflow-hidden border border-white/10 shrink-0">
+                        <Image
+                          src={model.images?.[0] || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800'}
+                          alt={model.name}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-black" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-white font-serif font-bold text-sm truncate">{model.name}</h4>
+                          <span className="text-[9px] font-mono font-bold text-[#D4AF37]">${model.rate || 130}/h</span>
+                        </div>
+                        <span className="text-[8px] text-white/50 uppercase tracking-wider truncate block">
+                          {model.sector || model.city}
+                        </span>
+                        <span className="text-[8px] text-emerald-400 font-bold block">
+                          📍 A ~ {model.distanceKm || 1.2} km
+                        </span>
+                      </div>
+                    </div>
+
+                    <a
+                      href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi en el Radar GPS de Cariñosas.top (${model.city}). Deseo consultar tu disponibilidad hoy.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full py-1.5 rounded-lg bg-gradient-to-r from-[#D4AF37] to-[#FFE088] text-black font-black text-[9px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:brightness-110 transition-all"
+                    >
+                      <MessageCircle size={11} fill="currentColor" />
+                      <span>WhatsApp VIP</span>
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
         </div>
 
