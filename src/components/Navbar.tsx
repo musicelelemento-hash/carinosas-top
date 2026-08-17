@@ -111,10 +111,10 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
                 </button>
               )}
 
-              {/* Publish Ad CTA */}
+              {/* Publish Ad CTA (Desktop/Tablet) */}
               <Link
                 href="/publicar-anuncio"
-                className="relative group overflow-hidden px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-[0_4px_25px_rgba(212,168,67,0.4)] bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black hover:brightness-110 flex items-center gap-2"
+                className="hidden sm:flex relative group overflow-hidden px-5 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 shadow-[0_4px_25px_rgba(212,168,67,0.4)] bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black hover:brightness-110 items-center gap-2"
               >
                 <Diamond size={12} className="fill-current" />
                 <span>Publicar Anuncio VIP</span>

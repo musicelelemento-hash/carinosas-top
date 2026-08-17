@@ -184,8 +184,8 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
                   }
                 }}
                 onFocus={() => setIsSearchFocused(true)}
-                placeholder="Escribe tu cantón o ciudad (Machala, Pasaje, Santa Rosa, GYE...)..."
-                className="flex-1 bg-transparent border-none outline-none text-xs sm:text-sm text-white placeholder:text-white/40 font-medium"
+                placeholder="Escribe tu cantón o ciudad (Machala, Pasaje, GYE...)..."
+                className="flex-1 bg-transparent border-none outline-none text-base sm:text-sm text-white placeholder:text-white/40 font-medium"
               />
 
               {searchTerm && (
@@ -204,11 +204,11 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
               <button
                 onClick={handleGPSDetect}
                 disabled={isLocatingGPS}
-                className="hidden sm:flex items-center gap-1.5 px-4 py-2.5 rounded-full glass-dark border border-brand-gold/30 text-brand-gold hover:bg-brand-gold hover:text-brand-black text-[9px] font-black uppercase tracking-wider transition-all"
+                className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full glass-dark border border-brand-gold/40 text-brand-gold hover:bg-brand-gold hover:text-brand-black text-[9px] font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer"
                 title="Detectar mi cantón más cercano con GPS"
               >
                 <LocateFixed size={12} className={isLocatingGPS ? "animate-spin" : ""} />
-                <span>{isLocatingGPS ? "Localizando..." : "GPS"}</span>
+                <span>{isLocatingGPS ? "..." : "GPS"}</span>
               </button>
 
               {/* Direct Search Action Button */}

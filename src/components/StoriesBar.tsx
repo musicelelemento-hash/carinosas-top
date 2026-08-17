@@ -160,7 +160,7 @@ export default function StoriesBar() {
                     alt={model.name}
                     fill
                     sizes="68px"
-                    className="object-cover rounded-full group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
+                    className="object-cover rounded-full group-hover:scale-110 transition-transform duration-500 brightness-100 contrast-[1.03]"
                   />
                 </div>
 

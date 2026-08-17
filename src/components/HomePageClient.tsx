@@ -18,7 +18,7 @@ import VIPGuide from "@/components/VIPGuide";
 import PushPrompt from "@/components/PushPrompt";
 import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
 import MobileFiltersSheet from "@/components/MobileFiltersSheet";
-import MobileSpeedDial from "@/components/MobileSpeedDial";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import SecretVaultTeaser from "@/components/SecretVaultTeaser";
 import OccasionMatchmaker from "@/components/OccasionMatchmaker";
 import LiveActivityToast from "@/components/LiveActivityToast";
@@ -352,7 +352,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <GhostNotifications />
         <AIAssistantOverlay />
         <PushPrompt />
-        <MobileSpeedDial />
+        <MobileBottomNav />
         <LiveActivityToast />
 
         <MobileFiltersSheet

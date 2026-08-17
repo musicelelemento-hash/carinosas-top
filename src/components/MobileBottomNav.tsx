@@ -72,11 +72,16 @@ export default function MobileBottomNav() {
 
             if (isAi) {
               return (
-                <Link
+                <button
                   key={id}
-                  href={href}
-                  onClick={() => handleHaptic(id)}
-                  className="flex flex-col items-center justify-center -mt-5 relative group"
+                  type="button"
+                  onClick={() => {
+                    handleHaptic(id);
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("open-ai-concierge"));
+                    }
+                  }}
+                  className="flex flex-col items-center justify-center -mt-5 relative group cursor-pointer outline-none"
                   aria-label="Abrir Asistente Concierge VIP"
                 >
                   <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#D4AF37] via-[#FFF1C2] to-[#D4AF37] p-[2px] shadow-[0_0_25px_rgba(212,168,67,0.5)] group-active:scale-95 transition-transform">
@@ -87,7 +92,7 @@ export default function MobileBottomNav() {
                   <span className="text-[8px] font-black uppercase tracking-wider text-[#D4AF37] mt-1">
                     {label}
                   </span>
-                </Link>
+                </button>
               );
             }
 
