@@ -18,9 +18,28 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [vipPass, setVipPass] = useState<string | null>(null);
+  const [modelAuth, setModelAuth] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMuted(sound.getMuted());
+
+    const checkLogins = () => {
+      try {
+        const storedPass = localStorage.getItem("vip_pass_code") || localStorage.getItem("carinosas_vip_pass");
+        const storedModel = localStorage.getItem("model_token") || localStorage.getItem("model_authenticated");
+        setVipPass(storedPass);
+        setModelAuth(storedModel);
+      } catch {}
+    };
+
+    checkLogins();
+    window.addEventListener("storage", checkLogins);
+    window.addEventListener("vip_pass_updated", checkLogins);
+    return () => {
+      window.removeEventListener("storage", checkLogins);
+      window.removeEventListener("vip_pass_updated", checkLogins);
+    };
   }, []);
 
   const handleToggleSound = () => {
@@ -111,6 +130,35 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
                 </button>
               )}
 
+              {/* Active Session Status or Login Trigger */}
+              {vipPass ? (
+                <Link
+                  href="/boveda-secreta"
+                  className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-gold/15 border border-brand-gold/50 text-brand-gold text-[9px] font-black uppercase tracking-wider shadow-[0_0_15px_rgba(212,168,67,0.3)] animate-pulse"
+                  title="Pase VIP Activo · Ir a Bóveda Secreta"
+                >
+                  <Crown size={12} className="fill-brand-gold" />
+                  <span>Socio VIP Activo</span>
+                </Link>
+              ) : modelAuth ? (
+                <Link
+                  href="/panel-modelo"
+                  className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-pink/15 border border-brand-pink/50 text-brand-pink text-[9px] font-black uppercase tracking-wider shadow-[0_0_15px_rgba(255,0,110,0.3)]"
+                  title="Ir a Mi Panel de Modelo"
+                >
+                  <Sparkles size={12} />
+                  <span>Mi Estudio</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setIsAuthOpen(true)}
+                  className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full glass-obsidian border border-white/15 text-[#A1A1AA] hover:text-white hover:border-brand-gold/40 text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  <User size={12} />
+                  <span>Acceder</span>
+                </button>
+              )}
+
               {/* Publish Ad CTA (Desktop/Tablet) */}
               <Link
                 href="/publicar-anuncio"
@@ -151,12 +199,31 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
             <Link href="/#collection" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-xs text-white/70 hover:text-brand-gold uppercase tracking-widest font-bold transition-colors">
               <Sparkles size={14} className="text-brand-gold" /> Catálogo General
             </Link>
-            <button 
-              onClick={() => { setMenuOpen(false); setIsAuthOpen(true); }} 
-              className="w-full text-left flex items-center gap-3 text-xs text-white/50 hover:text-white uppercase tracking-widest font-bold transition-colors pt-2 border-t border-white/5"
-            >
-              <User size={14} /> Iniciar Sesión / Mi Cuenta
-            </button>
+            
+            {vipPass ? (
+              <Link 
+                href="/boveda-secreta"
+                onClick={() => setMenuOpen(false)}
+                className="w-full text-left flex items-center gap-3 text-xs text-brand-gold uppercase tracking-widest font-bold pt-2 border-t border-white/5"
+              >
+                <Crown size={14} /> Socio VIP Activo ({vipPass})
+              </Link>
+            ) : modelAuth ? (
+              <Link 
+                href="/panel-modelo"
+                onClick={() => setMenuOpen(false)}
+                className="w-full text-left flex items-center gap-3 text-xs text-brand-pink uppercase tracking-widest font-bold pt-2 border-t border-white/5"
+              >
+                <Sparkles size={14} /> Panel Estudio de Modelo
+              </Link>
+            ) : (
+              <button 
+                onClick={() => { setMenuOpen(false); setIsAuthOpen(true); }} 
+                className="w-full text-left flex items-center gap-3 text-xs text-white/50 hover:text-white uppercase tracking-widest font-bold transition-colors pt-2 border-t border-white/5 cursor-pointer"
+              >
+                <User size={14} /> Iniciar Sesión / Mi Cuenta
+              </button>
+            )}
           </div>
         </div>
       </nav>

@@ -14,6 +14,27 @@ export default function MobileBottomNav() {
   const [activeTab, setActiveTab] = useState<string>("home");
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [vipPass, setVipPass] = useState<string | null>(null);
+  const [modelAuth, setModelAuth] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkSessions = () => {
+      try {
+        const storedPass = localStorage.getItem("vip_pass_code") || localStorage.getItem("carinosas_vip_pass");
+        const storedModel = localStorage.getItem("model_token") || localStorage.getItem("model_authenticated");
+        setVipPass(storedPass);
+        setModelAuth(storedModel);
+      } catch {}
+    };
+
+    checkSessions();
+    window.addEventListener("storage", checkSessions);
+    window.addEventListener("vip_pass_updated", checkSessions);
+    return () => {
+      window.removeEventListener("storage", checkSessions);
+      window.removeEventListener("vip_pass_updated", checkSessions);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,8 +66,19 @@ export default function MobileBottomNav() {
     { id: "home", label: "Catálogo", icon: Home, href: "/#collection" },
     { id: "radar", label: "Radar GPS", icon: Compass, href: "/#mapa" },
     { id: "ai", label: "Concierge", icon: Sparkles, href: "/#ai-assistant", isAi: true },
-    { id: "vip", label: "Club VIP", icon: Crown, href: "/#vip-lounge" },
-    { id: "registro", label: "Publicar", icon: UserPlus, href: "/registro" },
+    { 
+      id: "vip", 
+      label: vipPass ? "Socio VIP" : "Club VIP", 
+      icon: Crown, 
+      href: vipPass ? "/boveda-secreta" : "/#vip-lounge",
+      isHighlighted: Boolean(vipPass)
+    },
+    { 
+      id: "registro", 
+      label: modelAuth ? "Mi Estudio" : "Publicar", 
+      icon: UserPlus, 
+      href: modelAuth ? "/panel-modelo" : "/publicar-anuncio" 
+    },
   ];
 
   return (

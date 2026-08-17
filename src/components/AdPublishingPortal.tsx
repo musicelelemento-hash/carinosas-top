@@ -82,6 +82,20 @@ const PLANS: PlanTier[] = [
       "Renovación mensual"
     ],
     gradient: "from-white/10 to-transparent"
+  },
+  {
+    id: "gratis",
+    name: "ANUNCIO GRATIS",
+    price: "$0",
+    period: "/7 días",
+    badge: "🆓 PRUEBA SIN COSTO",
+    features: [
+      "Publicación Inmediata en Directorio",
+      "Hasta 2 Fotos de Perfil",
+      "Contacto Directo por WhatsApp",
+      "Prueba de 7 días sin tarjeta"
+    ],
+    gradient: "from-white/10 via-white/5 to-transparent"
   }
 ];
 
@@ -191,7 +205,7 @@ export default function AdPublishingPortal() {
               <p className="text-xs text-white/50">Elige el plan que mejor se adapte a tu objetivo de ingresos</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {PLANS.map((plan) => {
                 const isSelected = selectedPlan === plan.id;
                 return (
