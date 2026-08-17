@@ -30,7 +30,9 @@ import {
   Check,
   CreditCard,
   QrCode,
-  ArrowRight
+  ArrowRight,
+  Send,
+  Mail
 } from "lucide-react";
 import Link from "next/link";
 import VIPRatings from "@/components/VIPRatings";
@@ -58,6 +60,8 @@ interface ModelProfileProps {
     tags?: string[];
     sector?: string;
     whatsapp?: string;
+    telegram?: string;
+    email?: string;
     city?: string;
     is_verified_4k?: boolean;
     is_online?: boolean;
@@ -655,10 +659,34 @@ export default function ModelProfile({ model }: ModelProfileProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Optional Telegram Button */}
+              {model.telegram && (
+                <a
+                  href={`https://t.me/${model.telegram.replace("@", "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3.5 rounded-2xl bg-[#229ED9]/15 border border-[#229ED9]/40 text-[#229ED9] hover:bg-[#229ED9] hover:text-white transition-all shadow-md hover:scale-105"
+                  title="Contactar 100% Anónimo por Telegram"
+                >
+                  <Send size={15} />
+                </a>
+              )}
+
+              {/* Optional Email Button */}
+              {model.email && (
+                <a
+                  href={`mailto:${model.email}?subject=${encodeURIComponent(`Reserva VIP Cariñosas.top - ${model.name}`)}`}
+                  className="p-3.5 rounded-2xl glass-dark border border-white/15 text-white/60 hover:text-white hover:border-brand-gold/40 transition-all shadow-md hover:scale-105"
+                  title="Enviar Correo de Reservas"
+                >
+                  <Mail size={15} />
+                </a>
+              )}
+
               <button 
                 onClick={() => handleContact()}
-                className="flex-1 sm:flex-none px-8 py-3.5 bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:scale-105 active:scale-95 text-brand-black rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(212,168,67,0.4)]"
+                className="flex-1 sm:flex-none px-7 py-3.5 bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:scale-105 active:scale-95 text-brand-black rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(212,168,67,0.4)] cursor-pointer"
               >
                 <MessageCircle size={15} fill="currentColor" />
                 <span>Reservar por WhatsApp</span>
