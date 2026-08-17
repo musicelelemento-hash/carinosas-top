@@ -22,16 +22,7 @@ export default function PanicDisguise() {
   }, []);
 
   if (!isPanicActive) {
-    return (
-      <button
-        onClick={() => setIsPanicActive(true)}
-        title="Modo Pánico Rápido (Presiona ESC)"
-        className="fixed bottom-6 left-6 z-[100] group p-3 rounded-2xl glass-obsidian border border-white/15 text-white/50 hover:text-brand-gold hover:border-brand-gold shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 text-[9px] uppercase font-mono"
-      >
-        <EyeOff size={15} />
-        <span className="hidden sm:inline">Camuflaje (ESC)</span>
-      </button>
-    );
+    return null;
   }
 
   return (

@@ -318,9 +318,9 @@ export default function ProfileCard({
                 }}
                 style={{
                   opacity: i === currentImageIndex ? 1 : 0,
-                  transform: i === currentImageIndex ? (isAnimating ? 'scale(1.08)' : 'scale(1)') : 'scale(1.12)',
-                  filter: isAnimating ? 'brightness(0.32) saturate(0.8)' : 'brightness(0.88)',
-                  transition: 'opacity 0.8s ease, transform 1.2s cubic-bezier(0.23,1,0.32,1), filter 0.8s ease',
+                  transform: i === currentImageIndex ? (isAnimating ? 'scale(1.04)' : 'scale(1)') : 'scale(1.08)',
+                  filter: isHovered ? 'brightness(0.72) contrast(1.04)' : 'brightness(1.02) contrast(1.04) saturate(1.06)',
+                  transition: 'opacity 0.8s ease, transform 1.2s cubic-bezier(0.23,1,0.32,1), filter 0.5s ease',
                 }}
                 priority={i === 0 && (is_verified_4k || isBoosted)}
                 loading={i === 0 && (is_verified_4k || isBoosted) ? undefined : "lazy"}
@@ -332,30 +332,30 @@ export default function ProfileCard({
           <div className="absolute inset-0 magazine-overlay pointer-events-none z-10" />
 
           {/* ── STATIC INFO (bottom) ── */}
-          <div className={`absolute inset-x-0 bottom-0 p-6 space-y-2.5 transition-all duration-500 ${isHovered ? 'translate-y-6 opacity-0' : 'translate-y-0 opacity-100'}`}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif text-4xl text-white leading-none tracking-tight" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}>
+          <div className={`absolute inset-x-0 bottom-0 p-5 sm:p-6 space-y-2 transition-all duration-500 z-20 ${isHovered ? 'translate-y-6 opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-serif text-3xl sm:text-4xl text-white font-bold leading-none tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.95)]">
                 {name}
               </h3>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 border border-emerald-500/30 backdrop-blur-md">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-emerald-500/40 backdrop-blur-md shrink-0 shadow-lg">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">En Línea</span>
+                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">En Línea</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className={`label-xs ${isFree ? 'text-white/40' : 'text-brand-gold'}`}>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md backdrop-blur-md ${isFree ? 'bg-white/10 text-white/70 border border-white/10' : 'bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40'}`}>
                 {isFree ? 'Estándar' : plan_type}
               </span>
-              <span className="w-[3px] h-[3px] rounded-full bg-white/25" />
-              <span className="label-xs text-white/60 flex items-center gap-1">
-                <MapPin size={10} className="text-brand-gold/70" />
+              <span className="w-[3px] h-[3px] rounded-full bg-white/40" />
+              <span className="text-[11px] text-white/90 font-medium flex items-center gap-1 drop-shadow-md">
+                <MapPin size={12} className="text-[#D4AF37]" />
                 {location}
               </span>
             </div>
 
-            <p className="font-signature text-xl text-brand-gold/70 -rotate-1 leading-tight">
-              {personal_note}
+            <p className="font-signature text-xl text-[#F5E0A0] -rotate-1 leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+              &ldquo;{personal_note}&rdquo;
             </p>
           </div>
 

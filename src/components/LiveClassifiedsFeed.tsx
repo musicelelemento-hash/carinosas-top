@@ -386,12 +386,12 @@ export default function LiveClassifiedsFeed({ currentCountry }: LiveClassifiedsF
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
 
               {/* Card Top: Image & Overlay Badges */}
-              <div className="relative aspect-[4/3] rounded-[1.8rem] overflow-hidden border border-white/10">
+              <div className="relative aspect-[4/5] rounded-[1.8rem] overflow-hidden border border-white/10">
                 <Image
                   src={ad.imageUrl}
                   alt={ad.name}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-100 contrast-[1.03]"
                   sizes="(max-width: 768px) 100vw, 25vw"
                 />
                 

@@ -131,7 +131,7 @@ export default function LiveActivityToast() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed top-4 md:top-6 right-4 md:right-6 z-[100] max-w-[340px] w-full transition-all duration-500 pointer-events-auto ${
+      className={`fixed top-20 md:top-24 right-4 md:right-6 z-[100] max-w-[320px] w-full transition-all duration-500 pointer-events-auto ${
         isVisible
           ? "opacity-100 translate-y-0 scale-100"
           : "opacity-0 -translate-y-4 scale-95 pointer-events-none"

@@ -256,7 +256,7 @@ export default function RecommendationSection({ currentCountry }: Recommendation
                     setSelectedCity(city);
                   }}
                   className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                    selectedCity === city ? 'bg-brand-pink text-white shadow-md' : 'text-white/40 hover:text-white'
+                    selectedCity === city ? 'bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,168,67,0.4)]' : 'text-white/40 hover:text-white'
                   }`}
                 >
                   {city === 'all' ? 'Todas' : city}
@@ -284,22 +284,22 @@ export default function RecommendationSection({ currentCountry }: Recommendation
                   src={model.imageUrl}
                   alt={model.name}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-100 contrast-[1.03]"
                 />
                 
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent opacity-90" />
 
                 {/* Top Badges */}
                 <div className="absolute top-4 inset-x-4 flex items-center justify-between z-10">
                   {/* Distance Pill */}
-                  <div className="px-3 py-1.5 rounded-full glass-obsidian border border-brand-gold/50 text-brand-gold text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
-                    <MapPin size={11} className="text-brand-gold" />
+                  <div className="px-3 py-1.5 rounded-full glass-obsidian border border-[#D4AF37]/50 text-[#D4AF37] text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+                    <MapPin size={11} className="text-[#D4AF37]" />
                     {model.distance}
                   </div>
 
                   {/* Match Score Badge */}
-                  <div className="px-3 py-1.5 rounded-full bg-brand-pink text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg">
-                    <Sparkles size={11} />
+                  <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#FFF1C2] to-[#AA7C11] text-black text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg">
+                    <Sparkles size={11} className="fill-black" />
                     {model.matchScore}% Match
                   </div>
                 </div>
@@ -348,7 +348,7 @@ export default function RecommendationSection({ currentCountry }: Recommendation
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={() => handleQuickContact(model)}
-                  className="flex-1 py-3 rounded-xl bg-brand-gold hover:bg-white text-brand-black text-[9px] font-black uppercase tracking-widest transition-all shadow-[0_4px_20px_rgba(212,168,67,0.3)] flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black text-[9px] font-black uppercase tracking-widest transition-all shadow-[0_4px_20px_rgba(212,168,67,0.3)] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <MessageCircle size={13} fill="currentColor" />
                   Agendar Cita

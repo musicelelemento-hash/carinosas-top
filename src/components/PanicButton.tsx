@@ -35,7 +35,7 @@ export default function PanicButton() {
     <button
       onClick={handlePanic}
       aria-label="Salida Rápida Discreta: Redirige instantáneamente a Google o presiona Doble Escape"
-      className="hidden md:flex fixed bottom-6 right-28 z-[50] group items-center gap-2 glass-obsidian border border-white/15 px-4 py-2.5 rounded-full hover:border-[#FF0062]/60 hover:bg-[#FF0062]/15 focus-visible:ring-2 focus-visible:ring-[#FF0062] focus-visible:outline-none transition-all active:scale-95 shadow-2xl cursor-pointer"
+      className="hidden md:flex fixed bottom-6 right-52 z-[50] group items-center gap-2 glass-obsidian border border-white/15 px-4 py-2.5 rounded-full hover:border-[#FF0062]/60 hover:bg-[#FF0062]/15 focus-visible:ring-2 focus-visible:ring-[#FF0062] focus-visible:outline-none transition-all active:scale-95 shadow-2xl cursor-pointer"
       title="Salida Rápida Discreta (Doble Esc)"
     >
       <div className="relative">

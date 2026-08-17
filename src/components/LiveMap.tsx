@@ -93,7 +93,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
     }
   }, []);
 
-  // Compute models for selected city with fallback realistic radar entries if empty
+  // Compute models for selected city with realistic radar entries
   const dbCityModels = models.filter(
     (m) => m.city?.toLowerCase().includes(selectedCity?.toLowerCase()) || (m.sector && m.sector.toLowerCase().includes(selectedCity?.toLowerCase()))
   );
@@ -103,29 +103,55 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
   const cityModels: MapModel[] = dbCityModels.length > 0 ? dbCityModels : [
     {
       id: `live-${selectedCity}-1`,
-      name: `Musa ${selectedCity} VIP`,
+      name: `Valentina S.`,
       city: selectedCity,
-      sector: `${selectedCity} Zona VIP`,
+      sector: `${selectedCity} Zona VIP Élite`,
       lat: fallbackPreset.center[0] + 0.003,
       lng: fallbackPreset.center[1] + 0.004,
       plan_type: "VIP Elite",
-      images: [activeCountry.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
-      whatsapp: activeCountry.dialCode.replace("+", "") + "998877665",
+      images: ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
+      whatsapp: "593987654321",
       age: 23
     },
     {
       id: `live-${selectedCity}-2`,
-      name: `Valeria Platinum`,
+      name: `Camila R.`,
       city: selectedCity,
-      sector: `${selectedCity} Exclusive Suites`,
+      sector: `${selectedCity} Suites 5★`,
       lat: fallbackPreset.center[0] - 0.004,
       lng: fallbackPreset.center[1] - 0.003,
       plan_type: "Diamante",
       images: ["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800"],
-      whatsapp: activeCountry.dialCode.replace("+", "") + "987654321",
+      whatsapp: "593987654322",
       age: 24
+    },
+    {
+      id: `live-${selectedCity}-3`,
+      name: `Luciana M.`,
+      city: selectedCity,
+      sector: `${selectedCity} Zona Residencial`,
+      lat: fallbackPreset.center[0] + 0.005,
+      lng: fallbackPreset.center[1] - 0.004,
+      plan_type: "VIP Elite",
+      images: ["https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800"],
+      whatsapp: "593987654323",
+      age: 22
+    },
+    {
+      id: `live-${selectedCity}-4`,
+      name: `Elena V.`,
+      city: selectedCity,
+      sector: `${selectedCity} Plaza VIP`,
+      lat: fallbackPreset.center[0] - 0.002,
+      lng: fallbackPreset.center[1] + 0.006,
+      plan_type: "Oro",
+      images: ["https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"],
+      whatsapp: "593987654324",
+      age: 25
     }
   ];
+
+  const displayMapModels = dbCityModels.length > 0 ? dbCityModels : cityModels;
 
   const handleCitySelect = (cityKey: string) => {
     sound.playSonarPing();
@@ -146,31 +172,22 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
     }
   };
 
-  // Gold pulsing marker icon
-  const goldIcon = L
-    ? new L.DivIcon({
-        html: `<div class="live-pin">
-          <div class="pin-pulse"></div>
-          <div class="pin-core"></div>
-        </div>`,
-        className: "custom-div-icon",
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-      })
-    : null;
-
-  // Red Pulsing active icon
-  const selectedIcon = L
-    ? new L.DivIcon({
-        html: `<div class="live-pin-selected">
-          <div class="pin-pulse-red"></div>
-          <div class="pin-core-red"></div>
-        </div>`,
-        className: "custom-div-icon-selected",
-        iconSize: [44, 44],
-        iconAnchor: [22, 22],
-      })
-    : null;
+  // Custom Avatar Marker Icon Factory
+  const createAvatarIcon = (imgUrl: string, isSelected: boolean) => {
+    if (!L) return undefined;
+    return new L.DivIcon({
+      html: `<div class="relative group cursor-pointer">
+        <div class="absolute -inset-2 rounded-full ${isSelected ? 'bg-[#FF0062]/40 animate-ping' : 'bg-[#D4AF37]/30 animate-pulse'} blur-sm"></div>
+        <div class="relative w-11 h-11 rounded-full p-[2px] ${isSelected ? 'bg-gradient-to-tr from-[#FF0062] to-[#FF80A0] scale-110 shadow-[0_0_20px_rgba(255,0,98,0.7)]' : 'bg-gradient-to-tr from-[#D4AF37] via-[#FFE088] to-[#AA7C11] shadow-[0_0_15px_rgba(212,175,55,0.6)]'} transition-transform duration-300">
+          <img src="${imgUrl}" alt="VIP" class="w-full h-full object-cover rounded-full" />
+          <div class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-black"></div>
+        </div>
+      </div>`,
+      className: "custom-avatar-pin",
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+    });
+  };
 
   const initialCenter = (cityPresets[initialCityKey] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] }).center;
 
@@ -322,7 +339,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
               dragging={true}
               touchZoom={true}
               doubleClickZoom={true}
-              className="w-full h-full grayscale-[0.8] contrast-125"
+              className="w-full h-full"
               zoomControl={false}
               ref={mapRef}
             >
@@ -333,13 +350,16 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
               
               {mapTarget && <LiveMapAnimator target={mapTarget} />}
 
-              {/* Verified Models Pins */}
-              {models.map((model) => (
+              {/* Verified Models Avatar Pins with Sonar Pulse */}
+              {displayMapModels.map((model) => (
                 model.lat && model.lng && (
                   <Marker
                     key={model.id}
                     position={[model.lat, model.lng]}
-                    icon={(selectedModel?.id === model.id ? selectedIcon : goldIcon) || undefined}
+                    icon={createAvatarIcon(
+                      model.images?.[0] || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
+                      selectedModel?.id === model.id
+                    )}
                     eventHandlers={{ click: () => handleModelSelect(model) }}
                   >
                     <Popup className="premium-map-popup">

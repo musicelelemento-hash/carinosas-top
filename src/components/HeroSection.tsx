@@ -134,32 +134,32 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
           <Hero3DCanvas />
         </div>
 
-        {/* ── TOP BADGE & LOGO ── */}
-        <div className="flex flex-col items-center gap-2.5">
+        {/* ── TOP BADGE & EDITORIAL TITLE ── */}
+        <div className="flex flex-col items-center gap-2 max-w-3xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2.5 px-5 py-1.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_0_25px_rgba(212,168,67,0.2)]"
+            className="inline-flex items-center gap-2 px-4 py-1 rounded-full glass-obsidian border border-[#D4AF37]/40 shadow-[0_0_20px_rgba(212,168,67,0.2)]"
           >
-            <Gem size={13} className="text-brand-gold animate-pulse" />
-            <span className="text-[9px] font-black uppercase tracking-[0.35em] text-brand-gold">
-              Directorio de Ultra Lujo · Ecuador
+            <Gem size={12} className="text-[#D4AF37] animate-pulse" />
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#D4AF37]">
+              Círculo Privado & Exclusivo · {activeCountry.name}
             </span>
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">En Vivo</span>
           </motion.div>
 
-          <h1 className="font-serif font-bold text-3xl sm:text-5xl md:text-6xl tracking-tight select-none">
-            <span className="bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
-              CARIÑOSAS
+          <h1 className="font-serif font-bold text-2xl sm:text-4xl md:text-5xl tracking-tight select-none leading-tight">
+            <span className="bg-gradient-to-r from-white via-white/95 to-white/80 bg-clip-text text-transparent">
+              Modelos & Acompañantes 
             </span>
-            <span className="italic text-gold-shimmer ml-2 drop-shadow-[0_0_30px_rgba(212,168,67,0.4)]">
-              .TOP
+            <span className="italic text-gold-shimmer ml-2 drop-shadow-[0_0_25px_rgba(212,168,67,0.45)]">
+              Élite 4K
             </span>
           </h1>
 
-          <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-[0.25em] font-medium max-w-lg">
-            Catálogo 4K Inmediato · Modelos Verificadas en {activeCountry.name}
+          <p className="text-[11px] sm:text-xs text-white/60 font-light max-w-md tracking-wide">
+            Verificación biométrica en tiempo real · Contacto directo y discreción total
           </p>
         </div>
 

@@ -673,11 +673,10 @@ animation: boostPulse 2.5s infinite ease-in-out;
 .magazine-overlay {
   background: linear-gradient(
     to top,
-    rgba(8, 8, 12, 1) 0%,
-    rgba(8, 8, 12, 0.88) 25%,
-    rgba(8, 8, 12, 0.35) 55%,
-    rgba(8, 8, 12, 0.1) 75%,
-    transparent 100%
+    rgba(8, 8, 12, 0.95) 0%,
+    rgba(8, 8, 12, 0.72) 18%,
+    rgba(8, 8, 12, 0.22) 32%,
+    transparent 48%
   );
 }
 
