@@ -238,7 +238,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
   const availabilityLabel = model.is_online ? 'Disponible ahora' : 'Disponibilidad por confirmar';
 
   return (
-    <div className="relative min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-16">
+    <div className="relative min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-32 md:pb-24">
       
       {/* ── TOP HUD NAVIGATION ── */}
       <div className="fixed top-6 left-6 z-[100] flex flex-col gap-2.5">

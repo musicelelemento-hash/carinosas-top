@@ -121,7 +121,7 @@ export default function ConciergeChatView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#08080C] text-white pt-20 pb-12 noise-overlay flex flex-col justify-between">
+    <div className="min-h-screen bg-[#08080C] text-white pt-20 pb-28 md:pb-12 noise-overlay flex flex-col justify-between">
       <div className="max-w-3xl mx-auto px-4 w-full flex-1 flex flex-col">
 
         {/* ── TOP CONCIERGE HEADER BAR ── */}
@@ -129,7 +129,7 @@ export default function ConciergeChatView() {
           <div className="flex items-center gap-3">
             <Link 
               href="/"
-              className="w-10 h-10 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white/70 hover:text-white"
+              className="w-10 h-10 rounded-full glass-dark border border-white/10 flex items-center justify-center text-[#A1A1AA] hover:text-white transition-colors cursor-pointer"
             >
               <ArrowLeft size={18} />
             </Link>
@@ -162,7 +162,7 @@ export default function ConciergeChatView() {
                 window.location.href = "https://www.google.com";
               }
             }}
-            className="px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[9px] font-black uppercase tracking-wider hover:bg-rose-500 hover:text-white transition-all flex items-center gap-1"
+            className="px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[9px] font-black uppercase tracking-wider hover:bg-rose-500 hover:text-white transition-all flex items-center gap-1 cursor-pointer"
           >
             <AlertTriangle size={11} />
             <span>Pánico (ESC)</span>
@@ -170,7 +170,7 @@ export default function ConciergeChatView() {
         </div>
 
         {/* ── SECURITY NOTICE BANNER ── */}
-        <div className="p-3 rounded-2xl glass-dark border border-white/10 text-center mb-4 text-[10px] text-white/50 font-mono flex items-center justify-center gap-2">
+        <div className="p-3 rounded-2xl glass-dark border border-white/10 text-center mb-4 text-[10px] text-[#A1A1AA] font-mono flex items-center justify-center gap-2">
           <ShieldCheck size={14} className="text-brand-gold" />
           <span>Sesión Encriptada Confidencial · Los mensajes se auto-destruyen en 24 horas.</span>
         </div>
@@ -187,7 +187,7 @@ export default function ConciergeChatView() {
             <button
               key={chip}
               onClick={() => handleSend(chip)}
-              className="whitespace-nowrap px-3.5 py-1.5 rounded-full glass-obsidian border border-brand-gold/30 hover:border-brand-gold text-[10px] text-brand-gold/90 font-bold uppercase tracking-wider transition-all shadow-md shrink-0"
+              className="whitespace-nowrap px-3.5 py-1.5 rounded-full glass-obsidian border border-brand-gold/30 hover:border-brand-gold text-[10px] text-brand-gold/90 font-bold uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer"
             >
               {chip}
             </button>
@@ -195,7 +195,7 @@ export default function ConciergeChatView() {
         </div>
 
         {/* ── CHAT MESSAGES CONTAINER ── */}
-        <div className="flex-1 overflow-y-auto space-y-4 pr-1 pb-4 min-h-[350px]">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1 pb-4 min-h-[350px] custom-scrollbar">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -204,15 +204,15 @@ export default function ConciergeChatView() {
               <div
                 className={`max-w-[85%] sm:max-w-[75%] rounded-3xl p-4 sm:p-5 text-xs leading-relaxed space-y-3 ${
                   msg.sender === "user"
-                    ? "bg-gradient-to-r from-brand-gold to-[#FFE088] text-brand-black font-medium shadow-[0_5px_25px_rgba(212,168,67,0.3)] rounded-br-none"
-                    : "glass-obsidian border border-white/15 text-white/90 shadow-xl rounded-bl-none"
+                    ? "bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-white rounded-br-none shadow-[0_5px_25px_rgba(212,168,67,0.2)]"
+                    : "bg-[#18181B] border border-white/15 text-zinc-100 shadow-xl rounded-bl-none"
                 }`}
               >
                 <p>{msg.text}</p>
 
                 {/* Model Recommendation Card inside Chat */}
                 {msg.modelCard && (
-                  <div className="rounded-2xl overflow-hidden glass-dark border border-brand-gold/40 p-3 text-white space-y-3 mt-2 bg-black/40">
+                  <div className="rounded-2xl overflow-hidden glass-dark border border-brand-gold/40 p-3 text-white space-y-3 mt-2 bg-black/60">
                     <div className="flex items-center gap-3">
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-brand-gold/40">
                         <Image
@@ -227,7 +227,7 @@ export default function ConciergeChatView() {
                           <span className="font-serif font-bold text-sm text-white">{msg.modelCard.name}</span>
                           <span className="font-serif font-bold text-brand-gold text-xs">{msg.modelCard.rate}</span>
                         </div>
-                        <span className="text-[10px] text-white/60 block">{msg.modelCard.sector} · {msg.modelCard.city}</span>
+                        <span className="text-[10px] text-[#A1A1AA] block">{msg.modelCard.sector} · {msg.modelCard.city}</span>
                         <div className="inline-flex items-center gap-1 text-[8px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
                           <ShieldCheck size={9} /> Disponibilidad Confirmada
                         </div>
@@ -246,16 +246,16 @@ export default function ConciergeChatView() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-end gap-1 text-[9px] opacity-50 font-mono">
+                <div className="flex items-center justify-end gap-1 text-[9px] text-[#A1A1AA] font-mono">
                   <span>{msg.timestamp}</span>
-                  <CheckCheck size={12} />
+                  <CheckCheck size={12} className="text-brand-gold" />
                 </div>
               </div>
             </div>
           ))}
 
           {isTyping && (
-            <div className="flex items-center gap-2 text-brand-gold/70 text-[10px] font-mono px-3">
+            <div className="flex items-center gap-2 text-brand-gold/80 text-[10px] font-mono px-3">
               <span className="w-2 h-2 rounded-full bg-brand-gold animate-bounce" />
               <span className="w-2 h-2 rounded-full bg-brand-gold animate-bounce [animation-delay:0.2s]" />
               <span className="w-2 h-2 rounded-full bg-brand-gold animate-bounce [animation-delay:0.4s]" />
@@ -278,19 +278,19 @@ export default function ConciergeChatView() {
             placeholder="Escribe tu solicitud confidencial (ej. Machala, Guayaquil, Suite 5★)..."
             value={inputVal}
             onChange={e => setInputVal(e.target.value)}
-            className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-white/40"
+            className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder-[#A1A1AA]"
           />
 
           <button
             type="button"
-            className="w-10 h-10 rounded-full glass-dark border border-white/10 text-white/70 hover:text-brand-gold flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-full glass-dark border border-white/10 text-[#A1A1AA] hover:text-brand-gold flex items-center justify-center transition-colors cursor-pointer"
           >
             <Mic size={16} />
           </button>
 
           <button
             type="submit"
-            className="w-11 h-11 rounded-full bg-brand-gold hover:bg-white text-brand-black flex items-center justify-center transition-all shadow-[0_0_20px_rgba(212,168,67,0.4)] shrink-0"
+            className="w-11 h-11 rounded-full bg-brand-gold hover:bg-white text-brand-black flex items-center justify-center transition-all shadow-[0_0_20px_rgba(212,168,67,0.4)] shrink-0 cursor-pointer"
           >
             <Send size={16} />
           </button>

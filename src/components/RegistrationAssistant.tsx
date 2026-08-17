@@ -333,7 +333,7 @@ export default function RegistrationAssistant() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-white/70 font-bold uppercase tracking-wider">Citas por semana:</span>
+                    <span className="text-[#A1A1AA] font-bold uppercase tracking-wider">Citas por semana:</span>
                     <span className="text-brand-gold font-serif text-lg font-bold">{appointmentsPerWeek} citas</span>
                   </div>
                   <input
@@ -342,9 +342,12 @@ export default function RegistrationAssistant() {
                     max="15"
                     value={appointmentsPerWeek}
                     onChange={(e) => setAppointmentsPerWeek(Number(e.target.value))}
-                    className="w-full accent-brand-gold bg-white/10 h-2 rounded-lg cursor-pointer"
+                    className="w-full luxury-slider cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, #D4AF37 0%, #D4AF37 ${((appointmentsPerWeek - 1) / (15 - 1)) * 100}%, #27272A ${((appointmentsPerWeek - 1) / (15 - 1)) * 100}%, #27272A 100%)`
+                    }}
                   />
-                  <div className="flex justify-between text-[9px] text-white/30">
+                  <div className="flex justify-between text-[10px] text-[#A1A1AA] font-mono">
                     <span>1 cita/sem</span>
                     <span>8 citas/sem</span>
                     <span>15 citas/sem</span>
@@ -353,7 +356,7 @@ export default function RegistrationAssistant() {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-white/70 font-bold uppercase tracking-wider">Tarifa por hora:</span>
+                    <span className="text-[#A1A1AA] font-bold uppercase tracking-wider">Tarifa por hora:</span>
                     <span className="text-brand-gold font-serif text-lg font-bold">${hourlyRate} USD/h</span>
                   </div>
                   <input
@@ -363,9 +366,12 @@ export default function RegistrationAssistant() {
                     step="10"
                     value={hourlyRate}
                     onChange={(e) => setHourlyRate(Number(e.target.value))}
-                    className="w-full accent-brand-gold bg-white/10 h-2 rounded-lg cursor-pointer"
+                    className="w-full luxury-slider cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, #D4AF37 0%, #D4AF37 ${((hourlyRate - 80) / (300 - 80)) * 100}%, #27272A ${((hourlyRate - 80) / (300 - 80)) * 100}%, #27272A 100%)`
+                    }}
                   />
-                  <div className="flex justify-between text-[9px] text-white/30">
+                  <div className="flex justify-between text-[10px] text-[#A1A1AA] font-mono">
                     <span>$80/h</span>
                     <span>$180/h</span>
                     <span>$300/h</span>

@@ -6,13 +6,27 @@ import AdminQuickUpload from "@/components/AdminQuickUpload";
 import AdminModelList from "@/components/AdminModelList";
 import AdminPaymentSettings from "@/components/AdminPaymentSettings";
 import AdminGentlemenPasses from "@/components/AdminGentlemenPasses";
-import { LogOut, LayoutDashboard, PlusCircle, Users, Loader2, CreditCard, Gift } from "lucide-react";
+import AdminDashboardHUD from "@/components/AdminDashboardHUD";
+import AdminStoriesManager from "@/components/AdminStoriesManager";
+import AdminSecurityLogs from "@/components/AdminSecurityLogs";
+import { 
+  LogOut, 
+  LayoutDashboard, 
+  PlusCircle, 
+  Users, 
+  Loader2, 
+  CreditCard, 
+  Gift, 
+  Film, 
+  ShieldCheck 
+} from "lucide-react";
 import { checkAdminSessionAction, logoutAdminAction } from "@/app/actions/admin";
+import { sound } from "@/lib/soundEngine";
 
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'upload' | 'passes' | 'payments'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'upload' | 'stories' | 'passes' | 'payments' | 'security'>('catalog');
 
   useEffect(() => {
     async function checkSession() {
@@ -24,6 +38,7 @@ export default function AdminPage() {
   }, []);
 
   const handleLogout = async () => {
+    sound.playSubtleClick();
     await logoutAdminAction();
     setIsAdmin(false);
   };
@@ -41,103 +56,136 @@ export default function AdminPage() {
     return <AdminLogin onSuccess={() => setIsAdmin(true)} />;
   }
 
-  const TABS: { id: 'catalog' | 'upload' | 'passes' | 'payments'; label: string; icon: React.ReactNode }[] = [
-    { id: 'catalog', label: 'Flota de Modelos', icon: <Users size={16} /> },
-    { id: 'upload', label: 'Publicación Express', icon: <PlusCircle size={16} /> },
-    { id: 'passes', label: 'Pases VIP Caballeros', icon: <Gift size={16} /> },
-    { id: 'payments', label: 'Métodos de Pago & Billeteras', icon: <CreditCard size={16} /> },
+  const TABS: { id: 'catalog' | 'upload' | 'stories' | 'passes' | 'payments' | 'security'; label: string; icon: React.ReactNode }[] = [
+    { id: 'catalog', label: 'Flota de Modelos', icon: <Users size={15} /> },
+    { id: 'upload', label: 'Publicación Express', icon: <PlusCircle size={15} /> },
+    { id: 'stories', label: 'Historias 4K & Reels', icon: <Film size={15} /> },
+    { id: 'passes', label: 'Pases VIP Caballeros', icon: <Gift size={15} /> },
+    { id: 'payments', label: 'Métodos de Pago & Billeteras', icon: <CreditCard size={15} /> },
+    { id: 'security', label: 'Auditoría & Seguridad', icon: <ShieldCheck size={15} /> },
   ];
 
   return (
-    <main className="min-h-screen bg-brand-black pt-24 pb-12">
-      <nav className="fixed top-0 w-full z-[60] glass-premium border-b border-brand-gold/10">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-             <div className="w-10 h-10 bg-brand-gold rounded-xl flex items-center justify-center text-brand-black shadow-lg shadow-brand-gold/20">
+    <main className="min-h-screen bg-[#08080C] text-white pt-24 pb-28 md:pb-12">
+      
+      {/* ── TOP NAV CONSOLE ── */}
+      <nav className="fixed top-0 w-full z-[60] glass-obsidian border-b border-brand-gold/20 shadow-2xl backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+             <div className="w-10 h-10 bg-gradient-to-br from-[#D4A843] via-[#FFE088] to-[#AA7C11] rounded-2xl flex items-center justify-center text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.35)]">
                 <LayoutDashboard size={20} />
              </div>
              <div className="flex flex-col">
-                <span className="font-serif text-brand-gold uppercase tracking-[0.2em] text-sm leading-none">Torre de Control</span>
-                <span className="text-[8px] text-brand-white/30 uppercase tracking-[0.3em] font-black mt-1">Nivel: Master CEO / Dueño</span>
+                <span className="font-serif text-brand-gold uppercase tracking-[0.2em] text-sm leading-none font-bold">Torre de Control</span>
+                <span className="text-[8px] text-[#A1A1AA] uppercase tracking-[0.3em] font-mono mt-1">Nivel: Master CEO / Dueño</span>
              </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 p-1 bg-brand-black/40 border border-white/5 rounded-2xl">
+          <div className="hidden xl:flex items-center gap-1.5 p-1 bg-black/40 border border-white/10 rounded-2xl">
             {TABS.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                onClick={() => {
+                  sound.playSubtleClick();
+                  setActiveTab(tab.id);
+                }}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === tab.id 
-                  ? 'bg-brand-gold text-brand-black shadow-lg' 
-                  : 'text-brand-white/40 hover:text-brand-gold'
+                  ? 'bg-brand-gold text-brand-black shadow-lg shadow-brand-gold/20' 
+                  : 'text-[#A1A1AA] hover:text-white'
                 }`}
               >
                 {tab.icon}
-                {tab.label}
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>
 
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 text-[10px] text-brand-white/30 uppercase font-black hover:text-brand-pink transition-colors group"
+            className="flex items-center gap-2 text-[10px] text-[#A1A1AA] uppercase font-black hover:text-rose-400 transition-colors group cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-brand-pink/10 transition-colors">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-rose-500/10 transition-colors">
               <LogOut size={14} />
             </div>
             <span className="hidden sm:inline">Desconectar</span>
           </button>
         </div>
 
-        {/* Mobile Sub-tabs */}
-        <div className="lg:hidden flex items-center gap-1 overflow-x-auto no-scrollbar px-4 py-2 border-t border-white/5 bg-[#08080C]">
+        {/* Mobile / Tablet Sub-tabs */}
+        <div className="xl:hidden flex items-center gap-1 overflow-x-auto no-scrollbar px-4 py-2 border-t border-white/5 bg-[#0a0a0f]">
           {TABS.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+              onClick={() => {
+                sound.playSubtleClick();
+                setActiveTab(tab.id);
+              }}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
                 activeTab === tab.id 
-                ? 'bg-brand-gold text-brand-black' 
-                : 'text-white/40 hover:text-white'
+                ? 'bg-brand-gold text-brand-black shadow-md' 
+                : 'text-[#A1A1AA] hover:text-white'
               }`}
             >
-              {tab.label}
+              {tab.icon}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
       </nav>
 
-      <div className="mt-8">
-        {activeTab === 'upload' && (
-          <div className="animate-in slide-in-from-bottom-5 duration-500">
-            <AdminQuickUpload />
-          </div>
-        )}
-        {activeTab === 'catalog' && (
-          <div className="animate-in slide-in-from-bottom-5 duration-500">
-            <AdminModelList />
-          </div>
-        )}
-        {activeTab === 'passes' && (
-          <div className="animate-in slide-in-from-bottom-5 duration-500">
-            <AdminGentlemenPasses />
-          </div>
-        )}
-        {activeTab === 'payments' && (
-          <div className="animate-in slide-in-from-bottom-5 duration-500">
-            <AdminPaymentSettings />
-          </div>
-        )}
+      {/* ── MAIN CONTENT AREA ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-8">
+        
+        {/* Master Executive HUD */}
+        <AdminDashboardHUD onSelectTab={(t) => setActiveTab(t as any)} />
+
+        {/* Active Tab View */}
+        <div className="pt-2">
+          {activeTab === 'upload' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminQuickUpload />
+            </div>
+          )}
+          {activeTab === 'catalog' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminModelList />
+            </div>
+          )}
+          {activeTab === 'stories' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminStoriesManager />
+            </div>
+          )}
+          {activeTab === 'passes' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminGentlemenPasses />
+            </div>
+          )}
+          {activeTab === 'payments' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminPaymentSettings />
+            </div>
+          )}
+          {activeTab === 'security' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminSecurityLogs />
+            </div>
+          )}
+        </div>
+
       </div>
 
-      {/* Floating Alerts Area for Admin */}
+      {/* Floating GPS & Sync Badge */}
       <div className="fixed bottom-8 right-8 z-50 pointer-events-none">
-        <div className="glass-premium border-brand-pink/20 px-6 py-4 rounded-2xl flex items-center gap-4 animate-bounce pointer-events-auto">
-          <div className="w-2 h-2 rounded-full bg-brand-gold animate-pulse" />
-          <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest">Sincronización GPS: Activa</span>
+        <div className="glass-obsidian border border-brand-gold/40 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-2xl pointer-events-auto">
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <span className="text-[9px] text-brand-gold uppercase font-mono font-bold tracking-widest">
+            Soberano · 100% Cripto
+          </span>
         </div>
       </div>
+
     </main>
   );
 }

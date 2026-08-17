@@ -58,7 +58,7 @@ export default function SecretVaultView() {
   const [activeMedia, setActiveMedia] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-[#08080C] text-white pt-24 pb-20 noise-overlay">
+    <div className="min-h-screen bg-[#08080C] text-white pt-24 pb-28 md:pb-20 noise-overlay">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10">
 
         {/* ── TOP VAULT HEADER ── */}
@@ -82,7 +82,7 @@ export default function SecretVaultView() {
             Acceso Exclusivo <span className="italic text-gold-shimmer">Diamante</span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-white/60 uppercase tracking-[0.2em] font-medium max-w-lg">
+          <p className="text-xs sm:text-sm text-[#A1A1AA] uppercase tracking-[0.2em] font-medium max-w-lg">
             Contenido multimedia sin censura, sesiones 360° y reservas de alto perfil.
           </p>
         </div>

@@ -20,6 +20,13 @@ import {
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 
+import { 
+  getAdminVIPPassesAction, 
+  createAdminVIPPassAction, 
+  toggleAdminVIPPassAction, 
+  deleteAdminVIPPassAction 
+} from "@/app/actions/admin";
+
 interface VIPPass {
   id: string;
   code: string;
@@ -38,32 +45,32 @@ const DEFAULT_PASSES: VIPPass[] = [
     code: "VIP-MACHALA-ORO",
     targetCity: "Machala",
     durationDays: 30,
-    vaultBonusUsd: 150,
-    maxUses: 100,
-    usedCount: 24,
-    createdAt: "2026-08-15",
+    vaultBonusUsd: 100,
+    maxUses: 50,
+    usedCount: 14,
+    createdAt: "2026-08-10",
     isActive: true
   },
   {
     id: "pass-2",
-    code: "DIAMANTE-SAMBORONDON",
+    code: "VIP-GUAYAQUIL-ALPHA",
     targetCity: "Guayaquil",
     durationDays: 60,
     vaultBonusUsd: 250,
-    maxUses: 50,
-    usedCount: 18,
-    createdAt: "2026-08-14",
+    maxUses: 20,
+    usedCount: 7,
+    createdAt: "2026-08-12",
     isActive: true
   },
   {
     id: "pass-3",
-    code: "PENTHOUSE-ELITE-EC",
-    targetCity: "Ecuador (Nacional)",
-    durationDays: 90,
-    vaultBonusUsd: 500,
-    maxUses: 200,
-    usedCount: 65,
-    createdAt: "2026-08-10",
+    code: "VIP-QUITO-DIAMANTE",
+    targetCity: "Quito",
+    durationDays: 30,
+    vaultBonusUsd: 150,
+    maxUses: 30,
+    usedCount: 18,
+    createdAt: "2026-08-15",
     isActive: true
   }
 ];
@@ -81,14 +88,37 @@ export default function AdminGentlemenPasses() {
   const [newMaxUses, setNewMaxUses] = useState(50);
 
   useEffect(() => {
-    const local = localStorage.getItem("carinosas_vip_passes");
-    if (local) {
+    async function loadPasses() {
       try {
-        setPasses(JSON.parse(local));
-      } catch (e) {
-        console.error("Error parsing local vip passes", e);
+        const dbPasses = await getAdminVIPPassesAction();
+        if (dbPasses && dbPasses.length > 0) {
+          const mapped: VIPPass[] = dbPasses.map((p: any) => ({
+            id: p.id,
+            code: p.pass_code,
+            targetCity: p.holder_name || "Nacional",
+            durationDays: 30,
+            vaultBonusUsd: 100,
+            maxUses: 50,
+            usedCount: 1,
+            createdAt: p.created_at ? p.created_at.split("T")[0] : "2026-08-16",
+            isActive: p.status === "active"
+          }));
+          setPasses(mapped);
+          return;
+        }
+      } catch (err) {
+        console.warn("DB VIP passes fetch notice:", err);
+      }
+
+      // Fallback to local storage
+      const local = localStorage.getItem("carinosas_vip_passes");
+      if (local) {
+        try {
+          setPasses(JSON.parse(local));
+        } catch {}
       }
     }
+    loadPasses();
   }, []);
 
   const savePasses = (newPassList: VIPPass[]) => {
@@ -96,7 +126,7 @@ export default function AdminGentlemenPasses() {
     localStorage.setItem("carinosas_vip_passes", JSON.stringify(newPassList));
   };
 
-  const handleCreatePass = (e: React.FormEvent) => {
+  const handleCreatePass = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCode.trim()) return;
 
@@ -117,6 +147,19 @@ export default function AdminGentlemenPasses() {
     setIsCreating(false);
     setNewCode("");
 
+    // Persist to server
+    try {
+      await createAdminVIPPassAction({
+        pass_code: pass.code,
+        holder_name: pass.targetCity,
+        tier_type: "gentleman",
+        tier_level: "Diamante",
+        duration_days: pass.durationDays
+      });
+    } catch (err) {
+      console.warn("Server pass create notice:", err);
+    }
+
     if (typeof window !== "undefined") {
       confetti({
         particleCount: 100,
@@ -134,20 +177,34 @@ export default function AdminGentlemenPasses() {
     setTimeout(() => setCopiedCode(null), 2500);
   };
 
-  const handleToggle = (id: string) => {
-    const updated = passes.map(p => p.id === id ? { ...p, isActive: !p.isActive } : p);
+  const handleToggle = async (id: string) => {
+    const pass = passes.find(p => p.id === id);
+    const newActiveState = pass ? !pass.isActive : true;
+    const updated = passes.map(p => p.id === id ? { ...p, isActive: newActiveState } : p);
     savePasses(updated);
+
+    try {
+      await toggleAdminVIPPassAction(id, newActiveState ? "active" : "revoked");
+    } catch (err) {
+      console.warn("Toggle status server notice:", err);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("¿Seguro que deseas revocar este pase VIP?")) {
       const updated = passes.filter(p => p.id !== id);
       savePasses(updated);
+
+      try {
+        await deleteAdminVIPPassAction(id);
+      } catch (err) {
+        console.warn("Delete pass server notice:", err);
+      }
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-8 animate-in fade-in duration-500 text-white">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-12 space-y-8 animate-in fade-in duration-500 text-white">
 
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-obsidian border border-brand-gold/30 rounded-3xl p-6 shadow-2xl">

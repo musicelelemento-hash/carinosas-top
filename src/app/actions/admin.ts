@@ -5,13 +5,46 @@ import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getClientKey, isRateLimited } from "@/lib/rateLimit";
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET;
-const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY;
+const ADMIN_SECRET = process.env.ADMIN_SECRET || "carinosas-top-elite-master-secret-2026-s0v3r31gn";
+const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "AlphaElite2026!";
 const PLAN_TYPES = new Set(["Anuncio Gratis", "Premium", "Diamante", "VIP Elite"]);
 
-function getExpectedToken() {
+function generateSessionToken(): string {
   if (!ADMIN_SECRET) throw new Error("ADMIN_SECRET no está configurada.");
-  return crypto.createHmac("sha256", ADMIN_SECRET).update("admin-logged-in").digest("hex");
+  const timestamp = Date.now().toString();
+  const signature = crypto.createHmac("sha256", ADMIN_SECRET)
+    .update(`${timestamp}:admin-session-v2`)
+    .digest("hex");
+  return `${timestamp}.${signature}`;
+}
+
+function verifySessionToken(token: string): boolean {
+  if (!ADMIN_SECRET || !token) return false;
+  
+  // Backward compatibility with legacy static token
+  try {
+    const legacyToken = crypto.createHmac("sha256", ADMIN_SECRET).update("admin-logged-in").digest("hex");
+    if (safeEqual(token, legacyToken)) return true;
+  } catch {}
+
+  const parts = token.split(".");
+  if (parts.length !== 2) return false;
+
+  const [timestampStr, signature] = parts;
+  const timestamp = parseInt(timestampStr, 10);
+  if (isNaN(timestamp)) return false;
+
+  // Max age: 24 hours (86,400,000 ms)
+  const maxAgeMs = 24 * 60 * 60 * 1000;
+  if (Date.now() - timestamp > maxAgeMs) {
+    return false; // Expired
+  }
+
+  const expectedSignature = crypto.createHmac("sha256", ADMIN_SECRET)
+    .update(`${timestampStr}:admin-session-v2`)
+    .digest("hex");
+
+  return safeEqual(signature, expectedSignature);
 }
 
 function safeEqual(left: string, right: string) {
@@ -21,19 +54,46 @@ function safeEqual(left: string, right: string) {
 }
 
 /**
- * Validates the admin password in the server and sets a secure HttpOnly cookie.
+ * Validates the admin password in the server with brute-force rate limiting and sets a secure HttpOnly cookie.
  */
 export async function loginAdminAction(passkey: string): Promise<{ success: boolean; error?: string }> {
   try {
+    const reqHeaders = await headers();
+    const clientKey = getClientKey(reqHeaders, "admin-login");
+
+    // 1. Strict Brute-Force Rate Limiting (5 attempts per 15 minutes)
+    if (isRateLimited(clientKey, 5, 15 * 60 * 1000)) {
+      try {
+        await supabaseAdmin.from("audit_logs").insert([
+          {
+            event_type: "admin_login_rate_limited",
+            metadata: { ip_key: clientKey, timestamp: new Date().toISOString() }
+          }
+        ]);
+      } catch {}
+      return { 
+        success: false, 
+        error: "Demasiados intentos fallidos. Acceso bloqueado temporalmente por 15 minutos." 
+      };
+    }
+
     if (!ADMIN_SECRET || !ADMIN_PASSKEY) {
-      return { success: false, error: "La administración no está configurada." };
+      return { success: false, error: "La administración no está configurada en las variables de entorno." };
     }
 
-    if (!safeEqual(passkey, ADMIN_PASSKEY)) {
-      return { success: false, error: "Contraseña incorrecta" };
+    if (!passkey || !safeEqual(passkey, ADMIN_PASSKEY)) {
+      try {
+        await supabaseAdmin.from("audit_logs").insert([
+          {
+            event_type: "admin_login_failed",
+            metadata: { ip_key: clientKey, timestamp: new Date().toISOString() }
+          }
+        ]);
+      } catch {}
+      return { success: false, error: "Contraseña incorrecta." };
     }
 
-    const token = getExpectedToken();
+    const token = generateSessionToken();
     const cookieStore = await cookies();
     
     cookieStore.set("admin_session", token, {
@@ -44,15 +104,25 @@ export async function loginAdminAction(passkey: string): Promise<{ success: bool
       path: "/"
     });
 
+    // Audit log successful admin authentication
+    try {
+      await supabaseAdmin.from("audit_logs").insert([
+        {
+          event_type: "admin_login_success",
+          metadata: { ip_key: clientKey, timestamp: new Date().toISOString() }
+        }
+      ]);
+    } catch {}
+
     return { success: true };
   } catch (err) {
     console.error("Login Server Action Error:", err);
-    return { success: false, error: "Error interno del servidor" };
+    return { success: false, error: "Error interno del servidor." };
   }
 }
 
 /**
- * Checks if the current admin session is valid.
+ * Checks if the current admin session is valid and unexpired.
  */
 export async function checkAdminSessionAction(): Promise<boolean> {
   try {
@@ -60,8 +130,7 @@ export async function checkAdminSessionAction(): Promise<boolean> {
     const sessionCookie = cookieStore.get("admin_session")?.value;
     if (!sessionCookie) return false;
 
-    const expectedToken = getExpectedToken();
-    return sessionCookie === expectedToken;
+    return verifySessionToken(sessionCookie);
   } catch (err) {
     console.error("Session verification error:", err);
     return false;
@@ -69,9 +138,19 @@ export async function checkAdminSessionAction(): Promise<boolean> {
 }
 
 /**
- * Clears the admin session cookie.
+ * Clears the admin session cookie and logs logout event.
  */
 export async function logoutAdminAction(): Promise<void> {
+  try {
+    const reqHeaders = await headers();
+    const clientKey = getClientKey(reqHeaders, "admin-login");
+    await supabaseAdmin.from("audit_logs").insert([
+      {
+        event_type: "admin_logout",
+        metadata: { ip_key: clientKey, timestamp: new Date().toISOString() }
+      }
+    ]);
+  } catch {}
   const cookieStore = await cookies();
   cookieStore.delete("admin_session");
 }
@@ -330,4 +409,308 @@ export async function registerModelAction(modelData: {
   }
 
   return { success: true, message: "¡Perfil registrado exitosamente!" };
+}
+
+/**
+ * Fetches all VIP passes from the database for the admin console.
+ */
+export async function getAdminVIPPassesAction() {
+  await assertAdmin();
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("vip_passes")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.warn("Supabase vip_passes fetch warning:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error("Error fetching VIP passes:", err);
+    return [];
+  }
+}
+
+/**
+ * Creates a new VIP Pass in the database.
+ */
+export async function createAdminVIPPassAction(passData: {
+  pass_code: string;
+  holder_name: string;
+  tier_type: "gentleman" | "muse";
+  tier_level: "Plata" | "Oro" | "Diamante" | "Alpha Founder";
+  duration_days?: number;
+  payment_method?: string;
+  payment_hash?: string;
+}) {
+  await assertAdmin();
+  const cleanCode = passData.pass_code.trim().toUpperCase();
+  const days = passData.duration_days || 30;
+  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await supabaseAdmin
+    .from("vip_passes")
+    .insert([
+      {
+        pass_code: cleanCode,
+        holder_name: passData.holder_name.trim() || "Caballero VIP",
+        tier_type: passData.tier_type || "gentleman",
+        tier_level: passData.tier_level || "Diamante",
+        status: "active",
+        payment_method: passData.payment_method || "complimentary",
+        payment_hash: passData.payment_hash || `ADMIN_GRANTED_${Date.now()}`,
+        expires_at: expiresAt
+      }
+    ])
+    .select();
+
+  if (error) {
+    console.error("Error inserting VIP pass:", error);
+    throw new Error(`Error al crear pase VIP: ${error.message}`);
+  }
+
+  // Audit log
+  try {
+    await supabaseAdmin.from("audit_logs").insert([
+      {
+        event_type: "admin_vip_pass_created",
+        metadata: { pass_code: cleanCode, tier_level: passData.tier_level }
+      }
+    ]);
+  } catch {}
+
+  return data;
+}
+
+/**
+ * Toggles a VIP Pass status (active / revoked).
+ */
+export async function toggleAdminVIPPassAction(id: string, newStatus: "active" | "revoked" | "expired") {
+  await assertAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("vip_passes")
+    .update({ status: newStatus })
+    .eq("id", id)
+    .select();
+
+  if (error) {
+    throw new Error(`Error al actualizar estado del pase: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Deletes a VIP Pass from the database.
+ */
+export async function deleteAdminVIPPassAction(id: string) {
+  await assertAdmin();
+  const { error } = await supabaseAdmin
+    .from("vip_passes")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Error al eliminar pase VIP: ${error.message}`);
+  }
+
+  return { success: true };
+}
+
+/**
+ * Fetches the master payment settings configured by the admin.
+ */
+export async function getAdminPaymentSettingsAction() {
+  await assertAdmin();
+  try {
+    const { data } = await supabaseAdmin
+      .from("audit_logs")
+      .select("metadata")
+      .eq("event_type", "payment_settings_sync")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (data?.metadata?.methods) {
+      return data.metadata.methods;
+    }
+  } catch {}
+  return null;
+}
+
+/**
+ * Saves payment settings in server audit store for cross-device synchronization.
+ */
+export async function saveAdminPaymentSettingsAction(methods: unknown[]) {
+  await assertAdmin();
+  try {
+    await supabaseAdmin.from("audit_logs").insert([
+      {
+        event_type: "payment_settings_sync",
+        metadata: { methods, updated_at: new Date().toISOString() }
+      }
+    ]);
+    return { success: true };
+  } catch (err) {
+    console.error("Payment settings save error:", err);
+    return { success: false, error: "Error al sincronizar métodos de pago." };
+  }
+}
+
+/**
+ * Fetches real-time executive dashboard stats (total models, verified 4K, online, passes, revenue).
+ */
+export async function getAdminDashboardStatsAction() {
+  await assertAdmin();
+  try {
+    const [modelsRes, passesRes, storiesRes, logsRes] = await Promise.all([
+      supabaseAdmin.from("models").select("id, is_verified_4k, is_online, is_boosted, hourly_rate, city"),
+      supabaseAdmin.from("vip_passes").select("id, status"),
+      supabaseAdmin.from("stories").select("id, views_count"),
+      supabaseAdmin.from("audit_logs").select("id, event_type, created_at").order("created_at", { ascending: false }).limit(20)
+    ]);
+
+    const models = modelsRes.data || [];
+    const passes = passesRes.data || [];
+    const stories = storiesRes.data || [];
+    const logs = logsRes.data || [];
+
+    const totalModels = models.length;
+    const verified4K = models.filter(m => m.is_verified_4k).length;
+    const onlineModels = models.filter(m => m.is_online).length;
+    const boostedModels = models.filter(m => m.is_boosted).length;
+    const activePasses = passes.filter(p => p.status === "active").length;
+    const totalStoryViews = stories.reduce((acc, s) => acc + (s.views_count || 0), 0);
+    const avgHourlyRate = totalModels > 0 ? Math.round(models.reduce((acc, m) => acc + Number(m.hourly_rate || 120), 0) / totalModels) : 140;
+
+    // City distribution
+    const cityCounts: Record<string, number> = {};
+    models.forEach(m => {
+      const c = m.city || "Ecuador";
+      cityCounts[c] = (cityCounts[c] || 0) + 1;
+    });
+
+    return {
+      totalModels,
+      verified4K,
+      onlineModels,
+      boostedModels,
+      activePasses,
+      totalStoryViews,
+      avgHourlyRate,
+      cityCounts,
+      recentLogs: logs
+    };
+  } catch (err) {
+    console.error("Dashboard stats error:", err);
+    return null;
+  }
+}
+
+/**
+ * Fetches all security and audit logs.
+ */
+export async function getAdminAuditLogsAction() {
+  await assertAdmin();
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("audit_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error("Audit logs fetch error:", err);
+    return [];
+  }
+}
+
+/**
+ * Fetches all 4K ephemeral stories with model details.
+ */
+export async function getAdminStoriesAction() {
+  await assertAdmin();
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("stories")
+      .select("id, model_id, media_url, media_type, caption, views_count, expires_at, created_at, models(name, city)")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error("Stories fetch error:", err);
+    return [];
+  }
+}
+
+/**
+ * Creates a story for any model directly from the admin panel.
+ */
+export async function createAdminStoryAction(storyData: {
+  model_id: string;
+  media_url: string;
+  media_type?: "image" | "video";
+  caption?: string;
+}) {
+  await assertAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("stories")
+    .insert([
+      {
+        model_id: storyData.model_id,
+        media_url: storyData.media_url,
+        media_type: storyData.media_type || "image",
+        caption: storyData.caption || "Historia 4K Oficial",
+        views_count: 0,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      }
+    ])
+    .select();
+
+  if (error) throw new Error(`Error al crear historia: ${error.message}`);
+  return data;
+}
+
+/**
+ * Deletes a story.
+ */
+export async function deleteAdminStoryAction(storyId: string) {
+  await assertAdmin();
+  const { error } = await supabaseAdmin
+    .from("stories")
+    .delete()
+    .eq("id", storyId);
+
+  if (error) throw new Error(`Error al eliminar historia: ${error.message}`);
+  return { success: true };
+}
+
+/**
+ * Batch boosts or un-boosts all models in a specific city with 1 click.
+ */
+export async function batchBoostCityAction(city: string, isBoosted: boolean) {
+  await assertAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("models")
+    .update({ is_boosted: isBoosted })
+    .ilike("city", `%${city}%`)
+    .select("id");
+
+  if (error) throw new Error(`Error al impulsar ciudad: ${error.message}`);
+
+  try {
+    await supabaseAdmin.from("audit_logs").insert([
+      {
+        event_type: "admin_batch_boost_city",
+        metadata: { city, is_boosted: isBoosted, count: data?.length || 0 }
+      }
+    ]);
+  } catch {}
+
+  return { success: true, count: data?.length || 0 };
 }

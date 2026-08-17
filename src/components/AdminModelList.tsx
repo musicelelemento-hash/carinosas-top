@@ -175,7 +175,7 @@ export default function AdminModelList() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 pb-28 md:pb-12 space-y-6">
       {/* Header & Metrics */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>

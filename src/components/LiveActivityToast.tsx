@@ -15,59 +15,59 @@ interface ActivityItem {
 const SAMPLE_ACTIVITIES: ActivityItem[] = [
   {
     id: "1",
-    type: "online",
-    name: "Mariana",
-    location: "El Poblado, Medellín",
-    message: "disponible para citas VIP",
-    timeAgo: "Hace 1 min"
+    type: "booking",
+    name: "Socio Alpha #084",
+    location: "Swissôtel, La Carolina, Quito",
+    message: "agendó cita VIP confirmada con Valentina",
+    timeAgo: "Hace 2 min"
   },
   {
     id: "2",
     type: "vip_pass",
-    name: "Socio VIP #8402",
-    location: "Samborondón, Guayaquil",
-    message: "activó Pase Diamante Alpha",
+    name: "Caballero Diamante #219",
+    location: "Isla Mocolí, Samborondón",
+    message: "activó Pase Anual Alpha Founder",
     timeAgo: "Hace 3 min"
   },
   {
     id: "3",
-    type: "verified_4k",
-    name: "Valentina",
-    location: "La Carolina, Quito",
-    message: "verificó su Bóveda 4K",
-    timeAgo: "Hace 5 min"
+    type: "online",
+    name: "Estefanía",
+    location: "Salinas Yacht Club & Chipipe",
+    message: "disponible para fines de semana en la playa",
+    timeAgo: "Hace 1 min"
   },
   {
     id: "4",
-    type: "online",
-    name: "Fiorella",
-    location: "San Isidro, Lima",
-    message: "disponible para Cenas VIP",
-    timeAgo: "Hace 2 min"
-  },
-  {
-    id: "5",
-    type: "vip_pass",
-    name: "Socio VIP #1938",
-    location: "Punta Pacífica, Panamá",
-    message: "desbloqueó Bóveda Secreta",
+    type: "verified_4k",
+    name: "Mia",
+    location: "Barbasquillo 5★, Manta",
+    message: "desbloqueó 6 fotos exclusivas en su Bóveda 4K",
     timeAgo: "Hace 4 min"
   },
   {
+    id: "5",
+    type: "booking",
+    name: "Empresario El Oro #105",
+    location: "Hotel Oro Verde, Machala",
+    message: "confirmó encuentro privado con Nicole",
+    timeAgo: "Hace 5 min"
+  },
+  {
     id: "6",
-    type: "verified_4k",
-    name: "Paulina",
-    location: "Polanco, CDMX",
-    message: "actualizó Book de Fotos 4K",
-    timeAgo: "Hace 6 min"
+    type: "online",
+    name: "Alessandra",
+    location: "Puerto Santa Ana, Guayaquil",
+    message: "en línea ahora · 100% fotos reales 4K",
+    timeAgo: "Hace 2 min"
   },
   {
     id: "7",
-    type: "booking",
-    name: "Carolina",
-    location: "Salamanca, Madrid",
-    message: "agendó cita VIP confirmada",
-    timeAgo: "Hace 8 min"
+    type: "vip_pass",
+    name: "Caballero Morlaco #042",
+    location: "Puertas del Sol, Cuenca",
+    message: "desbloqueó Bóveda Secreta de Camila",
+    timeAgo: "Hace 6 min"
   }
 ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { 
   X, 
   Crown, 
@@ -9,10 +9,8 @@ import {
   Copy, 
   QrCode, 
   Building2, 
-  ArrowRight, 
   Sparkles,
-  Lock,
-  ExternalLink
+  CheckCircle2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -36,7 +34,7 @@ export default function VIPCheckoutModal({
 }: VIPCheckoutModalProps) {
   const [paymentMethod, setPaymentMethod] = useState<"crypto" | "bank">("crypto");
   const [cryptoNetwork, setCryptoNetwork] = useState<"TRC20" | "BEP20">("TRC20");
-  const [copied, setCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [txHashOrRef, setTxHashOrRef] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,24 +47,50 @@ export default function VIPCheckoutModal({
   };
 
   const BANK_ACCOUNTS = [
-    { bank: "Banco Pichincha (Ecuador)", type: "Cta Corriente", num: "2100894561", holder: "CARINOSAS MEDIA CORP", ruc: "1792849501001" },
-    { bank: "Banco Guayaquil (Ecuador)", type: "Cta Ahorros", num: "0012489563", holder: "CARINOSAS VIP GROUP", ruc: "1792849501001" },
-    { bank: "Bancolombia (Colombia)", type: "Cta Ahorros", num: "450-891234-90", holder: "CARINOSAS LATAM", ruc: "901.482.119-4" },
-    { bank: "BCP (Perú)", type: "Cta Corriente Soles/USD", num: "193-48912345-0-88", holder: "CARINOSAS PERU SAC", ruc: "20608912451" },
+    { id: "bank-0", bank: "Banco Pichincha (Ecuador)", type: "Cta Corriente", num: "2100894561", holder: "CARINOSAS MEDIA CORP", ruc: "1792849501001" },
+    { id: "bank-1", bank: "Banco Guayaquil (Ecuador)", type: "Cta Ahorros", num: "0012489563", holder: "CARINOSAS VIP GROUP", ruc: "1792849501001" },
+    { id: "bank-2", bank: "Bancolombia (Colombia)", type: "Cta Ahorros", num: "450-891234-90", holder: "CARINOSAS LATAM", ruc: "901.482.119-4" },
+    { id: "bank-3", bank: "BCP (Perú)", type: "Cta Corriente Soles/USD", num: "193-48912345-0-88", holder: "CARINOSAS PERU SAC", ruc: "20608912451" },
   ];
+
+  // Sanitized copywriting for title to prevent "Membresía & Pase Pase..."
+  const displayTitle = useMemo(() => {
+    if (!planName) return "Membresía Alpha Caballero VIP";
+    const lower = planName.toLowerCase().trim();
+    if (lower === "pase vip diamante" || lower === "pase alpha caballero vip" || lower === "pase alpha founder" || lower === "membresía alpha caballero vip") {
+      return "Membresía Alpha Caballero VIP";
+    }
+    if (planName.startsWith("Pase ")) {
+      return `Membresía ${planName.replace(/^Pase\s+/i, "")}`;
+    }
+    if (!lower.includes("membresía") && !lower.includes("pase")) {
+      return `Membresía ${planName}`;
+    }
+    return planName;
+  }, [planName]);
+
+  // Sanitized currency string to prevent "$$50 USD USD"
+  const displayPrice = useMemo(() => {
+    if (planPrice === undefined || planPrice === null) return "$50 USD";
+    const raw = String(planPrice).trim();
+    const isMonthly = raw.toLowerCase().includes("mes");
+    const cleanedNum = raw.replace(/[^\d.]/g, "");
+    const numVal = cleanedNum || "50";
+    return isMonthly ? `$${numVal} USD / mes` : `$${numVal} USD`;
+  }, [planPrice]);
 
   if (!isOpen) return null;
 
   const currentWallet = WALLETS[cryptoNetwork];
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (text: string, key: string) => {
     if (typeof window !== "undefined") {
       navigator.clipboard?.writeText(text);
-      setCopied(true);
+      setCopiedKey(key);
       if ("vibrate" in navigator) {
         try { navigator.vibrate(15); } catch {}
       }
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopiedKey(null), 1500);
     }
   };
 
@@ -114,10 +138,7 @@ export default function VIPCheckoutModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-xl glass-obsidian border border-[#D4AF37]/40 rounded-[2.5rem] p-6 md:p-8 shadow-[0_25px_90px_rgba(0,0,0,0.95)] space-y-6 max-h-[85dvh] overflow-y-auto no-scrollbar"
-        style={{
-          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 16px))",
-        }}
+        className="relative w-full max-w-xl glass-obsidian border border-[#D4AF37]/40 rounded-[2.5rem] p-6 md:p-8 shadow-[0_25px_90px_rgba(0,0,0,0.95)] space-y-6 max-h-[88dvh] overflow-y-auto custom-scrollbar pb-8"
       >
         {/* Close Button */}
         <button
@@ -134,10 +155,10 @@ export default function VIPCheckoutModal({
             <Crown size={26} />
           </div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-white italic">
-            Membresía & Pase {planName}
+            {displayTitle}
           </h3>
-          <p className="text-xs text-white/50">
-            Total a pagar: <strong className="text-brand-gold font-serif text-base">${planPrice} USD</strong>
+          <p className="text-xs text-[#A1A1AA]">
+            Total a pagar: <strong className="text-brand-gold font-serif text-base">{displayPrice}</strong>
           </p>
         </div>
 
@@ -150,22 +171,22 @@ export default function VIPCheckoutModal({
 
             <div className="space-y-1">
               <h4 className="text-xl font-serif text-white font-bold italic">¡Pase VIP Activado con Éxito!</h4>
-              <p className="text-xs text-white/50">Guarda tu código personal para acceder a los beneficios exclusivos:</p>
+              <p className="text-xs text-[#A1A1AA]">Guarda tu código personal para acceder a los beneficios exclusivos:</p>
             </div>
 
             <div className="p-4 rounded-2xl bg-brand-gold/10 border border-brand-gold/40 flex items-center justify-between">
               <span className="font-mono text-lg font-bold text-brand-gold">{passCreated}</span>
               <button
-                onClick={() => handleCopy(passCreated)}
-                className="px-3 py-1.5 rounded-xl bg-brand-gold text-brand-black text-[10px] font-black uppercase tracking-wider"
+                onClick={() => handleCopy(passCreated, "pass")}
+                className="px-3.5 py-1.5 rounded-xl bg-brand-gold text-brand-black text-[10px] font-black uppercase tracking-wider transition-transform active:scale-95"
               >
-                {copied ? "Copiado ✓" : "Copiar"}
+                {copiedKey === "pass" ? "¡Copiado! ✓" : "Copiar Código"}
               </button>
             </div>
 
             <button
               onClick={onClose}
-              className="w-full py-4 rounded-2xl bg-brand-gold text-brand-black font-black text-xs uppercase tracking-[0.2em]"
+              className="w-full py-4 rounded-2xl bg-brand-gold text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_0_25px_rgba(212,168,67,0.4)] hover:scale-[1.01] active:scale-98 transition-all"
             >
               Comenzar a Disfrutar
             </button>
@@ -179,10 +200,10 @@ export default function VIPCheckoutModal({
               <button
                 type="button"
                 onClick={() => setPaymentMethod("crypto")}
-                className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   paymentMethod === "crypto"
-                    ? "bg-brand-gold text-brand-black shadow-md"
-                    : "text-white/50 hover:text-white"
+                    ? "bg-[#D4AF37] text-black shadow-md font-bold"
+                    : "text-[#A1A1AA] hover:text-white"
                 }`}
               >
                 <QrCode size={15} />
@@ -191,10 +212,10 @@ export default function VIPCheckoutModal({
               <button
                 type="button"
                 onClick={() => setPaymentMethod("bank")}
-                className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   paymentMethod === "bank"
-                    ? "bg-brand-gold text-brand-black shadow-md"
-                    : "text-white/50 hover:text-white"
+                    ? "bg-[#D4AF37] text-black shadow-md font-bold"
+                    : "text-[#A1A1AA] hover:text-white"
                 }`}
               >
                 <Building2 size={15} />
@@ -207,37 +228,51 @@ export default function VIPCheckoutModal({
               <div className="space-y-4">
                 {/* Network Chips */}
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/50 font-bold uppercase tracking-wider">Red USDT:</span>
+                  <span className="text-[#A1A1AA] font-bold uppercase tracking-wider">Red USDT:</span>
                   <div className="flex gap-2">
-                    {(["TRC20", "BEP20"] as const).map((net) => (
-                      <button
-                        key={net}
-                        type="button"
-                        onClick={() => setCryptoNetwork(net)}
-                        className={`px-3 py-1 rounded-lg text-[10px] font-mono font-bold uppercase transition-all ${
-                          cryptoNetwork === net
-                            ? "bg-emerald-400 text-black shadow-md"
-                            : "glass-dark border border-white/10 text-white/60"
-                        }`}
-                      >
-                        {net} (Tron / BSC)
-                      </button>
-                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setCryptoNetwork("TRC20")}
+                      className={`px-3 py-1.5 rounded-xl text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                        cryptoNetwork === "TRC20"
+                          ? "bg-[#D4AF37] text-black font-semibold shadow-[0_0_15px_rgba(212,175,55,0.35)]"
+                          : "glass-dark border border-white/10 text-white/70 hover:text-white hover:border-[#D4AF37]/30"
+                      }`}
+                    >
+                      TRC20 (Red Tron)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCryptoNetwork("BEP20")}
+                      className={`px-3 py-1.5 rounded-xl text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                        cryptoNetwork === "BEP20"
+                          ? "bg-[#D4AF37] text-black font-semibold shadow-[0_0_15px_rgba(212,175,55,0.35)]"
+                          : "glass-dark border border-white/10 text-white/70 hover:text-white hover:border-[#D4AF37]/30"
+                      }`}
+                    >
+                      BEP20 (BNB Smart Chain)
+                    </button>
                   </div>
                 </div>
 
                 {/* Wallet Box */}
-                <div className="p-4 rounded-2xl glass-dark border border-brand-gold/30 space-y-2">
-                  <span className="text-[9px] text-white/40 uppercase font-black tracking-widest block">Dirección de Billetera ({cryptoNetwork}):</span>
+                <div className="p-4 rounded-2xl glass-dark border border-brand-gold/30 space-y-2 relative">
+                  <span className="text-[9px] text-[#A1A1AA] uppercase font-black tracking-widest block">
+                    Dirección de Billetera ({cryptoNetwork}):
+                  </span>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-xs text-brand-gold break-all">{currentWallet}</span>
                     <button
                       type="button"
-                      onClick={() => handleCopy(currentWallet)}
-                      className="px-3 py-1.5 rounded-xl bg-brand-gold/20 hover:bg-brand-gold text-brand-gold hover:text-brand-black text-[10px] font-bold shrink-0 transition-colors flex items-center gap-1"
+                      onClick={() => handleCopy(currentWallet, "wallet")}
+                      className="px-3.5 py-1.5 rounded-xl bg-brand-gold/20 hover:bg-brand-gold text-brand-gold hover:text-brand-black text-[10px] font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                     >
-                      <Copy size={11} />
-                      <span>{copied ? "Copiado" : "Copiar"}</span>
+                      {copiedKey === "wallet" ? (
+                        <CheckCircle2 size={12} className="text-emerald-400" />
+                      ) : (
+                        <Copy size={11} />
+                      )}
+                      <span>{copiedKey === "wallet" ? "¡Copiado al portapapeles!" : "Copiar Billetera"}</span>
                     </button>
                   </div>
                 </div>
@@ -247,10 +282,12 @@ export default function VIPCheckoutModal({
             {/* BANK TAB */}
             {paymentMethod === "bank" && (
               <div className="space-y-3">
-                <span className="text-[10px] text-white/40 uppercase font-black tracking-widest block">Cuentas Bancarias Oficiales:</span>
-                <div className="grid grid-cols-1 gap-2.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                  {BANK_ACCOUNTS.map((acc, i) => (
-                    <div key={i} className="p-3.5 rounded-2xl glass-dark border border-white/10 space-y-1">
+                <span className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block">
+                  Cuentas Bancarias Oficiales:
+                </span>
+                <div className="grid grid-cols-1 gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-1">
+                  {BANK_ACCOUNTS.map((acc) => (
+                    <div key={acc.id} className="p-3.5 rounded-2xl glass-dark border border-white/10 space-y-1.5 hover:border-brand-gold/30 transition-colors">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-white">{acc.bank}</span>
                         <span className="text-[9px] text-brand-gold uppercase font-mono">{acc.type}</span>
@@ -259,13 +296,20 @@ export default function VIPCheckoutModal({
                         <span>N°: {acc.num}</span>
                         <button
                           type="button"
-                          onClick={() => handleCopy(acc.num)}
-                          className="text-[9px] text-white/50 hover:text-white px-2 py-0.5 rounded bg-white/5"
+                          onClick={() => handleCopy(acc.num, acc.id)}
+                          className="text-[9px] text-[#A1A1AA] hover:text-white px-2.5 py-1 rounded-lg bg-white/5 hover:bg-brand-gold/20 border border-white/10 hover:border-brand-gold/40 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                         >
-                          Copiar N°
+                          {copiedKey === acc.id ? (
+                            <span className="text-emerald-400 font-bold">¡Copiado al portapapeles! ✓</span>
+                          ) : (
+                            <>
+                              <Copy size={10} />
+                              <span>Copiar N°</span>
+                            </>
+                          )}
                         </button>
                       </div>
-                      <p className="text-[9px] text-white/40">Titular: {acc.holder} · RUC: {acc.ruc}</p>
+                      <p className="text-[9px] text-[#A1A1AA]">Titular: {acc.holder} · RUC: {acc.ruc}</p>
                     </div>
                   ))}
                 </div>
@@ -275,18 +319,20 @@ export default function VIPCheckoutModal({
             {/* Confirmation Form */}
             <form onSubmit={handleSubmit} className="space-y-3 pt-2">
               <div>
-                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest block mb-1">Nombre o Alias Confidencial</label>
+                <label className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
+                  Nombre o Alias Confidencial
+                </label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Ej: Socio VIP / Andrés"
-                  className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/30 outline-none"
+                  className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#A1A1AA] outline-none transition-colors"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest block mb-1">
+                <label className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
                   {paymentMethod === "crypto" ? "Hash de la Transacción (TXID)" : "Número de Comprobante / Referencia Bancaria"}
                 </label>
                 <input
@@ -295,7 +341,7 @@ export default function VIPCheckoutModal({
                   value={txHashOrRef}
                   onChange={(e) => setTxHashOrRef(e.target.value)}
                   placeholder={paymentMethod === "crypto" ? "Pega el TXID de tu retiro" : "Ej: 00489128"}
-                  className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/30 outline-none"
+                  className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#A1A1AA] outline-none transition-colors font-mono"
                 />
               </div>
 
@@ -306,7 +352,7 @@ export default function VIPCheckoutModal({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <span>Verificando Pago...</span>
@@ -326,3 +372,4 @@ export default function VIPCheckoutModal({
     </div>
   );
 }
+

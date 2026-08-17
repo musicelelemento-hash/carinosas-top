@@ -161,7 +161,7 @@ export default function AuthModal({
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md glass-obsidian border border-brand-gold/40 rounded-[2.5rem] p-8 shadow-[0_25px_90px_rgba(0,0,0,0.95)] space-y-6 z-10 animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md glass-obsidian border border-brand-gold/40 rounded-[2.5rem] p-6 sm:p-8 shadow-[0_25px_90px_rgba(0,0,0,0.95)] space-y-6 z-10 animate-in zoom-in-95 duration-300 max-h-[90dvh] overflow-y-auto custom-scrollbar pb-8">
         
         {/* Top Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
@@ -172,7 +172,8 @@ export default function AuthModal({
 
           <button 
             onClick={onClose}
-            className="w-8 h-8 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white/40 hover:text-white"
+            className="w-8 h-8 rounded-full glass-dark border border-white/10 flex items-center justify-center text-[#A1A1AA] hover:text-white transition-colors cursor-pointer"
+            aria-label="Cerrar modal"
           >
             <X size={14} />
           </button>

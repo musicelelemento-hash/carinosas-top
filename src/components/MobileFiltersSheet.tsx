@@ -106,7 +106,7 @@ export default function MobileFiltersSheet({
         {/* 1. Max Rate Slider */}
         <div className="space-y-3">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-white/60 font-bold uppercase tracking-wider">Tarifa Máxima por Hora:</span>
+            <span className="text-[#A1A1AA] font-bold uppercase tracking-wider">Tarifa Máxima por Hora:</span>
             <span className="text-base font-serif font-bold text-[#D4AF37]">${maxRate} USD</span>
           </div>
 
@@ -117,10 +117,13 @@ export default function MobileFiltersSheet({
             step="10"
             value={maxRate}
             onChange={(e) => setMaxRate(Number(e.target.value))}
-            className="w-full accent-[#D4AF37] h-2 bg-white/10 rounded-lg cursor-pointer"
+            className="w-full luxury-slider cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, #D4AF37 0%, #D4AF37 ${((maxRate - 60) / (300 - 60)) * 100}%, #27272A ${((maxRate - 60) / (300 - 60)) * 100}%, #27272A 100%)`
+            }}
           />
 
-          <div className="flex justify-between text-[8px] text-white/40 uppercase font-black tracking-widest">
+          <div className="flex justify-between text-[10px] text-[#A1A1AA] font-mono">
             <span>$60 / h</span>
             <span>$150 / h</span>
             <span>$300+ / h</span>

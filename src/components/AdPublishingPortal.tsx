@@ -123,7 +123,7 @@ export default function AdPublishingPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#08080C] text-white pt-24 pb-20 noise-overlay">
+    <div className="min-h-screen bg-[#08080C] text-white pt-24 pb-28 md:pb-20 noise-overlay">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
 
         {/* ── HEADER BREADCRUMB & TITLE ── */}
@@ -145,7 +145,7 @@ export default function AdPublishingPortal() {
             Publica tu Anuncio <span className="italic text-gold-shimmer">Élite</span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-white/60 uppercase tracking-[0.2em] font-medium max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm text-[#A1A1AA] uppercase tracking-[0.2em] font-medium max-w-xl mx-auto">
             Multiplica tus contactos de alto nivel en Machala, Guayaquil, Quito y todo Ecuador.
           </p>
         </div>

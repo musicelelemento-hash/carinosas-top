@@ -18,6 +18,7 @@ import {
   Edit2
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { getAdminPaymentSettingsAction, saveAdminPaymentSettingsAction } from "@/app/actions/admin";
 
 export interface PaymentMethodConfig {
   id: string;
@@ -91,19 +92,39 @@ export default function AdminPaymentSettings() {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    const local = localStorage.getItem("carinosas_payment_methods");
-    if (local) {
+    async function loadSettings() {
       try {
-        setMethods(JSON.parse(local));
-      } catch (e) {
-        console.error("Error parsing local payment methods", e);
+        const serverSettings = await getAdminPaymentSettingsAction();
+        if (serverSettings && Array.isArray(serverSettings) && serverSettings.length > 0) {
+          setMethods(serverSettings);
+          return;
+        }
+      } catch (err) {
+        console.warn("DB payment settings fetch notice:", err);
+      }
+
+      const local = localStorage.getItem("carinosas_payment_methods");
+      if (local) {
+        try {
+          setMethods(JSON.parse(local));
+        } catch (e) {
+          console.error("Error parsing local payment methods", e);
+        }
       }
     }
+    loadSettings();
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("carinosas_payment_methods", JSON.stringify(methods));
     setSavedSuccess(true);
+
+    try {
+      await saveAdminPaymentSettingsAction(methods);
+    } catch (err) {
+      console.warn("Server payment settings save notice:", err);
+    }
+
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
@@ -139,7 +160,7 @@ export default function AdminPaymentSettings() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-8 animate-in fade-in duration-500 text-white">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-12 space-y-8 animate-in fade-in duration-500 text-white">
 
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-obsidian border border-brand-gold/30 rounded-3xl p-6 shadow-2xl">

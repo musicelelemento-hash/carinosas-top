@@ -130,23 +130,23 @@ export default function Footer() {
         <div className="h-[1px] w-full bg-white/10" />
 
         {/* Bottom bar */}
-        <div className="py-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="py-8 pb-28 md:pb-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="space-y-2 text-center md:text-left">
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-[#A1A1AA]">
               Cariñosas.top © 2026 · Todos los Derechos Reservados · Ecuador
             </p>
-            <p className="text-[8px] text-white/20 leading-relaxed uppercase tracking-widest max-w-2xl">
+            <p className="text-[9px] text-[#A1A1AA]/80 leading-relaxed uppercase tracking-widest max-w-2xl">
               Plataforma digital para mayores de 18 años. Anuncios independientes de acompañamiento y modelaje en Quito, Guayaquil y todo Ecuador.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-5 text-[10px] text-white/40 uppercase tracking-widest font-black">
+          <div className="flex flex-wrap items-center gap-5 text-[10px] text-[#A1A1AA] uppercase tracking-widest font-black">
             <button
               onClick={handleToggleSound}
               title={isMuted ? "Activar Sonido VIP" : "Silenciar Sonido"}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
                 isMuted
-                  ? "bg-white/5 border-white/10 text-white/40 hover:text-white"
+                  ? "bg-white/5 border-white/10 text-[#A1A1AA] hover:text-white"
                   : "bg-brand-gold/15 border-brand-gold/40 text-brand-gold hover:bg-brand-gold/25"
               }`}
             >
