@@ -156,7 +156,7 @@ export default function ProfileCard({
       const phone = whatsapp.replace(/\D/g, '');
       const fullPhone = phone.startsWith('593') ? phone : `593${phone.replace(/^0/, '')}`;
       setTimeout(() => {
-        window.open(`https://wa.me/${fullPhone}?text=Hola%20${encodeURIComponent(name)}%2C%20vi%20tu%20perfil%20en%20Cari%C3%B1osas.top%20%F0%9F%94%A5`, '_blank');
+        window.open(`https://wa.me/${fullPhone}?text=Hola%20${encodeURIComponent(name)}%2C%20vi%20tu%20perfil%20en%20Cari%C3%B1osas.top`, '_blank');
         setIsTransitioning(false);
       }, 1100);
     } else {
@@ -339,16 +339,16 @@ export default function ProfileCard({
               </h3>
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-emerald-500/40 backdrop-blur-md shrink-0 shadow-lg">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">En Línea</span>
+                <span className="text-[9px] font-mono font-black text-emerald-400 uppercase tracking-widest">En Línea</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md backdrop-blur-md ${isFree ? 'bg-white/10 text-white/70 border border-white/10' : 'bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40'}`}>
+              <span className={`text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md backdrop-blur-md ${isFree ? 'bg-white/10 text-white/70 border border-white/10' : 'bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40'}`}>
                 {isFree ? 'Estándar' : plan_type}
               </span>
               <span className="w-[3px] h-[3px] rounded-full bg-white/40" />
-              <span className="text-[11px] text-white/90 font-medium flex items-center gap-1 drop-shadow-md">
+              <span className="text-[11px] font-mono text-white/90 font-medium flex items-center gap-1 drop-shadow-md">
                 <MapPin size={12} className="text-[#D4AF37]" />
                 {location}
               </span>
@@ -461,8 +461,8 @@ export default function ProfileCard({
           </div>
 
           <div className="flex flex-col items-end gap-0.5">
-            <span className="label-xs text-white/40">Respuesta</span>
-            <span className="body-sm font-bold italic text-brand-gold">&lt; 5 min</span>
+            <span className="label-xs font-mono text-white/40">Respuesta</span>
+            <span className="body-sm font-mono font-bold text-brand-gold">&lt; 5 min</span>
           </div>
         </div>
       </motion.div>

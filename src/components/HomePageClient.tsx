@@ -221,7 +221,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider glass-obsidian border border-brand-pink/50 text-brand-pink hover:bg-brand-pink/10 transition-all shadow-[0_0_15px_rgba(255,0,98,0.25)] animate-pulse"
               >
                 <Film size={13} />
-                <span>🎬 Reels Feed (TikTok)</span>
+                <span>Reels Feed</span>
               </button>
 
               <button
@@ -237,7 +237,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                 }`}
               >
                 <Radio size={13} />
-                <span>⚡ En Vivo</span>
+                <span>En Vivo</span>
               </button>
 
               <button
@@ -253,7 +253,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                 }`}
               >
                 <MapPin size={13} />
-                <span>🗺️ Geo-Radar</span>
+                <span>Geo-Radar</span>
               </button>
             </div>
 
@@ -268,54 +268,56 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           </div>
         </div>
 
-        {/* ── 1. MAIN COLLECTION GRID (IMMEDIATE FIRST VIEWPORT REWARD) ── */}
-        <section id="collection" className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20">
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 mb-2">
-                <Flame size={12} className="text-brand-gold animate-pulse" />
-                <span className="text-[8px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto {currentCountry.name}</span>
-              </div>
-              <h2 className="font-serif font-bold text-2xl sm:text-4xl italic text-white">
-                Modelos & Acompañantes <span className="text-gold-shimmer">VIP</span>
-              </h2>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono block">Disponibles</span>
-              <span className="font-serif text-xl sm:text-2xl font-bold text-brand-gold">{displayModels.length} Perfiles</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
-            {displayModels.map((model) => (
-              <ProfileCard key={model.id} {...model} />
-            ))}
-          </div>
-
-          {isLoading && (
-            <div className="mt-20 flex justify-center py-10">
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative w-12 h-12">
-                  <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
-                  <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+        {/* ── 1. MAIN COLLECTION GRID + GEO-RADAR (fijo a la derecha en desktop) ── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20 lg:grid lg:grid-cols-[1fr_390px] lg:gap-8 lg:items-start">
+          <section id="collection">
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 mb-2">
+                  <Flame size={12} className="text-brand-gold animate-pulse" />
+                  <span className="text-[8px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto {currentCountry.name}</span>
                 </div>
-                <span className="text-[10px] text-brand-gold/60 italic font-mono uppercase tracking-widest">Cargando más perfiles...</span>
+                <h2 className="font-serif font-bold text-2xl sm:text-4xl italic text-white">
+                  Modelos & Acompañantes <span className="text-gold-shimmer">VIP</span>
+                </h2>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono block">Disponibles</span>
+                <span className="font-serif text-xl sm:text-2xl font-bold text-brand-gold">{displayModels.length} Perfiles</span>
               </div>
             </div>
-          )}
-        </section>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-x-8 gap-y-16">
+              {displayModels.map((model) => (
+                <ProfileCard key={model.id} {...model} />
+              ))}
+            </div>
+
+            {isLoading && (
+              <div className="mt-20 flex justify-center py-10">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative w-12 h-12">
+                    <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
+                    <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+                  </div>
+                  <span className="text-[10px] text-brand-gold/60 italic font-mono uppercase tracking-widest">Cargando más perfiles...</span>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* ── GEO-RADAR: panel fijo a la derecha en desktop, sección normal en mobile ── */}
+          <aside id="mapa" className="mt-16 lg:mt-0 lg:sticky lg:top-28">
+            <LiveMap variant="panel" currentCountry={currentCountry} userLocation={location} />
+          </aside>
+        </div>
 
         {/* ── 2. LIVE CLASSIFIEDS FEED (HIGH ENGAGEMENT) ── */}
         <div id="clasificados-feed">
           <LiveClassifiedsFeed currentCountry={currentCountry} />
         </div>
 
-        {/* ── 3. GEO-RADAR LIVE MAP ── */}
-        <div id="mapa">
-          <LiveMap currentCountry={currentCountry} userLocation={location} />
-        </div>
-
-        {/* ── 4. RECOMMENDATIONS & OCCASIONS ── */}
+        {/* ── 3. RECOMMENDATIONS & OCCASIONS ── */}
         <RecommendationSection currentCountry={currentCountry} />
 
         <OccasionMatchmaker

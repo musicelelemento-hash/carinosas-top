@@ -68,9 +68,11 @@ interface MapModel {
 interface LiveMapProps {
   currentCountry?: Country;
   userLocation?: { countryId: string; provinceId: string | null; cantonId: string | null; cantonName: string | null } | null;
+  /** 'full' = sección cockpit completa (comportamiento original). 'panel' = versión compacta para vivir como sidebar fijo junto al grid. */
+  variant?: "full" | "panel";
 }
 
-export default function LiveMap({ currentCountry, userLocation }: LiveMapProps = {}) {
+export default function LiveMap({ currentCountry, userLocation, variant = "full" }: LiveMapProps = {}) {
   const activeCountry = currentCountry || getCountryById("ecuador");
   const cityPresets = activeCountry.mapPresets || getCountryById("ecuador").mapPresets;
   const initialCityKey = Object.keys(cityPresets)[0] || "Quito";
@@ -252,6 +254,105 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
   };
 
   const initialCenter = (cityPresets[initialCityKey] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] }).center;
+  const fallbackAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800";
+
+  if (variant === "panel") {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-[#0C0C10] overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-bold text-white">Radar en vivo</span>
+            <span className="text-[11px] font-mono text-white/40">
+              {selectedCity} · radio {activeRadius === "all" ? "todo" : activeRadius}
+            </span>
+          </div>
+          <span className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-brand-pink">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-pink animate-pulse" />
+            LIVE
+          </span>
+        </div>
+
+        {/* Compact map */}
+        <div className="relative h-[260px] overflow-hidden">
+          {!loading && typeof window !== "undefined" && (
+            <MapContainer
+              center={initialCenter}
+              zoom={13}
+              scrollWheelZoom={false}
+              dragging={true}
+              touchZoom={true}
+              doubleClickZoom={false}
+              className="w-full h-full"
+              zoomControl={false}
+              ref={mapRef}
+            >
+              <TileLayer
+                attribution='&copy; CARTO'
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              />
+              {mapTarget && <LiveMapAnimator target={mapTarget} />}
+              {displayMapModels.map((model) => (
+                model.lat && model.lng && (
+                  <Marker
+                    key={model.id}
+                    position={[model.lat, model.lng]}
+                    icon={createAvatarIcon(model.images?.[0] || fallbackAvatar, selectedModel?.id === model.id)}
+                    eventHandlers={{ click: () => handleModelSelect(model) }}
+                  />
+                )
+              ))}
+            </MapContainer>
+          )}
+          <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center overflow-hidden">
+            <div className="w-[300px] h-[300px] rounded-full radar-sweep-beam opacity-40" />
+            <div className="absolute w-[220px] h-[220px] rounded-full border border-[#D4A843]/15" />
+            <div className="absolute w-[110px] h-[110px] rounded-full border border-[#D4A843]/20" />
+          </div>
+        </div>
+
+        {/* Nearby list — "movimiento reciente" con datos reales */}
+        <div className="flex-1 divide-y divide-white/5 max-h-[320px] overflow-y-auto">
+          {displayMapModels.length === 0 ? (
+            <div className="p-6 text-center text-white/40 text-xs">
+              No hay modelos en rango en {selectedCity}.
+            </div>
+          ) : (
+            displayMapModels.slice(0, 6).map((model) => (
+              <button
+                key={model.id}
+                onClick={() => handleModelSelect(model)}
+                className={`w-full px-5 py-3 flex items-center gap-3 text-left hover:bg-white/5 transition-colors cursor-pointer ${
+                  selectedModel?.id === model.id ? "bg-brand-gold/5" : ""
+                }`}
+              >
+                <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-white/10">
+                  <Image src={model.images?.[0] || fallbackAvatar} alt={model.name} fill className="object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-semibold text-white block truncate">{model.name}</span>
+                  <span className="text-[11px] text-white/45 block truncate">{model.sector || model.city}</span>
+                </div>
+                <span className="text-[11px] font-mono text-brand-gold shrink-0 flex items-center gap-1">
+                  <Navigation size={11} />
+                  {model.distanceKm ?? 1.2} km
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Link al radar de pantalla completa */}
+        <a
+          href="/radar"
+          className="px-5 py-3.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
+        >
+          <span>Ver radar completo</span>
+          <ChevronRight size={14} />
+        </a>
+      </div>
+    );
+  }
 
   return (
     <section className="relative w-full overflow-hidden bg-[#08080C] border-y border-[#D4AF37]/20" id="geo-radar-live">
@@ -405,9 +506,15 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
                     </p>
 
                     <div className="flex items-center gap-2 text-[9px] text-emerald-400 font-bold">
-                      <span>🟢 En Línea</span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        En Línea
+                      </span>
                       <span className="text-white/30">·</span>
-                      <span className="text-[#D4AF37]">A ~ {model.distanceKm || 1.2} km</span>
+                      <span className="text-[#D4AF37] flex items-center gap-1">
+                        <Navigation size={9} />
+                        A ~ {model.distanceKm || 1.2} km
+                      </span>
                     </div>
                   </div>
 
@@ -418,9 +525,10 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
           </div>
 
           {/* Sidebar Footer */}
-          <div className="p-3.5 border-t border-white/10 bg-black/40 text-center">
+          <div className="p-3.5 border-t border-white/10 bg-black/40 text-center flex items-center justify-center gap-1.5">
+            <Lock size={10} className="text-white/40" />
             <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] block font-mono">
-              🔒 Privacidad & Discreción 100% Blindada
+              Privacidad & Discreción 100% Blindada
             </span>
           </div>
         </div>
@@ -574,7 +682,7 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
           {/* Touch Notice Toast when locked */}
           {showTouchNotice && !isMapInteractive && (
             <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full glass-obsidian border border-[#D4AF37]/50 text-white text-[10px] font-medium tracking-wide shadow-2xl animate-in fade-in duration-200 pointer-events-none">
-              💡 Pulsa <strong className="text-[#D4AF37]">Scroll Libre</strong> arriba para mover el mapa
+              Pulsa <strong className="text-[#D4AF37]">Scroll Libre</strong> arriba para mover el mapa
             </div>
           )}
 
@@ -611,8 +719,9 @@ export default function LiveMap({ currentCountry, userLocation }: LiveMapProps =
                         <span className="text-[8px] text-white/50 uppercase tracking-wider truncate block">
                           {model.sector || model.city}
                         </span>
-                        <span className="text-[8px] text-emerald-400 font-bold block">
-                          📍 A ~ {model.distanceKm || 1.2} km
+                        <span className="text-[8px] text-emerald-400 font-bold flex items-center gap-1">
+                          <Navigation size={8} />
+                          A ~ {model.distanceKm || 1.2} km
                         </span>
                       </div>
                     </div>

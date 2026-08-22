@@ -91,8 +91,8 @@ export default function MobileBottomNav() {
       }}
     >
       <div className="max-w-md mx-auto px-4 pointer-events-auto">
-        <nav 
-          className="rounded-full px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,0.95)] flex items-center justify-between border border-[#D4AF37]/35"
+        <nav
+          className="rounded-[28px] px-3 py-2.5 shadow-[0_15px_50px_rgba(0,0,0,0.95)] flex items-center justify-between border border-[#D4AF37]/35"
           style={{
             background: "rgba(12, 12, 18, 0.92)",
             backdropFilter: "blur(20px)",
@@ -121,7 +121,7 @@ export default function MobileBottomNav() {
                       <Sparkles size={20} className="animate-pulse" />
                     </div>
                   </div>
-                  <span className="text-[8px] font-black uppercase tracking-wider text-[#D4AF37] mt-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#D4AF37] mt-1">
                     {label}
                   </span>
                 </button>
@@ -133,13 +133,13 @@ export default function MobileBottomNav() {
                 key={id}
                 href={href}
                 onClick={() => handleHaptic(id)}
-                className={`flex-1 flex flex-col items-center justify-center py-1 rounded-2xl transition-all ${
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-1.5 rounded-2xl transition-all ${
                   isActive ? "text-[#D4AF37] scale-105" : "text-white/40 hover:text-white"
                 }`}
               >
-                <Icon size={18} className={isActive ? "text-[#D4AF37]" : "text-white/40"} />
-                <span className={`text-[8px] font-bold uppercase tracking-wider mt-1 ${
-                  isActive ? "text-[#D4AF37] font-black" : "text-white/40"
+                <Icon size={20} className={isActive ? "text-[#D4AF37]" : "text-white/40"} />
+                <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${
+                  isActive ? "text-[#D4AF37]" : "text-white/40"
                 }`}>
                   {label}
                 </span>

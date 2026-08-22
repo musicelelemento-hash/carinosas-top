@@ -47,7 +47,7 @@ const PLANS: PlanTier[] = [
     name: "DIAMANTE VIP",
     price: "$180",
     period: "/mes",
-    badge: "👑 MÁXIMA EXPOSICIÓN #1",
+    badge: "MÁXIMA EXPOSICIÓN #1",
     isPopular: true,
     features: [
       "Posición #1 Fija en tu Ciudad (Machala / GYE / UIO)",
@@ -66,7 +66,7 @@ const PLANS: PlanTier[] = [
     name: "ORO ELITE",
     price: "$99",
     period: "/mes",
-    badge: "⭐ TOP #3 EN TU CIUDAD",
+    badge: "TOP #3 EN TU CIUDAD",
     features: [
       "Posición Top #3 en el Catálogo de tu Ciudad",
       "Badge 'Verificada'",
@@ -95,7 +95,7 @@ const PLANS: PlanTier[] = [
     name: "ANUNCIO GRATIS",
     price: "$0",
     period: "/7 días",
-    badge: "🆓 PRUEBA SIN COSTO",
+    badge: "PRUEBA SIN COSTO",
     features: [
       "Publicación Inmediata en Directorio",
       "Hasta 2 Fotos de Perfil",

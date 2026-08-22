@@ -350,7 +350,10 @@ export default function LiveClassifiedsFeed({ currentCountry }: LiveClassifiedsF
                   : "glass-dark border-white/10 text-white/50 hover:text-white"
               }`}
             >
-              🌐 Internacional ({SAMPLE_CLASSIFIEDS.length})
+              <span className="inline-flex items-center gap-1.5">
+                <Globe size={11} />
+                Internacional ({SAMPLE_CLASSIFIEDS.length})
+              </span>
             </button>
           </div>
         </div>

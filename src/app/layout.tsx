@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Playfair_Display, Alex_Brush } from "next/font/google";
+import { Montserrat, Playfair_Display, Alex_Brush, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -15,6 +15,11 @@ const playfair = Playfair_Display({
 const alexBrush = Alex_Brush({
   variable: "--font-alex-brush",
   weight: "400",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
@@ -172,7 +177,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} antialiased bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black pb-20 md:pb-0`}
+        className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} ${jetbrainsMono.variable} antialiased bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black pb-20 md:pb-0`}
       >
         {children}
         <MobileBottomNav />

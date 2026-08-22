@@ -134,8 +134,8 @@ export default function StoriesBar() {
                 <span className="text-[7px] text-white font-black uppercase tracking-wider block">REELS 4K</span>
               </div>
             </div>
-            <span className="text-[10px] text-brand-pink font-bold group-hover:text-white uppercase tracking-wider transition-colors">
-              🔥 Ver Reels
+            <span className="text-[10px] font-mono text-brand-pink font-bold group-hover:text-white uppercase tracking-wider transition-colors">
+              Ver Reels
             </span>
           </button>
 

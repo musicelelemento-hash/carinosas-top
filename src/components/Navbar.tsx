@@ -124,7 +124,7 @@ export default function Navbar({ currentCountry, onChangeLocation }: NavbarProps
                   className="flex items-center gap-2 text-[9px] text-brand-gold hover:text-white uppercase tracking-widest font-bold transition-all px-3.5 py-1.5 rounded-full glass-obsidian border border-brand-gold/40 shadow-[0_0_15px_rgba(212,168,67,0.2)] hover:border-brand-gold"
                   title="Cambiar país o cantón"
                 >
-                  <span className="text-xs">{currentCountry?.flag || "🇪🇨"}</span>
+                  <Globe size={12} />
                   <span className="truncate max-w-[90px] sm:max-w-none">{currentCountry?.name || "Ecuador"}</span>
                   <span className="text-white/30 text-[8px]">▼</span>
                 </button>

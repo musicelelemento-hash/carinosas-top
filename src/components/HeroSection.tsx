@@ -2,17 +2,21 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { type Country, getCountryById } from "@/lib/countries";
-import { 
-  Search, 
-  ChevronDown, 
-  Gem, 
-  Sparkles, 
-  ShieldCheck, 
-  MapPin, 
-  LocateFixed, 
+import {
+  Search,
+  ChevronDown,
+  Gem,
+  Sparkles,
+  ShieldCheck,
+  MapPin,
+  LocateFixed,
   X,
   Flame,
-  Check
+  Check,
+  Globe,
+  Crown,
+  Wine,
+  Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -308,16 +312,16 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
             {/* Quick Location Pills */}
             <div className="flex items-center gap-1.5 shrink-0">
               {[
-                { id: "all", label: "🌐 Todo el País", val: "" },
-                { id: "machala", label: "📍 Machala VIP", val: "Machala" },
-                { id: "pasaje", label: "📍 Pasaje", val: "Pasaje" },
-                { id: "pto-bolivar", label: "📍 Pto. Bolívar", val: "Puerto Bolívar" },
-                { id: "santa-rosa", label: "📍 Santa Rosa", val: "Santa Rosa" },
-                { id: "guayaquil", label: "📍 Guayaquil", val: "Guayaquil" },
-                { id: "quito", label: "📍 Quito", val: "Quito" },
-                { id: "cuenca", label: "📍 Cuenca", val: "Cuenca" },
-                { id: "manta", label: "📍 Manta", val: "Manta" },
-                { id: "santo-domingo", label: "📍 Sto. Domingo", val: "Santo Domingo" },
+                { id: "all", label: "Todo el País", val: "", Icon: Globe },
+                { id: "machala", label: "Machala VIP", val: "Machala", Icon: MapPin },
+                { id: "pasaje", label: "Pasaje", val: "Pasaje", Icon: MapPin },
+                { id: "pto-bolivar", label: "Pto. Bolívar", val: "Puerto Bolívar", Icon: MapPin },
+                { id: "santa-rosa", label: "Santa Rosa", val: "Santa Rosa", Icon: MapPin },
+                { id: "guayaquil", label: "Guayaquil", val: "Guayaquil", Icon: MapPin },
+                { id: "quito", label: "Quito", val: "Quito", Icon: MapPin },
+                { id: "cuenca", label: "Cuenca", val: "Cuenca", Icon: MapPin },
+                { id: "manta", label: "Manta", val: "Manta", Icon: MapPin },
+                { id: "santo-domingo", label: "Sto. Domingo", val: "Santo Domingo", Icon: MapPin },
               ].map((pill) => {
                 const isActive = (pill.val === "" && selectedCity === "Todas las Ciudades") || selectedCity === pill.val;
                 return (
@@ -342,6 +346,7 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
                         : "glass-obsidian border border-white/10 hover:border-[#D4AF37]/50 text-white/70 hover:text-[#D4AF37]"
                     }`}
                   >
+                    <pill.Icon size={11} />
                     <span>{pill.label}</span>
                   </button>
                 );
@@ -354,11 +359,11 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
             {/* Verified Experience Category Chips */}
             <div className="flex items-center gap-1.5 shrink-0">
               {[
-                { id: "verificadas", label: "⭐ Verificación 4K", val: "verificada" },
-                { id: "top-vip", label: "👑 Selección TOP VIP", val: "vip" },
-                { id: "cenas", label: "🥂 Cenas & Eventos", val: "cena" },
-                { id: "masajes", label: "💆 Masaje Relax", val: "masaje" },
-                { id: "discreta", label: "🔒 Discreción Total", val: "discrecion" },
+                { id: "verificadas", label: "Verificación 4K", val: "verificada", Icon: ShieldCheck },
+                { id: "top-vip", label: "Selección TOP VIP", val: "vip", Icon: Crown },
+                { id: "cenas", label: "Cenas & Eventos", val: "cena", Icon: Wine },
+                { id: "masajes", label: "Masaje Relax", val: "masaje", Icon: Sparkles },
+                { id: "discreta", label: "Discreción Total", val: "discrecion", Icon: Lock },
               ].map((pill) => {
                 const isActive = currentTag === pill.val;
                 return (
@@ -379,6 +384,7 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
                         : "glass-dark border border-[#D4AF37]/25 text-white/80 hover:border-[#D4AF37]/60 hover:text-white"
                     }`}
                   >
+                    <pill.Icon size={11} />
                     <span>{pill.label}</span>
                   </button>
                 );
