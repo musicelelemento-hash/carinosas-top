@@ -261,9 +261,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
   return (
     <div className="relative min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-32 md:pb-24">
       
-      {/* ── TOP HUD NAVIGATION ── */}
-      <div className="fixed top-6 left-6 z-[100] flex flex-col gap-2.5">
-        <Link 
+      {/* ── TOP HUD NAVIGATION (desktop) ── */}
+      <div className="hidden lg:flex fixed top-6 left-6 z-[100] flex-col gap-2.5">
+        <Link
           href="/"
           className={`group flex items-center gap-2.5 glass-obsidian px-5 py-2.5 rounded-full border border-brand-gold/30 hover:border-brand-gold hover:text-brand-gold transition-all active:scale-95 shadow-xl ${scrolled ? 'scale-90 origin-top-left -translate-y-2' : ''}`}
         >
@@ -276,9 +276,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
         </div>
       </div>
 
-      <div className="fixed top-6 right-6 z-[100] flex items-center gap-2">
+      <div className="hidden lg:flex fixed top-6 right-6 z-[100] items-center gap-2">
         {/* Like Button */}
-        <button 
+        <button
           onClick={handleLike}
           className={`flex items-center gap-1.5 glass-obsidian px-4 py-2.5 rounded-full border transition-all ${
             isLiked ? 'border-brand-pink bg-brand-pink/20 text-brand-pink' : 'border-white/10 hover:border-brand-gold text-white/70 hover:text-white'
@@ -289,7 +289,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
         </button>
 
         {/* Share Button */}
-        <button 
+        <button
           onClick={handleShare}
           className="flex items-center gap-2 glass-obsidian px-4 py-2.5 rounded-full border border-white/10 hover:border-brand-gold group transition-all"
         >
@@ -298,6 +298,40 @@ export default function ModelProfile({ model }: ModelProfileProps) {
             {copiedLink ? '¡Enlace Copiado!' : 'Compartir'}
           </span>
         </button>
+      </div>
+
+      {/* ── MOBILE HERO OVERLAY — calcado del mockup screenProfile ── */}
+      <div className="lg:hidden absolute top-0 inset-x-0 z-[45] px-4 pt-3.5 flex items-center justify-between pointer-events-none">
+        <Link href="/" className="pointer-events-auto w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(8,8,11,.6)', backdropFilter: 'blur(10px)' }}>
+          <ChevronLeft size={20} className="text-white" />
+        </Link>
+        <div className="flex gap-2.5 pointer-events-auto">
+          <button onClick={handleLike} className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(8,8,11,.6)', backdropFilter: 'blur(10px)' }}>
+            <Heart size={18} className={isLiked ? 'fill-brand-pink text-brand-pink' : 'text-white'} />
+          </button>
+          <button onClick={handleShare} className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(8,8,11,.6)', backdropFilter: 'blur(10px)' }}>
+            <Share2 size={18} className="text-white" />
+          </button>
+        </div>
+      </div>
+
+      <div className="lg:hidden absolute left-5 right-5 z-[45] flex flex-col gap-2" style={{ top: 'calc(75vh - 76px)' }}>
+        <div className="flex items-baseline gap-2">
+          <span className="font-serif text-[34px] font-bold leading-none text-white">{model.name}</span>
+          <span className="text-[17px] text-white/60">{model.age}</span>
+          {isVerified && <BadgeCheck size={19} className="text-brand-gold" />}
+        </div>
+        <div className="flex items-center gap-2.5">
+          <span className="flex items-center gap-1.5 text-[13px] text-white/70">
+            <MapPin size={14} className="text-brand-gold" />
+            {model.sector || model.location}
+          </span>
+          <span className="w-[3px] h-[3px] rounded-full bg-white/30" />
+          <span className="flex items-center gap-1.5 text-[13px]" style={{ color: model.is_online ? '#34d399' : 'rgba(240,240,236,.5)' }}>
+            <span className="w-[7px] h-[7px] rounded-full" style={{ background: model.is_online ? '#34d399' : 'rgba(240,240,236,.4)' }} />
+            {availabilityLabel}
+          </span>
+        </div>
       </div>
 
       {/* ── MAIN TWO-COLUMN SHOWCASE ── */}
@@ -361,8 +395,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
             
             {/* Identity & Bio Header */}
             <div className="space-y-6 pt-6 lg:pt-16">
-              
-              <div className="space-y-3">
+
+              {/* Desktop: eyebrow + nombre grande (en mobile ya va superpuesto sobre el hero) */}
+              <div className="hidden lg:block space-y-3">
                 <div className="flex items-center gap-2">
                   <TrendingUp size={14} className="text-brand-gold" />
                   <span className="text-[9px] text-brand-gold font-black uppercase tracking-[0.35em]">Top Model en {model.location}</span>
@@ -379,6 +414,20 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                   <MapPin size={13} className="text-brand-gold" />
                   <span>{model.sector || 'Zona Exclusiva Hotel 5★'}, {model.location}</span>
                 </p>
+              </div>
+
+              {/* Mobile: fila de stats (calcado del mockup) */}
+              <div className="lg:hidden grid grid-cols-3 gap-2.5">
+                {[
+                  { k: 'Distancia', v: 'Cerca' },
+                  { k: 'Responde', v: '3 min' },
+                  { k: 'Reseñas', v: '4.9' },
+                ].map((s) => (
+                  <div key={s.k} className="rounded-[14px] p-3 flex flex-col gap-1" style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.07)' }}>
+                    <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-white/40">{s.k}</span>
+                    <span className="text-[15px] font-bold text-white">{s.v}</span>
+                  </div>
+                ))}
               </div>
 
               {/* ── INTERACTIVE 24K GOLD VOICE NOTE PLAYER ── */}
@@ -552,9 +601,10 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                             className="aspect-[4/5] bg-brand-black rounded-2xl border border-brand-gold/40 overflow-hidden relative group/item cursor-pointer shadow-xl hover:scale-105 transition-all"
                           >
                             <Image src={img} fill className="object-cover" alt={`Foto exclusiva ${i + 1}`} />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity flex items-end p-2.5">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity flex items-end gap-1.5 p-2.5">
+                              <Sparkles size={10} className="text-brand-gold" />
                               <span className="text-[8px] text-brand-gold font-black uppercase tracking-wider">
-                                ✨ Ver en 4K Ultra HD
+                                Ver en 4K Ultra HD
                               </span>
                             </div>
                           </div>

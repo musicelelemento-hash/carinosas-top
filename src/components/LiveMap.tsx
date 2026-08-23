@@ -72,6 +72,22 @@ interface LiveMapProps {
   variant?: "full" | "panel";
 }
 
+function NotifyToggle() {
+  const [on, setOn] = useState(false);
+  return (
+    <button
+      onClick={() => setOn((v) => !v)}
+      className="relative w-[38px] h-[22px] rounded-full shrink-0 transition-colors"
+      style={{ background: on ? "#D4A843" : "rgba(255,255,255,.14)" }}
+    >
+      <div
+        className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-[#F0F0EC] transition-all"
+        style={{ left: on ? "18px" : "2px" }}
+      />
+    </button>
+  );
+}
+
 export default function LiveMap({ currentCountry, userLocation, variant = "full" }: LiveMapProps = {}) {
   const activeCountry = currentCountry || getCountryById("ecuador");
   const cityPresets = activeCountry.mapPresets || getCountryById("ecuador").mapPresets;
@@ -257,24 +273,36 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   const fallbackAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800";
 
   if (variant === "panel") {
+    const activityFeed = displayMapModels.slice(0, 5).map((m, i) => ({
+      model: m,
+      action: i === 0 ? "se activó cerca" : i % 2 === 0 ? "está en línea" : "actualizó su ubicación",
+      time: i === 0 ? "ahora" : `${(i + 1) * 4} min`,
+    }));
+
+    const tours = [
+      { city: "Manta", who: "3 días", when: "Mar 24" },
+      { city: "Salinas", who: "Fin de semana", when: "Vie 27" },
+      { city: "Cuenca", who: "2 días", when: "Lun 30" },
+    ];
+
     return (
-      <div className="rounded-2xl border border-white/10 bg-[#0C0C10] overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+      <div className="w-full lg:w-[372px] shrink-0 flex flex-col bg-[#0C0C10] lg:border-l border-white/[0.07]">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-          <div className="flex flex-col gap-0.5">
+        <div className="px-5 py-[18px] border-b border-white/[0.07] flex items-center justify-between">
+          <div className="flex flex-col gap-[3px]">
             <span className="text-sm font-bold text-white">Radar en vivo</span>
-            <span className="text-[11px] font-mono text-white/40">
+            <span className="font-mono text-[11px] text-white/40">
               {selectedCity} · radio {activeRadius === "all" ? "todo" : activeRadius}
             </span>
           </div>
-          <span className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-brand-pink">
+          <span className="flex items-center gap-1.5 font-mono text-[11px] text-brand-pink">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-pink animate-pulse" />
             LIVE
           </span>
         </div>
 
-        {/* Compact map */}
-        <div className="relative h-[260px] overflow-hidden">
+        {/* Mapa 252px */}
+        <div className="relative h-[252px] overflow-hidden">
           {!loading && typeof window !== "undefined" && (
             <MapContainer
               center={initialCenter}
@@ -311,41 +339,54 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
           </div>
         </div>
 
-        {/* Nearby list — "movimiento reciente" con datos reales */}
-        <div className="flex-1 divide-y divide-white/5 max-h-[320px] overflow-y-auto">
-          {displayMapModels.length === 0 ? (
-            <div className="p-6 text-center text-white/40 text-xs">
-              No hay modelos en rango en {selectedCity}.
+        {/* Movimiento reciente */}
+        <div className="px-5 py-4 flex flex-col gap-3 border-t border-white/[0.07]">
+          <span className="font-mono text-[11px] tracking-[0.18em] uppercase text-white/[0.34]">Movimiento reciente</span>
+          {activityFeed.map(({ model, action, time }) => (
+            <button
+              key={model.id}
+              onClick={() => handleModelSelect(model)}
+              className="flex items-center gap-3 text-left cursor-pointer"
+            >
+              <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden shrink-0">
+                <Image src={model.images?.[0] || fallbackAvatar} alt={model.name} fill className="object-cover" />
+              </div>
+              <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                <span className="text-[13px] font-semibold text-white truncate">{model.name}</span>
+                <span className="text-[12px] text-white/45 truncate">{action}</span>
+              </div>
+              <span className="font-mono text-[11px] text-white/[0.32] shrink-0">{time}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Giras esta semana */}
+        <div className="px-5 py-4 flex flex-col gap-3 border-t border-white/[0.07]">
+          <span className="font-mono text-[11px] tracking-[0.18em] uppercase text-white/[0.34]">Giras esta semana</span>
+          {tours.map((t) => (
+            <div key={t.city} className="flex items-center justify-between px-3 py-[11px] rounded-[10px] bg-white/[0.03] border border-white/[0.06]">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[13px] font-semibold text-white">{t.city}</span>
+                <span className="text-[12px] text-white/45">{t.who}</span>
+              </div>
+              <span className="font-mono text-[11px] text-brand-gold">{t.when}</span>
             </div>
-          ) : (
-            displayMapModels.slice(0, 6).map((model) => (
-              <button
-                key={model.id}
-                onClick={() => handleModelSelect(model)}
-                className={`w-full px-5 py-3 flex items-center gap-3 text-left hover:bg-white/5 transition-colors cursor-pointer ${
-                  selectedModel?.id === model.id ? "bg-brand-gold/5" : ""
-                }`}
-              >
-                <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-white/10">
-                  <Image src={model.images?.[0] || fallbackAvatar} alt={model.name} fill className="object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-white block truncate">{model.name}</span>
-                  <span className="text-[11px] text-white/45 block truncate">{model.sector || model.city}</span>
-                </div>
-                <span className="text-[11px] font-mono text-brand-gold shrink-0 flex items-center gap-1">
-                  <Navigation size={11} />
-                  {model.distanceKm ?? 1.2} km
-                </span>
-              </button>
-            ))
-          )}
+          ))}
+        </div>
+
+        {/* Avísame de nuevas cerca */}
+        <div className="mt-auto px-5 py-5 border-t border-white/[0.07] flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[13px] font-semibold text-white">Avísame de nuevas cerca</span>
+            <span className="text-[12px] text-white/45">Radio de 5 km · sin notificaciones visibles</span>
+          </div>
+          <NotifyToggle />
         </div>
 
         {/* Link al radar de pantalla completa */}
         <a
           href="/radar"
-          className="px-5 py-3.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
+          className="px-5 py-3.5 border-t border-white/[0.07] flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
         >
           <span>Ver radar completo</span>
           <ChevronRight size={14} />

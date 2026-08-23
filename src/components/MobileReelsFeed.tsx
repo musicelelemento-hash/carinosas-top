@@ -200,7 +200,20 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
     >
       
       {/* ── TOP ACTION BAR ── */}
-      <div className="absolute top-0 inset-x-0 z-30 p-4 pt-6 sm:p-5 sm:pt-8 flex items-center justify-between bg-gradient-to-b from-black/90 via-black/50 to-transparent">
+      <div className="absolute top-0 inset-x-0 z-30 p-4 pt-4 sm:p-5 sm:pt-6 flex flex-col gap-3 bg-gradient-to-b from-black/90 via-black/50 to-transparent">
+        {/* Story-style progress bars */}
+        <div className="flex gap-1.5">
+          {REEL_ITEMS.map((r, i) => (
+            <div key={r.id} className="flex-1 h-[3px] rounded-full bg-white/25 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-white transition-all"
+                style={{ width: i < currentIndex ? "100%" : i === currentIndex ? "42%" : "0%" }}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/40 text-brand-gold text-[9px] font-black uppercase tracking-wider shadow-[0_0_15px_rgba(212,168,67,0.2)]">
             <Flame size={12} className="text-brand-pink fill-brand-pink animate-pulse" />
@@ -217,12 +230,13 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
           </span>
         </div>
 
-        <button 
+        <button
           onClick={onClose}
           className="w-10 h-10 rounded-full glass-dark border border-white/20 text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform"
         >
           <X size={18} />
         </button>
+        </div>
       </div>
 
       {/* ── MAIN FULL-SCREEN MEDIA CONTAINER ── */}

@@ -23,6 +23,16 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sound } from "@/lib/soundEngine";
+import VIPCheckoutModal from "./VIPCheckoutModal";
+
+const VAULT_PREVIEW_GRID = [
+  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800",
+];
 
 const VAULT_ITEMS = [
   {
@@ -56,6 +66,7 @@ const VAULT_ITEMS = [
 
 export default function SecretVaultView() {
   const [activeMedia, setActiveMedia] = useState<string | null>(null);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#08080C] text-white pt-24 pb-28 md:pb-20 noise-overlay">
@@ -85,6 +96,55 @@ export default function SecretVaultView() {
           <p className="text-xs sm:text-sm text-[#A1A1AA] uppercase tracking-[0.2em] font-medium max-w-lg">
             Contenido multimedia sin censura, sesiones 360° y reservas de alto perfil.
           </p>
+        </div>
+
+        {/* ── VISTA PREVIA BLOQUEADA (grid 2 col, calcado del mockup screenVault) ── */}
+        <div className="rounded-3xl border border-white/10 overflow-hidden bg-[#0C0C10]">
+          <div className="px-5 py-4 flex items-center justify-between border-b border-white/10">
+            <div>
+              <span className="font-serif text-lg font-bold text-white block">Bóveda</span>
+              <span className="text-[12px] font-mono text-white/45">48 archivos · solo socios</span>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand-gold">
+              <Lock size={17} />
+            </div>
+          </div>
+
+          <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {VAULT_PREVIEW_GRID.map((src, i) => (
+              <div key={src} className="relative h-[150px] rounded-2xl overflow-hidden bg-[#101014]">
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  style={i === 0 ? undefined : { filter: "blur(14px) brightness(.55)" }}
+                />
+                {i === 0 ? (
+                  <span className="absolute left-2.5 bottom-2.5 px-2.5 py-1 rounded-lg bg-[#08080C]/72 font-mono text-[11px] text-white">
+                    Vista previa
+                  </span>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Lock size={22} className="text-white/75" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="p-4 pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex-1 px-4 py-3.5 rounded-2xl border border-brand-gold/30 bg-brand-gold/[0.06]">
+              <span className="text-[14px] font-bold text-brand-gold block">Pase de socio · $80/mes</span>
+              <span className="text-[13px] text-white/60">Acceso a la bóveda completa, historias privadas y agenda anticipada.</span>
+            </div>
+            <button
+              onClick={() => { sound.playIrisAperture(); setIsCheckoutOpen(true); }}
+              className="px-6 py-3.5 rounded-2xl bg-brand-gold text-brand-black font-black text-[13px] uppercase tracking-wider hover:brightness-110 transition-all cursor-pointer shrink-0"
+            >
+              Activar pase
+            </button>
+          </div>
         </div>
 
         {/* ── PASE DIAMANTE VIP STATUS CARD ── */}
@@ -335,6 +395,13 @@ export default function SecretVaultView() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <VIPCheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        planName="Pase de Socio · Bóveda 4K"
+        planPrice="$80 USD"
+      />
     </div>
   );
 }

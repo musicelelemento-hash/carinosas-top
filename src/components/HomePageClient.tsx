@@ -18,7 +18,6 @@ import VIPGuide from "@/components/VIPGuide";
 import PushPrompt from "@/components/PushPrompt";
 import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
 import MobileFiltersSheet from "@/components/MobileFiltersSheet";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import SecretVaultTeaser from "@/components/SecretVaultTeaser";
 import OccasionMatchmaker from "@/components/OccasionMatchmaker";
 import LiveActivityToast from "@/components/LiveActivityToast";
@@ -28,6 +27,7 @@ import GentlemenClubSection from "@/components/GentlemenClubSection";
 import HiddenModelsLounge from "@/components/HiddenModelsLounge";
 import PanicDisguise from "@/components/PanicDisguise";
 import MobileReelsFeed from "@/components/MobileReelsFeed";
+import TerminalSidebar from "@/components/TerminalSidebar";
 import { Sliders, LayoutGrid, Film, Radio, MapPin, Sparkles, Flame, ShieldCheck } from "lucide-react";
 import { type Country, getCountryById } from "@/lib/countries";
 
@@ -140,6 +140,47 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
   const [isReelsOpen, setIsReelsOpen] = React.useState(false);
   const [viewMode, setViewMode] = React.useState<'grid' | 'reels' | 'feed' | 'map'>('grid');
+  const [desktopTab, setDesktopTab] = React.useState<'cerca' | 'online' | 'nuevas' | 'top'>('cerca');
+
+  React.useEffect(() => {
+    const openReels = () => setIsReelsOpen(true);
+    window.addEventListener("open-reels-feed", openReels);
+    return () => window.removeEventListener("open-reels-feed", openReels);
+  }, []);
+
+  const handleLocationSearch = (locName: string) => {
+    if (!locName || locName === "Todas las Ciudades") {
+      setDisplayModels(initialModels);
+      return;
+    }
+    const clean = locName.toLowerCase().trim();
+    const matched = initialModels.filter(m =>
+      m.location.toLowerCase().includes(clean) ||
+      (m.sector && m.sector.toLowerCase().includes(clean)) ||
+      m.name.toLowerCase().includes(clean) ||
+      (m.tags && m.tags.some(t => t.toLowerCase().includes(clean))) ||
+      (m.description && m.description.toLowerCase().includes(clean))
+    );
+
+    if (matched.length > 0) {
+      setDisplayModels(matched);
+    } else if (["pasaje", "santa rosa", "puerto bolívar", "huaquillas", "arenillas"].some(c => clean.includes(c))) {
+      const elOroModels = initialModels.filter(m =>
+        m.location.toLowerCase().includes("machala") ||
+        (m.sector && m.sector.toLowerCase().includes("puerto"))
+      );
+      setDisplayModels(elOroModels.length > 0 ? elOroModels : initialModels);
+    } else {
+      setDisplayModels(initialModels);
+    }
+  };
+
+  const handleDesktopTab = (tab: 'cerca' | 'online' | 'nuevas' | 'top') => {
+    setDesktopTab(tab);
+    if (tab === 'cerca') handleSelectTag('');
+    else if (tab === 'top') handleSelectTag('vip');
+    // 'online' y 'nuevas' son puramente visuales: no hay campo de "en línea"/"fecha de alta" en el modelo de datos real.
+  };
 
   return (
     <>
@@ -152,50 +193,22 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         {/* Ambient Interactive Gold Dust Canvas */}
         <GoldParticles />
 
-        <Navbar currentCountry={currentCountry} onChangeLocation={resetLocation} />
+        <Navbar currentCountry={currentCountry} onChangeLocation={resetLocation} onSearch={handleLocationSearch} />
 
-        <StoriesBar />
+        {/* ── Solo mobile: stories + hero cinemático de búsqueda (la dirección "Terminal" del mockup no los incluye en desktop) ── */}
+        <div className="lg:hidden">
+          <StoriesBar />
+          <HeroSection
+            currentCountry={currentCountry}
+            activeTag={activeTag}
+            onSelectTag={handleSelectTag}
+            onSelectLocation={handleLocationSearch}
+          />
+        </div>
 
-        <HeroSection
-          currentCountry={currentCountry}
-          activeTag={activeTag}
-          onSelectTag={handleSelectTag}
-          onSelectLocation={(locName) => {
-            if (!locName || locName === "Todas las Ciudades") {
-              setDisplayModels(initialModels);
-            } else {
-              const clean = locName.toLowerCase().trim();
-              const matched = initialModels.filter(m => 
-                m.location.toLowerCase().includes(clean) || 
-                (m.sector && m.sector.toLowerCase().includes(clean)) ||
-                m.name.toLowerCase().includes(clean) ||
-                (m.tags && m.tags.some(t => t.toLowerCase().includes(clean))) ||
-                (m.description && m.description.toLowerCase().includes(clean))
-              );
-
-              if (matched.length > 0) {
-                setDisplayModels(matched);
-              } else {
-                // If it's a canton in El Oro (like Pasaje or Santa Rosa), fallback to Machala / El Oro models
-                if (["pasaje", "santa rosa", "puerto bolívar", "huaquillas", "arenillas"].some(c => clean.includes(c))) {
-                  const elOroModels = initialModels.filter(m => 
-                    m.location.toLowerCase().includes("machala") || 
-                    (m.sector && m.sector.toLowerCase().includes("puerto"))
-                  );
-                  setDisplayModels(elOroModels.length > 0 ? elOroModels : initialModels);
-                } else {
-                  setDisplayModels(initialModels);
-                }
-              }
-            }
-          }}
-        />
-
-        {/* ── TRI-MODE VIEW SWITCHER BAR (FUSION A + B + C) ── */}
-        <div className="sticky top-16 z-30 py-3 backdrop-blur-xl bg-[#08080C]/85 border-y border-white/5 shadow-2xl">
+        {/* ── TRI-MODE VIEW SWITCHER BAR — solo mobile (desktop usa el sidebar Terminal) ── */}
+        <div className="lg:hidden sticky top-14 z-30 py-3 backdrop-blur-xl bg-[#08080C]/85 border-y border-white/5 shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
-            
-            {/* Mode buttons */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
@@ -213,11 +226,8 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                 <span>Catálogo 4K</span>
               </button>
 
-              {/* TikTok / Reels Mode Trigger */}
               <button
-                onClick={() => {
-                  setIsReelsOpen(true);
-                }}
+                onClick={() => setIsReelsOpen(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider glass-obsidian border border-brand-pink/50 text-brand-pink hover:bg-brand-pink/10 transition-all shadow-[0_0_15px_rgba(255,0,98,0.25)] animate-pulse"
               >
                 <Film size={13} />
@@ -257,7 +267,6 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
               </button>
             </div>
 
-            {/* Mobile Touch Filters Button */}
             <button
               onClick={() => setIsFiltersSheetOpen(true)}
               className="px-3.5 py-2 rounded-xl glass-obsidian border border-brand-gold/40 text-brand-gold text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 shadow-lg"
@@ -268,48 +277,86 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           </div>
         </div>
 
-        {/* ── 1. MAIN COLLECTION GRID + GEO-RADAR (fijo a la derecha en desktop) ── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20 lg:grid lg:grid-cols-[1fr_390px] lg:gap-8 lg:items-start">
-          <section id="collection">
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 mb-2">
-                  <Flame size={12} className="text-brand-gold animate-pulse" />
-                  <span className="text-[8px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto {currentCountry.name}</span>
+        {/* ── 1. TERMINAL: sidebar (desktop) + grid de perfiles + radar en vivo ── */}
+        <div className="lg:flex lg:items-start">
+          <TerminalSidebar
+            models={displayModels}
+            onOpenReels={() => setIsReelsOpen(true)}
+            onOpenRadar={() => document.getElementById('mapa')?.scrollIntoView({ behavior: 'smooth' })}
+          />
+
+          <div className="flex-1 min-w-0 max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20 lg:max-w-none lg:pt-6 lg:px-[26px] lg:pb-10 lg:grid lg:grid-cols-[1fr_372px] lg:gap-0 lg:items-start">
+            <section id="collection">
+              {/* Desktop: tabs pill + contador en línea */}
+              <div className="hidden lg:flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2.5">
+                  {[
+                    { id: 'cerca' as const, label: 'Cerca de mí' },
+                    { id: 'online' as const, label: 'En línea' },
+                    { id: 'nuevas' as const, label: 'Nuevas' },
+                    { id: 'top' as const, label: 'Top semana' },
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => handleDesktopTab(t.id)}
+                      className="px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors"
+                      style={{
+                        background: desktopTab === t.id ? '#D4A843' : 'transparent',
+                        color: desktopTab === t.id ? '#08080C' : 'rgba(240,240,236,.7)',
+                        border: `1px solid ${desktopTab === t.id ? '#D4A843' : 'rgba(255,255,255,.12)'}`,
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
-                <h2 className="font-serif font-bold text-2xl sm:text-4xl italic text-white">
-                  Modelos & Acompañantes <span className="text-gold-shimmer">VIP</span>
-                </h2>
+                <div className="flex items-center gap-2 font-mono text-xs text-white/45">
+                  <span className="w-[7px] h-[7px] rounded-full bg-brand-pink block animate-pulse" />
+                  <span>{displayModels.length} en línea ahora</span>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono block">Disponibles</span>
-                <span className="font-serif text-xl sm:text-2xl font-bold text-brand-gold">{displayModels.length} Perfiles</span>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-x-8 gap-y-16">
-              {displayModels.map((model) => (
-                <ProfileCard key={model.id} {...model} />
-              ))}
-            </div>
-
-            {isLoading && (
-              <div className="mt-20 flex justify-center py-10">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative w-12 h-12">
-                    <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
-                    <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+              {/* Mobile heading */}
+              <div className="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 mb-2">
+                    <Flame size={12} className="text-brand-gold animate-pulse" />
+                    <span className="text-[8px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto {currentCountry.name}</span>
                   </div>
-                  <span className="text-[10px] text-brand-gold/60 italic font-mono uppercase tracking-widest">Cargando más perfiles...</span>
+                  <h2 className="font-serif font-bold text-2xl sm:text-4xl italic text-white">
+                    Modelos & Acompañantes <span className="text-gold-shimmer">VIP</span>
+                  </h2>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono block">Disponibles</span>
+                  <span className="font-serif text-xl sm:text-2xl font-bold text-brand-gold">{displayModels.length} Perfiles</span>
                 </div>
               </div>
-            )}
-          </section>
 
-          {/* ── GEO-RADAR: panel fijo a la derecha en desktop, sección normal en mobile ── */}
-          <aside id="mapa" className="mt-16 lg:mt-0 lg:sticky lg:top-28">
-            <LiveMap variant="panel" currentCountry={currentCountry} userLocation={location} />
-          </aside>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 lg:gap-x-[18px] lg:gap-y-[18px]">
+                {displayModels.map((model) => (
+                  <ProfileCard key={model.id} {...model} />
+                ))}
+              </div>
+
+              {isLoading && (
+                <div className="mt-20 flex justify-center py-10">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-12 h-12">
+                      <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
+                      <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+                    </div>
+                    <span className="text-[10px] text-brand-gold/60 italic font-mono uppercase tracking-widest">Cargando más perfiles...</span>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* ── RADAR EN VIVO: panel fijo a la derecha en desktop, sección normal en mobile ── */}
+            <aside id="mapa" className="mt-16 lg:mt-0 lg:sticky lg:top-16">
+              <LiveMap variant="panel" currentCountry={currentCountry} userLocation={location} />
+            </aside>
+          </div>
         </div>
 
         {/* ── 2. LIVE CLASSIFIEDS FEED (HIGH ENGAGEMENT) ── */}
@@ -354,7 +401,6 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <GhostNotifications />
         <AIAssistantOverlay />
         <PushPrompt />
-        <MobileBottomNav />
         <LiveActivityToast />
 
         <MobileFiltersSheet

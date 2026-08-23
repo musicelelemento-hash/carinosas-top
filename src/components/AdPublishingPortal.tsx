@@ -23,7 +23,8 @@ import {
   ChevronRight,
   CheckCircle2,
   RefreshCw,
-  Info
+  Info,
+  MapPin
 } from "lucide-react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -44,10 +45,10 @@ interface PlanTier {
 const PLANS: PlanTier[] = [
   {
     id: "diamante",
-    name: "DIAMANTE VIP",
-    price: "$180",
+    name: "DIAMANTE",
+    price: "$79",
     period: "/mes",
-    badge: "MÁXIMA EXPOSICIÓN #1",
+    badge: "PORTADA, RADAR Y REELS",
     isPopular: true,
     features: [
       "Posición #1 Fija en tu Ciudad (Machala / GYE / UIO)",
@@ -63,13 +64,13 @@ const PLANS: PlanTier[] = [
   },
   {
     id: "oro",
-    name: "ORO ELITE",
-    price: "$99",
+    name: "ORO",
+    price: "$29",
     period: "/mes",
-    badge: "TOP #3 EN TU CIUDAD",
+    badge: "PRIORIDAD + VERIFICACIÓN 4K",
     features: [
-      "Posición Top #3 en el Catálogo de tu Ciudad",
-      "Badge 'Verificada'",
+      "Prioridad en el Catálogo de tu Ciudad",
+      "Badge 'Verificada 4K'",
       "Hasta 6 Fotos HD + 1 Vídeo Corto",
       "Botón WhatsApp Directo + Telegram",
       "Presencia en el Geo-Radar Inmediato"
@@ -77,25 +78,11 @@ const PLANS: PlanTier[] = [
     gradient: "from-white/20 via-white/10 to-transparent"
   },
   {
-    id: "plata",
-    name: "PLATA BÁSICO",
-    price: "$49",
-    period: "/mes",
-    badge: "DIRECTORIO GENERAL",
-    features: [
-      "Listado en Directorio General",
-      "Hasta 3 Fotos",
-      "Contacto por WhatsApp",
-      "Renovación mensual"
-    ],
-    gradient: "from-white/10 to-transparent"
-  },
-  {
     id: "gratis",
-    name: "ANUNCIO GRATIS",
+    name: "GRATIS",
     price: "$0",
     period: "/7 días",
-    badge: "PRUEBA SIN COSTO",
+    badge: "SIN PRIORIDAD EN EL FEED",
     features: [
       "Publicación Inmediata en Directorio",
       "Hasta 2 Fotos de Perfil",
@@ -260,7 +247,7 @@ export default function AdPublishingPortal() {
               <p className="text-xs text-white/50">Elige el plan que mejor se adapte a tu objetivo de ingresos</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {PLANS.map((plan) => {
                 const isSelected = selectedPlan === plan.id;
                 return (
@@ -707,25 +694,26 @@ export default function AdPublishingPortal() {
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { id: "Machala", label: "📍 Machala VIP" },
-                    { id: "Guayaquil", label: "📍 Guayaquil / Samborondón" },
-                    { id: "Quito", label: "📍 Quito (La Carolina)" },
-                    { id: "Cuenca", label: "📍 Cuenca" },
-                    { id: "Manta", label: "📍 Manta" },
-                    { id: "Santo Domingo", label: "📍 Santo Domingo" },
-                    { id: "Ambato", label: "📍 Ambato" },
-                    { id: "Salinas", label: "📍 Salinas" },
+                    { id: "Machala", label: "Machala VIP" },
+                    { id: "Guayaquil", label: "Guayaquil / Samborondón" },
+                    { id: "Quito", label: "Quito (La Carolina)" },
+                    { id: "Cuenca", label: "Cuenca" },
+                    { id: "Manta", label: "Manta" },
+                    { id: "Santo Domingo", label: "Santo Domingo" },
+                    { id: "Ambato", label: "Ambato" },
+                    { id: "Salinas", label: "Salinas" },
                   ].map((cityOption) => (
                     <button
                       key={cityOption.id}
                       type="button"
                       onClick={() => setFormData({ ...formData, city: cityOption.id, sector: `${cityOption.id} Centro / Hotel 5★` })}
-                      className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
                         formData.city === cityOption.id
                           ? 'bg-brand-gold text-brand-black shadow-md scale-105'
                           : 'glass-dark border border-white/10 text-white/70 hover:text-white'
                       }`}
                     >
+                      <MapPin size={11} />
                       {cityOption.label}
                     </button>
                   ))}
@@ -738,7 +726,9 @@ export default function AdPublishingPortal() {
                   <label className="text-[10px] font-black uppercase tracking-wider text-brand-gold/90">
                     Fotos 4K & Vídeos
                   </label>
-                  <span className="text-[8px] text-brand-gold font-bold">✨ Auditoría Biométrica 4K</span>
+                  <span className="flex items-center gap-1 text-[8px] text-brand-gold font-bold">
+                    <Sparkles size={10} /> Auditoría Biométrica 4K
+                  </span>
                 </div>
 
                 <div className="border-2 border-dashed border-white/15 hover:border-brand-gold/50 rounded-3xl p-8 text-center bg-white/[0.02] cursor-pointer transition-all space-y-2">
