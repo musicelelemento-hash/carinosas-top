@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import HeroSection from "@/components/HeroSection";
 import ProfileCard from "@/components/ProfileCard";
 import Navbar from "@/components/Navbar";
@@ -28,7 +29,8 @@ import HiddenModelsLounge from "@/components/HiddenModelsLounge";
 import PanicDisguise from "@/components/PanicDisguise";
 import MobileReelsFeed from "@/components/MobileReelsFeed";
 import TerminalSidebar from "@/components/TerminalSidebar";
-import { Sliders, LayoutGrid, Film, Radio, MapPin, Sparkles, Flame, ShieldCheck } from "lucide-react";
+import MobileHomeFeed from "@/components/MobileHomeFeed";
+import { Sliders, LayoutGrid, Film, Radio, MapPin } from "lucide-react";
 import { type Country, getCountryById } from "@/lib/countries";
 
 interface HomePageModel {
@@ -53,6 +55,7 @@ interface HomePageClientProps {
 }
 
 export default function HomePageClient({ initialModels }: HomePageClientProps) {
+  const router = useRouter();
   const [displayModels, setDisplayModels] = React.useState<HomePageModel[]>(initialModels);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isFiltersSheetOpen, setIsFiltersSheetOpen] = React.useState(false);
@@ -195,18 +198,82 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
         <Navbar currentCountry={currentCountry} onChangeLocation={resetLocation} onSearch={handleLocationSearch} />
 
-        {/* ── Solo mobile: stories + hero cinemático de búsqueda (la dirección "Terminal" del mockup no los incluye en desktop) ── */}
+        {/* ── Solo mobile: stories + feed, calcado 1:1 de screenHome del mockup ── */}
         <div className="lg:hidden">
           <StoriesBar />
-          <HeroSection
-            currentCountry={currentCountry}
-            activeTag={activeTag}
-            onSelectTag={handleSelectTag}
-            onSelectLocation={handleLocationSearch}
-          />
         </div>
 
-        {/* ── TRI-MODE VIEW SWITCHER BAR — solo mobile (desktop usa el sidebar Terminal) ── */}
+        <div id="collection">
+          <div className="lg:hidden">
+            <MobileHomeFeed models={displayModels} />
+          </div>
+
+          {/* ── TERMINAL: sidebar + grid + radar en vivo — solo desktop ── */}
+          <div className="hidden lg:flex lg:items-start">
+            <TerminalSidebar
+              models={displayModels}
+              onOpenReels={() => setIsReelsOpen(true)}
+              onOpenRadar={() => document.getElementById('mapa')?.scrollIntoView({ behavior: 'smooth' })}
+            />
+
+            <div className="flex-1 min-w-0 lg:pt-6 lg:px-[26px] lg:pb-10 lg:grid lg:grid-cols-[1fr_372px] lg:gap-0 lg:items-start">
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    {[
+                      { id: 'cerca' as const, label: 'Cerca de mí' },
+                      { id: 'online' as const, label: 'En línea' },
+                      { id: 'nuevas' as const, label: 'Nuevas' },
+                      { id: 'top' as const, label: 'Top semana' },
+                    ].map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => handleDesktopTab(t.id)}
+                        className="px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors"
+                        style={{
+                          background: desktopTab === t.id ? '#D4A843' : 'transparent',
+                          color: desktopTab === t.id ? '#08080C' : 'rgba(240,240,236,.7)',
+                          border: `1px solid ${desktopTab === t.id ? '#D4A843' : 'rgba(255,255,255,.12)'}`,
+                        }}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 font-mono text-xs text-white/45">
+                    <span className="w-[7px] h-[7px] rounded-full bg-brand-pink block om-breathe" />
+                    <span>{displayModels.length} en línea ahora</span>
+                  </div>
+                </div>
+
+                <div className="grid lg:grid-cols-3 lg:gap-x-[18px] lg:gap-y-[18px]">
+                  {displayModels.map((model) => (
+                    <ProfileCard key={model.id} {...model} />
+                  ))}
+                </div>
+
+                {isLoading && (
+                  <div className="mt-20 flex justify-center py-10">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="relative w-12 h-12">
+                        <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
+                        <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+                      </div>
+                      <span className="text-[10px] text-brand-gold/60 italic font-mono uppercase tracking-widest">Cargando más perfiles...</span>
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* ── RADAR EN VIVO: panel fijo a la derecha ── */}
+              <aside id="mapa" className="lg:sticky lg:top-16">
+                <LiveMap variant="panel" currentCountry={currentCountry} userLocation={location} />
+              </aside>
+            </div>
+          </div>
+        </div>
+
+        {/* ── TRI-MODE VIEW SWITCHER BAR — solo mobile ── */}
         <div className="lg:hidden sticky top-14 z-30 py-3 backdrop-blur-xl bg-[#08080C]/85 border-y border-white/5 shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
             <div className="flex items-center gap-2">
@@ -251,16 +318,8 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
               </button>
 
               <button
-                onClick={() => {
-                  setViewMode('map');
-                  const el = document.getElementById('mapa');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
-                  viewMode === 'map'
-                    ? 'bg-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.4)]'
-                    : 'glass-obsidian border border-white/10 text-white/70 hover:text-white'
-                }`}
+                onClick={() => router.push('/radar')}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 glass-obsidian border border-white/10 text-white/70 hover:text-white"
               >
                 <MapPin size={13} />
                 <span>Geo-Radar</span>
@@ -277,86 +336,14 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           </div>
         </div>
 
-        {/* ── 1. TERMINAL: sidebar (desktop) + grid de perfiles + radar en vivo ── */}
-        <div className="lg:flex lg:items-start">
-          <TerminalSidebar
-            models={displayModels}
-            onOpenReels={() => setIsReelsOpen(true)}
-            onOpenRadar={() => document.getElementById('mapa')?.scrollIntoView({ behavior: 'smooth' })}
+        {/* ── Búsqueda avanzada + filtros de ciudad/categoría (mobile) — funcionalidad real, más abajo en el scroll para no dominar la entrada ── */}
+        <div className="lg:hidden">
+          <HeroSection
+            currentCountry={currentCountry}
+            activeTag={activeTag}
+            onSelectTag={handleSelectTag}
+            onSelectLocation={handleLocationSearch}
           />
-
-          <div className="flex-1 min-w-0 max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20 lg:max-w-none lg:pt-6 lg:px-[26px] lg:pb-10 lg:grid lg:grid-cols-[1fr_372px] lg:gap-0 lg:items-start">
-            <section id="collection">
-              {/* Desktop: tabs pill + contador en línea */}
-              <div className="hidden lg:flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2.5">
-                  {[
-                    { id: 'cerca' as const, label: 'Cerca de mí' },
-                    { id: 'online' as const, label: 'En línea' },
-                    { id: 'nuevas' as const, label: 'Nuevas' },
-                    { id: 'top' as const, label: 'Top semana' },
-                  ].map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => handleDesktopTab(t.id)}
-                      className="px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors"
-                      style={{
-                        background: desktopTab === t.id ? '#D4A843' : 'transparent',
-                        color: desktopTab === t.id ? '#08080C' : 'rgba(240,240,236,.7)',
-                        border: `1px solid ${desktopTab === t.id ? '#D4A843' : 'rgba(255,255,255,.12)'}`,
-                      }}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 font-mono text-xs text-white/45">
-                  <span className="w-[7px] h-[7px] rounded-full bg-brand-pink block om-breathe" />
-                  <span>{displayModels.length} en línea ahora</span>
-                </div>
-              </div>
-
-              {/* Mobile heading */}
-              <div className="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/5">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 mb-2">
-                    <Flame size={12} className="text-brand-gold animate-pulse" />
-                    <span className="text-[8px] uppercase font-black tracking-[0.3em] text-brand-gold">Directorio Selecto {currentCountry.name}</span>
-                  </div>
-                  <h2 className="font-serif font-bold text-2xl sm:text-4xl italic text-white">
-                    Modelos & Acompañantes <span className="text-gold-shimmer">VIP</span>
-                  </h2>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono block">Disponibles</span>
-                  <span className="font-serif text-xl sm:text-2xl font-bold text-brand-gold">{displayModels.length} Perfiles</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 lg:gap-x-[18px] lg:gap-y-[18px]">
-                {displayModels.map((model) => (
-                  <ProfileCard key={model.id} {...model} />
-                ))}
-              </div>
-
-              {isLoading && (
-                <div className="mt-20 flex justify-center py-10">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="relative w-12 h-12">
-                      <div className="absolute inset-0 border-2 border-brand-gold/10 rounded-full" />
-                      <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
-                    </div>
-                    <span className="text-[10px] text-brand-gold/60 italic font-mono uppercase tracking-widest">Cargando más perfiles...</span>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* ── RADAR EN VIVO: panel fijo a la derecha en desktop, sección normal en mobile ── */}
-            <aside id="mapa" className="mt-16 lg:mt-0 lg:sticky lg:top-16">
-              <LiveMap variant="panel" currentCountry={currentCountry} userLocation={location} />
-            </aside>
-          </div>
         </div>
 
         {/* ── 2. LIVE CLASSIFIEDS FEED (HIGH ENGAGEMENT) ── */}

@@ -152,14 +152,14 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
           </div>
         </nav>
 
-        {/* ── MOBILE HEADER — logo compacto + ubicación + búsqueda + menú ── */}
-        <div className="lg:hidden flex items-center justify-between h-14 px-4 gap-3">
+        {/* ── MOBILE HEADER — calcado del mockup screenHome: padding 12px 20px 10px ── */}
+        <div className="lg:hidden flex items-center justify-between" style={{ padding: "12px 20px 10px" }}>
           <Link href="/" className="flex items-baseline shrink-0">
             <span className="font-serif font-bold text-[21px] leading-none text-brand-gold">CARIÑOSAS</span>
             <span className="font-serif font-bold text-[21px] leading-none text-white">.TOP</span>
           </Link>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2.5 shrink-0">
             <button
               onClick={onChangeLocation}
               className="flex items-center gap-1.5 h-10 px-3 rounded-xl bg-white/5 border border-white/[0.08] text-white shrink-0"

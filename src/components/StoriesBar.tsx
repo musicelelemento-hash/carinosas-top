@@ -118,8 +118,8 @@ export default function StoriesBar() {
       {/* Top Hairline Gold Glow */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-gold/30 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center gap-5 overflow-x-auto no-scrollbar py-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-3.5 overflow-x-auto no-scrollbar" style={{ padding: "4px 20px 12px" }}>
 
           {/* LIVE badge & Reels Trigger */}
           <button
@@ -127,7 +127,7 @@ export default function StoriesBar() {
             onClick={() => setIsReelsOpen(true)}
             className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none cursor-pointer"
           >
-            <div className="relative w-[68px] h-[68px] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 border-2 border-dashed border-brand-pink/60 bg-brand-pink/10 shadow-[0_0_15px_rgba(255,0,98,0.2)]">
+            <div className="relative w-[58px] h-[58px] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 border-2 border-dashed border-brand-pink/60 bg-brand-pink/10 shadow-[0_0_15px_rgba(255,0,98,0.2)]">
               <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-brand-pink border-2 border-black pulse-crimson" />
               <div className="text-center">
                 <Flame size={18} className="text-brand-pink fill-brand-pink mx-auto mb-0.5 animate-pulse" />
@@ -151,7 +151,7 @@ export default function StoriesBar() {
               className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none cursor-pointer relative"
             >
               {/* Rotating Bezel container */}
-              <div className="relative w-[68px] h-[68px] rounded-full p-[2px] bg-gradient-to-tr from-[#D4A843] via-[#FFE088] to-[#9A7830] group-hover:scale-105 transition-transform duration-300 shadow-[0_0_15px_rgba(212,168,67,0.25)] group-hover:shadow-[0_0_25px_rgba(212,168,67,0.5)]">
+              <div className="relative w-[58px] h-[58px] rounded-full p-[2px] bg-gradient-to-tr from-[#D4A843] via-[#FFE088] to-[#9A7830] group-hover:scale-105 transition-transform duration-300 shadow-[0_0_15px_rgba(212,168,67,0.25)] group-hover:shadow-[0_0_25px_rgba(212,168,67,0.5)]">
                 
                 {/* Inner Black Gap */}
                 <div className="w-full h-full rounded-full p-[2px] bg-[#08080C] overflow-hidden relative">
@@ -159,7 +159,7 @@ export default function StoriesBar() {
                     src={model.avatar}
                     alt={model.name}
                     fill
-                    sizes="68px"
+                    sizes="58px"
                     className="object-cover rounded-full group-hover:scale-110 transition-transform duration-500 brightness-100 contrast-[1.03]"
                   />
                 </div>
