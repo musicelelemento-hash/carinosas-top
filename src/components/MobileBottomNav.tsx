@@ -67,27 +67,33 @@ export default function MobileBottomNav() {
   return (
     <>
       <div
-        className="md:hidden fixed bottom-0 inset-x-0 z-[60]"
-        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 16px))" }}
+        className="md:hidden fixed bottom-0 inset-x-0 z-[60] flex items-start px-2"
+        style={{
+          minHeight: 82,
+          paddingTop: 12,
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          background: "rgba(10,10,13,.96)",
+          backdropFilter: "blur(20px)",
+          borderTop: "1px solid rgba(255,255,255,.08)",
+        }}
       >
-        <div className="mx-4 rounded-[20px] border-t border-white/[0.08] flex items-start pt-3 px-2" style={{ background: "rgba(10,10,13,.96)", backdropFilter: "blur(20px)" }}>
-          {navItems.map(({ id, label, icon: Icon, onClick }) => {
-            const isActive = activeTab === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => { setActiveTab(id); haptic(); onClick(); }}
-                className="flex-1 flex flex-col items-center justify-center gap-[5px] pb-3 cursor-pointer"
-              >
-                <Icon size={20} color={isActive ? "#D4A843" : "rgba(240,240,236,.4)"} />
-                <span className="text-[11px] font-semibold" style={{ color: isActive ? "#D4A843" : "rgba(240,240,236,.4)" }}>
-                  {label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {navItems.map(({ id, label, icon: Icon, onClick }) => {
+          const isActive = activeTab === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => { setActiveTab(id); haptic(); onClick(); }}
+              className="flex-1 flex flex-col items-center justify-center gap-[5px] cursor-pointer"
+              style={{ minHeight: 44 }}
+            >
+              <Icon size={20} color={isActive ? "#D4A843" : "rgba(240,240,236,.4)"} />
+              <span className="text-[11px] font-semibold" style={{ color: isActive ? "#D4A843" : "rgba(240,240,236,.4)" }}>
+                {label}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* FAB Concierge IA — fuera del bottom nav, para que el nav quede idéntico al mockup */}

@@ -960,6 +960,30 @@ animation: boostPulse 2.5s infinite ease-in-out;
   }
 }
 
+/* ===== DECORATIVE RADAR (RadarVisual.tsx) ===== */
+@keyframes radarSweepSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes radarBlipPing {
+  0% { transform: scale(.6); opacity: .7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+.radar-blip-ping {
+  animation: radarBlipPing 3s ease-out infinite;
+}
+
+@keyframes omBreathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+.om-breathe {
+  animation: omBreathe 2.4s ease-in-out infinite;
+}
+
 /* ===== LUXURY GOLD RANGE SLIDER ===== */
 input[type="range"].luxury-slider,
 .luxury-range-slider {

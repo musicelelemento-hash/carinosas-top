@@ -25,6 +25,7 @@ import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import LiveMapAnimator from "./LiveMapAnimator";
+import RadarVisual from "./RadarVisual";
 import { sound } from "@/lib/soundEngine";
 import { type Country, getCountryById } from "@/lib/countries";
 
@@ -296,47 +297,27 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
             </span>
           </div>
           <span className="flex items-center gap-1.5 font-mono text-[11px] text-brand-pink">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-pink animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-pink om-breathe" />
             LIVE
           </span>
         </div>
 
-        {/* Mapa 252px */}
+        {/* Radar decorativo 252px */}
         <div className="relative h-[252px] overflow-hidden">
-          {!loading && typeof window !== "undefined" && (
-            <MapContainer
-              center={initialCenter}
-              zoom={13}
-              scrollWheelZoom={false}
-              dragging={true}
-              touchZoom={true}
-              doubleClickZoom={false}
-              className="w-full h-full"
-              zoomControl={false}
-              ref={mapRef}
-            >
-              <TileLayer
-                attribution='&copy; CARTO'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              />
-              {mapTarget && <LiveMapAnimator target={mapTarget} />}
-              {displayMapModels.map((model) => (
-                model.lat && model.lng && (
-                  <Marker
-                    key={model.id}
-                    position={[model.lat, model.lng]}
-                    icon={createAvatarIcon(model.images?.[0] || fallbackAvatar, selectedModel?.id === model.id)}
-                    eventHandlers={{ click: () => handleModelSelect(model) }}
-                  />
-                )
-              ))}
-            </MapContainer>
-          )}
-          <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center overflow-hidden">
-            <div className="w-[300px] h-[300px] rounded-full radar-sweep-beam opacity-40" />
-            <div className="absolute w-[220px] h-[220px] rounded-full border border-[#D4A843]/15" />
-            <div className="absolute w-[110px] h-[110px] rounded-full border border-[#D4A843]/20" />
-          </div>
+          <RadarVisual
+            size="compact"
+            blips={displayMapModels.slice(0, 6).map((m, i) => ({
+              id: m.id,
+              name: m.name,
+              km: m.distanceKm ? `${m.distanceKm} km` : undefined,
+              avatar: m.images?.[0],
+              live: i % 2 === 0,
+            }))}
+            onSelect={(b) => {
+              const model = displayMapModels.find((m) => m.id === b.id);
+              if (model) handleModelSelect(model);
+            }}
+          />
         </div>
 
         {/* Movimiento reciente */}
@@ -383,14 +364,23 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
           <NotifyToggle />
         </div>
 
-        {/* Link al radar de pantalla completa */}
-        <a
-          href="/radar"
-          className="px-5 py-3.5 border-t border-white/[0.07] flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
-        >
-          <span>Ver radar completo</span>
-          <ChevronRight size={14} />
-        </a>
+        {/* Links al radar / mapa de pantalla completa */}
+        <div className="border-t border-white/[0.07] flex divide-x divide-white/[0.07]">
+          <a
+            href="/radar"
+            className="flex-1 px-5 py-3.5 flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
+          >
+            <span>Radar completo</span>
+            <ChevronRight size={14} />
+          </a>
+          <a
+            href="/radar?vista=mapa"
+            className="flex-1 px-5 py-3.5 flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
+          >
+            <span>Ver mapa</span>
+            <ChevronRight size={14} />
+          </a>
+        </div>
       </div>
     );
   }

@@ -71,35 +71,38 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
         </div>
 
         {/* ── DESKTOP "TERMINAL" HEADER — 64px, calcado del mockup 1a ── */}
-        <nav className="hidden lg:flex items-center h-16 px-6 gap-7">
-          <Link href="/" className="flex items-baseline shrink-0">
-            <span className="font-serif font-bold text-[22px] tracking-[0.04em] leading-none text-brand-gold">
-              CARIÑOSAS
-            </span>
-            <span className="font-serif font-bold text-[22px] tracking-[0.04em] leading-none text-white">
-              .TOP
-            </span>
-          </Link>
+        <nav className="hidden lg:flex items-center h-16 px-6">
+          {/* Logo + ubicación */}
+          <div className="flex items-center gap-7 shrink-0">
+            <Link href="/" className="flex items-baseline shrink-0">
+              <span className="font-serif font-bold text-[22px] tracking-[0.04em] leading-none text-brand-gold">
+                CARIÑOSAS
+              </span>
+              <span className="font-serif font-bold text-[22px] tracking-[0.04em] leading-none text-white">
+                .TOP
+              </span>
+            </Link>
 
-          {onChangeLocation ? (
-            <button
-              onClick={onChangeLocation}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.07] text-white hover:border-brand-gold/40 transition-colors shrink-0 cursor-pointer"
-              title="Cambiar país o cantón"
-            >
-              <MapPin size={14} className="text-brand-gold" />
-              <span className="text-[13px] font-semibold">{currentCountry?.name || "Ecuador"}</span>
-              <ChevronDown size={14} className="text-white/40" />
-            </button>
-          ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.07] shrink-0">
-              <MapPin size={14} className="text-brand-gold" />
-              <span className="text-[13px] font-semibold text-white">Machala · El Oro</span>
-            </div>
-          )}
+            {onChangeLocation ? (
+              <button
+                onClick={onChangeLocation}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.07] text-white hover:border-brand-gold/40 transition-colors shrink-0 cursor-pointer"
+                title="Cambiar país o cantón"
+              >
+                <MapPin size={14} className="text-brand-gold" />
+                <span className="text-[13px] font-semibold">{currentCountry?.name || "Ecuador"}</span>
+                <ChevronDown size={14} className="text-white/40" />
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.07] shrink-0">
+                <MapPin size={14} className="text-brand-gold" />
+                <span className="text-[13px] font-semibold text-white">Machala · El Oro</span>
+              </div>
+            )}
+          </div>
 
-          {/* Search pill — centrada */}
-          <div className="flex items-center gap-2.5 flex-1 max-w-[420px] mx-8 px-3.5 py-2.5 rounded-[10px] bg-white/[0.04] border border-white/[0.08]">
+          {/* Search pill — centrada, margin 0 32px como el mockup */}
+          <div className="flex items-center gap-2.5 flex-1 max-w-[420px] mx-8 px-3.5 py-[9px] rounded-[10px] bg-white/[0.04] border border-white/[0.08]">
             <Search size={15} className="text-white/35 shrink-0" />
             <input
               value={searchTerm}
@@ -111,8 +114,8 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
             <span className="ml-auto font-mono text-[11px] text-white/[0.28] border border-white/10 rounded-[5px] px-1.5 py-px shrink-0">/</span>
           </div>
 
-          {/* Derecha */}
-          <div className="flex items-center gap-3 shrink-0 ml-auto">
+          {/* Derecha — gap 14px como el mockup */}
+          <div className="flex items-center gap-3.5 shrink-0">
             <button
               onClick={handleToggleSound}
               className="w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-brand-gold transition-colors"

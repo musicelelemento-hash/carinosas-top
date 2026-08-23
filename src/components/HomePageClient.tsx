@@ -311,7 +311,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                   ))}
                 </div>
                 <div className="flex items-center gap-2 font-mono text-xs text-white/45">
-                  <span className="w-[7px] h-[7px] rounded-full bg-brand-pink block animate-pulse" />
+                  <span className="w-[7px] h-[7px] rounded-full bg-brand-pink block om-breathe" />
                   <span>{displayModels.length} en línea ahora</span>
                 </div>
               </div>
