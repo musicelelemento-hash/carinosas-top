@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cloudflare:tunnel": "npx cloudflared tunnel --url http://localhost:3000"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
