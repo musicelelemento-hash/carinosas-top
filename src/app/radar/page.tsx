@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RadarPage() {
   return (
-    <main className="min-h-screen bg-[#08080C] text-white">
+    <main className="min-h-screen bg-[#08080B] text-white">
       <Navbar />
       <GeoRadarFullscreen />
       <Footer />

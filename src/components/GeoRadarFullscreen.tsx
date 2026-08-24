@@ -63,15 +63,15 @@ export default function GeoRadarFullscreen() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#08080C] text-white pt-20 pb-12 flex flex-col">
+    <div className="min-h-screen bg-[#08080B] text-white pt-20 pb-12 flex flex-col">
       <div className="max-w-7xl mx-auto px-4 w-full flex-1 flex flex-col space-y-4">
 
         {/* ── TOP RADAR CONTROLS ── */}
-        <div className="glass-obsidian border border-brand-gold/30 rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-[#101014] border border-white/[0.1] rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="w-10 h-10 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white/70 hover:text-white shrink-0"
+              className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-white/70 hover:text-white shrink-0"
             >
               <ArrowLeft size={18} />
             </Link>
@@ -120,7 +120,7 @@ export default function GeoRadarFullscreen() {
 
         {vista === "radar" ? (
           /* ── RADAR DECORATIVO (calcado del mockup screenRadar) ── */
-          <div className="flex-1 rounded-3xl overflow-hidden border border-white/10 min-h-[600px] shadow-2xl relative">
+          <div className="flex-1 rounded-3xl overflow-hidden border border-white/[0.1] min-h-[600px] relative">
             <RadarVisual size="full" blips={hidden ? [] : blips} />
 
             {nearest && !hidden && (
@@ -152,7 +152,7 @@ export default function GeoRadarFullscreen() {
           </div>
         ) : (
           /* ── MAPA REAL (Leaflet) ── */
-          <div className="flex-1 rounded-3xl overflow-hidden glass-obsidian border border-white/10 min-h-[600px] shadow-2xl relative">
+          <div className="flex-1 rounded-3xl overflow-hidden border border-white/[0.1] min-h-[600px] relative">
             <LiveMap currentCountry={ecuador} />
           </div>
         )}

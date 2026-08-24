@@ -17,7 +17,6 @@ import {
   Hotel, 
   ArrowLeft,
   Flame,
-  KeyRound,
   CheckCircle2,
   X
 } from "lucide-react";
@@ -67,9 +66,25 @@ const VAULT_ITEMS = [
 export default function SecretVaultView() {
   const [activeMedia, setActiveMedia] = useState<string | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [hasVIPPass, setHasVIPPass] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const checkPass = () => {
+      try {
+        setHasVIPPass(localStorage.getItem("vip_pass_code") || localStorage.getItem("carinosas_vip_pass"));
+      } catch {}
+    };
+    checkPass();
+    window.addEventListener("storage", checkPass);
+    window.addEventListener("vip_pass_updated", checkPass);
+    return () => {
+      window.removeEventListener("storage", checkPass);
+      window.removeEventListener("vip_pass_updated", checkPass);
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#08080C] text-white pt-24 pb-28 md:pb-20 noise-overlay">
+    <div className="min-h-screen bg-[#08080B] text-white pt-24 pb-28 md:pb-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10">
 
         {/* ── TOP VAULT HEADER ── */}
@@ -82,15 +97,15 @@ export default function SecretVaultView() {
             <span>Volver al Directorio</span>
           </Link>
 
-          <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full glass-obsidian border border-brand-gold/40 text-brand-gold shadow-[0_0_30px_rgba(212,168,67,0.3)]">
-            <Lock size={14} className="animate-pulse" />
+          <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-gold/40 text-brand-gold">
+            <Lock size={14} />
             <span className="text-[10px] font-black uppercase tracking-[0.3em]">
               Bóveda Secreta 4K · Club Privado
             </span>
           </div>
 
           <h1 className="font-serif font-bold text-3xl sm:text-5xl text-white tracking-tight">
-            Acceso Exclusivo <span className="italic text-gold-shimmer">Diamante</span>
+            Acceso Exclusivo <span className="italic text-brand-gold">Diamante</span>
           </h1>
 
           <p className="text-xs sm:text-sm text-[#A1A1AA] uppercase tracking-[0.2em] font-medium max-w-lg">
@@ -98,30 +113,41 @@ export default function SecretVaultView() {
           </p>
         </div>
 
-        {/* ── VISTA PREVIA BLOQUEADA (grid 2 col, calcado del mockup screenVault) ── */}
-        <div className="rounded-3xl border border-white/10 overflow-hidden bg-[#0C0C10]">
-          <div className="px-5 py-4 flex items-center justify-between border-b border-white/10">
+        {/* ── BÓVEDA: dos estados (bloqueada / desbloqueada), spec ── */}
+        <div className="rounded-3xl border border-white/[0.1] overflow-hidden bg-[#0C0C10]">
+          <div className="px-5 py-4 flex items-center justify-between border-b border-white/[0.07]">
             <div>
               <span className="font-serif text-lg font-bold text-white block">Bóveda</span>
               <span className="text-[12px] font-mono text-white/45">48 archivos · solo socios</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand-gold">
-              <Lock size={17} />
+            <div className="w-10 h-10 rounded-full bg-white/[0.05] flex items-center justify-center text-brand-gold">
+              {hasVIPPass ? <CheckCircle2 size={17} /> : <Lock size={17} />}
             </div>
           </div>
 
-          <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div
+            className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-2.5"
+            style={{ transition: "filter .4s" }}
+          >
             {VAULT_PREVIEW_GRID.map((src, i) => (
-              <div key={src} className="relative h-[150px] rounded-2xl overflow-hidden bg-[#101014]">
+              <div
+                key={src}
+                className="relative rounded-2xl overflow-hidden bg-[#101014]"
+                style={{ height: hasVIPPass ? 132 : 150 }}
+              >
                 <Image
                   src={src}
                   alt=""
                   fill
                   className="object-cover"
-                  style={i === 0 ? undefined : { filter: "blur(14px) brightness(.55)" }}
+                  style={!hasVIPPass && i !== 0 ? { filter: "blur(14px) brightness(.55)" } : undefined}
                 />
-                {i === 0 ? (
-                  <span className="absolute left-2.5 bottom-2.5 px-2.5 py-1 rounded-lg bg-[#08080C]/72 font-mono text-[11px] text-white">
+                {hasVIPPass ? (
+                  <span className="absolute left-2.5 bottom-2.5 px-2.5 py-1 rounded-lg bg-[#08080B]/72 font-mono text-[11px] text-white">
+                    {i % 2 === 0 ? "0:24" : "Foto"}
+                  </span>
+                ) : i === 0 ? (
+                  <span className="absolute left-2.5 bottom-2.5 px-2.5 py-1 rounded-lg bg-[#08080B]/72 font-mono text-[11px] text-white">
                     Vista previa
                   </span>
                 ) : (
@@ -134,47 +160,38 @@ export default function SecretVaultView() {
           </div>
 
           <div className="p-4 pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="flex-1 px-4 py-3.5 rounded-2xl border border-brand-gold/30 bg-brand-gold/[0.06]">
-              <span className="text-[14px] font-bold text-brand-gold block">Pase de socio · $80/mes</span>
-              <span className="text-[13px] text-white/60">Acceso a la bóveda completa, historias privadas y agenda anticipada.</span>
-            </div>
-            <button
-              onClick={() => { sound.playIrisAperture(); setIsCheckoutOpen(true); }}
-              className="px-6 py-3.5 rounded-2xl bg-brand-gold text-brand-black font-black text-[13px] uppercase tracking-wider hover:brightness-110 transition-all cursor-pointer shrink-0"
-            >
-              Activar pase
-            </button>
-          </div>
-        </div>
-
-        {/* ── PASE DIAMANTE VIP STATUS CARD ── */}
-        <div className="relative rounded-3xl p-6 sm:p-8 glass-obsidian border-2 border-brand-gold/50 shadow-[0_0_50px_rgba(212,168,67,0.25)] overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/10 rounded-full blur-3xl pointer-events-none -z-10" />
-
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-gold via-[#FFE088] to-brand-gold p-0.5 shadow-lg shadow-brand-gold/30 shrink-0">
-                <div className="w-full h-full rounded-2xl bg-[#141419] flex items-center justify-center text-brand-gold">
-                  <KeyRound size={28} className="animate-pulse" />
+            {hasVIPPass ? (
+              <>
+                <div className="flex-1 px-4 py-3.5 rounded-2xl border border-emerald-400/30 bg-emerald-400/[0.06] flex items-center gap-2.5">
+                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="text-[14px] font-bold text-emerald-400 block">Pase activo hasta el 23 sep</span>
+                    <span className="text-[13px] text-white/60">Renovación automática · cancela cuando quieras.</span>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-serif text-xl sm:text-2xl font-bold text-white">Pase Diamante VIP</span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/40 text-emerald-400 text-[9px] font-bold uppercase tracking-wider">
-                    Activo
-                  </span>
+                <button
+                  onClick={() => setIsCheckoutOpen(true)}
+                  className="btn-ghost px-6 shrink-0"
+                  style={{ minHeight: 44 }}
+                >
+                  Gestionar pase
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex-1 px-4 py-3.5 rounded-2xl border border-brand-gold/30 bg-brand-gold/[0.06]">
+                  <span className="text-[14px] font-bold text-brand-gold block">Pase de socio · $80/mes</span>
+                  <span className="text-[13px] text-white/60">Bóveda completa, historias privadas y agenda anticipada.</span>
                 </div>
-                <span className="text-xs text-white/60 font-mono block mt-0.5">
-                  TOKEN DE SEGURIDAD: 0x82F4...E19B · Encriptado AES-256
-                </span>
-              </div>
-            </div>
-
-            <div className="text-left md:text-right border-t md:border-t-0 pt-4 md:pt-0 border-white/10 w-full md:w-auto">
-              <span className="text-[9px] font-black uppercase tracking-widest text-brand-gold/70 block">Tiempo Restante de Sesión</span>
-              <span className="font-serif text-2xl font-bold text-white">14h 22m 10s</span>
-            </div>
+                <button
+                  onClick={() => { sound.playIrisAperture(); setIsCheckoutOpen(true); }}
+                  className="btn-gold px-6 shrink-0"
+                  style={{ minHeight: 44 }}
+                >
+                  Activar pase
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -257,7 +274,7 @@ export default function SecretVaultView() {
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#08080C] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#08080B] via-transparent to-transparent" />
                   <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full glass-dark border border-white/20 text-[9px] font-mono text-white flex items-center gap-1">
                     <Eye size={11} /> {item.mediaCount}
                   </div>
@@ -374,7 +391,7 @@ export default function SecretVaultView() {
               </div>
 
               {/* Bottom Controls */}
-              <div className="p-4 bg-[#08080C] border-t border-white/10 flex items-center justify-between gap-4">
+              <div className="p-4 bg-[#08080B] border-t border-white/10 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-[10px] text-white/50 font-mono">
                   <ShieldCheck size={14} className="text-brand-gold" />
                   <span>Transmisión Segura Encriptada</span>

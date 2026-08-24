@@ -235,9 +235,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
       accent: 'text-brand-pink', 
       bg: 'bg-brand-pink/5', 
       border: 'border-brand-pink/20', 
-      icon: <Diamond size={16} className="fill-brand-pink" />, 
+      icon: <Diamond size={16} className="fill-brand-pink" />,
       label: 'DIAMOND MEMBER',
-      glow: 'shadow-[0_0_15px_rgba(255,0,110,0.2)]',
+      glow: '',
       exclusive: true,
       autoplay: 5000
     },
@@ -245,9 +245,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
       accent: 'text-brand-gold', 
       bg: 'bg-brand-gold/10', 
       border: 'border-brand-gold/30', 
-      icon: <Crown size={16} className="fill-brand-gold" />, 
+      icon: <Crown size={16} className="fill-brand-gold" />,
       label: 'VIP ELITE ALPHA',
-      glow: 'shadow-[0_0_20px_rgba(212,175,55,0.3)]',
+      glow: '',
       exclusive: true,
       autoplay: 4000
     }
@@ -259,7 +259,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
   const availabilityLabel = model.is_online ? 'Disponible ahora' : 'Disponibilidad por confirmar';
 
   return (
-    <div className="relative min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-32 md:pb-24">
+    <div className="relative min-h-screen bg-[#08080B] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden pb-32 md:pb-24">
       
       {/* ── TOP HUD NAVIGATION (desktop) ── */}
       <div className="hidden lg:flex fixed top-6 left-6 z-[100] flex-col gap-2.5">
@@ -319,7 +319,11 @@ export default function ModelProfile({ model }: ModelProfileProps) {
         <div className="flex items-baseline gap-2">
           <span className="font-serif text-[34px] font-bold leading-none text-white">{model.name}</span>
           <span className="text-[17px] text-white/60">{model.age}</span>
-          {isVerified && <BadgeCheck size={19} className="text-brand-gold" />}
+          {isVerified && (
+            <Link href="/verificacion" aria-label="Ver verificación 4K" className="inline-flex">
+              <BadgeCheck size={19} className="text-brand-gold" />
+            </Link>
+          )}
         </div>
         <div className="flex items-center gap-2.5">
           <span className="flex items-center gap-1.5 text-[13px] text-white/70">
@@ -361,7 +365,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                     priority={index === 0}
                   />
                   {/* Cinematic gradient overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#08080C] via-transparent to-black/30 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#08080B] via-transparent to-black/30 pointer-events-none" />
                 </div>
               </SwiperSlide>
             ))}
@@ -369,7 +373,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
           {/* Social Proof Badges Over Media */}
           <div className="absolute bottom-10 left-8 md:left-12 z-40 space-y-3 pointer-events-none pr-8">
-            <div className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full glass-obsidian border ${config.border} shadow-[0_0_25px_rgba(212,168,67,0.3)]`}>
+            <div className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full glass-obsidian border ${config.border}`}>
               <div className={config.accent}>
                 {config.icon}
               </div>
@@ -390,7 +394,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
         </div>
 
         {/* Right Column: Editorial Profile & Booking Engine */}
-        <div className="w-full lg:w-[45%] bg-[#08080C] overflow-y-auto no-scrollbar relative border-l border-white/5">
+        <div className="w-full lg:w-[45%] bg-[#08080B] overflow-y-auto no-scrollbar relative border-l border-white/5">
           <div className="max-w-[560px] mx-auto p-6 md:p-12 lg:p-14 space-y-12">
             
             {/* Identity & Bio Header */}
@@ -436,7 +440,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={toggleVoiceAudio}
-                      className="w-12 h-12 rounded-2xl bg-brand-gold hover:bg-white text-brand-black flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(212,168,67,0.5)] shrink-0"
+                      className="w-12 h-12 rounded-2xl bg-brand-gold hover:opacity-90 text-brand-black flex items-center justify-center transition-all active:scale-95 shrink-0"
                     >
                       {isPlayingVoice ? (
                         <Pause size={18} className="fill-brand-black" />
@@ -469,8 +473,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                         className="w-1 rounded-full transition-all duration-200"
                         style={{
                           height: isPlayingVoice ? `${(idx % 5 + 2) * 5 + 4}px` : `${barHeight * 0.25}px`,
-                          backgroundColor: isActive || isPlayingVoice ? "#D4A843" : "rgba(255,255,255,0.15)",
-                          boxShadow: isActive ? "0 0 8px rgba(212,168,67,0.8)" : "none"
+                          backgroundColor: isActive || isPlayingVoice ? "#D4A843" : "rgba(255,255,255,0.15)"
                         }}
                       />
                     );
@@ -516,7 +519,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                       }}
                       className={`cursor-pointer p-4 rounded-2xl border transition-all duration-300 space-y-2 relative glass-obsidian ${
                         isSel
-                          ? 'border-brand-gold bg-brand-gold/15 shadow-[0_0_25px_rgba(212,168,67,0.3)]'
+                          ? 'border-brand-gold bg-brand-gold/15'
                           : 'border-white/10 hover:border-brand-gold/30 hover:bg-white/[0.04]'
                       }`}
                     >
@@ -542,7 +545,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                   }`}
                 >
                   Galería Pública ({model.images.length})
-                  {activeTab === 'photos' && <div className="absolute bottom-0 inset-x-0 h-[2px] bg-brand-gold shadow-[0_0_10px_#D4A843]" />}
+                  {activeTab === 'photos' && <div className="absolute bottom-0 inset-x-0 h-[2px] bg-brand-gold" />}
                 </button>
                 <button 
                   onClick={() => setActiveTab('exclusive')}
@@ -552,7 +555,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                 >
                   <span>Bóveda Secreta 4K (6)</span>
                   <Lock size={11} />
-                  {activeTab === 'exclusive' && <div className="absolute bottom-0 inset-x-0 h-[2px] bg-brand-pink shadow-[0_0_10px_#FF006E]" />}
+                  {activeTab === 'exclusive' && <div className="absolute bottom-0 inset-x-0 h-[2px] bg-brand-pink" />}
                 </button>
               </div>
 
@@ -576,7 +579,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                   {hasVIPPass ? (
                     <>
                       {/* Unlocked Vault Grid */}
-                      <div className="p-4 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-between shadow-[0_0_25px_rgba(212,168,67,0.25)]">
+                      <div className="p-4 rounded-2xl bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Crown size={20} className="text-brand-gold fill-brand-gold animate-pulse" />
                           <div>
@@ -646,7 +649,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                         </div>
                         <button
                           onClick={() => setIsVaultModalOpen(true)}
-                          className="px-8 py-3.5 bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black text-[10px] font-black uppercase tracking-[0.25em] rounded-full hover:scale-105 transition-all shadow-[0_0_25px_rgba(212,168,67,0.4)]"
+                          className="px-8 py-3.5 bg-brand-gold text-brand-black text-[10px] font-black uppercase tracking-[0.25em] rounded-full hover:opacity-90 transition-all"
                         >
                           Desbloquear Bóveda VIP
                         </button>
@@ -736,7 +739,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
               <button 
                 onClick={() => handleContact()}
-                className="flex-1 sm:flex-none px-7 py-3.5 bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:scale-105 active:scale-95 text-brand-black rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(212,168,67,0.4)] cursor-pointer"
+                className="flex-1 sm:flex-none px-7 py-3.5 bg-brand-gold hover:opacity-90 active:scale-95 text-brand-black rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <MessageCircle size={15} fill="currentColor" />
                 <span>Reservar por WhatsApp</span>

@@ -45,7 +45,7 @@ export default function RadarVisual({ blips, size = "compact", onSelect }: Radar
 
   return (
     <div
-      className="relative w-full h-full overflow-hidden"
+      className="absolute inset-0 overflow-hidden"
       style={{
         background: "radial-gradient(circle at 50% 50%, rgba(212,168,67,.07) 0%, rgba(10,10,13,0) 62%), #08080B",
       }}

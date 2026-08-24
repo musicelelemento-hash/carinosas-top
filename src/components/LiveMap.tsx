@@ -258,8 +258,8 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
     if (!L) return undefined;
     return new L.DivIcon({
       html: `<div class="relative group cursor-pointer">
-        <div class="absolute -inset-2 rounded-full ${isSelected ? 'bg-[#FF0062]/50 animate-ping' : 'bg-[#D4AF37]/35 animate-pulse'} blur-sm"></div>
-        <div class="relative w-11 h-11 rounded-full p-[2px] ${isSelected ? 'bg-gradient-to-tr from-[#FF0062] to-[#FF80A0] scale-110 shadow-[0_0_25px_rgba(255,0,98,0.8)]' : 'bg-gradient-to-tr from-[#D4AF37] via-[#FFF1C2] to-[#AA7C11] shadow-[0_0_18px_rgba(212,175,55,0.65)]'} transition-transform duration-300">
+        <div class="absolute -inset-2 rounded-full ${isSelected ? 'bg-[#FF0062]/50 animate-ping' : 'bg-[#D4A843]/35 animate-pulse'} blur-sm"></div>
+        <div class="relative w-11 h-11 rounded-full p-[2px] ${isSelected ? 'bg-gradient-to-tr from-[#FF0062] to-[#FF80A0] scale-110 shadow-[0_0_25px_rgba(255,0,98,0.8)]' : 'bg-gradient-to-tr from-[#D4A843] via-[#FFF1C2] to-[#AA7C11] shadow-[0_0_18px_rgba(212,175,55,0.65)]'} transition-transform duration-300">
           <img src="${imgUrl}" alt="VIP" class="w-full h-full object-cover rounded-full" />
           <div class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-black"></div>
         </div>
@@ -386,19 +386,19 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   }
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#08080C] border-y border-[#D4AF37]/20" id="geo-radar-live">
+    <section className="relative w-full overflow-hidden bg-[#08080B] border-y border-[#D4A843]/20" id="geo-radar-live">
       
       {/* ── TOP TACTICAL HUD BAR ── */}
       <div className="relative z-30 px-4 sm:px-6 py-4 bg-[#0A0A0F]/90 backdrop-blur-2xl border-b border-white/10">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-[0_0_20px_rgba(212,168,67,0.3)]">
-              <Radar size={20} className="animate-spin-slow text-[#D4AF37]" />
+            <div className="w-10 h-10 rounded-2xl bg-[#D4A843]/15 border border-[#D4A843]/40 flex items-center justify-center text-[#D4A843] shadow-[0_0_20px_rgba(212,168,67,0.3)]">
+              <Radar size={20} className="animate-spin-slow text-[#D4A843]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-[#D4AF37] font-black uppercase tracking-[0.3em] block">
+                <span className="text-[10px] text-[#D4A843] font-black uppercase tracking-[0.3em] block">
                   Geo-Radar 4K Táctico
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[8px] font-black uppercase tracking-wider flex items-center gap-1">
@@ -420,8 +420,8 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                 onClick={() => handleCitySelect(key)}
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
                   selectedCity === key
-                    ? "bg-gradient-to-r from-[#D4AF37] via-[#FFF1C2] to-[#D4AF37] text-black border-[#D4AF37] shadow-[0_0_20px_rgba(212,168,67,0.4)] scale-105"
-                    : "glass-dark border-white/10 text-white/50 hover:text-white hover:border-[#D4AF37]/40"
+                    ? "bg-gradient-to-r from-[#D4A843] via-[#FFF1C2] to-[#D4A843] text-black border-[#D4A843] shadow-[0_0_20px_rgba(212,168,67,0.4)] scale-105"
+                    : "glass-dark border-white/10 text-white/50 hover:text-white hover:border-[#D4A843]/40"
                 }`}
               >
                 {val.label}
@@ -447,7 +447,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                   Zona Radar: {selectedCity}
                 </span>
               </div>
-              <span className="text-[9px] px-2.5 py-1 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] font-bold border border-[#D4AF37]/35 shadow-sm">
+              <span className="text-[9px] px-2.5 py-1 rounded-full bg-[#D4A843]/15 text-[#D4A843] font-bold border border-[#D4A843]/35 shadow-sm">
                 {displayMapModels.length} Modelos en Rango
               </span>
             </div>
@@ -465,7 +465,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                     }}
                     className={`py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer text-center ${
                       activeRadius === rad
-                        ? "bg-[#D4AF37] text-black shadow-md font-black"
+                        ? "bg-[#D4A843] text-black shadow-md font-black"
                         : "text-white/40 hover:text-white"
                     }`}
                   >
@@ -483,7 +483,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
               </div>
               <div>
                 <span className="text-white/40 block text-[8px] uppercase tracking-wider">Llegada a Suite</span>
-                <span className="text-[#D4AF37] font-bold">5-12 min</span>
+                <span className="text-[#D4A843] font-bold">5-12 min</span>
               </div>
             </div>
           </div>
@@ -492,11 +492,11 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
           <div className="flex-1 divide-y divide-white/5 overflow-y-auto">
             {displayMapModels.length === 0 ? (
               <div className="p-10 text-center space-y-2 text-white/40 text-xs">
-                <MapPin size={24} className="mx-auto text-[#D4AF37]/40" />
+                <MapPin size={24} className="mx-auto text-[#D4A843]/40" />
                 <p>No hay modelos en el radio de {activeRadius} en {selectedCity}.</p>
                 <button
                   onClick={() => setActiveRadius("all")}
-                  className="text-[10px] text-[#D4AF37] hover:underline block mx-auto mt-2 cursor-pointer"
+                  className="text-[10px] text-[#D4A843] hover:underline block mx-auto mt-2 cursor-pointer"
                 >
                   Ampliar a toda la ciudad
                 </button>
@@ -507,11 +507,11 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                   key={model.id}
                   onClick={() => handleModelSelect(model)}
                   className={`w-full p-4 text-left flex items-center gap-3.5 transition-all hover:bg-white/5 group relative cursor-pointer ${
-                    selectedModel?.id === model.id ? 'bg-[#D4AF37]/10 border-l-4 border-[#D4AF37]' : ''
+                    selectedModel?.id === model.id ? 'bg-[#D4A843]/10 border-l-4 border-[#D4A843]' : ''
                   }`}
                 >
                   {/* Photo with status indicator */}
-                  <div className="relative w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-[#D4AF37]/50 transition-all shadow-md">
+                  <div className="relative w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 group-hover:border-[#D4A843]/50 transition-all shadow-md">
                     <Image 
                       src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
                       alt={model.name} 
@@ -524,10 +524,10 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                   {/* Info */}
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-white font-serif text-base font-bold group-hover:text-[#D4AF37] transition-colors truncate">
+                      <h4 className="text-white font-serif text-base font-bold group-hover:text-[#D4A843] transition-colors truncate">
                         {model.name}
                       </h4>
-                      <span className="text-[10px] font-mono font-bold text-[#D4AF37]">
+                      <span className="text-[10px] font-mono font-bold text-[#D4A843]">
                         ${model.rate || 130}/h
                       </span>
                     </div>
@@ -542,14 +542,14 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                         En Línea
                       </span>
                       <span className="text-white/30">·</span>
-                      <span className="text-[#D4AF37] flex items-center gap-1">
+                      <span className="text-[#D4A843] flex items-center gap-1">
                         <Navigation size={9} />
                         A ~ {model.distanceKm || 1.2} km
                       </span>
                     </div>
                   </div>
 
-                  <ChevronRight size={15} className={`text-white/20 group-hover:text-[#D4AF37] transition-all ${selectedModel?.id === model.id ? 'translate-x-1 text-[#D4AF37]' : ''}`} />
+                  <ChevronRight size={15} className={`text-white/20 group-hover:text-[#D4A843] transition-all ${selectedModel?.id === model.id ? 'translate-x-1 text-[#D4A843]' : ''}`} />
                 </button>
               ))
             )}
@@ -599,8 +599,8 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                   center={fallbackPreset.center}
                   radius={radiusMeters}
                   pathOptions={{
-                    color: "#D4AF37",
-                    fillColor: "#D4AF37",
+                    color: "#D4A843",
+                    fillColor: "#D4A843",
                     fillOpacity: 0.05,
                     weight: 1.5,
                     dashArray: "6 10"
@@ -621,7 +621,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                     eventHandlers={{ click: () => handleModelSelect(model) }}
                   >
                     <Popup className="premium-map-popup">
-                       <div className="p-4 w-60 space-y-3 bg-[#0c0c10] text-white rounded-2xl border border-[#D4AF37]/35 shadow-2xl">
+                       <div className="p-4 w-60 space-y-3 bg-[#0c0c10] text-white rounded-2xl border border-[#D4A843]/35 shadow-2xl">
                            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-black relative">
                               <Image 
                                 src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
@@ -629,7 +629,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                                 fill 
                                 className="object-cover" 
                               />
-                              <div className="absolute top-2 right-2 bg-[#D4AF37] text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase shadow-md">
+                              <div className="absolute top-2 right-2 bg-[#D4A843] text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase shadow-md">
                                 4K VIP
                               </div>
                            </div>
@@ -643,7 +643,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                              href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi en el Radar GPS de Cariñosas.top (${model.city}). Deseo consultar tu disponibilidad hoy.`)}`}
                              target="_blank"
                              rel="noopener noreferrer"
-                             className="block w-full py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#FFE088] text-black text-[10px] font-black uppercase text-center rounded-xl tracking-wider hover:brightness-110 transition-all shadow-lg"
+                             className="block w-full py-2.5 bg-gradient-to-r from-[#D4A843] to-[#FFE088] text-black text-[10px] font-black uppercase text-center rounded-xl tracking-wider hover:brightness-110 transition-all shadow-lg"
                           >
                              Contactar WhatsApp
                           </a>
@@ -660,9 +660,9 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
             {/* Rotating Conic Beam */}
             <div className="w-[580px] h-[580px] rounded-full radar-sweep-beam opacity-45 pointer-events-none" />
             {/* Concentric Reticle Rings */}
-            <div className="absolute w-[460px] h-[460px] rounded-full border border-[#D4AF37]/15 pointer-events-none" />
+            <div className="absolute w-[460px] h-[460px] rounded-full border border-[#D4A843]/15 pointer-events-none" />
             <div className="absolute w-[280px] h-[280px] rounded-full border border-emerald-500/10 pointer-events-none" />
-            <div className="absolute w-[120px] h-[120px] rounded-full border border-[#D4AF37]/20 pointer-events-none" />
+            <div className="absolute w-[120px] h-[120px] rounded-full border border-[#D4A843]/20 pointer-events-none" />
           </div>
 
           {/* Map Vignette Edge Glow */}
@@ -681,7 +681,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
               className={`px-3 py-1.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-xl border cursor-pointer ${
                 isMapInteractive
                   ? "bg-emerald-500/25 border-emerald-500/60 text-emerald-300 backdrop-blur-md"
-                  : "bg-black/80 border-[#D4AF37]/40 text-[#D4AF37] backdrop-blur-md hover:border-[#D4AF37]"
+                  : "bg-black/80 border-[#D4A843]/40 text-[#D4A843] backdrop-blur-md hover:border-[#D4A843]"
               }`}
               title={isMapInteractive ? "Mapa Desbloqueado: Mueve el mapa con 1 dedo" : "Mapa Bloqueado: Desliza la página libremente sin trabas"}
             >
@@ -700,7 +700,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                   }}
                   className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                     activeRadius === rad
-                      ? "bg-[#D4AF37] text-black shadow-md"
+                      ? "bg-[#D4A843] text-black shadow-md"
                       : "text-white/50 hover:text-white"
                   }`}
                 >
@@ -712,8 +712,8 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
 
           {/* Touch Notice Toast when locked */}
           {showTouchNotice && !isMapInteractive && (
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full glass-obsidian border border-[#D4AF37]/50 text-white text-[10px] font-medium tracking-wide shadow-2xl animate-in fade-in duration-200 pointer-events-none">
-              Pulsa <strong className="text-[#D4AF37]">Scroll Libre</strong> arriba para mover el mapa
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full glass-obsidian border border-[#D4A843]/50 text-white text-[10px] font-medium tracking-wide shadow-2xl animate-in fade-in duration-200 pointer-events-none">
+              Pulsa <strong className="text-[#D4A843]">Scroll Libre</strong> arriba para mover el mapa
             </div>
           )}
 
@@ -728,7 +728,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                     onClick={() => handleModelSelect(model)}
                     className={`snap-center flex-shrink-0 w-[240px] p-3 rounded-2xl glass-obsidian border transition-all cursor-pointer shadow-2xl ${
                       isSelected
-                        ? "border-[#D4AF37] bg-black/90 shadow-[0_0_25px_rgba(212,168,67,0.4)] scale-102"
+                        ? "border-[#D4A843] bg-black/90 shadow-[0_0_25px_rgba(212,168,67,0.4)] scale-102"
                         : "border-white/15 bg-[#0A0A0F]/85 hover:border-white/30"
                     }`}
                   >
@@ -745,7 +745,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
                           <h4 className="text-white font-serif font-bold text-sm truncate">{model.name}</h4>
-                          <span className="text-[9px] font-mono font-bold text-[#D4AF37]">${model.rate || 130}/h</span>
+                          <span className="text-[9px] font-mono font-bold text-[#D4A843]">${model.rate || 130}/h</span>
                         </div>
                         <span className="text-[8px] text-white/50 uppercase tracking-wider truncate block">
                           {model.sector || model.city}
@@ -762,7 +762,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="w-full py-1.5 rounded-lg bg-gradient-to-r from-[#D4AF37] to-[#FFE088] text-black font-black text-[9px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:brightness-110 transition-all"
+                      className="w-full py-1.5 rounded-lg bg-gradient-to-r from-[#D4A843] to-[#FFE088] text-black font-black text-[9px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:brightness-110 transition-all"
                     >
                       <MessageCircle size={11} fill="currentColor" />
                       <span>WhatsApp VIP</span>

@@ -107,7 +107,7 @@ function DoorAnimation({ onComplete, countryName, cantonName }: { onComplete: ()
         <div className="relative w-40 h-40 rounded-full border-2 border-dashed border-brand-gold/70 flex items-center justify-center shadow-[0_0_60px_rgba(212,168,67,0.6)]">
           {/* Inner Glowing Core */}
           <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#D4A843] via-[#FFE088] to-[#9A7830] p-1 shadow-[0_0_50px_rgba(212,168,67,0.8)] flex items-center justify-center">
-            <div className="w-full h-full rounded-full bg-[#08080C] flex items-center justify-center">
+            <div className="w-full h-full rounded-full bg-[#08080B] flex items-center justify-center">
               <ShieldCheck size={42} className="text-brand-gold animate-pulse" />
             </div>
           </div>
@@ -360,7 +360,7 @@ function CountryStep({
                       background: isHovered 
                         ? "linear-gradient(135deg, #D4A843, #FFE088)" 
                         : "rgba(255,255,255,0.06)",
-                      color: isHovered ? "#08080C" : "rgba(255,255,255,0.8)",
+                      color: isHovered ? "#08080B" : "rgba(255,255,255,0.8)",
                       borderColor: isHovered ? "#D4A843" : "rgba(255,255,255,0.12)",
                       boxShadow: isHovered ? "0 4px 20px rgba(212,168,67,0.4)" : "none"
                     }}
@@ -763,7 +763,7 @@ function CantonStep({
             background: selectedCanton
               ? "linear-gradient(135deg, #D4A843 0%, #FFE088 50%, #AA7C11 100%)"
               : "rgba(255,255,255,0.05)",
-            color: selectedCanton ? "#08080C" : "rgba(255,255,255,0.25)",
+            color: selectedCanton ? "#08080B" : "rgba(255,255,255,0.25)",
             cursor: selectedCanton ? "pointer" : "not-allowed",
             border: selectedCanton ? "none" : "1px solid rgba(255,255,255,0.1)"
           }}
@@ -859,7 +859,7 @@ export default function LocationGateway({ onEnter }: LocationGatewayProps) {
       )}
 
       {/* ── MAIN GATEWAY OVERLAY ── */}
-      <div className="fixed inset-0 z-[100] flex flex-col justify-between overflow-hidden bg-[#08080C]">
+      <div className="fixed inset-0 z-[100] flex flex-col justify-between overflow-hidden bg-[#08080B]">
         
         {/* Ambient background cinematic visual */}
         <div className="absolute inset-0 transition-all duration-1000">
@@ -989,7 +989,7 @@ export default function LocationGateway({ onEnter }: LocationGatewayProps) {
         </main>
 
         {/* ── FOOTER SEAL ── */}
-        <footer className="relative z-20 text-center py-4 px-6 shrink-0 border-t border-white/5 bg-[#08080C]/80 backdrop-blur-md">
+        <footer className="relative z-20 text-center py-4 px-6 shrink-0 border-t border-white/5 bg-[#08080B]/80 backdrop-blur-md">
           <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase">
             🔒 Discreción Total Blindada · Verificación Biométrica 4K · Red Élite Iberoamérica
           </p>

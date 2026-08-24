@@ -318,7 +318,7 @@ export default function RegistrationAssistant() {
                   <p className="text-xs text-white/50 mt-1">Calculado en base al promedio de reservas verificadas en Quito y Guayaquil.</p>
                 </div>
 
-                <div className="glass-dark p-6 rounded-2xl border border-brand-gold/40 text-center min-w-[220px] shadow-[0_0_30px_rgba(212,168,67,0.2)]">
+                <div className="glass-dark p-6 rounded-2xl border border-brand-gold/40 text-center min-w-[220px]">
                   <span className="text-[9px] text-white/40 uppercase font-black tracking-widest block mb-1">Ingreso Estimado</span>
                   <span className="text-3xl md:text-4xl font-serif text-brand-gold font-bold leading-none block">
                     ${estimatedMonthly.toLocaleString()} <span className="text-xs font-sans text-white/60">USD/mes</span>
@@ -428,7 +428,7 @@ export default function RegistrationAssistant() {
                     onClick={() => setPlan(p.value)}
                     className={`p-6 rounded-3xl border transition-all text-left relative flex flex-col justify-between ${
                       plan === p.value 
-                        ? 'border-brand-gold bg-brand-gold/15 shadow-[0_0_30px_rgba(212,168,67,0.3)] scale-[1.02]' 
+                        ? 'border-brand-gold bg-brand-gold/15 scale-[1.02]' 
                         : 'border-white/10 glass-dark hover:border-white/30'
                     }`}
                   >
@@ -467,7 +467,7 @@ export default function RegistrationAssistant() {
               <div className="text-center pt-4">
                 <button
                   onClick={() => setStep(2)}
-                  className="px-10 py-5 bg-brand-gold hover:bg-white text-brand-black rounded-2xl font-black text-xs uppercase tracking-[0.25em] transition-all transform hover:scale-105 shadow-[0_10px_35px_rgba(212,168,67,0.4)] inline-flex items-center gap-3"
+                  className="px-10 py-5 bg-brand-gold hover:bg-white text-brand-black rounded-2xl font-black text-xs uppercase tracking-[0.25em] transition-all transform hover:scale-105 inline-flex items-center gap-3"
                 >
                   <ShieldCheck size={18} />
                   Continuar al Registro con Plan {plan}
@@ -860,7 +860,7 @@ export default function RegistrationAssistant() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="w-14 h-14 rounded-full bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center mx-auto text-brand-gold shadow-[0_0_20px_rgba(212,168,67,0.2)]">
+                      <div className="w-14 h-14 rounded-full bg-brand-gold/15 border border-brand-gold/40 flex items-center justify-center mx-auto text-brand-gold">
                         <Mic size={24} />
                       </div>
                       <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Micrófono Listo</p>
@@ -909,7 +909,7 @@ export default function RegistrationAssistant() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-2xl mx-auto">
               {/* Phone Frame Mockup */}
-              <div className="w-64 h-[440px] bg-[#08080C] border-[6px] border-white/20 rounded-[2.5rem] mx-auto overflow-hidden relative shadow-[0_0_50px_rgba(212,168,67,0.3)]">
+              <div className="w-64 h-[440px] bg-[#08080B] border-[6px] border-white/20 rounded-[2.5rem] mx-auto overflow-hidden relative">
                 {images[0] ? (
                   <Image 
                     src={images[0]} 
@@ -956,7 +956,7 @@ export default function RegistrationAssistant() {
                 <button 
                   onClick={() => handleRegister(false)} 
                   disabled={loading} 
-                  className="w-full bg-brand-gold hover:bg-white text-brand-black font-black py-4 rounded-2xl uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(212,168,67,0.3)] transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-brand-gold hover:bg-white text-brand-black font-black py-4 rounded-2xl uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                 >
                   {loading ? <Loader2 className="animate-spin" size={18} /> : <span>Publicar Mi Perfil Ahora</span>}
                 </button>
@@ -972,7 +972,7 @@ export default function RegistrationAssistant() {
       case 5: // Success & WhatsApp Activation
         return (
           <div className="text-center space-y-6 py-6 animate-in zoom-in-95 max-w-lg mx-auto">
-            <div className="w-20 h-20 bg-brand-gold/15 rounded-full flex items-center justify-center mx-auto border border-brand-gold/40 text-brand-gold shadow-[0_0_40px_rgba(212,168,67,0.3)]">
+            <div className="w-20 h-20 bg-brand-gold/15 rounded-full flex items-center justify-center mx-auto border border-brand-gold/40 text-brand-gold">
               <CheckCircle2 size={44} />
             </div>
 
@@ -1020,7 +1020,7 @@ export default function RegistrationAssistant() {
         {/* Step Progress Bar */}
         <div className="h-1.5 bg-white/10 w-full">
           <div 
-            className="h-full bg-gradient-to-r from-brand-gold to-white transition-all duration-700 shadow-[0_0_15px_rgba(212,168,67,0.8)]" 
+            className="h-full bg-brand-gold transition-all duration-700" 
             style={{ width: `${(step / 5) * 100}%` }} 
           />
         </div>

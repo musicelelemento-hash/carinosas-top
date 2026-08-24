@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import StoryModal from "./StoryModal";
 import MobileReelsFeed from "./MobileReelsFeed";
-import { Flame, Sparkles } from "lucide-react";
+import { Flame } from "lucide-react";
 import { getActiveStoriesAction, type StoryItem } from "@/app/actions/stories";
 
 interface StoryCardItem {
@@ -114,76 +114,52 @@ export default function StoriesBar() {
   }, []);
 
   return (
-    <section className="w-full relative overflow-hidden bg-[#0A0A0F]/80 backdrop-blur-2xl border-b border-brand-gold/15">
-      {/* Top Hairline Gold Glow */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-gold/30 to-transparent" />
-
+    <section className="w-full relative overflow-hidden bg-[#08080B] border-b border-white/[0.07]">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-3.5 overflow-x-auto no-scrollbar" style={{ padding: "4px 20px 12px" }}>
 
-          {/* LIVE badge & Reels Trigger */}
+          {/* Reels Trigger */}
           <button
             type="button"
             onClick={() => setIsReelsOpen(true)}
-            className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none cursor-pointer"
+            className="flex-shrink-0 flex flex-col items-center gap-2 outline-none cursor-pointer"
           >
-            <div className="relative w-[58px] h-[58px] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 border-2 border-dashed border-brand-pink/60 bg-brand-pink/10 shadow-[0_0_15px_rgba(255,0,98,0.2)]">
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-brand-pink border-2 border-black pulse-crimson" />
-              <div className="text-center">
-                <Flame size={18} className="text-brand-pink fill-brand-pink mx-auto mb-0.5 animate-pulse" />
-                <span className="text-[7px] text-white font-black uppercase tracking-wider block">REELS 4K</span>
-              </div>
+            <div className="relative w-[58px] h-[58px] rounded-full flex items-center justify-center border-2 border-brand-pink/60">
+              <Flame size={18} className="text-brand-pink" />
             </div>
-            <span className="text-[10px] font-mono text-brand-pink font-bold group-hover:text-white uppercase tracking-wider transition-colors">
-              Ver Reels
-            </span>
+            <span className="text-[11px] text-white/90 font-medium">Reels</span>
           </button>
 
           {/* Vertical divider */}
-          <div className="flex-shrink-0 h-12 w-[1px] bg-white/10" />
+          <div className="flex-shrink-0 h-12 w-[1px] bg-white/[0.1]" />
 
-          {/* Model Stories with Beveled Rotating Gold Bezel */}
+          {/* Model Stories — bezel oro plano */}
           {storiesList.map((model) => (
             <button
               key={model.id}
               type="button"
               onClick={() => setActiveStory(model)}
-              className="flex-shrink-0 flex flex-col items-center gap-2 group outline-none cursor-pointer relative"
+              className="flex-shrink-0 flex flex-col items-center gap-2 outline-none cursor-pointer relative"
             >
-              {/* Rotating Bezel container */}
-              <div className="relative w-[58px] h-[58px] rounded-full p-[2px] bg-gradient-to-tr from-[#D4A843] via-[#FFE088] to-[#9A7830] group-hover:scale-105 transition-transform duration-300 shadow-[0_0_15px_rgba(212,168,67,0.25)] group-hover:shadow-[0_0_25px_rgba(212,168,67,0.5)]">
-                
-                {/* Inner Black Gap */}
-                <div className="w-full h-full rounded-full p-[2px] bg-[#08080C] overflow-hidden relative">
+              <div className="relative w-[58px] h-[58px] rounded-full p-[2px] border-2 border-brand-gold">
+                <div className="w-full h-full rounded-full overflow-hidden relative bg-[#08080B]">
                   <Image
                     src={model.avatar}
                     alt={model.name}
                     fill
                     sizes="58px"
-                    className="object-cover rounded-full group-hover:scale-110 transition-transform duration-500 brightness-100 contrast-[1.03]"
+                    className="object-cover rounded-full"
                   />
                 </div>
 
-                {/* Soundwave badge for audio preview */}
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-black/90 border border-brand-gold/40 text-[7px] text-brand-gold font-bold flex items-center gap-0.5 shadow-md">
-                  <span className="w-0.5 h-1.5 bg-brand-gold rounded-full animate-pulse" />
-                  <span className="w-0.5 h-2.5 bg-brand-gold rounded-full animate-pulse delay-75" />
-                  <span className="w-0.5 h-1.5 bg-brand-gold rounded-full animate-pulse delay-150" />
-                </div>
-
-                {/* Live Neon Crimson Dot */}
-                <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-black animate-pulse" />
+                {model.isOnline && (
+                  <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-brand-green border-2 border-[#08080B]" />
+                )}
               </div>
 
-              {/* Name & City */}
-              <div className="text-center">
-                <span className="text-[11px] text-white/90 group-hover:text-brand-gold font-medium block leading-tight transition-colors">
-                  {model.name}
-                </span>
-                <span className="text-[8px] text-brand-gold/70 uppercase tracking-widest font-black block mt-0.5">
-                  {model.city}
-                </span>
-              </div>
+              <span className="text-[11px] text-white/90 font-medium block leading-tight">
+                {model.name}
+              </span>
             </button>
           ))}
 

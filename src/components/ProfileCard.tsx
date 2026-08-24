@@ -64,7 +64,7 @@ export default function ProfileCard({
       >
         <div
           className={`relative overflow-hidden ${isFeed ? "" : "aspect-[4/5]"}`}
-          style={isFeed ? { height: 296 } : undefined}
+          style={isFeed ? { height: 250 } : undefined}
         >
           <Image
             src={cover}
@@ -85,9 +85,9 @@ export default function ProfileCard({
           {isBoosted && (
             <span
               className={`absolute font-mono font-bold ${isFeed ? "top-3 left-3 px-2.5 py-[6px] rounded-lg text-xs" : "top-3 left-3 px-2.5 py-[5px] rounded-md text-[11px] tracking-[0.08em]"}`}
-              style={{ background: "rgba(212,168,67,.94)", color: "#08080C" }}
+              style={{ background: "#D4A843", color: "#08080B" }}
             >
-              TOP
+              TOP 1
             </span>
           )}
 

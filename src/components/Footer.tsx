@@ -27,51 +27,33 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative overflow-hidden bg-[#040406] border-t border-brand-gold/15">
-
-      {/* Top gold ambient line */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-gold/60 to-transparent" />
-
-      {/* Background grid */}
-      <div className="absolute inset-0 grid-lines opacity-20 pointer-events-none" />
-
-      {/* Gold ambient orb */}
-      <div className="absolute bottom-0 right-[20%] w-[500px] h-[300px] pointer-events-none bg-brand-gold/5 blur-[100px]" />
-
+    <footer className="relative bg-[#08080B] border-t border-white/[0.07]">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
         {/* Main section */}
-        <div className="py-20 grid grid-cols-1 md:grid-cols-12 gap-12">
+        <div className="py-16 grid grid-cols-1 md:grid-cols-12 gap-12">
 
           {/* Brand Column */}
-          <div className="md:col-span-5 space-y-6">
-            <div>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="font-serif font-bold text-3xl sm:text-4xl italic bg-gradient-to-r from-[#F5E0A0] via-[#D4A843] to-[#F5E0A0] bg-clip-text text-transparent">
-                  CARIÑOSAS
-                </span>
-                <span className="font-serif font-bold text-3xl sm:text-4xl text-white">.TOP</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-px w-6 bg-brand-gold/50" />
-                <span className="text-[8px] text-brand-gold uppercase font-black tracking-[0.5em]">Directorio Élite Digital · Ecuador & Red Internacional</span>
-              </div>
+          <div className="md:col-span-5 space-y-5">
+            <div className="flex items-baseline gap-1">
+              <span className="font-serif font-bold text-3xl text-brand-gold">CARIÑOSAS</span>
+              <span className="font-serif font-bold text-3xl text-white">.TOP</span>
             </div>
 
-            <p className="text-xs text-white/50 leading-relaxed max-w-sm">
-              El círculo privado de mayor prestigio y discreción para caballeros de alto perfil y modelos independientes verificadas en Ecuador y las principales capitales.
+            <p className="text-xs text-white/55 leading-relaxed max-w-sm">
+              Directorio verificado de acompañantes en Ecuador y red internacional.
             </p>
 
             {/* Coverage Cities */}
             <div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-white/45">
                 <MapPin size={12} className="text-brand-gold" />
-                <span className="text-[9px] text-brand-gold uppercase font-black tracking-widest">Cobertura Exclusiva Nacional & Giras VIP</span>
+                <span>Cobertura</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {cities.map(city => (
                   <span key={city}
-                    className="px-3 py-1 rounded-full text-[9px] text-white/60 hover:text-brand-gold transition-colors glass-obsidian border border-white/10"
+                    className="px-3 py-1 rounded-full text-[11px] text-white/55 hover:text-brand-gold transition-colors border border-white/[0.1]"
                   >
                     {city}
                   </span>
@@ -84,41 +66,38 @@ export default function Footer() {
           <div className="hidden md:block md:col-span-1" />
 
           {/* Security & Privacy */}
-          <div className="md:col-span-3 space-y-5">
-            <h4 className="text-[10px] font-black text-brand-gold uppercase tracking-[0.3em] border-b border-brand-gold/20 pb-3">
-              Seguridad & Blindaje VIP
+          <div className="md:col-span-3 space-y-4">
+            <h4 className="font-mono text-[11px] text-brand-gold uppercase tracking-[0.18em] border-b border-white/[0.07] pb-3">
+              Seguridad
             </h4>
             <div className="space-y-3.5">
               {[
-                { icon: ShieldCheck, text: 'Verificación Biométrica 4K', color: 'text-[#D4AF37]' },
-                { icon: Lock, text: 'Privacidad y Discreción Total', color: 'text-[#D4AF37]' },
-                { icon: Gem, text: 'Canal Directo y Seguro', color: 'text-[#D4AF37]' },
-              ].map(({ icon: Icon, text, color }) => (
-                <div key={text} className="flex items-center gap-3 group">
-                  <Icon size={16} className={`${color} transition-transform group-hover:scale-110`} />
-                  <span className="text-xs text-white/60 group-hover:text-white transition-colors">{text}</span>
+                { icon: ShieldCheck, text: 'Verificación 4K' },
+                { icon: Lock, text: 'Privacidad y discreción' },
+                { icon: Gem, text: 'Canal directo y seguro' },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-3">
+                  <Icon size={16} className="text-brand-gold" />
+                  <span className="text-[13px] text-white/72">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Trust Certifications */}
-          <div className="md:col-span-3 space-y-5">
-            <h4 className="text-[10px] font-black text-brand-gold uppercase tracking-[0.3em] border-b border-brand-gold/20 pb-3">
+          <div className="md:col-span-3 space-y-4">
+            <h4 className="font-mono text-[11px] text-brand-gold uppercase tracking-[0.18em] border-b border-white/[0.07] pb-3">
               Certificaciones
             </h4>
             <div className="space-y-2.5">
               {[
-                { icon: '18+', label: 'Solo Adultos', sub: 'Acceso Estricto +18' },
-                { icon: '✓', label: 'WhatsApp Seguro', sub: 'Canal Directo Encriptado' },
-                { icon: '★', label: 'Sello Alpha 4K', sub: 'Exclusividad Garantizada' },
-              ].map(({ icon, label, sub }) => (
-                <div key={label} className="flex items-center gap-3.5 p-3 rounded-2xl glass-obsidian border border-white/10 group hover:border-brand-gold/30 transition-all">
+                { icon: '18+', label: 'Solo adultos' },
+                { icon: '✓', label: 'WhatsApp seguro' },
+                { icon: '★', label: 'Sello 4K' },
+              ].map(({ icon, label }) => (
+                <div key={label} className="flex items-center gap-3 p-3 rounded-2xl border border-white/[0.1]">
                   <span className="font-serif font-bold text-sm text-brand-gold w-6 text-center shrink-0">{icon}</span>
-                  <div>
-                    <div className="text-xs font-bold text-white/80">{label}</div>
-                    <div className="text-[9px] text-white/40">{sub}</div>
-                  </div>
+                  <span className="text-[13px] text-white/72">{label}</span>
                 </div>
               ))}
             </div>
@@ -127,36 +106,26 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="h-[1px] w-full bg-white/10" />
+        <div className="h-[1px] w-full bg-white/[0.07]" />
 
         {/* Bottom bar */}
         <div className="py-8 pb-28 md:pb-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <p className="text-xs text-[#A1A1AA]">
-              Cariñosas.top © 2026 · Todos los Derechos Reservados · Ecuador
-            </p>
-            <p className="text-[9px] text-[#A1A1AA]/80 leading-relaxed uppercase tracking-widest max-w-2xl">
-              Plataforma digital para mayores de 18 años. Anuncios independientes de acompañamiento y modelaje en Quito, Guayaquil y todo Ecuador.
-            </p>
-          </div>
+          <p className="text-[12px] text-white/45 text-center md:text-left">
+            Cariñosas.top © 2026 · Ecuador · Solo mayores de 18 años
+          </p>
 
-          <div className="flex flex-wrap items-center gap-5 text-[10px] text-[#A1A1AA] uppercase tracking-widest font-black">
+          <div className="flex flex-wrap items-center gap-5 font-mono text-[11px] text-white/45 uppercase tracking-[0.1em]">
             <button
               onClick={handleToggleSound}
-              title={isMuted ? "Activar Sonido VIP" : "Silenciar Sonido"}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-                isMuted
-                  ? "bg-white/5 border-white/10 text-[#A1A1AA] hover:text-white"
-                  : "bg-brand-gold/15 border-brand-gold/40 text-brand-gold hover:bg-brand-gold/25"
-              }`}
+              title={isMuted ? "Activar sonido" : "Silenciar sonido"}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.1] transition-colors hover:text-brand-gold cursor-pointer"
             >
               {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-              <span className="text-[9px]">{isMuted ? "Sonido: Mute" : "Sonido: HD"}</span>
             </button>
 
-            <Link href="/registro" className="hover:text-brand-gold transition-colors">Registro de Modelos</Link>
+            <Link href="/registro" className="hover:text-brand-gold transition-colors">Registro de modelos</Link>
             <Link href="/admin" className="hover:text-brand-gold transition-colors">Administración</Link>
-            <a href="https://wa.me/593987654321" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte VIP</a>
+            <a href="https://wa.me/593987654321" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte</a>
           </div>
         </div>
 

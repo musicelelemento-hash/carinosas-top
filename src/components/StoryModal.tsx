@@ -101,7 +101,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
   return (
     <div className="fixed inset-0 z-[300] bg-black/90 backdrop-blur-3xl flex items-center justify-center p-0 md:p-6 animate-in fade-in duration-300">
       <div 
-        className="relative w-full max-w-[430px] h-full md:h-[92vh] max-h-[860px] bg-[#08080C] md:rounded-[2.5rem] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.95)] border border-white/10 flex flex-col justify-between select-none"
+        className="relative w-full max-w-[430px] h-full md:h-[92vh] max-h-[860px] bg-[#08080B] md:rounded-[2.5rem] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.95)] border border-white/10 flex flex-col justify-between select-none"
         onMouseDown={() => setIsPaused(true)}
         onMouseUp={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
@@ -119,7 +119,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
           />
           {/* Obsidian Luxury Vignette */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/10 to-black/95 z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#08080C] via-transparent to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#08080B] via-transparent to-transparent z-10" />
         </div>
 
         {/* ── TOUCH TAP NAVIGATION HITBOXES (Left & Right halves) ── */}

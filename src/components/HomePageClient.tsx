@@ -2,31 +2,15 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import HeroSection from "@/components/HeroSection";
 import ProfileCard from "@/components/ProfileCard";
 import Navbar from "@/components/Navbar";
-import RecommendationSection from "@/components/RecommendationSection";
 import PanicButton from "@/components/PanicButton";
-import LiveCountBanner from "@/components/LiveCountBanner";
-import GhostNotifications from "@/components/GhostNotifications";
 import Footer from "@/components/Footer";
 import StoriesBar from "@/components/StoriesBar";
 import LiveMap from "@/components/LiveMap";
 import AIAssistantOverlay from "@/components/AIAssistantOverlay";
-import VIPLounge from "@/components/VIPLounge";
-import GlobalLounge from "@/components/GlobalLounge";
-import VIPGuide from "@/components/VIPGuide";
-import PushPrompt from "@/components/PushPrompt";
 import LocationGateway, { useLocationGateway } from "@/components/LocationGateway";
 import MobileFiltersSheet from "@/components/MobileFiltersSheet";
-import SecretVaultTeaser from "@/components/SecretVaultTeaser";
-import OccasionMatchmaker from "@/components/OccasionMatchmaker";
-import LiveActivityToast from "@/components/LiveActivityToast";
-import LiveClassifiedsFeed from "@/components/LiveClassifiedsFeed";
-import GoldParticles from "@/components/GoldParticles";
-import GentlemenClubSection from "@/components/GentlemenClubSection";
-import HiddenModelsLounge from "@/components/HiddenModelsLounge";
-import PanicDisguise from "@/components/PanicDisguise";
 import MobileReelsFeed from "@/components/MobileReelsFeed";
 import TerminalSidebar from "@/components/TerminalSidebar";
 import MobileHomeFeed from "@/components/MobileHomeFeed";
@@ -69,8 +53,8 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
   React.useEffect(() => {
     if (location?.cantonName) {
       const cantonClean = location.cantonName.split(" ")[0].toLowerCase();
-      const matched = initialModels.filter(m => 
-        m.location.toLowerCase().includes(cantonClean) || 
+      const matched = initialModels.filter(m =>
+        m.location.toLowerCase().includes(cantonClean) ||
         (m.sector && m.sector.toLowerCase().includes(cantonClean))
       );
       if (matched.length > 0) {
@@ -120,16 +104,16 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
     let filtered: HomePageModel[] = [];
 
     if (clean === "vip") {
-      filtered = initialModels.filter(m => 
-        m.isBoosted || 
-        m.plan_type === 'VIP Elite' || 
-        m.plan_type === 'Diamante' || 
+      filtered = initialModels.filter(m =>
+        m.isBoosted ||
+        m.plan_type === 'VIP Elite' ||
+        m.plan_type === 'Diamante' ||
         m.plan_type === 'Oro'
       );
     } else if (clean === "verificada") {
       filtered = initialModels.filter(m => m.is_verified_4k);
     } else {
-      filtered = initialModels.filter(m => 
+      filtered = initialModels.filter(m =>
         (m.tags && m.tags.some(t => t.toLowerCase().includes(clean))) ||
         (m.description && m.description.toLowerCase().includes(clean)) ||
         (m.sector && m.sector.toLowerCase().includes(clean)) ||
@@ -192,13 +176,10 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         <LocationGateway onEnter={handleEnter} />
       )}
 
-      <main className="min-h-screen bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden relative">
-        {/* Ambient Interactive Gold Dust Canvas */}
-        <GoldParticles />
-
+      <main className="min-h-screen bg-[#08080B] text-white selection:bg-brand-gold selection:text-brand-black overflow-x-hidden relative">
         <Navbar currentCountry={currentCountry} onChangeLocation={resetLocation} onSearch={handleLocationSearch} />
 
-        {/* ── Solo mobile: stories + feed, calcado 1:1 de screenHome del mockup ── */}
+        {/* ── Solo mobile: historias + feed, home = feed (spec) ── */}
         <div className="lg:hidden">
           <StoriesBar />
         </div>
@@ -232,7 +213,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                         className="px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors"
                         style={{
                           background: desktopTab === t.id ? '#D4A843' : 'transparent',
-                          color: desktopTab === t.id ? '#08080C' : 'rgba(240,240,236,.7)',
+                          color: desktopTab === t.id ? '#08080B' : 'rgba(240,240,236,.72)',
                           border: `1px solid ${desktopTab === t.id ? '#D4A843' : 'rgba(255,255,255,.12)'}`,
                         }}
                       >
@@ -274,7 +255,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
         </div>
 
         {/* ── TRI-MODE VIEW SWITCHER BAR — solo mobile ── */}
-        <div className="lg:hidden sticky top-14 z-30 py-3 backdrop-blur-xl bg-[#08080C]/85 border-y border-white/5 shadow-2xl">
+        <div className="lg:hidden sticky top-14 z-30 py-3 backdrop-blur-xl bg-[#08080B]/85 border-y border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
             <div className="flex items-center gap-2">
               <button
@@ -283,112 +264,59 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                   const el = document.getElementById('collection');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.4)] scale-105'
-                    : 'glass-obsidian border border-white/10 text-white/70 hover:text-white'
+                    ? 'bg-brand-gold text-brand-black'
+                    : 'border border-white/[0.1] text-white/70 hover:text-white'
                 }`}
               >
                 <LayoutGrid size={13} />
-                <span>Catálogo 4K</span>
+                <span>Catálogo</span>
               </button>
 
               <button
                 onClick={() => setIsReelsOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider glass-obsidian border border-brand-pink/50 text-brand-pink hover:bg-brand-pink/10 transition-all shadow-[0_0_15px_rgba(255,0,98,0.25)] animate-pulse"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-brand-pink/50 text-brand-pink transition-colors"
               >
                 <Film size={13} />
-                <span>Reels Feed</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setViewMode('feed');
-                  const el = document.getElementById('clasificados-feed');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${
-                  viewMode === 'feed'
-                    ? 'bg-brand-gold text-brand-black shadow-[0_0_20px_rgba(212,168,67,0.4)]'
-                    : 'glass-obsidian border border-white/10 text-white/70 hover:text-white'
-                }`}
-              >
-                <Radio size={13} />
-                <span>En Vivo</span>
+                <span>Reels</span>
               </button>
 
               <button
                 onClick={() => router.push('/radar')}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 glass-obsidian border border-white/10 text-white/70 hover:text-white"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-white/[0.1] text-white/70 hover:text-white transition-colors"
+              >
+                <Radio size={13} />
+                <span>Radar</span>
+              </button>
+
+              <button
+                onClick={() => router.push('/radar?vista=mapa')}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-white/[0.1] text-white/70 hover:text-white transition-colors"
               >
                 <MapPin size={13} />
-                <span>Geo-Radar</span>
+                <span>Mapa</span>
               </button>
             </div>
 
             <button
               onClick={() => setIsFiltersSheetOpen(true)}
-              className="px-3.5 py-2 rounded-xl glass-obsidian border border-brand-gold/40 text-brand-gold text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 shadow-lg"
+              className="px-3.5 py-2 rounded-xl border border-brand-gold/40 text-brand-gold text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 shrink-0"
             >
               <Sliders size={13} />
-              <span className="hidden sm:inline">Filtros Táctiles</span>
+              <span className="hidden sm:inline">Filtros</span>
             </button>
           </div>
         </div>
 
-        {/* ── Búsqueda avanzada + filtros de ciudad/categoría (mobile) — funcionalidad real, más abajo en el scroll para no dominar la entrada ── */}
-        <div className="lg:hidden">
-          <HeroSection
-            currentCountry={currentCountry}
-            activeTag={activeTag}
-            onSelectTag={handleSelectTag}
-            onSelectLocation={handleLocationSearch}
-          />
-        </div>
-
-        {/* ── 2. LIVE CLASSIFIEDS FEED (HIGH ENGAGEMENT) ── */}
-        <div id="clasificados-feed">
-          <LiveClassifiedsFeed currentCountry={currentCountry} />
-        </div>
-
-        {/* ── 3. RECOMMENDATIONS & OCCASIONS ── */}
-        <RecommendationSection currentCountry={currentCountry} />
-
-        <OccasionMatchmaker
-          onSelectOccasion={(tagKeyword) => {
-            if (!tagKeyword) {
-              setDisplayModels(initialModels);
-            } else {
-              const filtered = initialModels.filter(m => 
-                (m.tags && m.tags.some(t => t.toLowerCase().includes(tagKeyword.toLowerCase()))) ||
-                (m.description && m.description.toLowerCase().includes(tagKeyword.toLowerCase())) ||
-                (m.sector && m.sector.toLowerCase().includes(tagKeyword.toLowerCase()))
-              );
-              setDisplayModels(filtered.length > 0 ? filtered : initialModels);
-            }
-          }}
-        />
-
-        {/* ── 5. ELITE CLUBS & SECRET VAULT ── */}
-        <GentlemenClubSection />
-        <HiddenModelsLounge />
-        <VIPLounge />
-        <SecretVaultTeaser />
-        <GlobalLounge />
-        <VIPGuide />
-        <PanicDisguise />
-
-        {/* ── 6. MOBILE REELS FEED (TIKTOK / REELS OVERLAY) ── */}
+        {/* ── MOBILE REELS FEED (overlay) ── */}
         <MobileReelsFeed
           isOpen={isReelsOpen}
           onClose={() => setIsReelsOpen(false)}
         />
 
         <PanicButton />
-        <GhostNotifications />
         <AIAssistantOverlay />
-        <PushPrompt />
-        <LiveActivityToast />
 
         <MobileFiltersSheet
           isOpen={isFiltersSheetOpen}

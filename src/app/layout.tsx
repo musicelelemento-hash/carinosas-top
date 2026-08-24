@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#08080C",
+  themeColor: "#08080B",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
@@ -177,7 +177,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} ${jetbrainsMono.variable} antialiased bg-[#08080C] text-white selection:bg-brand-gold selection:text-brand-black pb-24 md:pb-0`}
+        className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} ${jetbrainsMono.variable} antialiased bg-[#08080B] text-white selection:bg-brand-gold selection:text-brand-black pb-24 md:pb-0`}
       >
         {children}
         <MobileBottomNav />

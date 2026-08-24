@@ -99,7 +99,7 @@ export default function TerminalSidebar({ models, onOpenReels, onOpenRadar }: Te
             style={{ background: privateMode ? "#D4A843" : "rgba(255,255,255,.14)" }}
           >
             <div
-              className="absolute top-0.5 w-4 h-4 rounded-full bg-[#08080C] transition-all"
+              className="absolute top-0.5 w-4 h-4 rounded-full bg-[#08080B] transition-all"
               style={{ left: privateMode ? "16px" : "2px" }}
             />
           </button>

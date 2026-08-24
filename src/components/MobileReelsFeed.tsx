@@ -2,21 +2,19 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { 
-  X, 
-  Heart, 
-  Flame, 
-  MessageCircle, 
-  Volume2, 
-  VolumeX, 
-  Sparkles, 
-  Share2, 
-  ShieldCheck, 
-  MapPin, 
-  ChevronUp, 
-  ChevronDown,
-  Crown
+import {
+  X,
+  Heart,
+  MessageCircle,
+  Volume2,
+  VolumeX,
+  Share2,
+  ShieldCheck,
+  MapPin,
+  ChevronUp,
+  Link2,
+  Download,
+  Send,
 } from "lucide-react";
 
 interface ReelItem {
@@ -30,6 +28,8 @@ interface ReelItem {
   description: string;
   hasAudio: boolean;
   tags: string[];
+  likes: number;
+  comments: number;
 }
 
 const REEL_ITEMS: ReelItem[] = [
@@ -43,7 +43,9 @@ const REEL_ITEMS: ReelItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1080",
     description: "Hermosa y cariñosa en Machala. Trato de novios real, masajes relajantes y total discreción para ejecutivos.",
     hasAudio: true,
-    tags: ["MachalaVIP", "PuertoBolívar", "TratoDeNovios", "4KReal"]
+    tags: ["MachalaVIP", "PuertoBolívar", "TratoDeNovios", "4KReal"],
+    likes: 2412,
+    comments: 318,
   },
   {
     id: "r1",
@@ -55,7 +57,9 @@ const REEL_ITEMS: ReelItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1080",
     description: "Cenas exclusivas y momentos de alto nivel en hoteles 5★ en Quito Norte y Cumbayá.",
     hasAudio: true,
-    tags: ["Elegante", "Hotel5★", "Bóveda4K", "QuitoVIP"]
+    tags: ["Elegante", "Hotel5★", "Bóveda4K", "QuitoVIP"],
+    likes: 1893,
+    comments: 204,
   },
   {
     id: "r2",
@@ -67,7 +71,9 @@ const REEL_ITEMS: ReelItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1080",
     description: "Presencia impecable y atención preferencial para caballeros distinguidos en Samborondón y Puerto Santa Ana.",
     hasAudio: true,
-    tags: ["TratoVIP", "AltaGama", "4KVerified", "Samborondón"]
+    tags: ["TratoVIP", "AltaGama", "4KVerified", "Samborondón"],
+    likes: 3021,
+    comments: 412,
   },
   {
     id: "r3",
@@ -79,7 +85,9 @@ const REEL_ITEMS: ReelItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1080",
     description: "Universitaria sofisticada. Conexión auténtica y compañía sin prisa en Cuenca.",
     hasAudio: true,
-    tags: ["Universitaria", "Sutil", "MasajeRelax", "CuencaVIP"]
+    tags: ["Universitaria", "Sutil", "MasajeRelax", "CuencaVIP"],
+    likes: 1544,
+    comments: 176,
   },
   {
     id: "r4",
@@ -91,7 +99,9 @@ const REEL_ITEMS: ReelItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=1080",
     description: "Acompañante VIP en Santo Domingo. Bellísima, apasionada y discreta para momentos inolvidables.",
     hasAudio: true,
-    tags: ["SantoDomingo", "ZonaRosa", "Elite4K"]
+    tags: ["SantoDomingo", "ZonaRosa", "Elite4K"],
+    likes: 987,
+    comments: 93,
   },
   {
     id: "r5",
@@ -103,8 +113,24 @@ const REEL_ITEMS: ReelItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=1080",
     description: "Acompañamiento exclusivo frente al mar con total discreción en suites y yates.",
     hasAudio: true,
-    tags: ["PlayaVIP", "Yates", "Barbasquillo", "4KHD"]
-  }
+    tags: ["PlayaVIP", "Yates", "Barbasquillo", "4KHD"],
+    likes: 2205,
+    comments: 267,
+  },
+];
+
+interface MockComment {
+  id: string;
+  author: string;
+  time: string;
+  text: string;
+  liked: boolean;
+}
+
+const MOCK_COMMENTS: MockComment[] = [
+  { id: "c1", author: "Andrés M.", time: "2 h", text: "Perfil verificado, todo tal cual las fotos.", liked: false },
+  { id: "c2", author: "Carlos R.", time: "5 h", text: "Excelente trato, muy puntual.", liked: true },
+  { id: "c3", author: "Diego P.", time: "1 d", text: "¿Disponible este fin de semana en Quito?", liked: false },
 ];
 
 interface MobileReelsFeedProps {
@@ -119,6 +145,9 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
   const [isAudioActive, setIsAudioActive] = useState(false);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [viewersCount, setViewersCount] = useState(842);
+  const [sheet, setSheet] = useState<null | "comments" | "share">(null);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [copied, setCopied] = useState(false);
   const lastTapRef = useRef<number>(0);
 
   useEffect(() => {
@@ -132,17 +161,23 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (sheet) setSheet(null);
+        else onClose();
+      }
       if (e.key === "ArrowDown") handleNext();
       if (e.key === "ArrowUp") handlePrev();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, currentIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, currentIndex, sheet]);
 
   if (!isOpen) return null;
 
   const currentReel = REEL_ITEMS[currentIndex];
+  const isLiked = !!likedMap[currentReel.id];
+  const likeCount = currentReel.likes + (isLiked ? 1 : 0);
 
   const handleDoubleTap = () => {
     const now = Date.now();
@@ -158,17 +193,13 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
   };
 
   const handleNext = () => {
-    if (currentIndex < REEL_ITEMS.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      setCurrentIndex(0);
-    }
+    setSheet(null);
+    setCurrentIndex(prev => (prev < REEL_ITEMS.length - 1 ? prev + 1 : 0));
   };
 
   const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
+    setSheet(null);
+    setCurrentIndex(prev => (prev > 0 ? prev - 1 : prev));
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -188,21 +219,32 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
   };
 
   const handleContactWhatsApp = () => {
-    const text = encodeURIComponent(`Hola ${currentReel.name}, te vi en el Modo Reels 4K de Cariñosas.top (Ciudad: ${currentReel.city}, Sector: ${currentReel.sector}). Deseo consultar tu disponibilidad.`);
+    const text = encodeURIComponent(`Hola ${currentReel.name}, te vi en Reels de Cariñosas.top (Ciudad: ${currentReel.city}, Sector: ${currentReel.sector}). Deseo consultar tu disponibilidad.`);
     window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
   };
 
+  const profileSlug = currentReel.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const shareUrl = `carinosas.top/${profileSlug}`;
+
+  const handleCopyLink = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(`https://${shareUrl}`).catch(() => {});
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  };
+
   return (
-    <div 
+    <div
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="fixed inset-0 z-[160] bg-black flex flex-col justify-between overflow-hidden animate-in fade-in duration-300 select-none"
+      className="fixed inset-0 z-[160] bg-black flex flex-col justify-between overflow-hidden select-none"
     >
-      
+
       {/* ── TOP ACTION BAR ── */}
-      <div className="absolute top-0 inset-x-0 z-30 p-4 pt-4 sm:p-5 sm:pt-6 flex flex-col gap-3 bg-gradient-to-b from-black/90 via-black/50 to-transparent">
+      <div className="absolute top-0 inset-x-0 z-30 p-4 pt-4 sm:p-5 sm:pt-6 flex flex-col gap-3 bg-gradient-to-b from-black/90 via-black/40 to-transparent">
         {/* Story-style progress bars */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-[5px]">
           {REEL_ITEMS.map((r, i) => (
             <div key={r.id} className="flex-1 h-[3px] rounded-full bg-white/25 overflow-hidden">
               <div
@@ -214,33 +256,30 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
         </div>
 
         <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/40 text-brand-gold text-[9px] font-black uppercase tracking-wider shadow-[0_0_15px_rgba(212,168,67,0.2)]">
-            <Flame size={12} className="text-brand-pink fill-brand-pink animate-pulse" />
-            <span>Reels 4K en Vivo</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#08080B]/55 border border-brand-gold/40 text-brand-gold font-mono text-[10px] uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-pink" />
+              <span>Reels 4K en vivo</span>
+            </div>
+
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#08080B]/55 border border-white/[0.1] font-mono text-[10px] text-white/70">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+              <span>{viewersCount} viendo</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full glass-dark border border-white/10 text-[9px] font-mono text-white/70">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{viewersCount} viendo</span>
-          </div>
-
-          <span className="text-[10px] text-white/50 font-mono hidden sm:inline">
-            {currentIndex + 1}/{REEL_ITEMS.length}
-          </span>
-        </div>
-
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full glass-dark border border-white/20 text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-        >
-          <X size={18} />
-        </button>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-[#08080B]/55 border border-white/20 text-white flex items-center justify-center"
+            aria-label="Cerrar"
+          >
+            <X size={18} />
+          </button>
         </div>
       </div>
 
       {/* ── MAIN FULL-SCREEN MEDIA CONTAINER ── */}
-      <div 
+      <div
         onClick={handleDoubleTap}
         className="relative w-full h-full flex-1 overflow-hidden"
       >
@@ -249,150 +288,237 @@ export default function MobileReelsFeed({ isOpen, onClose }: MobileReelsFeedProp
           alt={currentReel.name}
           fill
           priority
-          className="object-cover brightness-95"
+          className="object-cover"
         />
 
-        {/* Ambient Dark Gradient for readable text */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/20" />
+        {/* Ambient dark gradient para legibilidad de texto (spec) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.2) 32%, transparent 55%, rgba(0,0,0,.45) 100%)",
+          }}
+        />
 
         {/* Double Tap Floating Heart Animation */}
         {showHeartAnim && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 animate-in zoom-in-50 duration-300">
-            <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-brand-pink to-brand-gold flex items-center justify-center shadow-[0_0_60px_rgba(255,0,98,0.8)] scale-125 animate-bounce">
-              <Heart size={60} className="fill-white text-white" />
-            </div>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+            <Heart size={72} className="fill-brand-pink text-brand-pink" />
           </div>
         )}
 
-        {/* ── RIGHT FLOATING ACTION COLUMN ── */}
-        <div className="absolute right-4 bottom-32 z-20 flex flex-col items-center gap-5">
-          
-          {/* Like Button */}
-          <button 
+        {/* ── RIGHT FLOATING ACTION COLUMN (spec: bottom 168, gap 16) ── */}
+        <div className="absolute right-4 bottom-[168px] z-20 flex flex-col items-center gap-4">
+
+          {/* Like */}
+          <button
             onClick={(e) => {
               e.stopPropagation();
               setLikedMap(prev => ({ ...prev, [currentReel.id]: !prev[currentReel.id] }));
             }}
-            className="flex flex-col items-center gap-1 group"
+            className="flex flex-col items-center gap-1"
           >
-            <div className={`w-12 h-12 rounded-full glass-dark border border-white/10 flex items-center justify-center transition-all ${
-              likedMap[currentReel.id] ? 'bg-brand-pink border-brand-pink text-white shadow-[0_0_20px_rgba(255,0,98,0.5)]' : 'text-white'
-            }`}>
-              <Heart size={22} className={likedMap[currentReel.id] ? 'fill-white' : ''} />
+            <div className={`w-11 h-11 rounded-full bg-[#08080B]/55 border border-white/[0.1] flex items-center justify-center ${isLiked ? "text-brand-pink" : "text-white"}`}>
+              <Heart size={22} className={isLiked ? "fill-brand-pink" : ""} />
             </div>
-            <span className="text-[9px] text-white/80 font-bold uppercase">Me Gusta</span>
+            <span className="font-mono text-[11px] text-white/85">{likeCount.toLocaleString("es-EC")}</span>
           </button>
 
-          {/* Voice Greeting Audio Toggle */}
-          <button 
+          {/* Comments */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSheet("comments");
+            }}
+            className="flex flex-col items-center gap-1"
+          >
+            <div className="w-11 h-11 rounded-full bg-[#08080B]/55 border border-white/[0.1] flex items-center justify-center text-white">
+              <MessageCircle size={20} />
+            </div>
+            <span className="font-mono text-[11px] text-white/85">{currentReel.comments}</span>
+          </button>
+
+          {/* Share */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSheet("share");
+            }}
+            className="flex flex-col items-center gap-1"
+          >
+            <div className="w-11 h-11 rounded-full bg-[#08080B]/55 border border-white/[0.1] flex items-center justify-center text-white">
+              <Share2 size={19} />
+            </div>
+            <span className="font-mono text-[11px] text-white/85">Enviar</span>
+          </button>
+
+          {/* Volumen */}
+          <button
             onClick={(e) => {
               e.stopPropagation();
               setIsAudioActive(!isAudioActive);
             }}
             className="flex flex-col items-center gap-1"
           >
-            <div className={`w-12 h-12 rounded-full glass-dark border border-white/10 flex items-center justify-center text-brand-gold transition-all ${
-              isAudioActive ? 'bg-brand-gold text-brand-black shadow-[0_0_25px_rgba(212,168,67,0.6)] animate-pulse' : ''
-            }`}>
-              {isAudioActive ? <Volume2 size={22} /> : <VolumeX size={22} />}
+            <div className={`w-11 h-11 rounded-full bg-[#08080B]/55 border border-white/[0.1] flex items-center justify-center ${isAudioActive ? "text-brand-gold" : "text-white"}`}>
+              {isAudioActive ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </div>
-            <span className="text-[9px] text-white/80 font-bold uppercase">
-              {isAudioActive ? 'Escuchando' : 'Voz HD'}
-            </span>
-
-            {/* Equalizer animation bars */}
-            {isAudioActive && (
-              <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="w-1 h-3 bg-brand-gold rounded-full animate-bounce" />
-                <span className="w-1 h-5 bg-brand-gold rounded-full animate-bounce [animation-delay:0.2s]" />
-                <span className="w-1 h-2 bg-brand-gold rounded-full animate-bounce [animation-delay:0.4s]" />
-                <span className="w-1 h-4 bg-brand-gold rounded-full animate-bounce [animation-delay:0.1s]" />
-              </div>
-            )}
-          </button>
-
-          {/* Share */}
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              if (navigator.share) {
-                navigator.share({ title: `Perfil 4K de ${currentReel.name}`, url: window.location.href });
-              }
-            }}
-            className="flex flex-col items-center gap-1"
-          >
-            <div className="w-12 h-12 rounded-full glass-dark border border-white/10 flex items-center justify-center text-white">
-              <Share2 size={20} />
-            </div>
-            <span className="text-[9px] text-white/80 font-bold uppercase">Compartir</span>
-          </button>
-
-          {/* Next Navigation Arrow */}
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleNext();
-            }}
-            className="w-12 h-12 rounded-full bg-brand-gold text-brand-black flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-          >
-            <ChevronDown size={24} />
+            <span className="font-mono text-[11px] text-white/85">Voz</span>
           </button>
         </div>
 
-        {/* ── BOTTOM METADATA & BOOKING SHEET ── */}
-        <div className="absolute bottom-5 inset-x-4 z-20 space-y-3">
-          
-          <div className="space-y-1.5 pr-16">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-serif text-white italic font-bold">{currentReel.name}</span>
-              <span className="text-sm text-white/70">, {currentReel.age}</span>
-              <div className="bg-brand-gold text-brand-black text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase flex items-center gap-1 shadow-md">
-                <ShieldCheck size={10} /> 4K VERIFIED
-              </div>
+        {/* ── BOTTOM METADATA & BOOKING (spec: bottom 104, right 92) ── */}
+        {!sheet && (
+          <div className="absolute bottom-[104px] left-4 right-[92px] z-20 space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="font-serif font-bold text-[15px] text-white">{currentReel.name}</span>
+              <ShieldCheck size={15} className="text-brand-gold" />
             </div>
 
-            <div className="flex items-center gap-2 text-[10px] text-brand-gold font-bold uppercase tracking-wider">
-              <MapPin size={11} /> {currentReel.sector} · {currentReel.city}
-              <span className="text-white/40">|</span>
-              <span className="text-white font-serif italic text-sm">{currentReel.rate}</span>
+            <div className="flex items-center gap-2 text-[12px] text-white/72">
+              <MapPin size={12} className="text-brand-gold" />
+              <span>{currentReel.sector} · {currentReel.city}</span>
             </div>
 
-            <p className="text-xs text-white/85 line-clamp-2 leading-relaxed font-medium">
-              &quot;{currentReel.description}&quot;
+            <p className="text-[14px] text-white/85 leading-[1.5] line-clamp-3">
+              {currentReel.description}
             </p>
 
-            {/* Tags */}
-            <div className="flex gap-1.5 flex-wrap pt-0.5">
-              {currentReel.tags.map(t => (
-                <span key={t} className="text-[8px] px-2.5 py-0.5 rounded-full glass-dark border border-white/10 text-white/70 font-mono">
-                  #{t}
-                </span>
-              ))}
-            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleContactWhatsApp(); }}
+              className="btn-gold px-5 flex items-center gap-2"
+              style={{ minHeight: 44 }}
+            >
+              <MessageCircle size={15} />
+              Escribir
+            </button>
           </div>
+        )}
 
-          {/* Action Buttons & Swipe Up Hint */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleContactWhatsApp}
-                className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:brightness-110 text-brand-black text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(212,168,67,0.5)] flex items-center justify-center gap-2"
-              >
-                <MessageCircle size={15} fill="currentColor" />
-                <span>Chatear por WhatsApp Directo</span>
+        {!sheet && (
+          <div className="absolute bottom-6 inset-x-0 z-20 flex items-center justify-center gap-1 font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
+            <span>Desliza para siguiente</span>
+            <ChevronUp size={12} />
+          </div>
+        )}
+      </div>
+
+      {/* ── HOJA DE COMENTARIOS ── */}
+      {sheet === "comments" && (
+        <div className="absolute inset-0 z-40 flex flex-col justify-end" onClick={() => setSheet(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-[#101014] rounded-t-[22px] flex flex-col"
+            style={{ height: 470 }}
+          >
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.07]">
+              <span className="text-[15px] font-bold text-white">{currentReel.comments} comentarios</span>
+              <button onClick={() => setSheet(null)} aria-label="Cerrar" className="text-white/60">
+                <X size={20} />
               </button>
             </div>
 
-            {/* Swipe up hint */}
-            <div className="flex items-center justify-center gap-1 text-[8px] font-mono uppercase tracking-[0.25em] text-white/40 pt-1">
-              <span>Desliza para siguiente</span>
-              <ChevronUp size={10} className="animate-bounce" />
+            <div className="flex-1 overflow-y-auto px-5 py-3 space-y-4">
+              {MOCK_COMMENTS.map((c) => (
+                <div key={c.id} className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-full bg-white/10 shrink-0 flex items-center justify-center font-serif text-[13px] text-white/70">
+                    {c.author[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-bold text-white">{c.author}</span>
+                      <span className="font-mono text-[11px] text-white/45">{c.time}</span>
+                    </div>
+                    <p className="text-[13px] text-white/72 leading-[1.45]">{c.text}</p>
+                  </div>
+                  <Heart size={15} className={c.liked ? "fill-brand-pink text-brand-pink shrink-0" : "text-white/30 shrink-0"} />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 px-5 py-3 border-t border-white/[0.07]">
+              <input
+                value={commentDraft}
+                onChange={(e) => setCommentDraft(e.target.value)}
+                placeholder="Escribe un comentario..."
+                className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 text-[13px] text-white placeholder:text-white/35 outline-none"
+                style={{ height: 46 }}
+              />
+              <button
+                onClick={() => setCommentDraft("")}
+                className="w-11 h-11 rounded-xl bg-brand-gold text-[#08080B] flex items-center justify-center shrink-0"
+                aria-label="Enviar comentario"
+              >
+                <Send size={16} />
+              </button>
             </div>
           </div>
-
         </div>
+      )}
 
-      </div>
+      {/* ── HOJA DE COMPARTIR ── */}
+      {sheet === "share" && (
+        <div className="absolute inset-0 z-40 flex flex-col justify-end" onClick={() => setSheet(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-[#101014] rounded-t-[22px] p-5 space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[15px] font-bold text-white">Compartir perfil</span>
+              <button onClick={() => setSheet(null)} aria-label="Cerrar" className="text-white/60">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Tarjeta compartible */}
+            <div
+              className="flex rounded-2xl overflow-hidden"
+              style={{ border: "1px solid rgba(212,168,67,.35)" }}
+            >
+              <div className="relative shrink-0" style={{ width: 116, height: 150 }}>
+                <Image src={currentReel.imageUrl} alt={currentReel.name} fill className="object-cover" />
+              </div>
+              <div className="flex-1 min-w-0 p-3.5 flex flex-col justify-center gap-1.5 bg-[#0C0C10]">
+                <span className="font-mono text-[11px] text-brand-gold uppercase tracking-[0.14em]">Cariñosas.top</span>
+                <span className="font-serif font-bold text-2xl text-white truncate">{currentReel.name}</span>
+                <span className="text-[13px] text-white/72 truncate">{currentReel.sector} · verificada 4K</span>
+                <span className="font-mono text-[11px] text-white/45 truncate">{shareUrl}</span>
+              </div>
+            </div>
+
+            <p className="text-[12px] text-white/45 leading-[1.5]">
+              La tarjeta no revela contacto ni ubicación exacta. Enlace válido 24 h.
+            </p>
+
+            <div className="grid grid-cols-3 gap-2.5">
+              <button
+                onClick={handleCopyLink}
+                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-white/[0.1] text-white"
+                style={{ height: 48 }}
+              >
+                <Link2 size={17} />
+                <span className="text-[11px] font-semibold">{copied ? "Copiado" : "Copiar"}</span>
+              </button>
+              <button
+                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-white/[0.1] text-white"
+                style={{ height: 48 }}
+              >
+                <Download size={17} />
+                <span className="text-[11px] font-semibold">Guardar</span>
+              </button>
+              <button
+                onClick={handleContactWhatsApp}
+                className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-brand-gold text-[#08080B]"
+                style={{ height: 48 }}
+              >
+                <Send size={17} />
+                <span className="text-[11px] font-semibold">Enviar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

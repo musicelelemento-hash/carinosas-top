@@ -8,7 +8,6 @@ export default function MobileBottomNav() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("home");
   const [modelAuth, setModelAuth] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSessions = () => {
@@ -25,11 +24,6 @@ export default function MobileBottomNav() {
     if (typeof window !== "undefined" && "vibrate" in navigator) {
       try { navigator.vibrate(15); } catch {}
     }
-  };
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2000);
   };
 
   const navItems: { id: string; label: string; icon: typeof Home; onClick: () => void }[] = [
@@ -50,16 +44,12 @@ export default function MobileBottomNav() {
     },
     {
       id: "chats", label: "Chats", icon: MessageCircle, onClick: () => {
-        showToast("Chats: próximamente");
+        router.push("/chats");
       },
     },
     {
       id: "tu", label: "Tú", icon: User, onClick: () => {
-        if (modelAuth) {
-          router.push("/panel-modelo");
-        } else {
-          window.dispatchEvent(new CustomEvent("open-auth-modal"));
-        }
+        router.push(modelAuth ? "/panel-modelo" : "/cuenta");
       },
     },
   ];
@@ -100,22 +90,15 @@ export default function MobileBottomNav() {
       <button
         type="button"
         onClick={() => window.dispatchEvent(new CustomEvent("open-ai-concierge"))}
-        className="md:hidden fixed z-[61] w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_25px_rgba(212,168,67,0.5)]"
+        className="md:hidden fixed z-[61] w-12 h-12 rounded-full flex items-center justify-center bg-brand-gold"
         style={{
           right: 16,
           bottom: "calc(96px + env(safe-area-inset-bottom, 16px))",
-          background: "linear-gradient(135deg, #D4A843, #FFF1C2, #D4A843)",
         }}
         aria-label="Abrir Concierge IA"
       >
-        <Sparkles size={20} className="text-[#08080C]" />
+        <Sparkles size={20} className="text-[#08080B]" />
       </button>
-
-      {toast && (
-        <div className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[70] px-4 py-2 rounded-full bg-[#0C0C10] border border-brand-gold/30 text-white text-xs shadow-2xl">
-          {toast}
-        </div>
-      )}
     </>
   );
 }

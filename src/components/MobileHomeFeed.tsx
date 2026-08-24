@@ -51,7 +51,7 @@ export default function MobileHomeFeed({ models }: MobileHomeFeedProps) {
             style={{
               padding: "9px 14px",
               background: chip === c.id ? "#D4A843" : "rgba(255,255,255,.05)",
-              color: chip === c.id ? "#08080C" : "rgba(240,240,236,.7)",
+              color: chip === c.id ? "#08080B" : "rgba(240,240,236,.72)",
               border: `1px solid ${chip === c.id ? "#D4A843" : "rgba(255,255,255,.1)"}`,
             }}
           >
