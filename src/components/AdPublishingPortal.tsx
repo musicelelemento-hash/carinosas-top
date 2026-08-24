@@ -20,16 +20,18 @@ import {
   Mail, 
   Phone, 
   Lock, 
-  ChevronRight,
-  CheckCircle2,
-  RefreshCw,
-  Info,
-  MapPin
+  ChevronRight, 
+  CheckCircle2, 
+  RefreshCw, 
+  Info, 
+  MapPin,
+  Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { sound } from "@/lib/soundEngine";
+import { registerModelAction } from "@/app/actions/admin";
 
 interface PlanTier {
   id: string;
@@ -166,17 +168,56 @@ export default function AdPublishingPortal() {
     }, 1500);
   };
 
-  const handleCompleteSubmission = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleCompleteSubmission = async (e: React.FormEvent) => {
     e.preventDefault();
-    sound.playGoldChime();
-    setIsSuccess(true);
-    if (typeof window !== "undefined") {
-      confetti({
-        particleCount: 130,
-        spread: 75,
-        origin: { y: 0.6 },
-        colors: ["#D4A843", "#FFE088", "#FF0062"]
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const fullWhatsApp = formData.whatsapp.startsWith("+") 
+        ? formData.whatsapp 
+        : `+593${formData.whatsapp.replace(/^0+/, "")}`;
+
+      await registerModelAction({
+        name: formData.name || "Musa VIP",
+        city: formData.city || "Machala",
+        sector: formData.sector || `${formData.city} Centro VIP`,
+        whatsapp: fullWhatsApp,
+        description: formData.description || `Acompañante de alta gama en ${formData.city}. Disponible para veladas exclusivas, cenas de gala y reservas VIP.`,
+        tags: formData.tags || ["Trato VIP", "Hotel 5★", "Masaje Relax"],
+        plan_type: currentPlan.name === "DIAMANTE" ? "Diamante" : currentPlan.name === "ORO" ? "VIP Elite" : "Anuncio Gratis",
+        ageConfirmed: true,
+        age: parseInt(formData.age, 10) || 22,
+        is_phone_verified: isPhoneVerified,
+        hourly_rate: parseInt(formData.rate, 10) || 120,
+        personal_note: "Cada encuentro es una historia que merece ser contada con elegancia."
       });
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("model_token", "MODEL_SESSION_" + Date.now());
+        localStorage.setItem("model_authenticated", "true");
+        localStorage.setItem("model_name", formData.name || "Musa VIP");
+        window.dispatchEvent(new CustomEvent("model_session_updated"));
+      }
+
+      sound.playGoldChime();
+      setIsSuccess(true);
+      if (typeof window !== "undefined") {
+        confetti({
+          particleCount: 130,
+          spread: 75,
+          origin: { y: 0.6 },
+          colors: ["#D4A843", "#FFE088", "#FF0062"]
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al registrar anuncio.";
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -740,6 +781,12 @@ export default function AdPublishingPortal() {
                 </div>
               </div>
 
+              {submitError && (
+                <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold text-center">
+                  ⚠️ {submitError}
+                </div>
+              )}
+
             </div>
 
             <div className="flex items-center justify-between pt-4">
@@ -753,10 +800,20 @@ export default function AdPublishingPortal() {
 
               <button
                 type="submit"
-                className="px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-gold via-[#FFE088] to-brand-gold text-brand-black font-black text-xs uppercase tracking-widest shadow-[0_0_35px_rgba(212,168,67,0.5)] flex items-center gap-2 hover:scale-105 transition-all cursor-pointer"
+                disabled={isSubmitting}
+                className="px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-gold via-[#FFE088] to-brand-gold text-brand-black font-black text-xs uppercase tracking-widest shadow-[0_0_35px_rgba(212,168,67,0.5)] flex items-center gap-2 hover:scale-105 transition-all cursor-pointer disabled:opacity-50"
               >
-                <Zap size={16} className="fill-brand-black" />
-                <span>Activar Mi Anuncio VIP Ahora</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin text-brand-black" />
+                    <span>Publicando en Base de Datos...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={16} className="fill-brand-black" />
+                    <span>Activar Mi Anuncio VIP Ahora</span>
+                  </>
+                )}
               </button>
             </div>
           </motion.form>

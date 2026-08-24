@@ -45,11 +45,19 @@ interface TourSchedule {
 }
 
 export default function ModelStudioDashboard() {
+  const [modelName, setModelName] = useState<string>("Valentina");
   const [availability, setAvailability] = useState<AvailabilityState>("online");
   const [isBoosted, setIsBoosted] = useState(false);
   const [hourlyRate, setHourlyRate] = useState(150);
   const [vaultRate, setVaultRate] = useState(35);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem("model_name");
+      if (stored) setModelName(stored);
+    } catch {}
+  }, []);
 
   // Touring Cities Management
   const [tours, setTours] = useState<TourSchedule[]>([
@@ -152,7 +160,7 @@ export default function ModelStudioDashboard() {
           <div className="relative">
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#D4A843] via-[#FFE088] to-[#AA7C11] p-0.5 shadow-[0_0_30px_rgba(212,168,67,0.4)]">
               <div className="w-full h-full rounded-[22px] bg-[#08080C] flex items-center justify-center text-3xl font-serif font-bold text-brand-gold">
-                V
+                {modelName ? modelName[0].toUpperCase() : "M"}
               </div>
             </div>
             {/* Live Indicator */}
@@ -165,7 +173,7 @@ export default function ModelStudioDashboard() {
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
-              <h1 className="text-3xl font-serif font-bold text-white italic">Valentina</h1>
+              <h1 className="text-3xl font-serif font-bold text-white italic">{modelName}</h1>
               <span className="text-[9px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-brand-gold/20 text-brand-gold border border-brand-gold/40">
                 VIP Diamante 4K
               </span>

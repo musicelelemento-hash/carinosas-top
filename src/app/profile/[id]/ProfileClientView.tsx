@@ -44,11 +44,20 @@ export default function ProfileClientView({ id, initialModel }: ProfileClientVie
     async function fetchModel() {
       try {
         setLoading(true);
-        const { data, error: sbError } = await supabase
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+        let query = supabase
           .from("models")
-          .select("id, name, age, city, sector, description, images, tags, plan_type, whatsapp, is_verified_4k, is_online")
-          .eq("id", id)
-          .single();
+          .select("id, name, age, city, sector, description, images, tags, plan_type, whatsapp, is_verified_4k, is_online");
+
+        if (isUuid) {
+          query = query.eq("id", id);
+        } else {
+          const cleanSlug = id.replace(/-vip$/i, "").replace(/-/g, " ").trim();
+          query = query.ilike("name", `%${cleanSlug}%`);
+        }
+
+        const { data, error: sbError } = await query.limit(1).maybeSingle();
 
         if (data && !sbError) {
           setModel({
@@ -66,6 +75,34 @@ export default function ProfileClientView({ id, initialModel }: ProfileClientVie
             is_online: data.is_online,
             city: data.city,
             sector: data.sector || undefined,
+          });
+          return;
+        }
+
+        // Secondary fallback
+        const { data: fallbackData } = await supabase
+          .from("models")
+          .select("id, name, age, city, sector, description, images, tags, plan_type, whatsapp, is_verified_4k, is_online")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (fallbackData) {
+          setModel({
+            id: fallbackData.id,
+            name: fallbackData.name,
+            age: fallbackData.age,
+            location: fallbackData.sector ? `${fallbackData.sector}, ${fallbackData.city}` : fallbackData.city,
+            description: fallbackData.description || "",
+            images: fallbackData.images?.length ? fallbackData.images : ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
+            tags: fallbackData.tags || [],
+            plan_type: fallbackData.plan_type,
+            whatsapp: fallbackData.whatsapp,
+            isVerified: fallbackData.is_verified_4k,
+            is_verified_4k: fallbackData.is_verified_4k,
+            is_online: fallbackData.is_online,
+            city: fallbackData.city,
+            sector: fallbackData.sector || undefined,
           });
           return;
         }

@@ -21,11 +21,27 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { sound } from "@/lib/soundEngine";
+
+interface AssistantModel {
+  id: string;
+  name: string;
+  city: string;
+  sector?: string;
+  plan_type?: string;
+  age?: number;
+  imageUrl: string;
+  is_verified_4k?: boolean;
+  rate?: string;
+  whatsapp?: string;
+}
+
 interface Message {
   id: string;
   sender: "concierge" | "user";
   text: string;
   timestamp: string;
+  models?: AssistantModel[];
   modelCard?: {
     name: string;
     city: string;
@@ -42,7 +58,7 @@ export default function ConciergeChatView() {
     {
       id: "m-1",
       sender: "concierge",
-      text: "Buenas noches, distinguido caballero. Soy su Concierge Privado de Cariñosas.top. ¿En qué ciudad de Ecuador requiere coordinar su acompañamiento de alto nivel hoy (Machala, Guayaquil, Quito, Cuenca)?",
+      text: "Buenas noches, distinguido caballero. Soy su Concierge Privado de Cariñosas.top. ¿En qué ciudad de Ecuador o qué tipo de acompañamiento exclusivo desea coordinar hoy?",
       timestamp: "Ahora"
     }
   ]);
@@ -59,9 +75,9 @@ export default function ConciergeChatView() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = textToSend || inputVal;
-    if (!text.trim()) return;
+    if (!text.trim() || isTyping) return;
 
     const userMsg: Message = {
       id: `usr-${Date.now()}`,
@@ -73,51 +89,40 @@ export default function ConciergeChatView() {
     setMessages(prev => [...prev, userMsg]);
     if (!textToSend) setInputVal("");
     setIsTyping(true);
+    sound.playSubtleClick();
 
-    // Simulated Concierge AI Response
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text.trim() }),
+      });
+
+      const data = await res.json();
+      sound.playGoldChime();
       setIsTyping(false);
-      let responseText = "Entendido con absoluta discreción. Permítame verificar la disponibilidad inmediata de nuestras modelos VIP.";
-      let card: Message["modelCard"] | undefined = undefined;
 
-      const lower = text.toLowerCase();
-      if (lower.includes("machala") || lower.includes("valeria") || lower.includes("oro")) {
-        responseText = "Excelente elección. Hemos verificado la agenda de Valeria en Machala. Se encuentra 100% disponible para veladas en suites de lujo o cenas ejecutivas.";
-        card = {
-          name: "Valeria VIP",
-          city: "Machala",
-          sector: "Puerto Bolívar / Centro",
-          rate: "$120/h",
-          imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800",
-          isVerified: true,
-          whatsapp: "593983344556"
-        };
-      } else if (lower.includes("guayaquil") || lower.includes("samborondon")) {
-        responseText = "Para Guayaquil y Samborondón tenemos a Alessandra Gold confirmada en suite ejecutiva.";
-        card = {
-          name: "Alessandra Gold",
-          city: "Guayaquil",
-          sector: "Samborondón VIP",
-          rate: "$150/h",
-          imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800",
-          isVerified: true,
-          whatsapp: "593981122334"
-        };
-      } else {
-        responseText = "He filtrado las acompañantes 4K activas para usted. ¿Prefiere servicio express en su hotel o recepción en suite privada?";
-      }
+      const botMsg: Message = {
+        id: `bot-${Date.now()}`,
+        sender: "concierge",
+        text: data.reply || "He procesado su solicitud con máxima discreción.",
+        timestamp: "Ahora",
+        models: data.models || []
+      };
 
+      setMessages(prev => [...prev, botMsg]);
+    } catch {
+      setIsTyping(false);
       setMessages(prev => [
         ...prev,
         {
           id: `bot-${Date.now()}`,
           sender: "concierge",
-          text: responseText,
-          timestamp: "Ahora",
-          modelCard: card
+          text: "He tenido una pequeña demora en la conexión satelital segura. Cuénteme su preferencia y con gusto le asistiré de inmediato.",
+          timestamp: "Ahora"
         }
       ]);
-    }, 1200);
+    }
   };
 
   return (
@@ -210,7 +215,59 @@ export default function ConciergeChatView() {
               >
                 <p>{msg.text}</p>
 
-                {/* Model Recommendation Card inside Chat */}
+                {/* Dynamic Models Recommendation Cards */}
+                {msg.models && msg.models.length > 0 && (
+                  <div className="space-y-2 mt-2 pt-2 border-t border-white/10">
+                    <span className="text-[9px] uppercase tracking-wider font-bold text-brand-gold block">
+                      Modelos recomendadas en vivo:
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {msg.models.map((model) => (
+                        <div key={model.id} className="rounded-2xl overflow-hidden glass-dark border border-brand-gold/30 p-2.5 text-white space-y-2 bg-black/60 hover:border-brand-gold transition-colors">
+                          <div className="flex items-center gap-2.5">
+                            <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-brand-gold/40">
+                              <Image
+                                src={model.imageUrl}
+                                alt={model.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="space-y-0.5 flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <span className="font-serif font-bold text-xs text-white truncate">{model.name}</span>
+                                {model.is_verified_4k && (
+                                  <span className="text-[8px] bg-brand-gold text-brand-black px-1.5 py-0.2 rounded font-black">4K</span>
+                                )}
+                              </div>
+                              <span className="text-[9px] text-[#A1A1AA] block truncate">{model.sector || model.city}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-1.5 pt-1">
+                            <Link
+                              href={`/profile/${model.id}`}
+                              className="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[9px] font-bold text-center transition-colors"
+                            >
+                              Ver Perfil
+                            </Link>
+                            <a
+                              href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi recomendada por el Concierge VIP de Cariñosas.top y deseo coordinar una reserva.`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 py-1.5 rounded-lg bg-brand-gold hover:bg-white text-brand-black text-[9px] font-bold text-center flex items-center justify-center gap-1 transition-colors"
+                            >
+                              <MessageCircle size={10} fill="currentColor" />
+                              <span>WhatsApp</span>
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Legacy single modelCard fallback */}
                 {msg.modelCard && (
                   <div className="rounded-2xl overflow-hidden glass-dark border border-brand-gold/40 p-3 text-white space-y-3 mt-2 bg-black/60">
                     <div className="flex items-center gap-3">

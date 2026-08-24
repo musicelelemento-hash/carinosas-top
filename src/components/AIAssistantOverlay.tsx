@@ -24,13 +24,14 @@ interface Message {
 }
 
 const PREFERENCE_CHIPS = [
+  { label: "📍 Machala", query: "Machala" },
   { label: "📍 Quito", query: "Quito" },
   { label: "📍 Guayaquil", query: "Guayaquil" },
   { label: "📍 Cuenca", query: "Cuenca" },
   { label: "📍 Manta", query: "Manta" },
+  { label: "📍 Santo Domingo", query: "Santo Domingo" },
+  { label: "📍 Ambato", query: "Ambato" },
   { label: "📍 Medellín", query: "Medellín" },
-  { label: "📍 Lima", query: "Lima" },
-  { label: "📍 Miami", query: "Miami" },
   { label: "🥂 Cena VIP", query: "Cena VIP" },
   { label: "💆‍♀️ Masaje Relax", query: "Masaje relax" },
   { label: "🏨 Hotel 5★", query: "Hotel 5 estrellas" },

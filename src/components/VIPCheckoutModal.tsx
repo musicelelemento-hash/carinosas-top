@@ -117,6 +117,10 @@ export default function VIPCheckoutModal({
 
     if (res.success && res.passCode) {
       setPassCreated(res.passCode);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("vip_pass_code", res.passCode);
+        window.dispatchEvent(new CustomEvent("vip_pass_updated"));
+      }
       try {
         soundFX?.playGoldChime();
         confetti({

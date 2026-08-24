@@ -26,6 +26,10 @@ interface HomePageModel {
   images?: string[];
   isBoosted?: boolean;
   is_verified_4k?: boolean;
+  is_online?: boolean;
+  country_code?: string;
+  created_at?: string;
+  voice_greeting_url?: string;
   description?: string | null;
   whatsapp?: string;
   sector?: string | null;
@@ -77,10 +81,10 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
           const city2 = sampleCities[1] || (currentCountry.name === "Ecuador" ? "Guayaquil" : "Bogotá");
           const city3 = sampleCities[2] || (currentCountry.name === "Ecuador" ? "Cuenca" : "Cartagena");
 
-          const extraModels = [
-            { id: Math.random().toString(), name: 'Elena', age: 22, location: city1, imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800', plan_type: 'Premium' },
-            { id: Math.random().toString(), name: 'Sofía', age: 23, location: city2, imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true, plan_type: 'VIP Elite' },
-            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: city3, imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800', plan_type: 'Diamante' },
+          const extraModels: HomePageModel[] = [
+            { id: Math.random().toString(), name: 'Elena', age: 22, location: city1, imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800', plan_type: 'Premium', is_online: true, is_verified_4k: true },
+            { id: Math.random().toString(), name: 'Sofía', age: 23, location: city2, imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true, plan_type: 'VIP Elite', is_online: true, is_verified_4k: true },
+            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: city3, imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800', plan_type: 'Diamante', is_online: false, is_verified_4k: true },
           ];
           setDisplayModels(prev => [...prev, ...extraModels]);
           setIsLoading(false);
@@ -164,9 +168,31 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
 
   const handleDesktopTab = (tab: 'cerca' | 'online' | 'nuevas' | 'top') => {
     setDesktopTab(tab);
-    if (tab === 'cerca') handleSelectTag('');
-    else if (tab === 'top') handleSelectTag('vip');
-    // 'online' y 'nuevas' son puramente visuales: no hay campo de "en línea"/"fecha de alta" en el modelo de datos real.
+    if (tab === 'cerca') {
+      if (location?.cantonName) {
+        const cantonClean = location.cantonName.split(" ")[0].toLowerCase();
+        const matched = initialModels.filter(m =>
+          m.location.toLowerCase().includes(cantonClean) ||
+          (m.sector && m.sector.toLowerCase().includes(cantonClean))
+        );
+        setDisplayModels(matched.length > 0 ? matched : initialModels);
+      } else {
+        setDisplayModels(initialModels);
+      }
+    } else if (tab === 'online') {
+      const onlineModels = initialModels.filter(m => m.is_online);
+      setDisplayModels(onlineModels.length > 0 ? onlineModels : initialModels);
+    } else if (tab === 'nuevas') {
+      const sortedNewest = [...initialModels].sort((a, b) => {
+        if (a.created_at && b.created_at) {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        return b.id.localeCompare(a.id);
+      });
+      setDisplayModels(sortedNewest);
+    } else if (tab === 'top') {
+      handleSelectTag('vip');
+    }
   };
 
   return (

@@ -123,9 +123,12 @@ export default function Footer() {
               {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
             </button>
 
-            <Link href="/registro" className="hover:text-brand-gold transition-colors">Registro de modelos</Link>
-            <Link href="/admin" className="hover:text-brand-gold transition-colors">Administración</Link>
-            <a href="https://wa.me/593987654321" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte</a>
+            <Link href="/publicar-anuncio" className="hover:text-brand-gold transition-colors">Publicar Anuncio</Link>
+            <Link href="/radar" className="hover:text-brand-gold transition-colors">Geo-Radar</Link>
+            <Link href="/boveda-secreta" className="hover:text-brand-gold transition-colors">Bóveda 4K</Link>
+            <Link href="/registro" className="hover:text-brand-gold transition-colors">Registro Modelo</Link>
+            <Link href="/admin" className="hover:text-brand-gold transition-colors">Admin</Link>
+            <a href="https://wa.me/593987654321" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte Concierge</a>
           </div>
         </div>
 

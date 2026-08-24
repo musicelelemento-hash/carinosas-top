@@ -12,6 +12,10 @@ interface DbModel {
   is_boosted: boolean;
   plan_type: string;
   is_verified_4k: boolean;
+  is_online?: boolean;
+  country_code?: string;
+  created_at?: string;
+  voice_greeting_url?: string;
   description: string | null;
   whatsapp: string;
   tags: string[] | null;
@@ -31,6 +35,10 @@ export default async function Home() {
     imageUrl: string;
     isBoosted: boolean;
     is_verified_4k: boolean;
+    is_online: boolean;
+    country_code?: string;
+    created_at?: string;
+    voice_greeting_url?: string;
     description: string | null;
     whatsapp: string;
     sector: string | null;
@@ -46,16 +54,16 @@ export default async function Home() {
 
     const primaryQuery = await supabase
       .from('models')
-      .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, description, whatsapp, tags, personal_note')
+      .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, is_online, country_code, created_at, voice_greeting_url, description, whatsapp, tags, personal_note')
       .order('created_at', { ascending: false });
 
     if (!primaryQuery.error && primaryQuery.data) {
       rawModels = primaryQuery.data as unknown as Record<string, unknown>[];
     } else {
-      // Fallback if personal_note column is not yet migrated in Supabase
+      // Fallback if some columns are not yet present in Supabase
       const fallbackQuery = await supabase
         .from('models')
-        .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, description, whatsapp, tags')
+        .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, is_online, description, whatsapp, tags')
         .order('created_at', { ascending: false });
       
       if (fallbackQuery.data) {
@@ -75,6 +83,10 @@ export default async function Home() {
         imageUrl: m.images && m.images[0] ? m.images[0] : fallbackImage,
         isBoosted: m.is_boosted || m.plan_type === 'Diamante' || m.plan_type === 'VIP Elite',
         is_verified_4k: m.is_verified_4k,
+        is_online: Boolean(m.is_online),
+        country_code: m.country_code || 'EC',
+        created_at: m.created_at,
+        voice_greeting_url: m.voice_greeting_url,
         description: m.description,
         whatsapp: m.whatsapp,
         sector: m.sector,
