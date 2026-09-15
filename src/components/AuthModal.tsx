@@ -132,7 +132,6 @@ export default function AuthModal({
         setStep("verify_email");
         setResendTimer(30);
         setCanResend(false);
-        setOtpCode("849201"); // Pre-filled demo OTP for smooth friction-free testing
         sound.playGoldChime();
       } else {
         // Login Flow
@@ -451,12 +450,12 @@ export default function AuthModal({
                   maxLength={6}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                  placeholder="849201"
+                  placeholder="000000"
                   className="w-48 text-center text-2xl font-mono font-bold tracking-[0.3em] px-4 py-3.5 rounded-2xl bg-black/60 border-2 border-brand-gold text-brand-gold shadow-[0_0_25px_rgba(212,168,67,0.3)] outline-none"
                 />
               </div>
               <span className="text-[9px] text-white/40 uppercase font-mono block">
-                Código demo de prueba: <strong>849201</strong>
+                Ingresa el código de 6 dígitos enviado a tu correo
               </span>
             </div>
 

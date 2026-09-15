@@ -12,8 +12,7 @@ import {
   Loader2, 
   AlertTriangle,
   Send,
-  Clock,
-  Zap
+  Clock
 } from "lucide-react";
 import { sendPhoneOtpAction, verifyPhoneOtpAction } from "@/app/actions/authPhone";
 
@@ -42,7 +41,6 @@ export default function PhoneVerificationModal({
   const [cooldown, setCooldown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
-  const [debugOtp, setDebugOtp] = useState<string | null>(null);
   const [whatsAppLink, setWhatsAppLink] = useState<string | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -79,7 +77,6 @@ export default function PhoneVerificationModal({
 
       if (res.success) {
         setHasSentCode(true);
-        if (res.debugOtp) setDebugOtp(res.debugOtp);
         if (res.whatsAppLink) setWhatsAppLink(res.whatsAppLink);
         setStatusMsg({ text: res.message, isError: false });
         startCooldown();
@@ -91,11 +88,6 @@ export default function PhoneVerificationModal({
       setIsLoading(false);
       setStatusMsg({ text: "Error de conexión al enviar el código.", isError: true });
     }
-  };
-
-  const handleAutoFillPin = (code: string) => {
-    const digits = code.slice(0, 6).split("");
-    setPin(digits);
   };
 
   const handlePinChange = (index: number, value: string) => {
@@ -298,30 +290,6 @@ export default function PhoneVerificationModal({
                     Ingresa el código de 6 dígitos enviado por <strong>{channel === "whatsapp_otp" ? "WhatsApp" : "SMS"}</strong> a {phoneNumber}:
                   </p>
                 </div>
-
-                {/* Instant Verification Assistant Banner */}
-                {debugOtp && (
-                  <div className="p-4 rounded-2xl bg-brand-gold/10 border border-brand-gold/40 flex items-center justify-between shadow-[0_0_25px_rgba(212,168,67,0.15)]">
-                    <div>
-                      <span className="text-[9px] text-brand-gold font-bold uppercase tracking-wider block">
-                        Código de Seguridad Generado:
-                      </span>
-                      <span className="text-xl font-mono font-black text-white tracking-[0.3em]">
-                        {debugOtp}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleAutoFillPin(debugOtp)}
-                        className="px-3.5 py-2 rounded-xl bg-brand-gold hover:bg-white text-brand-black font-black text-[10px] uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center gap-1.5"
-                      >
-                        <Zap size={13} className="fill-current" />
-                        <span>Autocompletar</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
 
                 {/* Direct WhatsApp Confirmation Link */}
                 {whatsAppLink && (

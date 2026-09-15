@@ -1,17 +1,17 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Cariñosas.top Smoke & Core Feature Tests', () => {
-  test('Home page renders hero, classifieds feed and VIP lounge', async ({ page }) => {
+  test('Home page renders the feed, nav and panic button', async ({ page }) => {
     await page.goto('/');
-    
+
     // Check main title
     await expect(page).toHaveTitle(/Cariñosas\.top/i);
 
-    // Verify key sections are present
-    const feed = page.locator('#clasificados-express');
-    await expect(feed).toBeVisible();
+    // Key sections present: feed collection + panic button
+    const collection = page.locator('#collection');
+    await expect(collection).toBeVisible();
 
-    // Verify Panic Button is present and accessible
+    // Panic Button present and accessible
     const panicBtn = page.getByRole('button', { name: /salida rápida/i });
     await expect(panicBtn).toBeVisible();
   });
@@ -26,17 +26,6 @@ test.describe('Cariñosas.top Smoke & Core Feature Tests', () => {
     const navigationPromise = page.waitForURL(/google\.com/);
     await panicBtn.click();
     await navigationPromise;
-  });
-
-  test('Multi-country switch updates classifieds feed', async ({ page }) => {
-    await page.goto('/');
-
-    const internationalBtn = page.getByRole('button', { name: /internacional/i });
-    if (await internationalBtn.isVisible()) {
-      await internationalBtn.click();
-      // Should show international ads
-      await expect(page.locator('#clasificados-express')).toContainText(/Internacional/i);
-    }
   });
 
   test('Turnstile verification API responds correctly', async ({ request }) => {

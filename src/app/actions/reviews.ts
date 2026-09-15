@@ -69,7 +69,10 @@ export async function submitVIPReviewAction(reviewData: {
     let isVerified = false;
     let assignedBadge = reviewData.tier_badge || "Socio Verificado";
 
-    // If a pass code was supplied, check its validity in database
+    // P0 (confianza real): una reseña SOLO se marca como "reserva verificada"
+    // cuando se confirma un pase VIP válido y activo. Antes, cualquier reseña
+    // sin pass_code se marcaba is_verified_booking=true sin verificar nada,
+    // lo que fabricaba prueba social falsa (el diferenciador del producto).
     if (reviewData.pass_code?.trim()) {
       const { data: pass } = await supabaseAdmin
         .from("vip_passes")
@@ -81,10 +84,8 @@ export async function submitVIPReviewAction(reviewData: {
         isVerified = true;
         assignedBadge = `${pass.tier_level || "Diamante"} VIP`;
       }
-    } else {
-      // Default verified flag if submitted through authenticated flow
-      isVerified = true;
     }
+    // Sin pass_code válido → reseña pública pero NO marcada como "reserva verificada".
 
     // Sanitize user inputs against XSS and excessive payloads
     const cleanComment = reviewData.comment.replace(/<[^>]*>?/gm, "").trim().slice(0, 1000);

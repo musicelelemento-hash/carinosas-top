@@ -9,6 +9,10 @@ import AdminGentlemenPasses from "@/components/AdminGentlemenPasses";
 import AdminDashboardHUD from "@/components/AdminDashboardHUD";
 import AdminStoriesManager from "@/components/AdminStoriesManager";
 import AdminSecurityLogs from "@/components/AdminSecurityLogs";
+import AdminVerificationQueue from "@/components/AdminVerificationQueue";
+import AdminRecruitmentTracker from "@/components/AdminRecruitmentTracker";
+import AdminMetricsDashboard from "@/components/AdminMetricsDashboard";
+import AdminControlRoom from "@/components/AdminControlRoom";
 import { 
   LogOut, 
   LayoutDashboard, 
@@ -18,7 +22,10 @@ import {
   CreditCard, 
   Gift, 
   Film, 
-  ShieldCheck 
+  ShieldCheck,
+  UserPlus,
+  BarChart3,
+  Zap
 } from "lucide-react";
 import { checkAdminSessionAction, logoutAdminAction } from "@/app/actions/admin";
 import { sound } from "@/lib/soundEngine";
@@ -26,7 +33,7 @@ import { sound } from "@/lib/soundEngine";
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'upload' | 'stories' | 'passes' | 'payments' | 'security'>('catalog');
+  const [activeTab, setActiveTab] = useState<'control' | 'catalog' | 'upload' | 'stories' | 'passes' | 'payments' | 'security' | 'verification' | 'recruitment' | 'metrics'>('control');
 
   useEffect(() => {
     async function checkSession() {
@@ -56,13 +63,17 @@ export default function AdminPage() {
     return <AdminLogin onSuccess={() => setIsAdmin(true)} />;
   }
 
-  const TABS: { id: 'catalog' | 'upload' | 'stories' | 'passes' | 'payments' | 'security'; label: string; icon: React.ReactNode }[] = [
+  const TABS: { id: 'control' | 'catalog' | 'upload' | 'stories' | 'passes' | 'payments' | 'security' | 'verification' | 'recruitment' | 'metrics'; label: string; icon: React.ReactNode }[] = [
+    { id: 'control', label: 'Control Total', icon: <Zap size={15} /> },
     { id: 'catalog', label: 'Flota de Modelos', icon: <Users size={15} /> },
+    { id: 'recruitment', label: 'Reclutamiento', icon: <UserPlus size={15} /> },
     { id: 'upload', label: 'Publicación Express', icon: <PlusCircle size={15} /> },
+    { id: 'verification', label: 'Verificación 4K', icon: <ShieldCheck size={15} /> },
     { id: 'stories', label: 'Historias 4K & Reels', icon: <Film size={15} /> },
     { id: 'passes', label: 'Pases VIP Caballeros', icon: <Gift size={15} /> },
     { id: 'payments', label: 'Métodos de Pago & Billeteras', icon: <CreditCard size={15} /> },
     { id: 'security', label: 'Auditoría & Seguridad', icon: <ShieldCheck size={15} /> },
+    { id: 'metrics', label: 'Métricas', icon: <BarChart3 size={15} /> },
   ];
 
   return (
@@ -142,6 +153,11 @@ export default function AdminPage() {
 
         {/* Active Tab View */}
         <div className="pt-2">
+          {activeTab === 'control' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminControlRoom onSelectTab={(t) => setActiveTab(t as any)} />
+            </div>
+          )}
           {activeTab === 'upload' && (
             <div className="animate-in slide-in-from-bottom-5 duration-500">
               <AdminQuickUpload />
@@ -152,9 +168,19 @@ export default function AdminPage() {
               <AdminModelList />
             </div>
           )}
+          {activeTab === 'recruitment' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminRecruitmentTracker onGotoUpload={() => setActiveTab('upload')} />
+            </div>
+          )}
           {activeTab === 'stories' && (
             <div className="animate-in slide-in-from-bottom-5 duration-500">
               <AdminStoriesManager />
+            </div>
+          )}
+          {activeTab === 'verification' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminVerificationQueue />
             </div>
           )}
           {activeTab === 'passes' && (
@@ -170,6 +196,11 @@ export default function AdminPage() {
           {activeTab === 'security' && (
             <div className="animate-in slide-in-from-bottom-5 duration-500">
               <AdminSecurityLogs />
+            </div>
+          )}
+          {activeTab === 'metrics' && (
+            <div className="animate-in slide-in-from-bottom-5 duration-500">
+              <AdminMetricsDashboard />
             </div>
           )}
         </div>

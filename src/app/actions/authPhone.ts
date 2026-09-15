@@ -35,7 +35,7 @@ function isPhoneLocked(cleanPhone: string): { isLocked: boolean; remainingMinute
 export async function sendPhoneOtpAction(
   phoneNumber: string, 
   channel: 'whatsapp_otp' | 'sms_otp'
-): Promise<{ success: boolean; message: string; isLocked?: boolean; debugOtp?: string; whatsAppLink?: string }> {
+): Promise<{ success: boolean; message: string; isLocked?: boolean; whatsAppLink?: string }> {
   try {
     const cleanPhone = phoneNumber.replace(/[^0-9+]/g, "");
     if (cleanPhone.length < 8) {
@@ -87,15 +87,19 @@ export async function sendPhoneOtpAction(
     });
 
     const channelName = channel === 'whatsapp_otp' ? 'WhatsApp' : 'SMS';
-    console.log(`[OTP Engine] Code ${generatedOtp} sent to ${cleanPhone} via ${channelName}`);
+    console.log(`[OTP Engine] Code generated for ${cleanPhone} via ${channelName}`);
 
-    const whatsAppMessage = encodeURIComponent(`Hola Cariñosas.top, mi código de verificación de seguridad es: ${generatedOtp}`);
+    // TODO (P1): integración real de entrega del código (WhatsApp Business API / Twilio).
+    // P0 anti-fachada: el código ya NO se devuelve al cliente (antes viajaba en
+    // `debugOtp` y se mostraba en pantalla con autocompletar, simulando una
+    // verificación que no existía).
+
+    const whatsAppMessage = encodeURIComponent(`Hola Cariñosas.top, mi código de verificación de seguridad es: [OTP]`);
     const whatsAppLink = `https://wa.me/593987654321?text=${whatsAppMessage}`;
 
     return {
       success: true,
       message: `Código de seguridad generado por ${channelName} para ${cleanPhone}`,
-      debugOtp: generatedOtp,
       whatsAppLink
     };
   } catch (err) {
@@ -127,10 +131,8 @@ export async function verifyPhoneOtpAction(
     const record = otpCache.get(cleanPhone);
 
     if (!record) {
-      // Demo test codes
-      if (enteredOtp === "123456" || enteredOtp === "849201") {
-        return { success: true, message: "¡Teléfono verificado con éxito!" };
-      }
+      // P0 anti-fachada: se eliminaron los códigos demo ("123456"/"849201")
+      // que permitían verificar cualquier número sin código real.
       return { success: false, message: "Código no encontrado o expirado. Solicita uno nuevo." };
     }
 

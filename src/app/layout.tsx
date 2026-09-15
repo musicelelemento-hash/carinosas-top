@@ -104,6 +104,13 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Cariñosas VIP",
   },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   robots: {
     index: true,
     follow: true,
@@ -156,13 +163,13 @@ export default function RootLayout({
         "@id": "https://carinosas.top/#directory",
         "name": "Directorio de Ciudades Élite",
         "itemListElement": [
-          { "@type": "SiteNavigationElement", "position": 1, "name": "Quito VIP", "url": "https://carinosas.top/?city=Quito" },
-          { "@type": "SiteNavigationElement", "position": 2, "name": "Guayaquil VIP", "url": "https://carinosas.top/?city=Guayaquil" },
-          { "@type": "SiteNavigationElement", "position": 3, "name": "Cuenca VIP", "url": "https://carinosas.top/?city=Cuenca" },
-          { "@type": "SiteNavigationElement", "position": 4, "name": "Samborondón VIP", "url": "https://carinosas.top/?city=Samborondón" },
-          { "@type": "SiteNavigationElement", "position": 5, "name": "Medellín VIP", "url": "https://carinosas.top/?country=colombia&city=Medellín" },
-          { "@type": "SiteNavigationElement", "position": 6, "name": "Lima VIP", "url": "https://carinosas.top/?country=peru&city=Lima" },
-          { "@type": "SiteNavigationElement", "position": 7, "name": "Ciudad de Panamá VIP", "url": "https://carinosas.top/?country=panama&city=Panamá" }
+          { "@type": "SiteNavigationElement", "position": 1, "name": "Quito VIP", "url": "https://carinosas.top/quito" },
+          { "@type": "SiteNavigationElement", "position": 2, "name": "Guayaquil VIP", "url": "https://carinosas.top/guayaquil" },
+          { "@type": "SiteNavigationElement", "position": 3, "name": "Cuenca VIP", "url": "https://carinosas.top/cuenca" },
+          { "@type": "SiteNavigationElement", "position": 4, "name": "Samborondón VIP", "url": "https://carinosas.top/samborondon" },
+          { "@type": "SiteNavigationElement", "position": 5, "name": "Medellín VIP", "url": "https://carinosas.top/medellin" },
+          { "@type": "SiteNavigationElement", "position": 6, "name": "Lima VIP", "url": "https://carinosas.top/lima" },
+          { "@type": "SiteNavigationElement", "position": 7, "name": "Ciudad de Panamá VIP", "url": "https://carinosas.top/panama" }
         ]
       }
     ]

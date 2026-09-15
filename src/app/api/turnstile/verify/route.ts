@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
-const TURNSTILE_SECRET_KEY = 
-  process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA"; // Cloudflare test secret key
+// P0 anti-fachada: la clave secreta de Turnstile NO tiene fallback a la "test key"
+// de Cloudflare en producción. Esa test key daba por válida cualquier verificación,
+// dejando la "protección antibot" decorativa. Ahora fallamos en frío.
+const TURNSTILE_SECRET_KEY = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+const secretKeyMissing = !TURNSTILE_SECRET_KEY;
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +14,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: "El token de Turnstile es requerido." },
         { status: 400 }
+      );
+    }
+
+    if (secretKeyMissing) {
+      return NextResponse.json(
+        { success: false, error: "La verificación antibot no está configurada." },
+        { status: 500 }
       );
     }
 

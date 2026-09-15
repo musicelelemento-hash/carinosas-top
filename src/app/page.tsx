@@ -1,6 +1,8 @@
 import React from "react";
 import HomePageClient from "@/components/HomePageClient";
+import ReferralTracker from "@/components/ReferralTracker";
 import { supabase } from "@/lib/supabase";
+import { rankModels } from "@/lib/ranking";
 
 interface DbModel {
   id: string;
@@ -25,12 +27,13 @@ interface DbModel {
 // Opt out of client caching for dynamic catalogs so updates are shown immediately
 export const revalidate = 0;
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams?: Promise<{ city?: string }> }) {
   interface DisplayModel {
     id: string;
     name: string;
     age: number;
     location: string;
+    city: string;
     images: string[];
     imageUrl: string;
     isBoosted: boolean;
@@ -79,6 +82,7 @@ export default async function Home() {
         name: m.name,
         age: m.age,
         location: m.sector ? `${m.sector}, ${m.city}` : m.city,
+        city: m.city,
         images: m.images && m.images.length > 0 ? m.images : [fallbackImage],
         imageUrl: m.images && m.images[0] ? m.images[0] : fallbackImage,
         isBoosted: m.is_boosted || m.plan_type === 'Diamante' || m.plan_type === 'VIP Elite',
@@ -101,29 +105,17 @@ export default async function Home() {
     console.error("Server-side Supabase model fetch error:", err);
   }
 
-  // Priority and sorting logic
-  const PLAN_PRIORITY: Record<string, number> = {
-    'VIP Elite': 0,
-    'Diamante': 0,
-    'Oro': 1,
-    'Premium': 2,
-    'Plata': 2,
-    'Anuncio Gratis': 3,
-    'Gratis': 3,
-    'Básico': 3
-  };
-  
-  allModels.sort((a, b) => {
-    const pA = PLAN_PRIORITY[a.plan_type as string] ?? 99;
-    const pB = PLAN_PRIORITY[b.plan_type as string] ?? 99;
-    
-    if (pA !== pB) return pA - pB;
-    
-    const bA = (a.isBoosted || a.plan_type === 'Diamante' || a.plan_type === 'VIP Elite') ? 0 : 1;
-    const bB = (b.isBoosted || b.plan_type === 'Diamante' || b.plan_type === 'VIP Elite') ? 0 : 1;
-    
-    return bA - bB;
-  });
+  // Recomendación inteligente del feed (Hook loop / recompensa variable).
+  // Se priorizan verificadas 4K + en línea + destacadas, con coincidencia de
+  // ciudad del usuario y una mezcla determinista para que el feed no sea
+  // aburrido (patrón TikTok). No fabrica datos: reordena los reales.
+  const cityParam = (await searchParams)?.city;
+  const ranked = rankModels(allModels, cityParam);
 
-  return <HomePageClient initialModels={allModels} />;
+  return (
+    <>
+      <ReferralTracker />
+      <HomePageClient initialModels={ranked} />
+    </>
+  );
 }

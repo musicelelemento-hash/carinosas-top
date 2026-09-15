@@ -22,6 +22,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 import { sound } from "@/lib/soundEngine";
+import { trackEvent } from "@/lib/track";
 
 interface AssistantModel {
   id: string;
@@ -78,6 +79,14 @@ export default function ConciergeChatView() {
   const handleSend = async (textToSend?: string) => {
     const text = textToSend || inputVal;
     if (!text.trim() || isTyping) return;
+
+    // Demanda: primer mensaje real del usuario al concierge (una vez por sesión).
+    try {
+      if (!sessionStorage.getItem("concierge_started_seen")) {
+        sessionStorage.setItem("concierge_started_seen", "1");
+        trackEvent("concierge_chat_started", { city: "via_concierge" });
+      }
+    } catch {}
 
     const userMsg: Message = {
       id: `usr-${Date.now()}`,

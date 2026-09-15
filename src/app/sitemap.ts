@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import { COUNTRIES } from '@/lib/countries';
+import { slugify, cityBaseName } from '@/lib/slug';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://carinosas.top';
@@ -47,16 +48,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // 2. City & Province International Landing Pages for Local SEO
-  const cityRoutes: MetadataRoute.Sitemap = COUNTRIES.flatMap((country) =>
-    country.provinces.flatMap((province) =>
-      province.cantons.map((canton) => ({
-        url: `${baseUrl}/?country=${country.id}&city=${encodeURIComponent(canton.name)}`,
-        lastModified,
-        changeFrequency: 'daily' as const,
-        priority: canton.isPopular ? 0.9 : 0.8,
-      }))
-    )
-  );
+  // P0 SEO: URLs limpias (/quito, /machala) en lugar de ?country=X&city=Y
+  // (los query params generaban contenido duplicado y no eran páginas SEO reales).
+  const seenCitySlugs = new Set<string>();
+  const cityRoutes: MetadataRoute.Sitemap = [];
+  for (const country of COUNTRIES) {
+    if (!country.available) continue;
+    for (const province of country.provinces) {
+      for (const canton of province.cantons) {
+        const slug = slugify(cityBaseName(canton.name));
+        if (!slug || seenCitySlugs.has(slug)) continue;
+        seenCitySlugs.add(slug);
+        cityRoutes.push({
+          url: `${baseUrl}/${slug}`,
+          lastModified,
+          changeFrequency: 'daily',
+          priority: canton.isPopular ? 0.9 : 0.7,
+        });
+      }
+    }
+  }
 
   // 3. Dynamic Model Profiles
   let modelRoutes: MetadataRoute.Sitemap = [];

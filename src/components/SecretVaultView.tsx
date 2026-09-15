@@ -180,7 +180,7 @@ export default function SecretVaultView() {
             ) : (
               <>
                 <div className="flex-1 px-4 py-3.5 rounded-2xl border border-brand-gold/30 bg-brand-gold/[0.06]">
-                  <span className="text-[14px] font-bold text-brand-gold block">Pase de socio · $80/mes</span>
+                  <span className="text-[14px] font-bold text-brand-gold block">Pase de socio · $19/mes</span>
                   <span className="text-[13px] text-white/60">Bóveda completa, historias privadas y agenda anticipada.</span>
                 </div>
                 <button
@@ -417,7 +417,7 @@ export default function SecretVaultView() {
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
         planName="Pase de Socio · Bóveda 4K"
-        planPrice="$80 USD"
+        planPrice="$19 USD"
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { MessageCircle, BadgeCheck, Navigation } from "lucide-react";
 import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
 import { sound } from "@/lib/soundEngine";
+import { trackEvent } from "@/lib/track";
 
 interface ProfileCardProps {
   id?: string;
@@ -45,6 +46,8 @@ export default function ProfileCard({
     sound.playGoldChime();
     setIsTransitioning(true);
     if (whatsapp) {
+      // Demanda: CTA de WhatsApp desde tarjeta (grid/feed).
+      trackEvent("whatsapp_cta_click", { modelId: id });
       const phone = whatsapp.replace(/\D/g, '');
       const fullPhone = phone.startsWith('593') ? phone : `593${phone.replace(/^0/, '')}`;
       setTimeout(() => {

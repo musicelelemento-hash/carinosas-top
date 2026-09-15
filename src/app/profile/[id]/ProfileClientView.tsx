@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import ModelProfile from "@/components/ModelProfile";
 import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { trackEvent } from "@/lib/track";
 
 export interface ProfileModel {
   id: string;
@@ -33,6 +34,15 @@ export default function ProfileClientView({ id, initialModel }: ProfileClientVie
   const [model, setModel] = useState<ProfileModel | null>(initialModel || null);
   const [loading, setLoading] = useState(!initialModel);
   const [error, setError] = useState(false);
+  const trackedRef = useRef<string | null>(null);
+
+  // Demanda: vista de perfil (una vez por carga real del modelo).
+  useEffect(() => {
+    if (model && trackedRef.current !== model.id) {
+      trackedRef.current = model.id;
+      trackEvent("profile_view", { modelId: model.id });
+    }
+  }, [model]);
 
   useEffect(() => {
     if (initialModel) {

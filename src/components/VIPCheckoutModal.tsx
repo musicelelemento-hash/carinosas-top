@@ -1,18 +1,21 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { 
-  X, 
-  Crown, 
-  ShieldCheck, 
-  Check, 
-  Copy, 
-  QrCode, 
-  Building2, 
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import {
+  X,
+  Crown,
+  Check,
+  Copy,
+  CheckCircle2,
+  QrCode,
+  Building2,
   Sparkles,
-  CheckCircle2
+  Zap,
+  Loader2,
+  RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { registerVIPPassAction } from "@/app/actions/vip";
 import { soundFX } from "@/lib/soundFX";
@@ -25,6 +28,33 @@ interface VIPCheckoutModalProps {
   onSuccess?: (passCode: string) => void;
 }
 
+type PaymentMethod = "auto" | "manual" | "bank";
+
+interface NpOrder {
+  passCode: string;
+  paymentId: number;
+  paymentStatus: string;
+  payAddress: string;
+  payAmount: number;
+  payCurrency: string;
+  priceAmount: number;
+  priceCurrency: string;
+}
+
+const NP_TERMINAL_FAIL_STATUSES = ["failed", "expired", "refunded"];
+
+const STATUS_LABEL: Record<string, string> = {
+  waiting: "Esperando pago…",
+  confirming: "Confirmando transacción…",
+  confirmed: "Pago confirmado — activando…",
+  sending: "Procesando…",
+  finished: "Pagado ✓",
+  partially_paid: "Pago parcial",
+  failed: "Fallido",
+  expired: "Expirado",
+  refunded: "Reembolsado",
+};
+
 export default function VIPCheckoutModal({
   isOpen,
   onClose,
@@ -32,7 +62,7 @@ export default function VIPCheckoutModal({
   planPrice = 49,
   onSuccess
 }: VIPCheckoutModalProps) {
-  const [paymentMethod, setPaymentMethod] = useState<"crypto" | "bank">("crypto");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("auto");
   const [cryptoNetwork, setCryptoNetwork] = useState<"TRC20" | "BEP20">("TRC20");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
@@ -41,9 +71,15 @@ export default function VIPCheckoutModal({
   const [passCreated, setPassCreated] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const [npOrder, setNpOrder] = useState<NpOrder | null>(null);
+  const [npStatus, setNpStatus] = useState<string | null>(null);
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const WALLETS = {
-    TRC20: "TYd8zN2s9Pqx7Lm3Vv1aK8eX4wY6R5t1Qp",
-    BEP20: "0x71C2d8A3b6B9F8e4a9C1235687aBcDeF12345678"
+    TRC20: process.env.NEXT_PUBLIC_VIP_TRC20_WALLET || "",
+    BEP20: process.env.NEXT_PUBLIC_VIP_BEP20_WALLET || "",
   };
 
   const BANK_ACCOUNTS = [
@@ -53,7 +89,6 @@ export default function VIPCheckoutModal({
     { id: "bank-3", bank: "BCP (Perú)", type: "Cta Corriente Soles/USD", num: "193-48912345-0-88", holder: "CARINOSAS PERU SAC", ruc: "20608912451" },
   ];
 
-  // Sanitized copywriting for title to prevent "Membresía & Pase Pase..."
   const displayTitle = useMemo(() => {
     if (!planName) return "Membresía Alpha Caballero VIP";
     const lower = planName.toLowerCase().trim();
@@ -69,7 +104,6 @@ export default function VIPCheckoutModal({
     return planName;
   }, [planName]);
 
-  // Sanitized currency string to prevent "$$50 USD USD"
   const displayPrice = useMemo(() => {
     if (planPrice === undefined || planPrice === null) return "$50 USD";
     const raw = String(planPrice).trim();
@@ -79,9 +113,69 @@ export default function VIPCheckoutModal({
     return isMonthly ? `$${numVal} USD / mes` : `$${numVal} USD`;
   }, [planPrice]);
 
+  const finalizePass = useCallback((code: string) => {
+    setPassCreated(code);
+    setNpStatus("finished");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("vip_pass_code", code);
+      window.dispatchEvent(new CustomEvent("vip_pass_updated"));
+    }
+    try {
+      soundFX?.playGoldChime();
+      confetti({
+        particleCount: 80,
+        spread: 90,
+        origin: { y: 0.5, x: 0.5 },
+        colors: ['#D4A843', '#FFE088', '#F5E0A0', '#AA7C11', '#FFFFFF'],
+      });
+    } catch {}
+    if (onSuccess) onSuccess(code);
+  }, [onSuccess]);
+
+  const checkPaymentStatus = useCallback(async () => {
+    if (!npOrder) return;
+    try {
+      const res = await fetch(`/api/np/status?payment_id=${npOrder.paymentId}`, { cache: "no-store" });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMsg(data.error || "Error consultando el estado del pago.");
+        return;
+      }
+      setNpStatus(data.paymentStatus);
+      if (data.paymentStatus === "finished" || data.paymentStatus === "confirmed") {
+        if (pollTimerRef.current) {
+          clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+        }
+        finalizePass(npOrder.passCode);
+      } else if (NP_TERMINAL_FAIL_STATUSES.includes(data.paymentStatus)) {
+        if (pollTimerRef.current) {
+          clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+        }
+        setErrorMsg(`El pago terminó en estado "${data.paymentStatus}". Puedes crear una nueva orden.`);
+      }
+    } catch {
+      // Fire-and-forget: el siguiente poll reintenta.
+    }
+  }, [npOrder, finalizePass]);
+
+  useEffect(() => {
+    if (!npOrder || passCreated) return;
+    checkPaymentStatus();
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    pollTimerRef.current = setInterval(checkPaymentStatus, 8000);
+    return () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    };
+  }, [npOrder, passCreated, checkPaymentStatus]);
+
   if (!isOpen) return null;
 
   const currentWallet = WALLETS[cryptoNetwork];
+  const walletConfigured = Boolean(currentWallet && currentWallet.length > 20);
+  const currentPayCurrency = cryptoNetwork === "BEP20" ? "usdtbsc20" : "usdttrc20";
 
   const handleCopy = (text: string, key: string) => {
     if (typeof window !== "undefined") {
@@ -92,6 +186,50 @@ export default function VIPCheckoutModal({
       }
       setTimeout(() => setCopiedKey(null), 1500);
     }
+  };
+
+  const handleCreateOrder = async () => {
+    setIsCreatingOrder(true);
+    setErrorMsg("");
+    setNpStatus(null);
+    try {
+      const tierLevel = planName.includes("Elite") ? "Alpha Founder" : "Diamante";
+      const res = await fetch("/api/np/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          holderName: fullName || "Socio VIP Confidencial",
+          tierLevel,
+          tierType: "gentleman",
+          payCurrency: currentPayCurrency,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMsg(data.error || "No se pudo crear la orden de pago.");
+        return;
+      }
+      setNpOrder({
+        passCode: data.passCode,
+        paymentId: data.paymentId,
+        paymentStatus: data.paymentStatus,
+        payAddress: data.payAddress,
+        payAmount: data.payAmount,
+        payCurrency: data.payCurrency,
+        priceAmount: data.priceAmount,
+        priceCurrency: data.priceCurrency,
+      });
+    } catch {
+      setErrorMsg("Error de conexión. Intenta nuevamente.");
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
+
+  const handleCancelOrder = () => {
+    setNpOrder(null);
+    setNpStatus(null);
+    setErrorMsg("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,7 +246,7 @@ export default function VIPCheckoutModal({
       holder_name: fullName || "Socio VIP Confidencial",
       tier_type: "gentleman",
       tier_level: planName.includes("Elite") ? "Alpha Founder" : "Diamante",
-      payment_method: paymentMethod === "crypto" ? "crypto_usdt" : "bank_transfer",
+      payment_method: paymentMethod === "manual" ? "crypto_usdt" : "bank_transfer",
       payment_hash: txHashOrRef,
       origin_country: "EC"
     });
@@ -116,25 +254,18 @@ export default function VIPCheckoutModal({
     setIsSubmitting(false);
 
     if (res.success && res.passCode) {
-      setPassCreated(res.passCode);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("vip_pass_code", res.passCode);
-        window.dispatchEvent(new CustomEvent("vip_pass_updated"));
-      }
-      try {
-        soundFX?.playGoldChime();
-        confetti({
-          particleCount: 80,
-          spread: 90,
-          origin: { y: 0.5, x: 0.5 },
-          colors: ['#D4A843', '#FFE088', '#F5E0A0', '#AA7C11', '#FFFFFF'],
-        });
-      } catch {}
-      if (onSuccess) onSuccess(res.passCode);
+      finalizePass(res.passCode);
     } else {
       setErrorMsg(res.error || "No se pudo procesar el pase. Intenta nuevamente.");
     }
   };
+
+  const statusPillClass =
+    npStatus === "finished" || npStatus === "confirmed"
+      ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40"
+      : NP_TERMINAL_FAIL_STATUSES.includes(npStatus || "")
+        ? "bg-rose-500/15 text-rose-400 border-rose-500/40"
+        : "bg-amber-500/15 text-amber-400 border-amber-500/40";
 
   return (
     <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4">
@@ -198,39 +329,213 @@ export default function VIPCheckoutModal({
         ) : (
           /* PAYMENT FLOW */
           <div className="space-y-6">
-            
+
             {/* Method Tabs */}
-            <div className="grid grid-cols-2 gap-3 p-1.5 rounded-2xl glass-dark border border-white/10">
+            <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl glass-dark border border-white/10">
               <button
                 type="button"
-                onClick={() => setPaymentMethod("crypto")}
-                className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  paymentMethod === "crypto"
+                onClick={() => setPaymentMethod("auto")}
+                className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  paymentMethod === "auto"
                     ? "bg-[#D4AF37] text-black shadow-md font-bold"
                     : "text-[#A1A1AA] hover:text-white"
                 }`}
               >
-                <QrCode size={15} />
-                <span>USDT Cripto</span>
+                <Zap size={14} />
+                <span>Cripto Auto</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("manual")}
+                className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  paymentMethod === "manual"
+                    ? "bg-[#D4AF37] text-black shadow-md font-bold"
+                    : "text-[#A1A1AA] hover:text-white"
+                }`}
+              >
+                <QrCode size={14} />
+                <span>USDT Manual</span>
               </button>
               <button
                 type="button"
                 onClick={() => setPaymentMethod("bank")}
-                className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   paymentMethod === "bank"
                     ? "bg-[#D4AF37] text-black shadow-md font-bold"
                     : "text-[#A1A1AA] hover:text-white"
                 }`}
               >
-                <Building2 size={15} />
+                <Building2 size={14} />
                 <span>Banco Local</span>
               </button>
             </div>
 
-            {/* CRYPTO TAB */}
-            {paymentMethod === "crypto" && (
+            {/* AUTO CRYPTO TAB */}
+            {paymentMethod === "auto" && (
               <div className="space-y-4">
-                {/* Network Chips */}
+                <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-[#D4AF37]/8 border border-brand-gold/25">
+                  <Zap size={15} className="text-brand-gold shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-white/80 leading-relaxed">
+                    Pago <strong className="text-brand-gold">automático y verificado</strong>:
+                    al recibir tu USDT, el pase se activa solo (sin copiar hashes).
+                  </p>
+                </div>
+
+                {npOrder ? (
+                  /* ORDER CREATED */
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-2xl glass-dark border border-brand-gold/30 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] text-[#A1A1AA] uppercase font-black tracking-widest">
+                          Envía exactamente
+                        </span>
+                        <span
+                          className={`px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold uppercase ${statusPillClass}`}
+                        >
+                          {STATUS_LABEL[npStatus || npOrder.paymentStatus] || npOrder.paymentStatus}
+                        </span>
+                      </div>
+
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-mono text-2xl font-bold text-brand-gold">
+                          {Number(npOrder.payAmount).toFixed(2)}
+                        </span>
+                        <span className="font-mono text-xs text-white/60 uppercase">
+                          {npOrder.payCurrency}
+                        </span>
+                        <span className="text-[10px] text-white/40 font-mono">
+                          ≈ ${Number(npOrder.priceAmount).toFixed(2)} {npOrder.priceCurrency}
+                        </span>
+                      </div>
+
+                      <div className="pt-1">
+                        <span className="text-[9px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
+                          Dirección de pago ({npOrder.payCurrency})
+                        </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[11px] text-brand-gold break-all">{npOrder.payAddress}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(npOrder.payAddress, "np-address")}
+                            className="px-3.5 py-1.5 rounded-xl bg-brand-gold/20 hover:bg-brand-gold text-brand-gold hover:text-brand-black text-[10px] font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          >
+                            {copiedKey === "np-address" ? (
+                              <CheckCircle2 size={12} className="text-emerald-400" />
+                            ) : (
+                              <Copy size={11} />
+                            )}
+                            <span>{copiedKey === "np-address" ? "¡Copiado!" : "Copiar"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void checkPaymentStatus()}
+                        className="px-4 py-2.5 rounded-xl glass-dark border border-white/10 text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:border-brand-gold/40 transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <RefreshCw size={12} />
+                        Verificar ahora
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelOrder}
+                        className="px-4 py-2.5 rounded-xl glass-dark border border-white/10 text-[10px] font-black uppercase tracking-wider text-white/50 hover:text-white hover:border-rose-500/40 transition-all cursor-pointer"
+                      >
+                        Cancelar pago
+                      </button>
+                    </div>
+
+                    <p className="text-[10px] text-white/40 text-center">
+                      Estado verificado cada ~8 segundos automáticamente. No cierres esta ventana hasta completar el envío.
+                    </p>
+                  </div>
+                ) : (
+                  /* NO ORDER YET */
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-[#A1A1AA] font-bold uppercase tracking-wider">Red USDT:</span>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCryptoNetwork("TRC20")}
+                          className={`px-3 py-1.5 rounded-xl text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                            cryptoNetwork === "TRC20"
+                              ? "bg-[#D4AF37] text-black font-semibold shadow-[0_0_15px_rgba(212,175,55,0.35)]"
+                              : "glass-dark border border-white/10 text-white/70 hover:text-white hover:border-[#D4AF37]/30"
+                          }`}
+                        >
+                          TRC20 (Red Tron)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCryptoNetwork("BEP20")}
+                          className={`px-3 py-1.5 rounded-xl text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                            cryptoNetwork === "BEP20"
+                              ? "bg-[#D4AF37] text-black font-semibold shadow-[0_0_15px_rgba(212,175,55,0.35)]"
+                              : "glass-dark border border-white/10 text-white/70 hover:text-white hover:border-[#D4AF37]/30"
+                          }`}
+                        >
+                          BEP20 (BNB Smart Chain)
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
+                        Nombre o Alias Confidencial
+                      </label>
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Ej: Socio VIP / Andrés"
+                        className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#A1A1AA] outline-none transition-colors"
+                      />
+                    </div>
+
+                    {errorMsg && (
+                      <p className="text-[10px] text-rose-400 font-bold">{errorMsg}</p>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => void handleCreateOrder()}
+                      disabled={isCreatingOrder}
+                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {isCreatingOrder ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 size={16} className="animate-spin" />
+                          Creando orden segura…
+                        </span>
+                      ) : (
+                        <>
+                          <Sparkles size={16} />
+                          <span>Pagar ahora con USDT</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* MANUAL CRYPTO TAB */}
+            {paymentMethod === "manual" && (
+              <div className="space-y-4">
+                {!walletConfigured && (
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30">
+                    <AlertTriangle size={15} className="text-amber-400 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-white/75">
+                      La billetera manual no está configurada. Usa la opción{" "}
+                      <strong className="text-brand-gold">Cripto Auto</strong> para pagos verificados automáticamente.
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-[#A1A1AA] font-bold uppercase tracking-wider">Red USDT:</span>
                   <div className="flex gap-2">
@@ -259,27 +564,28 @@ export default function VIPCheckoutModal({
                   </div>
                 </div>
 
-                {/* Wallet Box */}
-                <div className="p-4 rounded-2xl glass-dark border border-brand-gold/30 space-y-2 relative">
-                  <span className="text-[9px] text-[#A1A1AA] uppercase font-black tracking-widest block">
-                    Dirección de Billetera ({cryptoNetwork}):
-                  </span>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs text-brand-gold break-all">{currentWallet}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(currentWallet, "wallet")}
-                      className="px-3.5 py-1.5 rounded-xl bg-brand-gold/20 hover:bg-brand-gold text-brand-gold hover:text-brand-black text-[10px] font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                    >
-                      {copiedKey === "wallet" ? (
-                        <CheckCircle2 size={12} className="text-emerald-400" />
-                      ) : (
-                        <Copy size={11} />
-                      )}
-                      <span>{copiedKey === "wallet" ? "¡Copiado al portapapeles!" : "Copiar Billetera"}</span>
-                    </button>
+                {walletConfigured && (
+                  <div className="p-4 rounded-2xl glass-dark border border-brand-gold/30 space-y-2 relative">
+                    <span className="text-[9px] text-[#A1A1AA] uppercase font-black tracking-widest block">
+                      Dirección de Billetera ({cryptoNetwork}):
+                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs text-brand-gold break-all">{currentWallet}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(currentWallet, "wallet")}
+                        className="px-3.5 py-1.5 rounded-xl bg-brand-gold/20 hover:bg-brand-gold text-brand-gold hover:text-brand-black text-[10px] font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                      >
+                        {copiedKey === "wallet" ? (
+                          <CheckCircle2 size={12} className="text-emerald-400" />
+                        ) : (
+                          <Copy size={11} />
+                        )}
+                        <span>{copiedKey === "wallet" ? "¡Copiado al portapapeles!" : "Copiar Billetera"}</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -320,54 +626,56 @@ export default function VIPCheckoutModal({
               </div>
             )}
 
-            {/* Confirmation Form */}
-            <form onSubmit={handleSubmit} className="space-y-3 pt-2">
-              <div>
-                <label className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
-                  Nombre o Alias Confidencial
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Ej: Socio VIP / Andrés"
-                  className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#A1A1AA] outline-none transition-colors"
-                />
-              </div>
+            {/* Confirmation Form (solo manual/bank) */}
+            {paymentMethod !== "auto" && (
+              <form onSubmit={handleSubmit} className="space-y-3 pt-2">
+                <div>
+                  <label className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
+                    Nombre o Alias Confidencial
+                  </label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Ej: Socio VIP / Andrés"
+                    className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#A1A1AA] outline-none transition-colors"
+                  />
+                </div>
 
-              <div>
-                <label className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
-                  {paymentMethod === "crypto" ? "Hash de la Transacción (TXID)" : "Número de Comprobante / Referencia Bancaria"}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={txHashOrRef}
-                  onChange={(e) => setTxHashOrRef(e.target.value)}
-                  placeholder={paymentMethod === "crypto" ? "Pega el TXID de tu retiro" : "Ej: 00489128"}
-                  className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#A1A1AA] outline-none transition-colors font-mono"
-                />
-              </div>
+                <div>
+                  <label className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest block mb-1">
+                    {paymentMethod === "manual" ? "Hash de la Transacción (TXID)" : "Número de Comprobante / Referencia Bancaria"}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={txHashOrRef}
+                    onChange={(e) => setTxHashOrRef(e.target.value)}
+                    placeholder={paymentMethod === "manual" ? "Pega el TXID de tu retiro" : "Ej: 00489128"}
+                    className="w-full glass-dark border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#A1A1AA] outline-none transition-colors font-mono"
+                  />
+                </div>
 
-              {errorMsg && (
-                <p className="text-[10px] text-rose-400 font-bold">{errorMsg}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <span>Verificando Pago...</span>
-                ) : (
-                  <>
-                    <Sparkles size={16} />
-                    <span>Confirmar Pago & Obtener Pase VIP</span>
-                  </>
+                {errorMsg && (
+                  <p className="text-[10px] text-rose-400 font-bold">{errorMsg}</p>
                 )}
-              </button>
-            </form>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_35px_rgba(212,168,67,0.4)] hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <span>Verificando Pago...</span>
+                  ) : (
+                    <>
+                      <Sparkles size={16} />
+                      <span>Confirmar Pago & Obtener Pase VIP</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
 
           </div>
         )}
@@ -376,4 +684,3 @@ export default function VIPCheckoutModal({
     </div>
   );
 }
-

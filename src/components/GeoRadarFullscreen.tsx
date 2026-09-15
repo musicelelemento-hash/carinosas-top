@@ -14,15 +14,27 @@ import {
 import LiveMap from "@/components/LiveMap";
 import RadarVisual, { type RadarBlipData } from "@/components/RadarVisual";
 import { getCountryById } from "@/lib/countries";
+import { haversineKm, formatDistanceKm } from "@/lib/geo";
 import { supabase } from "@/lib/supabase";
 
-const FALLBACK_BLIPS: RadarBlipData[] = [
-  { id: "rb-1", name: "Valentina", km: "1,2 km", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400", live: true },
-  { id: "rb-2", name: "Camila", km: "2,4 km", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400", live: false },
-  { id: "rb-3", name: "Luciana", km: "3,1 km", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400", live: true },
-  { id: "rb-4", name: "Sofía", km: "4,8 km", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=400", live: false },
-  { id: "rb-5", name: "Elena", km: "6,0 km", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400", live: false },
-];
+// P0 anti-fachada: sin perfiles geolocalizados reales mostramos el radar vacío,
+// en lugar de blips ficticios (Valentina/Camila/Elena) con distancias inventadas.
+const FALLBACK_BLIPS: RadarBlipData[] = [];
+
+/** Obtiene la posición del usuario; si no hay permiso, usa el centro de la ciudad. */
+function getUserPosition(fallback: [number, number]): Promise<[number, number]> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      resolve(fallback);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve([pos.coords.latitude, pos.coords.longitude]),
+      () => resolve(fallback),
+      { timeout: 6000 }
+    );
+  });
+}
 
 export default function GeoRadarFullscreen() {
   const [activeRadius, setActiveRadius] = useState<string>("5km");
@@ -40,27 +52,44 @@ export default function GeoRadarFullscreen() {
 
   useEffect(() => {
     let active = true;
-    supabase
-      .from("models")
-      .select("id, name, images")
-      .not("lat", "is", null)
-      .limit(6)
-      .then(({ data }) => {
-        if (!active || !data || data.length === 0) return;
-        setBlips(
-          data.map((m, i) => ({
-            id: m.id,
-            name: m.name,
-            km: `${((i + 1) * 1.2).toFixed(1)} km`,
-            avatar: m.images?.[0],
-            live: i % 2 === 0,
-          }))
-        );
-      });
+    const fallbackCenter: [number, number] =
+      ecuador.mapPresets?.[ecuador.defaultCity]?.center ?? [-3.2581, -79.9161];
+
+    (async () => {
+      // P0: distancia REAL (Haversine) y estado "en línea" REAL (is_online),
+      // en lugar de `(i+1)*1.2 km` y `i%2===0`.
+      const [userLat, userLng] = await getUserPosition(fallbackCenter);
+
+      const { data } = await supabase
+        .from("models")
+        .select("id, name, images, lat, lng, is_online")
+        .not("lat", "is", null)
+        .not("lng", "is", null)
+        .limit(20);
+
+      if (!active || !data || data.length === 0) return;
+
+      const mapped = data
+        .map((m) => ({
+          id: m.id,
+          name: m.name,
+          km: formatDistanceKm(haversineKm(userLat, userLng, m.lat as number, m.lng as number)),
+          avatar: m.images?.[0],
+          live: m.is_online === true,
+        }))
+        .sort((a, b) => {
+          const ka = parseFloat(a.km.replace(",", "."));
+          const kb = parseFloat(b.km.replace(",", "."));
+          return ka - kb;
+        });
+
+      if (active) setBlips(mapped);
+    })();
+
     return () => {
       active = false;
     };
-  }, []);
+  }, [ecuador]);
 
   return (
     <div className="min-h-screen bg-[#08080B] text-white pt-20 pb-12 flex flex-col">

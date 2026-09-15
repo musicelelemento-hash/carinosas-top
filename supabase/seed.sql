@@ -2,6 +2,15 @@
 -- CARIÑOSAS.TOP — TURNKEY MASTER SEED DATA (OBSIDIAN ELITE PRODUCTION 2026)
 -- 30+ Perfiles Hiperrealistas 4K Verificados distribuidos en todo Ecuador
 -- ==============================================================================
+-- ⚠️⚠️⚠️  AVISO CRÍTICO (P0 anti-fachada)  ⚠️⚠️⚠️
+-- ESTE ARCHIVO ES **DATOS DE DEMOSTRACIÓN**:
+--   • Las fotos son de stock (Unsplash), NO de las modelos.
+--   • Los números de WhatsApp son secuenciales inventados.
+--   • TODOS los perfiles están marcados `is_verified_4k=TRUE` sin verificación real.
+-- Antes de publicar en producción: REEMPLAZAR por perfiles reales verificados
+-- (fotos propias, WhatsApp real, `is_verified_4k` solo tras verificación humana).
+-- Publicar esto tal cual destruye la confianza de la marca y genera riesgo legal.
+-- ==============================================================================
 
 -- 0. SCHEMA COMPATIBILITY UPGRADE (Auto-patches columns if missing)
 ALTER TABLE public.models ADD COLUMN IF NOT EXISTS personal_note TEXT;

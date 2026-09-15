@@ -4,9 +4,13 @@ import { cookies, headers } from "next/headers";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getClientKey, isRateLimited } from "@/lib/rateLimit";
+import { trackEvent } from "@/lib/track";
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "carinosas-top-elite-master-secret-2026-s0v3r31gn";
-const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "AlphaElite2026!";
+// SECURITY (P0): las credenciales de administrador NUNCA tienen valor por defecto.
+// Los antiguos defaults ([redactado]) estaban publicados en el repo y permitían
+// acceso admin a cualquiera que conociera el código. Ahora se exige configuración explícita.
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY;
 const PLAN_TYPES = new Set(["Anuncio Gratis", "Premium", "Diamante", "VIP Elite"]);
 
 function generateSessionToken(): string {
@@ -241,6 +245,11 @@ export async function createModelAction(modelData: {
     throw new Error(`Error al crear el modelo: ${error.message}`);
   }
 
+  // Oferta: alta de modelo (admin / publicación express).
+  try {
+    await trackEvent("model_registered", { modelId: (data?.[0]?.id as string) || undefined });
+  } catch {}
+
   return data;
 }
 
@@ -307,6 +316,24 @@ export async function updateModelAction(
     throw new Error(`Error al actualizar el modelo: ${error.message}`);
   }
 
+  // Oferta: registrar upgrade de plan (solo si realmente cambió).
+  if (modelData.plan_type) {
+    try {
+      const { data: before } = await supabaseAdmin
+        .from("models")
+        .select("plan_type")
+        .eq("id", id)
+        .maybeSingle();
+      if (before && before.plan_type && before.plan_type !== modelData.plan_type) {
+        await trackEvent("model_plan_upgraded", {
+          modelId: id,
+          fromPlan: before.plan_type,
+          toPlan: modelData.plan_type,
+        });
+      }
+    } catch {}
+  }
+
   return data;
 }
 
@@ -321,6 +348,18 @@ export async function batchVerify4KAction(modelIds: string[], isVerified: boolea
     .in("id", modelIds);
 
   if (error) throw new Error(`Error en actualización por lote: ${error.message}`);
+
+  // Oferta: cada modelo que pasa a verificado 4K emite su evento (solo activación).
+  if (isVerified) {
+    try {
+      await Promise.all(
+        modelIds.map((modelId) =>
+          trackEvent("model_verified_4k", { modelId }).catch(() => {})
+        )
+      );
+    } catch {}
+  }
+
   return { success: true };
 }
 
@@ -363,6 +402,8 @@ export async function registerModelAction(modelData: {
   voice_greeting_url?: string;
   hourly_rate?: number;
   personal_note?: string;
+  consent_confirmed?: boolean;
+  consent_snapshot?: string;
 }) {
   if (!modelData.name?.trim()) throw new Error("El nombre artístico es obligatorio.");
   if (!modelData.city?.trim()) throw new Error("La ciudad o cantón es obligatorio.");
@@ -396,13 +437,20 @@ export async function registerModelAction(modelData: {
           is_online: true,
           voice_greeting_url: modelData.voice_greeting_url,
           hourly_rate: modelData.hourly_rate || 120,
-          personal_note: modelData.personal_note || "Cada encuentro es una historia que merece ser contada con elegancia."
+          personal_note: modelData.personal_note || "Cada encuentro es una historia que merece ser contada con elegancia.",
+          consent_at: modelData.consent_confirmed ? new Date().toISOString() : null,
+          consent_snapshot: modelData.consent_confirmed ? (modelData.consent_snapshot || "") : null
         }
       ])
       .select("id");
 
     if (error) {
       console.warn("Supabase insert notice (fallback to memory/mock):", error.message);
+    } else if (data?.[0]?.id) {
+      // Oferta: registro público de una nueva modelo.
+      try {
+        await trackEvent("model_registered", { modelId: data[0].id as string });
+      } catch {}
     }
   } catch (err) {
     console.warn("Database registration non-fatal error:", err);
@@ -780,4 +828,84 @@ export async function duplicateModelAction(modelId: string) {
 
   if (createErr) throw new Error(`Error al clonar modelo: ${createErr.message}`);
   return created?.[0];
+}
+
+/**
+ * Métricas del negocio para el dashboard "Métricas" del admin.
+ * Lee SOLO datos reales (models, booking_requests, tracking_events, referral_codes).
+ * Sin datos → devuelve ceros / null y el cliente muestra "Sin datos aún".
+ */
+export async function getAdminMetricsAction() {
+  await assertAdmin();
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const [modelsRes, bookingsRes, eventsRes, recentRes, refsRes] = await Promise.all([
+      supabaseAdmin.from("models").select("id, city, is_verified_4k, created_at"),
+      supabaseAdmin.from("booking_requests").select("id, status"),
+      supabaseAdmin.from("tracking_events").select("event").gte("created_at", thirtyDaysAgo).limit(20000),
+      supabaseAdmin.from("tracking_events").select("id, event, model_id, session_key, meta, created_at").order("created_at", { ascending: false }).limit(50),
+      supabaseAdmin.from("referral_codes").select("code, uses_count"),
+    ]);
+
+    const models = modelsRes.data || [];
+    const bookings = bookingsRes.data || [];
+    const refs = refsRes.data || [];
+
+    // Perfiles activos por ciudad (oferta real).
+    const modelsByCity: Record<string, number> = {};
+    models.forEach((m) => {
+      const c = (m.city || "Sin ciudad").trim() || "Sin ciudad";
+      modelsByCity[c] = (modelsByCity[c] || 0) + 1;
+    });
+
+    const totalModels = models.length;
+    const verified4k = models.filter((m) => m.is_verified_4k).length;
+    const newThisWeek = models.filter((m) => (m.created_at || "") >= weekAgo).length;
+
+    // Embudo de demanda/dinero por evento (últimos 30 días).
+    const funnelEvents = [
+      "model_registered",
+      "model_verified_4k",
+      "model_plan_upgraded",
+      "city_page_view",
+      "profile_view",
+      "whatsapp_cta_click",
+      "whatsapp_click",
+      "concierge_chat_started",
+      "booking_requested",
+      "booking_created",
+      "vip_checkout_created",
+      "vip_payment_confirmed",
+      "referral_visit",
+    ];
+    const counts: Record<string, number> = {};
+    (eventsRes.data || []).forEach((e) => {
+      counts[e.event] = (counts[e.event] || 0) + 1;
+    });
+    const funnel = funnelEvents.map((event) => ({ event, count: counts[event] || 0 }));
+
+    const referralUses = refs.reduce((acc, r) => acc + (r.uses_count || 0), 0);
+
+    return {
+      modelsByCity,
+      totalModels,
+      newThisWeek,
+      verified4k,
+      verified4kShare: totalModels > 0 ? Math.round((verified4k / totalModels) * 100) : null,
+      bookings: {
+        total: bookings.length,
+        pending: bookings.filter((b) => b.status === "pending").length,
+        confirmed: bookings.filter((b) => b.status === "confirmed" || b.status === "completed").length,
+      },
+      funnel,
+      referralCodes: refs.length,
+      referralUses,
+      events: recentRes.data || [],
+    };
+  } catch (err) {
+    console.error("getAdminMetricsAction error:", err);
+    return null;
+  }
 }

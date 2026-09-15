@@ -42,32 +42,11 @@ async function getModelData(id: string): Promise<ProfileModel | null> {
       };
     }
 
-    // Secondary fallback: fetch first top model if slug is general
-    const { data: fallbackData } = await supabase
-      .from("models")
-      .select("id, name, age, city, sector, description, images, tags, plan_type, whatsapp, is_verified_4k, is_online")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (fallbackData) {
-      return {
-        id: fallbackData.id,
-        name: fallbackData.name,
-        age: fallbackData.age,
-        location: fallbackData.sector ? `${fallbackData.sector}, ${fallbackData.city}` : fallbackData.city,
-        description: fallbackData.description || "",
-        images: fallbackData.images?.length ? fallbackData.images : ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
-        tags: fallbackData.tags || [],
-        plan_type: fallbackData.plan_type,
-        whatsapp: fallbackData.whatsapp,
-        isVerified: fallbackData.is_verified_4k,
-        is_verified_4k: fallbackData.is_verified_4k,
-        is_online: fallbackData.is_online,
-        city: fallbackData.city,
-        sector: fallbackData.sector || undefined,
-      };
-    }
+    // P0 SEO / corrección: ANTES se servía el primer modelo como fallback para
+    // cualquier slug inexistente, lo que indexaba EL MISMO perfil en miles de
+    // URLs (contenido duplicado y confusión de indexación). Ahora, si no hay
+    // coincidencia real, devolvemos null → 404.
+    return null;
   } catch (err) {
     console.warn("Server-side model fetch fallback:", err);
   }
@@ -85,12 +64,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = `${model.name} (${model.location}) | Perfil VIP Verificado 4K · Cariñosas.top`;
+  const locationTitle = model.city || model.location;
+  const title = `${model.name} · Acompañante VIP en ${locationTitle}`;
+  const ogTitle = `${model.name} · Acompañante VIP en ${locationTitle} | Cariñosas.top`;
   const cleanDescription = model.description 
     ? `${model.description.slice(0, 150)}... Fotos 100% reales, verificación 4K y contacto directo en ${model.location}.`
     : `Perfil exclusivo de ${model.name} en ${model.location}. Acompañante VIP 4K verificada en Cariñosas.top.`;
 
-  const primaryImage = model.images[0] || "https://carinosas.top/og-luxury.png";
+  const firstImage = model.images[0] || "";
+  const primaryImage = firstImage && !firstImage.includes("images.unsplash.com")
+    ? firstImage
+    : "https://carinosas.top/og-luxury.png";
 
   return {
     title,
@@ -106,7 +90,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `https://carinosas.top/profile/${id}`,
     },
     openGraph: {
-      title,
+      title: ogTitle,
       description: cleanDescription,
       url: `https://carinosas.top/profile/${id}`,
       siteName: "Cariñosas.top Elite",
@@ -122,7 +106,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description: cleanDescription,
       images: [primaryImage],
     },
@@ -140,7 +124,7 @@ export default async function DynamicProfilePage({ params }: PageProps) {
       "@type": "Person",
       "name": model.name,
       "description": model.description,
-      "image": model.images,
+      "image": model.images.filter((img) => !img.includes("images.unsplash.com")),
       "address": {
         "@type": "PostalAddress",
         "addressLocality": model.city,

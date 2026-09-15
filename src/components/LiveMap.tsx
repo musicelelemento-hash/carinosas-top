@@ -28,6 +28,7 @@ import LiveMapAnimator from "./LiveMapAnimator";
 import RadarVisual from "./RadarVisual";
 import { sound } from "@/lib/soundEngine";
 import { type Country, getCountryById } from "@/lib/countries";
+import { haversineKm } from "@/lib/geo";
 
 // Dynamic imports for leaflet (SSR-safe)
 const MapContainer = dynamic(
@@ -151,70 +152,20 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   const fallbackPreset = cityPresets[selectedCity] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] as [number, number], zoom: 13, label: selectedCity };
 
   const cityModels: MapModel[] = useMemo(() => {
+    // P0 anti-fachada: ANTES, si no había modelos reales en la ciudad, se mostraban
+    // 4 perfiles FICTICIOS (Valentina S., Camila R., Luciana M., Elena V.) con fotos
+    // de stock, WhatsApp inventado y distancia hardcodeada. Eso destruía la confianza.
+    // Ahora, sin datos reales → mapa vacío (honesto). Y la distancia se calcula REAL
+    // con Haversine desde el centro de la ciudad hacia las coordenadas de cada modelo.
+    const center = fallbackPreset.center;
     const dbCityModels = models.filter(
       (m) => m.city?.toLowerCase().includes(selectedCity?.toLowerCase()) || (m.sector && m.sector.toLowerCase().includes(selectedCity?.toLowerCase()))
     );
 
-    if (dbCityModels.length > 0) return dbCityModels;
-
-    return [
-      {
-        id: `live-${selectedCity}-1`,
-        name: `Valentina S.`,
-        city: selectedCity,
-        sector: `${selectedCity} Zona VIP Élite`,
-        lat: fallbackPreset.center[0] + 0.0035,
-        lng: fallbackPreset.center[1] + 0.0042,
-        plan_type: "VIP Elite",
-        images: ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"],
-        whatsapp: "593987654321",
-        age: 23,
-        rate: 130,
-        distanceKm: 0.8
-      },
-      {
-        id: `live-${selectedCity}-2`,
-        name: `Camila R.`,
-        city: selectedCity,
-        sector: `${selectedCity} Suites 5★`,
-        lat: fallbackPreset.center[0] - 0.0045,
-        lng: fallbackPreset.center[1] - 0.0035,
-        plan_type: "Diamante",
-        images: ["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800"],
-        whatsapp: "593987654322",
-        age: 24,
-        rate: 150,
-        distanceKm: 1.2
-      },
-      {
-        id: `live-${selectedCity}-3`,
-        name: `Luciana M.`,
-        city: selectedCity,
-        sector: `${selectedCity} Centro Residencial`,
-        lat: fallbackPreset.center[0] + 0.0062,
-        lng: fallbackPreset.center[1] - 0.0048,
-        plan_type: "VIP Elite",
-        images: ["https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800"],
-        whatsapp: "593987654323",
-        age: 22,
-        rate: 120,
-        distanceKm: 1.6
-      },
-      {
-        id: `live-${selectedCity}-4`,
-        name: `Elena V.`,
-        city: selectedCity,
-        sector: `${selectedCity} Plaza VIP`,
-        lat: fallbackPreset.center[0] - 0.0028,
-        lng: fallbackPreset.center[1] + 0.0065,
-        plan_type: "Oro",
-        images: ["https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"],
-        whatsapp: "593987654324",
-        age: 25,
-        rate: 140,
-        distanceKm: 2.1
-      }
-    ];
+    return dbCityModels.map((m) => ({
+      ...m,
+      distanceKm: haversineKm(center[0], center[1], m.lat, m.lng),
+    }));
   }, [models, selectedCity, fallbackPreset]);
 
   // Radius filtering (meters)
@@ -231,7 +182,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
     if (activeRadius === "all") return cityModels;
     // Filter by approx distance
     const maxKm = activeRadius === "1km" ? 1.5 : activeRadius === "3km" ? 3.5 : 6.0;
-    return cityModels.filter(m => (m.distanceKm || 1.0) <= maxKm);
+    return cityModels.filter(m => (m.distanceKm ?? 1.0) <= maxKm);
   }, [cityModels, activeRadius]);
 
   const handleCitySelect = (cityKey: string) => {

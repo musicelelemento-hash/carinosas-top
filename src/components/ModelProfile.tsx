@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import VIPRatings from "@/components/VIPRatings";
+import { trackEvent } from "@/lib/track";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { sound } from "@/lib/soundEngine";
@@ -192,6 +193,9 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
       const defaultMsg = `Hola ${model.name}, vi tu perfil VIP en Cariñosas.top (${locationText}${sectorText}). Me gustaría coordinar una cita para la experiencia de ${rateInfo}. ¿Podrías confirmarme tu disponibilidad?`;
       const finalMessage = customMessage || defaultMsg;
+
+      // Éxito del embudo: clic a WhatsApp (tracking de conversión).
+      trackEvent("whatsapp_cta_click", { modelId: model.id });
 
       window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(finalMessage)}`, '_blank', 'noopener,noreferrer');
     }
@@ -736,6 +740,15 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                   <Mail size={15} />
                 </a>
               )}
+
+              <Link 
+                href={`/chats/${model.id}`}
+                className="flex-1 sm:flex-none px-7 py-3.5 rounded-2xl glass-dark border border-brand-gold/40 text-brand-gold hover:text-brand-black hover:bg-brand-gold transition-all font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+                title="Chatear y agendar aquí (privado)"
+              >
+                <MessageCircle size={15} />
+                <span>Chatear aquí</span>
+              </Link>
 
               <button 
                 onClick={() => handleContact()}

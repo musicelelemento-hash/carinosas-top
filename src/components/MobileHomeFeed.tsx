@@ -74,7 +74,7 @@ export default function MobileHomeFeed({ models }: MobileHomeFeedProps) {
               >
                 <Radar size={20} className="text-brand-gold shrink-0" />
                 <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                  <span className="text-sm font-bold text-white">{models.length} disponibles a menos de 5 km</span>
+                  <span className="text-sm font-bold text-white">{models.length} perfiles disponibles ahora</span>
                   <span className="text-xs text-white/50">Abrir el radar</span>
                 </div>
                 <ChevronRight size={18} className="text-white/40 shrink-0" />

@@ -31,6 +31,7 @@ import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { sound } from "@/lib/soundEngine";
+import { CONSENT_POINTS, CONSENT_SNAPSHOT } from "@/lib/consent";
 import { registerModelAction } from "@/app/actions/admin";
 
 interface PlanTier {
@@ -170,11 +171,21 @@ export default function AdPublishingPortal() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [consentError, setConsentError] = useState(false);
 
   const handleCompleteSubmission = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitError(null);
+
+    if (!consentAccepted) {
+      setConsentError(true);
+      setSubmitError("Debes aceptar el consentimiento de contenido (4 puntos) para publicar tu perfil.");
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      return;
+    }
+    setConsentError(false);
+    setIsSubmitting(true);
 
     try {
       const fullWhatsApp = formData.whatsapp.startsWith("+") 
@@ -193,7 +204,9 @@ export default function AdPublishingPortal() {
         age: parseInt(formData.age, 10) || 22,
         is_phone_verified: isPhoneVerified,
         hourly_rate: parseInt(formData.rate, 10) || 120,
-        personal_note: "Cada encuentro es una historia que merece ser contada con elegancia."
+        personal_note: "Cada encuentro es una historia que merece ser contada con elegancia.",
+        consent_confirmed: true,
+        consent_snapshot: CONSENT_SNAPSHOT
       });
 
       if (typeof window !== "undefined") {
@@ -786,6 +799,41 @@ export default function AdPublishingPortal() {
                   ⚠️ {submitError}
                 </div>
               )}
+
+              {/* ── CONSENTIMIENTO DE CONTENIDO (obligatorio, 4 puntos) ── */}
+              <div className={`p-5 rounded-2xl border transition-all space-y-4 ${
+                consentError && !consentAccepted
+                  ? 'bg-red-500/5 border-red-500/40'
+                  : consentAccepted
+                    ? 'bg-emerald-500/5 border-emerald-500/30'
+                    : 'bg-brand-gold/5 border-brand-gold/30'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={18} className={consentAccepted ? 'text-emerald-400' : 'text-brand-gold'} />
+                  <span className="text-xs font-black uppercase tracking-wider text-white">
+                    Consentimiento de Contenido (Obligatorio)
+                  </span>
+                </div>
+                <ul className="space-y-1.5">
+                  {CONSENT_POINTS.map((point, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-[11px] text-white/80 leading-relaxed">
+                      <span className="text-brand-gold font-black mt-px">{idx + 1}.</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+                <label className="flex items-start gap-2.5 pt-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consentAccepted}
+                    onChange={(e) => setConsentAccepted(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 accent-brand-gold cursor-pointer"
+                  />
+                  <span className="text-[11px] text-white/90 font-bold leading-relaxed">
+                    Confirmo que soy mayor de 18 años y doy mi consentimiento explícito a los 4 puntos anteriores.
+                  </span>
+                </label>
+              </div>
 
             </div>
 

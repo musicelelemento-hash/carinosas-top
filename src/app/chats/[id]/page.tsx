@@ -1,68 +1,123 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, BadgeCheck, CalendarPlus, CalendarCheck, Send, X } from "lucide-react";
-import { MOCK_CHATS } from "@/lib/mockChats";
+import { ArrowLeft, BadgeCheck, CalendarPlus, CalendarCheck, Send, X, Loader2 } from "lucide-react";
+import {
+  getOrCreateThreadAction,
+  getMessagesAction,
+  sendMessageAction,
+  createBookingFromChatAction,
+} from "@/app/actions/chat";
 
 interface Msg {
   id: string;
-  me: boolean;
-  t: string;
-  booking?: { day: string; time: string; type: string };
+  sender: string;
+  text: string;
+  created_at: string;
 }
 
 const DAYS = ["Jueves 25", "Viernes 26", "Sábado 27"];
 const HOURS = ["19:00", "21:00", "23:00", "01:00"];
 const MEETING_TYPES = ["Cena o evento", "Visita a domicilio", "Hotel"];
 
+function getSessionKey(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    let key = localStorage.getItem("carinosas_session");
+    if (!key) {
+      key = crypto.randomUUID();
+      localStorage.setItem("carinosas_session", key);
+    }
+    return key;
+  } catch {
+    return "";
+  }
+}
+
 export default function ChatConversationPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const contact = MOCK_CHATS.find((c) => c.id === params.id) || MOCK_CHATS[0];
+  const modelId = params.id;
 
-  const [msgs, setMsgs] = useState<Msg[]>([
-    { id: "m1", me: false, t: `Hola, gracias por escribir 🙂 ¿En qué te puedo ayudar?` },
-    { id: "m2", me: true, t: "Hola, quisiera coordinar una cita." },
-    { id: "m3", me: false, t: "Claro, dime qué día te queda bien y lo agendamos." },
-  ]);
+  const [sessionKey, setSessionKey] = useState("");
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [msgs, setMsgs] = useState<Msg[]>([]);
   const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(true);
   const [agendaOpen, setAgendaOpen] = useState(false);
+  const [bookingMsg, setBookingMsg] = useState<string | null>(null);
   const [day, setDay] = useState(DAYS[0]);
   const [hour, setHour] = useState(HOURS[1]);
   const [meetingType, setMeetingType] = useState(MEETING_TYPES[0]);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const sendMessage = () => {
-    if (!draft.trim()) return;
-    setMsgs((prev) => [...prev, { id: `u-${Date.now()}`, me: true, t: draft.trim() }]);
+  // Inicializa la sesión y crea/carga el hilo de conversación real.
+  useEffect(() => {
+    const sk = getSessionKey();
+    setSessionKey(sk);
+    (async () => {
+      const thread = await getOrCreateThreadAction(modelId, sk);
+      if (!thread.threadId) { setLoading(false); return; }
+      setThreadId(thread.threadId);
+      const res = await getMessagesAction(thread.threadId);
+      if (res.messages) setMsgs(res.messages as unknown as Msg[]);
+      setLoading(false);
+    })();
+  }, [modelId]);
+
+  useEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [msgs]);
+
+  const sendMessage = async () => {
+    const text = draft.trim();
+    if (!text || !threadId) return;
+    setMsgs((prev) => [...prev, { id: `temp-${Date.now()}`, sender: "guest", text, created_at: new Date().toISOString() }]);
     setDraft("");
+    const res = await sendMessageAction(threadId, text);
+    if (res.message) {
+      setMsgs((prev) =>
+        prev.map((m) => (m.id === `temp-${Date.now()}` ? (res.message as unknown as Msg) : m))
+      );
+    }
   };
 
-  const confirmBooking = () => {
-    setMsgs((prev) => [
-      ...prev,
-      { id: `b-${Date.now()}`, me: true, t: "", booking: { day, time: hour, type: meetingType } },
-    ]);
-    setAgendaOpen(false);
+  const confirmBooking = async () => {
+    if (!threadId) return;
+    const res = await createBookingFromChatAction({
+      modelId,
+      sessionKey,
+      city: "Machala", // TODO: usar ciudad real detectada del usuario.
+      serviceDuration: "1h",
+      meetingType,
+      day,
+      time: hour,
+    });
+    if (res.success) {
+      setBookingMsg(`Reserva solicitada: ${day} · ${hour} · ${meetingType}`);
+      setMsgs((prev) => [
+        ...prev,
+        { id: `b-${Date.now()}`, sender: "guest", text: `Quiero reservar: ${day} a las ${hour} (${meetingType})`, created_at: new Date().toISOString() },
+      ]);
+      setAgendaOpen(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#08080B] text-white flex flex-col">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.07]">
-        <button onClick={() => router.push("/chats")} className="w-9 h-9 rounded-full flex items-center justify-center text-white/70" aria-label="Atrás">
+        <button onClick={() => router.push("/")} className="w-9 h-9 rounded-full flex items-center justify-center text-white/70" aria-label="Atrás">
           <ArrowLeft size={18} />
         </button>
-        <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-[#101014]">
-          <Image src={contact.avatar} alt={contact.name} fill className="object-cover" />
-        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-[15px] font-bold text-white truncate">{contact.name}</span>
+            <span className="text-[15px] font-bold text-white truncate">Conversación privada</span>
             <BadgeCheck size={14} className="text-brand-gold shrink-0" />
           </div>
-          {contact.online && <span className="font-mono text-[11px] text-brand-green">en línea</span>}
+          <span className="font-mono text-[11px] text-brand-green">en línea</span>
         </div>
         <button
           onClick={() => setAgendaOpen(true)}
@@ -73,154 +128,104 @@ export default function ChatConversationPage() {
         </button>
       </div>
 
-      {/* Aviso de expiración */}
-      <div className="flex justify-center py-3">
-        <span className="font-mono text-[11px] text-white/45 px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,.04)" }}>
-          Hoy · los mensajes se borran en 7 días
-        </span>
-      </div>
-
       {/* Mensajes */}
-      <div className="flex-1 flex flex-col gap-2.5 px-4 pb-4 overflow-y-auto">
-        {msgs.map((m) =>
-          m.booking ? (
-            <div
-              key={m.id}
-              className="self-end max-w-[78%] rounded-2xl p-3.5 space-y-1"
-              style={{ border: "1px solid rgba(212,168,67,.4)", background: "rgba(212,168,67,.06)" }}
-            >
-              <div className="flex items-center gap-2 text-brand-gold">
-                <CalendarCheck size={16} />
-                <span className="text-[13px] font-bold">Reserva confirmada</span>
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3" ref={listRef}>
+        {loading ? (
+          <div className="flex justify-center py-10 text-white/40"><Loader2 className="animate-spin" /></div>
+        ) : msgs.length === 0 ? (
+          <p className="text-center text-white/40 text-sm py-8">
+            Esta conversación es privada y se guarda en tu dispositivo. Escribe para agendar.
+          </p>
+        ) : (
+          msgs.map((m) => (
+            <div key={m.id} className={`flex ${m.sender === "guest" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-[14px] leading-[1.45] ${
+                  m.sender === "guest"
+                    ? "bg-brand-gold text-[#08080C] rounded-br-[4px]"
+                    : "bg-white/[0.06] rounded-bl-[4px]"
+                }`}
+              >
+                {m.text}
               </div>
-              <p className="text-[13px] text-white/72">
-                {m.booking.day} · {m.booking.time} · {m.booking.type}
-              </p>
             </div>
-          ) : (
-            <div
-              key={m.id}
-              className="max-w-[78%] px-4 py-2.5 text-[14px] leading-[1.45]"
-              style={{
-                alignSelf: m.me ? "flex-end" : "flex-start",
-                background: m.me ? "#D4A843" : "rgba(255,255,255,.06)",
-                color: m.me ? "#08080B" : "#F0F0EC",
-                borderRadius: m.me ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-              }}
-            >
-              {m.t}
-            </div>
-          )
+          ))
+        )}
+        {bookingMsg && (
+          <div className="flex justify-center">
+            <span className="font-mono text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/30 rounded-xl px-3 py-1.5">
+              <CalendarCheck size={12} className="inline mr-1" /> {bookingMsg}
+            </span>
+          </div>
         )}
       </div>
 
-      {/* Barra de entrada */}
+      {/* Input */}
       <div className="flex items-center gap-2 px-4 py-3 border-t border-white/[0.07]">
         <button
           onClick={() => setAgendaOpen(true)}
-          className="w-[46px] h-[46px] rounded-xl bg-brand-gold text-[#08080B] flex items-center justify-center shrink-0"
+          className="w-11 h-11 rounded-xl bg-brand-gold text-[#08080B] flex items-center justify-center shrink-0"
           aria-label="Agendar"
         >
-          <CalendarPlus size={19} />
+          <CalendarPlus size={18} />
         </button>
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
           placeholder="Escribe un mensaje..."
-          className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 text-[14px] text-white placeholder:text-white/35 outline-none"
+          className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 text-sm text-white placeholder:text-white/35 outline-none"
           style={{ height: 46 }}
         />
         <button
           onClick={sendMessage}
-          className="w-[46px] h-[46px] rounded-xl bg-brand-gold text-[#08080B] flex items-center justify-center shrink-0"
+          className="w-11 h-11 rounded-xl bg-brand-gold text-[#08080B] flex items-center justify-center shrink-0"
           aria-label="Enviar"
         >
-          <Send size={17} />
+          <Send size={16} />
         </button>
       </div>
 
-      {/* ── HOJA DE AGENDA ── */}
+      {/* Agenda / reserva */}
       {agendaOpen && (
-        <div className="fixed inset-0 z-40 flex flex-col justify-end" onClick={() => setAgendaOpen(false)}>
+        <div className="absolute inset-0 z-40 flex flex-col justify-end" onClick={() => setAgendaOpen(false)}>
           <div className="absolute inset-0 bg-black/60" />
-          <div onClick={(e) => e.stopPropagation()} className="relative bg-[#101014] rounded-t-[22px] p-5 space-y-6">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-[#101014] rounded-t-[22px] p-5 space-y-4"
+          >
             <div className="flex items-center justify-between">
-              <span className="font-serif font-bold text-xl text-white">Agenda</span>
-              <button onClick={() => setAgendaOpen(false)} aria-label="Cerrar" className="text-white/60">
-                <X size={20} />
-              </button>
+              <span className="text-[15px] font-bold text-white">Agendar encuentro</span>
+              <button onClick={() => setAgendaOpen(false)} aria-label="Cerrar" className="text-white/60"><X size={20} /></button>
             </div>
-
-            <div className="space-y-2.5">
-              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">Día</span>
-              <div className="grid grid-cols-3 gap-2">
+            <div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-white/45">Día</span>
+              <div className="flex gap-2 mt-1.5 flex-wrap">
                 {DAYS.map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDay(d)}
-                    className="rounded-xl border text-[13px] font-semibold py-2.5 transition-colors"
-                    style={{
-                      background: day === d ? "rgba(212,168,67,.1)" : "transparent",
-                      borderColor: day === d ? "#D4A843" : "rgba(255,255,255,.1)",
-                      color: day === d ? "#D4A843" : "rgba(240,240,236,.72)",
-                    }}
-                  >
-                    {d}
-                  </button>
+                  <button key={d} onClick={() => setDay(d)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold ${day === d ? "bg-brand-gold text-[#08080B]" : "bg-white/[0.05] text-white/70"}`}>{d}</button>
                 ))}
               </div>
             </div>
-
-            <div className="space-y-2.5">
-              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">Hora</span>
-              <div className="grid grid-cols-3 gap-2">
+            <div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-white/45">Hora</span>
+              <div className="grid grid-cols-4 gap-2 mt-1.5">
                 {HOURS.map((h) => (
-                  <button
-                    key={h}
-                    onClick={() => setHour(h)}
-                    className="rounded-xl text-[13px] font-bold"
-                    style={{
-                      height: 48,
-                      background: hour === h ? "#D4A843" : "rgba(255,255,255,.05)",
-                      color: hour === h ? "#08080B" : "rgba(240,240,236,.72)",
-                      border: `1px solid ${hour === h ? "#D4A843" : "rgba(255,255,255,.1)"}`,
-                    }}
-                  >
-                    {h}
-                  </button>
+                  <button key={h} onClick={() => setHour(h)}
+                    className={`py-2 rounded-xl text-xs font-bold ${hour === h ? "bg-brand-gold text-[#08080B]" : "bg-white/[0.05] text-white/70"}`}>{h}</button>
                 ))}
               </div>
             </div>
-
-            <div className="space-y-2.5">
-              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">Encuentro</span>
-              <div className="space-y-2">
+            <div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-white/45">Encuentro</span>
+              <div className="flex gap-2 mt-1.5 flex-wrap">
                 {MEETING_TYPES.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setMeetingType(t)}
-                    className="w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-left"
-                    style={{ borderColor: meetingType === t ? "#D4A843" : "rgba(255,255,255,.1)" }}
-                  >
-                    <span
-                      className="w-4 h-4 rounded-full border shrink-0 flex items-center justify-center"
-                      style={{ borderColor: meetingType === t ? "#D4A843" : "rgba(255,255,255,.3)" }}
-                    >
-                      {meetingType === t && <span className="w-2 h-2 rounded-full bg-brand-gold" />}
-                    </span>
-                    <span className="text-[14px] text-white">{t}</span>
-                  </button>
+                  <button key={t} onClick={() => setMeetingType(t)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold ${meetingType === t ? "bg-brand-gold text-[#08080B]" : "bg-white/[0.05] text-white/70"}`}>{t}</button>
                 ))}
               </div>
             </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-white/[0.07]">
-              <span className="font-serif font-bold text-xl text-brand-gold">Reserva $60</span>
-              <button onClick={confirmBooking} className="btn-gold px-6" style={{ minHeight: 52 }}>
-                Confirmar reserva
-              </button>
-            </div>
+            <button onClick={confirmBooking} className="btn-gold w-full" style={{ minHeight: 52 }}>Confirmar reserva</button>
           </div>
         </div>
       )}

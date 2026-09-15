@@ -71,30 +71,23 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
     }
   }, [location, initialModels]);
 
+  // P0 anti-fachada: se ELIMINÓ la inyección de modelos falsos ("Elena", "Sofía",
+  // "Gabriela" con id: Math.random()) que simulaba un scroll infinito con perfiles
+  // inexistentes marcados como "verificados 4K". La confianza es el diferenciador
+  // del producto; mostrar perfiles falsos la destruye.
+  // TODO (P1): paginación real con cursor (keyset) desde Supabase.
   React.useEffect(() => {
     const handleScroll = () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
         setIsLoading(true);
-        setTimeout(() => {
-          const sampleCities = Object.keys(currentCountry.mapPresets || {});
-          const city1 = sampleCities[0] || (currentCountry.name === "Ecuador" ? "Quito" : "Medellín");
-          const city2 = sampleCities[1] || (currentCountry.name === "Ecuador" ? "Guayaquil" : "Bogotá");
-          const city3 = sampleCities[2] || (currentCountry.name === "Ecuador" ? "Cuenca" : "Cartagena");
-
-          const extraModels: HomePageModel[] = [
-            { id: Math.random().toString(), name: 'Elena', age: 22, location: city1, imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800', plan_type: 'Premium', is_online: true, is_verified_4k: true },
-            { id: Math.random().toString(), name: 'Sofía', age: 23, location: city2, imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800', isBoosted: true, plan_type: 'VIP Elite', is_online: true, is_verified_4k: true },
-            { id: Math.random().toString(), name: 'Gabriela', age: 25, location: city3, imageUrl: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=800', plan_type: 'Diamante', is_online: false, is_verified_4k: true },
-          ];
-          setDisplayModels(prev => [...prev, ...extraModels]);
-          setIsLoading(false);
-        }, 1500);
+        // Real pagination pending — no data fabrication.
+        setIsLoading(false);
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading, currentCountry]);
+  }, [isLoading]);
 
   const [activeTag, setActiveTag] = React.useState<string>("");
 
@@ -249,7 +242,7 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                   </div>
                   <div className="flex items-center gap-2 font-mono text-xs text-white/45">
                     <span className="w-[7px] h-[7px] rounded-full bg-brand-pink block om-breathe" />
-                    <span>{displayModels.length} en línea ahora</span>
+                    <span>{displayModels.filter(m => m.is_online).length} en línea ahora</span>
                   </div>
                 </div>
 

@@ -36,7 +36,10 @@ export default function TurnstileWidget({
   onSuccess,
   onError,
   onExpire,
-  siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
+  // P0 anti-fachada: la key de producción se lee de env. La "test key" de Cloudflare
+  // SIEMPRE pasa, así que usarla en producción dejaba la "protección antibot" decorativa.
+  // Ahora solo se renderiza si hay una site key REAL configurada.
+  siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
   theme = "dark",
   size = "normal"
 }: TurnstileWidgetProps) {
@@ -44,6 +47,7 @@ export default function TurnstileWidget({
   const widgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!siteKey) return; // Sin key real → no se simula protección.
     const renderWidget = () => {
       if (window.turnstile && containerRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
@@ -79,6 +83,14 @@ export default function TurnstileWidget({
       }
     };
   }, [siteKey, theme, size, onSuccess, onError, onExpire]);
+
+  if (!siteKey) {
+    return (
+      <div className="flex flex-col items-center justify-center my-3">
+        <p className="text-[10px] text-white/40">Protección antibot no configurada.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center my-3">

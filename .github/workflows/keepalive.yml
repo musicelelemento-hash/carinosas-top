@@ -1,0 +1,16 @@
+name: keep-alive
+
+# Mantiene "despiertos" los servicios free (render.com se duerme tras ~15 min sin tráfico).
+# Un cron golpea el endpoint de salud de Vercel cada 10 minutos; ese handler
+# hace ping a RENDER_URL (si está configurado) para reactivarlo.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: curl -fsS https://carinosas-top.vercel.app/api/health || true
