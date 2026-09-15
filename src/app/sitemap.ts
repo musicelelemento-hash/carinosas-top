@@ -75,6 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { data: models } = await supabase
       .from('models')
       .select('id, updated_at')
+      .not('id', 'like', 'a1000000-0000-0000-0000-0000000000%')
       .limit(500);
 
     if (models && models.length > 0) {

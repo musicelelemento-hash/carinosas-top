@@ -115,6 +115,7 @@ export default async function CityPage({ params }: { params: Promise<{ ciudad: s
       .from("models")
       .select("id, name, age, sector, city, images, is_verified_4k, plan_type, whatsapp")
       .ilike("city", `%${city}%`)
+      .not("id", "like", "a1000000-0000-0000-0000-0000000000%")
       .limit(24)
       .order("created_at", { ascending: false });
 

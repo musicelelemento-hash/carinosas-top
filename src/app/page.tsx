@@ -58,6 +58,7 @@ export default async function Home({ searchParams }: { searchParams?: Promise<{ 
     const primaryQuery = await supabase
       .from('models')
       .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, is_online, country_code, created_at, voice_greeting_url, description, whatsapp, tags, personal_note')
+      .not('id', 'like', 'a1000000-0000-0000-0000-0000000000%')
       .order('created_at', { ascending: false });
 
     if (!primaryQuery.error && primaryQuery.data) {
@@ -67,6 +68,7 @@ export default async function Home({ searchParams }: { searchParams?: Promise<{ 
       const fallbackQuery = await supabase
         .from('models')
         .select('id, name, age, sector, city, images, is_boosted, plan_type, is_verified_4k, is_online, description, whatsapp, tags')
+        .not('id', 'like', 'a1000000-0000-0000-0000-0000000000%')
         .order('created_at', { ascending: false });
       
       if (fallbackQuery.data) {

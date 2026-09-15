@@ -104,12 +104,6 @@ export default function AdPublishingPortal() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
-  // Phone OTP Verification State
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-
   // Form State
   const [formData, setFormData] = useState({
     name: "",
@@ -138,25 +132,6 @@ export default function AdPublishingPortal() {
     { num: 2, label: "2. Contacto & Datos" },
     { num: 3, label: "3. Activación" },
   ];
-
-  const handleSendPhoneOtp = () => {
-    if (!formData.whatsapp || formData.whatsapp.length < 8) {
-      alert("Por favor ingresa un número de WhatsApp válido.");
-      return;
-    }
-    sound.playSubtleClick();
-    setIsSendingOtp(true);
-    setTimeout(() => {
-      setIsSendingOtp(false);
-      setOtpSent(true);
-      setOtpCode("7492"); // Pre-filled demo PIN for smooth friction-free UX
-    }, 1200);
-  };
-
-  const handleVerifyOtp = () => {
-    sound.playGoldChime();
-    setIsPhoneVerified(true);
-  };
 
   const handleConfirmPayment = () => {
     sound.playGoldChime();
@@ -202,7 +177,7 @@ export default function AdPublishingPortal() {
         plan_type: currentPlan.name === "DIAMANTE" ? "Diamante" : currentPlan.name === "ORO" ? "VIP Elite" : "Anuncio Gratis",
         ageConfirmed: true,
         age: parseInt(formData.age, 10) || 22,
-        is_phone_verified: isPhoneVerified,
+        is_phone_verified: false,
         hourly_rate: parseInt(formData.rate, 10) || 120,
         personal_note: "Cada encuentro es una historia que merece ser contada con elegancia.",
         consent_confirmed: true,
@@ -576,7 +551,8 @@ export default function AdPublishingPortal() {
         )}
 
         {/* ══════════════════════════════════════════════════════════════
-            PASO 2 (GRATIS) / PASO 3 (PAGO): CONTACTO & DATOS CON OTP TEMPRANO
+            PASO 2 (GRATIS) / PASO 3 (PAGO): CONTACTO & DATOS
+            (WhatsApp validado por el equipo antes de activación)
            ══════════════════════════════════════════════════════════════ */}
         {((step === 2 && !isPaid) || (step === 3 && isPaid)) && (
           <motion.form 
@@ -594,75 +570,33 @@ export default function AdPublishingPortal() {
 
             <div className="glass-obsidian border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6">
               
-              {/* ── EARLY WHATSAPP VERIFICATION BOX WITH PIN OTP ── */}
+              {/* ── WHATSAPP OFICIAL DE RESERVAS ── */}
               <div className="p-5 rounded-2xl bg-brand-gold/10 border border-brand-gold/30 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MessageCircle size={18} className="text-brand-gold" />
-                    <label className="text-xs font-black uppercase tracking-wider text-white">
-                      WhatsApp Oficial de Reservas *
-                    </label>
-                  </div>
-                  {isPhoneVerified ? (
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[8px] font-black uppercase tracking-wider flex items-center gap-1">
-                      <CheckCircle2 size={12} /> Verificado 100%
-                    </span>
-                  ) : (
-                    <span className="text-[8px] text-white/50 uppercase font-mono">Paso de Seguridad Obligatorio</span>
-                  )}
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={18} className="text-brand-gold" />
+                  <label className="text-xs font-black uppercase tracking-wider text-white">
+                    WhatsApp Oficial de Reservas *
+                  </label>
+                  <span className="px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-white/60 text-[8px] font-black uppercase tracking-wider">
+                    A validar por el equipo
+                  </span>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex items-center gap-2 flex-1">
-                    <span className="px-3.5 py-3 rounded-2xl bg-white/5 border border-white/10 text-brand-gold font-mono text-sm font-bold">
-                      +593
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="987654321"
-                      value={formData.whatsapp}
-                      onChange={e => {
-                        setFormData({ ...formData, whatsapp: e.target.value });
-                        setIsPhoneVerified(false);
-                        setOtpSent(false);
-                      }}
-                      className="flex-1 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 focus:border-brand-gold outline-none text-white text-sm font-mono placeholder:text-white/30"
-                    />
-                  </div>
-
-                  {!isPhoneVerified && (
-                    <button
-                      type="button"
-                      onClick={handleSendPhoneOtp}
-                      disabled={isSendingOtp || !formData.whatsapp}
-                      className="px-5 py-3 rounded-2xl bg-brand-gold/20 hover:bg-brand-gold text-brand-gold hover:text-brand-black text-[10px] font-black uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
-                    >
-                      {isSendingOtp ? "Enviando..." : otpSent ? "Reenviar PIN" : "Verificar WhatsApp"}
-                    </button>
-                  )}
+                <p className="text-[10px] text-white/50 leading-relaxed">
+                  Proporciona un número real y al alcance: el equipo lo valida antes de activar tu anuncio (protección anti-fachada). Tu número nunca se expone tal cual en el catálogo.
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="px-3.5 py-3 rounded-2xl bg-white/5 border border-white/10 text-brand-gold font-mono text-sm font-bold">
+                    +593
+                  </span>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="987654321"
+                    value={formData.whatsapp}
+                    onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
+                    className="flex-1 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 focus:border-brand-gold outline-none text-white text-sm font-mono placeholder:text-white/30"
+                  />
                 </div>
-
-                {otpSent && !isPhoneVerified && (
-                  <div className="pt-2 flex items-center gap-3 animate-in fade-in">
-                    <input
-                      type="text"
-                      maxLength={4}
-                      value={otpCode}
-                      onChange={e => setOtpCode(e.target.value)}
-                      placeholder="PIN: 7492"
-                      className="w-28 px-3 py-2 text-center rounded-xl bg-black/60 border border-brand-gold text-brand-gold font-mono text-sm tracking-widest font-bold outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleVerifyOtp}
-                      className="px-4 py-2 rounded-xl bg-brand-gold text-brand-black text-[10px] font-black uppercase tracking-wider hover:scale-105 transition-all cursor-pointer"
-                    >
-                      Confirmar PIN
-                    </button>
-                    <span className="text-[9px] text-white/50">Código demo: <strong>7492</strong></span>
-                  </div>
-                )}
               </div>
 
               {/* ── ALTERNATIVE CHANNELS: TELEGRAM & EMAIL ── */}

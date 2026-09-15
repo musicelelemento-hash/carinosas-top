@@ -8,6 +8,9 @@ interface PageProps {
 
 async function getModelData(id: string): Promise<ProfileModel | null> {
   try {
+    // Los perfiles de demostración del seed (IDs a1000000-...) no son anuncios reales.
+    if (/^a1000000-0000-0000-0000-0000000000/i.test(id)) return null;
+
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
     let query = supabase
