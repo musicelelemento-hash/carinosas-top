@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import PrivacyModal from "./PrivacyModal";
 import PhoneVerificationModal from "./PhoneVerificationModal";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
 import { COUNTRIES, type Country } from "@/lib/countries";
 import { EmailValidator } from "@/lib/emailValidator";
@@ -72,6 +73,7 @@ export default function RegistrationAssistant() {
   // Phone Verification State
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   // WebP Compression & Upload State
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -268,6 +270,12 @@ export default function RegistrationAssistant() {
       return;
     }
 
+    // Anti-spam: reto antibot obligatorio antes de publicar.
+    if (!turnstileToken) {
+      alert("Completa la verificación antibot para poder publicar tu perfil.");
+      return;
+    }
+
     setLoading(true);
     try {
       const fullWhatsApp = whatsapp.startsWith("+") 
@@ -287,6 +295,7 @@ export default function RegistrationAssistant() {
         age: Number(age) || 22,
         country_code: selectedCountry.id,
         is_phone_verified: isPhoneVerified || forceProceed,
+        turnstile_token: turnstileToken,
         user_id: createdUserId,
         voice_greeting_url: audioUrl || undefined,
         hourly_rate: Number(hourlyRate) || 120
@@ -951,6 +960,17 @@ export default function RegistrationAssistant() {
                     <span className="text-white/50 uppercase tracking-wider font-bold">WhatsApp:</span>
                     <span className="text-emerald-400 font-mono font-bold">{whatsapp}</span>
                   </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-2.5 pt-1">
+                  <TurnstileWidget
+                    onSuccess={(t) => setTurnstileToken(t)}
+                    onExpire={() => setTurnstileToken("")}
+                    onError={() => setTurnstileToken("")}
+                  />
+                  <span className="text-[10px] text-white/40">
+                    Verificación antibot obligatoria para proteger el catálogo.
+                  </span>
                 </div>
 
                 <button 

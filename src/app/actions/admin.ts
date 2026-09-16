@@ -404,9 +404,35 @@ export async function registerModelAction(modelData: {
   personal_note?: string;
   consent_confirmed?: boolean;
   consent_snapshot?: string;
+  turnstile_token?: string;
 }) {
   if (!modelData.name?.trim()) throw new Error("El nombre artístico es obligatorio.");
   if (!modelData.city?.trim()) throw new Error("La ciudad o cantón es obligatorio.");
+
+  // P0 anti-spam: toda publicación pública exige un reto antibot válido. Sin
+  // token, con token inválido o sin secret configurado se rechaza en frío.
+  const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+  if (!turnstileSecret) {
+    throw new Error("La verificación antibot no está configurada. Publicación bloqueada.");
+  }
+  if (!modelData.turnstile_token) {
+    throw new Error("La verificación antibot es obligatoria para publicar.");
+  }
+  const turnstileForm = new URLSearchParams();
+  turnstileForm.append("secret", turnstileSecret);
+  turnstileForm.append("response", modelData.turnstile_token);
+  const turnstileRes = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: turnstileForm,
+    }
+  );
+  const turnstileOutcome = await turnstileRes.json();
+  if (!turnstileOutcome.success) {
+    throw new Error("Verificación antibot fallida. Recarga la página e inténtalo de nuevo.");
+  }
   
   // Clean phone number
   const cleanPhone = modelData.whatsapp ? modelData.whatsapp.replace(/[^0-9+]/g, "") : "";
@@ -433,8 +459,8 @@ export async function registerModelAction(modelData: {
           country_code: modelData.country_code || "EC",
           is_phone_verified: Boolean(modelData.is_phone_verified),
           user_id: modelData.user_id || null,
-          is_verified: true,
-          is_online: true,
+          is_verified: false,
+          is_online: false,
           voice_greeting_url: modelData.voice_greeting_url,
           hourly_rate: modelData.hourly_rate || 120,
           personal_note: modelData.personal_note || "Cada encuentro es una historia que merece ser contada con elegancia.",

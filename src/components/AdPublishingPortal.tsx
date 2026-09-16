@@ -18,12 +18,9 @@ import {
   MessageCircle, 
   Send, 
   Mail, 
-  Phone, 
   Lock, 
   ChevronRight, 
-  CheckCircle2, 
   RefreshCw, 
-  Info, 
   MapPin,
   Loader2
 } from "lucide-react";
@@ -104,6 +101,8 @@ export default function AdPublishingPortal() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
+  const [turnstileToken, setTurnstileToken] = useState("");
+
   // Form State
   const [formData, setFormData] = useState({
     name: "",
@@ -120,6 +119,13 @@ export default function AdPublishingPortal() {
 
   const isPaid = selectedPlan !== "gratis";
   const currentPlan = PLANS.find(p => p.id === selectedPlan) || PLANS[0];
+
+  const paymentTabs = [
+    { id: "paypal", label: "PayPal Express", icon: Zap, sub: "Cobro Inmediato" },
+    { id: "card", label: "Tarjeta de Crédito", icon: CreditCard, sub: "Visa / Mastercard" },
+    { id: "bank", label: "Transferencia EC", icon: Building2, sub: "Pichincha / Guayaquil" },
+    { id: "crypto", label: "Cripto USDT", icon: QrCode, sub: "100% Anónimo TRC-20" },
+  ] as const;
 
   // Steps definitions
   const stepsList = isPaid ? [
@@ -160,6 +166,12 @@ export default function AdPublishingPortal() {
       return;
     }
     setConsentError(false);
+
+    if (!turnstileToken) {
+      setSubmitError("Completa la verificación antibot para poder publicar tu anuncio.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -181,7 +193,8 @@ export default function AdPublishingPortal() {
         hourly_rate: parseInt(formData.rate, 10) || 120,
         personal_note: "Cada encuentro es una historia que merece ser contada con elegancia.",
         consent_confirmed: true,
-        consent_snapshot: CONSENT_SNAPSHOT
+        consent_snapshot: CONSENT_SNAPSHOT,
+        turnstile_token: turnstileToken
       });
 
       if (typeof window !== "undefined") {
@@ -388,19 +401,14 @@ export default function AdPublishingPortal() {
 
             {/* Payment Method Tabs */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { id: "paypal", label: "PayPal Express", icon: Zap, sub: "Cobro Inmediato" },
-                { id: "card", label: "Tarjeta de Crédito", icon: CreditCard, sub: "Visa / Mastercard" },
-                { id: "bank", label: "Transferencia EC", icon: Building2, sub: "Pichincha / Guayaquil" },
-                { id: "crypto", label: "Cripto USDT", icon: QrCode, sub: "100% Anónimo TRC-20" },
-              ].map((tab) => {
+              {paymentTabs.map((tab) => {
                 const isActive = paymentMethod === tab.id;
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => { sound.playSubtleClick(); setPaymentMethod(tab.id as any); }}
+                    onClick={() => { sound.playSubtleClick(); setPaymentMethod(tab.id); }}
                     className={`p-4 rounded-2xl text-left border transition-all cursor-pointer ${
                       isActive
                         ? 'bg-brand-gold/15 border-brand-gold text-brand-gold shadow-[0_0_20px_rgba(212,168,67,0.25)]'
@@ -767,6 +775,18 @@ export default function AdPublishingPortal() {
                     Confirmo que soy mayor de 18 años y doy mi consentimiento explícito a los 4 puntos anteriores.
                   </span>
                 </label>
+              </div>
+
+              {/* ── VERIFICACIÓN ANTIBOT (obligatoria) ── */}
+              <div className="flex flex-col items-center gap-2.5 pt-1">
+                <TurnstileWidget
+                  onSuccess={(t) => setTurnstileToken(t)}
+                  onExpire={() => setTurnstileToken("")}
+                  onError={() => setTurnstileToken("")}
+                />
+                <span className="text-[9px] text-white/40">
+                  Verificación antibot obligatoria para proteger el catálogo.
+                </span>
               </div>
 
             </div>
