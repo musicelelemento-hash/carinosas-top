@@ -14,6 +14,7 @@ import MobileFiltersSheet from "@/components/MobileFiltersSheet";
 import MobileReelsFeed from "@/components/MobileReelsFeed";
 import TerminalSidebar from "@/components/TerminalSidebar";
 import MobileHomeFeed from "@/components/MobileHomeFeed";
+import { ProfileSkeletonList, EmptyState } from "@/components/ui/VisualComponents";
 import { Sliders, LayoutGrid, Film, Radio, MapPin } from "lucide-react";
 import { type Country, getCountryById } from "@/lib/countries";
 
@@ -247,9 +248,22 @@ export default function HomePageClient({ initialModels }: HomePageClientProps) {
                 </div>
 
                 <div className="grid lg:grid-cols-3 lg:gap-x-[18px] lg:gap-y-[18px]">
-                  {displayModels.map((model) => (
-                    <ProfileCard key={model.id} {...model} />
-                  ))}
+                  {isLoading ? (
+                    <ProfileSkeletonList count={6} layout="grid" />
+                  ) : displayModels.length === 0 ? (
+                    <EmptyState
+                      title="Sin perfiles disponibles aún"
+                      subtitle="No hay modelos registrados en esta ciudad. Vuelve pronto o cambia de ciudad."
+                      action={{
+                        label: "Cambiar ciudad",
+                        onClick: () => resetLocation(),
+                      }}
+                    />
+                  ) : (
+                    displayModels.map((model) => (
+                      <ProfileCard key={model.id} {...model} />
+                    ))
+                  )}
                 </div>
 
                 {isLoading && (

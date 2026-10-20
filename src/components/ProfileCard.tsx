@@ -63,7 +63,7 @@ export default function ProfileCard({
     <>
       <div
         onClick={() => router.push(`/profile/${id}`)}
-        className={`overflow-hidden border border-white/[0.07] bg-[#101014] cursor-pointer group ${isFeed ? "rounded-[20px]" : "rounded-2xl"}`}
+        className={`overflow-hidden border border-white/[0.07] bg-[#101014] cursor-pointer group relative ${isFeed ? "rounded-[20px]" : "rounded-2xl"} transition-all duration-300 hover:border-brand-gold/40 hover:shadow-[0_20px_60px_rgba(212,168,67,0.15)]`}
       >
         <div
           className={`relative overflow-hidden ${isFeed ? "" : "aspect-[4/5]"}`}
@@ -74,7 +74,7 @@ export default function ProfileCard({
             alt={name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
           />
           <div
             className="absolute inset-0 pointer-events-none"
@@ -88,7 +88,7 @@ export default function ProfileCard({
           {isBoosted && (
             <span
               className={`absolute font-mono font-bold ${isFeed ? "top-3 left-3 px-2.5 py-[6px] rounded-lg text-xs" : "top-3 left-3 px-2.5 py-[5px] rounded-md text-[11px] tracking-[0.08em]"}`}
-              style={{ background: "#D4A843", color: "#08080B" }}
+              style={{ background: "#D4A843", color: "#08080B", boxShadow: "0 0 20px rgba(212,168,67,0.4)" }}
             >
               TOP 1
             </span>
@@ -116,12 +116,12 @@ export default function ProfileCard({
           <span className={`font-mono ${isFeed ? "text-xs text-white/45" : "text-[11px] text-white/[0.42]"}`}>{status}</span>
           <button
             onClick={handleContact}
-            className={`flex items-center font-bold transition-all ${
+            className={`flex items-center font-bold transition-all scale-pop-active ${
               isFeed ? "gap-2 px-4 py-[11px] rounded-xl text-sm" : "gap-[7px] px-3.5 py-[9px] rounded-[9px] text-[13px]"
             } ${
               isBoosted
-                ? "bg-brand-gold text-brand-black border border-brand-gold hover:brightness-110"
-                : "bg-transparent text-white border border-white/[0.14] hover:border-brand-gold/40"
+                ? "bg-brand-gold text-brand-black border border-brand-gold hover:brightness-110 hover:scale-105"
+                : "bg-transparent text-white border border-white/[0.14] hover:border-brand-gold/40 hover:bg-white/[0.05]"
             }`}
             style={isFeed ? { minHeight: 44 } : undefined}
           >

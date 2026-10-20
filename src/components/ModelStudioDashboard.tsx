@@ -189,7 +189,7 @@ export default function ModelStudioDashboard() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-28 md:pb-12 space-y-8">
       
       {/* ── TOP VIP PROFILE BANNER ── */}
-      <div className="glass-obsidian border border-brand-gold/30 rounded-[2.5rem] p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="glass-premium border border-brand-gold/30 rounded-[2.5rem] p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
         
         {/* Ambient Gold Aura */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-brand-gold/10 rounded-full blur-[100px] pointer-events-none" />
@@ -228,7 +228,7 @@ export default function ModelStudioDashboard() {
         <div className="flex flex-wrap items-center gap-3 relative z-10">
           
           {/* Availability State Selector */}
-          <div className="p-2 rounded-2xl glass-dark border border-white/10 flex items-center gap-1">
+          <div className="p-2 rounded-2xl glass-premium border border-white/10 flex items-center gap-1">
             {[
               { id: "online", label: "🟢 En Línea", color: "text-emerald-400" },
               { id: "in_appointment", label: "🟡 En Cita", color: "text-amber-400" },
@@ -258,7 +258,7 @@ export default function ModelStudioDashboard() {
             className={`px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg cursor-pointer ${
               isBoosted
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                : "bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:scale-105 active:scale-95 text-brand-black shadow-[0_4px_25px_rgba(212,168,67,0.35)]"
+                : "bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] hover:scale-105 active:scale-95 text-brand-black shadow-[0_4px_25px_rgba(212,168,67,0.35)] border-gold-gradient-animated"
             }`}
           >
             <Rocket size={15} />
@@ -271,7 +271,7 @@ export default function ModelStudioDashboard() {
       {/* ── METRICS STRIP ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {METRICS.map((m, i) => (
-          <div key={i} className="glass-obsidian border border-white/10 rounded-3xl p-5 space-y-2 relative overflow-hidden">
+          <div key={i} className="glass-premium border border-white/10 rounded-3xl p-5 space-y-2 relative overflow-hidden stagger-item" style={{ animationDelay: `${i * 0.1}s` }}>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-[#A1A1AA] uppercase font-black tracking-widest">{m.label}</span>
               <m.icon size={16} className={m.color} />
@@ -286,7 +286,7 @@ export default function ModelStudioDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Earnings Card */}
-        <div className="glass-obsidian border border-brand-gold/30 rounded-[2.5rem] p-6 sm:p-8 space-y-4 relative overflow-hidden bg-gradient-to-br from-[#121218] to-[#0a0a0f]">
+        <div className="glass-premium border border-brand-gold/30 rounded-[2.5rem] p-6 sm:p-8 space-y-4 relative overflow-hidden bg-gradient-to-br from-[#121218] to-[#0a0a0f]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-brand-gold uppercase font-black tracking-[0.2em] flex items-center gap-1.5">
               <DollarSign size={13} /> Facturación Estimada (Este Mes)
@@ -298,7 +298,7 @@ export default function ModelStudioDashboard() {
         </div>
 
         {/* Vault Card */}
-        <div className="glass-obsidian border border-brand-pink/30 rounded-[2.5rem] p-6 sm:p-8 space-y-4 relative overflow-hidden bg-gradient-to-br from-[#140e12] to-[#0a0a0f]">
+        <div className="glass-premium border border-brand-pink/30 rounded-[2.5rem] p-6 sm:p-8 space-y-4 relative overflow-hidden bg-gradient-to-br from-[#140e12] to-[#0a0a0f]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-brand-pink uppercase font-black tracking-[0.2em] flex items-center gap-1.5">
               <Lock size={13} /> Ingresos por Bóveda 4K
@@ -310,7 +310,7 @@ export default function ModelStudioDashboard() {
         </div>
 
         {/* Quick Action Share */}
-        <div className="glass-obsidian border border-white/10 rounded-[2.5rem] p-6 sm:p-8 flex flex-col justify-between space-y-4">
+        <div className="glass-premium border border-white/10 rounded-[2.5rem] p-6 sm:p-8 flex flex-col justify-between space-y-4">
           <div>
             <h3 className="text-base font-serif font-bold text-white">Tu Enlace VIP Directo</h3>
             <p className="text-xs text-[#A1A1AA] mt-1">Comparte tu enlace oficial verificado con clientes de confianza.</p>
@@ -334,7 +334,7 @@ export default function ModelStudioDashboard() {
       </div>
 
       {/* ── TOURS / GIRAS MANAGER ── */}
-      <div className="glass-obsidian border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6">
+      <div className="glass-premium border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-brand-gold mb-1">
@@ -358,7 +358,7 @@ export default function ModelStudioDashboard() {
 
         {/* Add Tour Drawer */}
         {isAddingTour && (
-          <div className="p-5 rounded-2xl glass-dark border border-brand-gold/40 space-y-4 animate-in fade-in">
+          <div className="p-5 rounded-2xl glass-premium border border-brand-gold/40 space-y-4 animate-in fade-in">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-white uppercase tracking-wider">Nueva Ciudad en tu Calendario</span>
               <button onClick={() => setIsAddingTour(false)} className="text-[#A1A1AA] hover:text-white cursor-pointer">
@@ -399,7 +399,7 @@ export default function ModelStudioDashboard() {
         {/* Tour List Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {tours.map((t) => (
-            <div key={t.id} className="p-4 rounded-2xl glass-dark border border-white/10 flex items-center justify-between group hover:border-brand-gold/40 transition-all">
+            <div key={t.id} className="p-4 rounded-2xl glass-premium border border-white/10 flex items-center justify-between group hover:border-brand-gold/40 transition-all">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{t.countryFlag}</span>
@@ -426,9 +426,9 @@ export default function ModelStudioDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Box 1: Hourly Rates */}
-        <div className="glass-obsidian border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6">
-          <div className="space-y-1">
-            <h3 className="text-xl font-serif font-bold text-white italic">Configuración de Tarifas</h3>
+          <div className="glass-premium border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6">
+            <div className="space-y-1">
+              <h3 className="text-xl font-serif font-bold text-white italic">Configuración de Tarifas</h3>
             <p className="text-xs text-[#A1A1AA]">Ajusta tu tarifa por hora reflejada en el catálogo y calculadora.</p>
           </div>
 
@@ -460,9 +460,9 @@ export default function ModelStudioDashboard() {
         </div>
 
         {/* Box 2: Secret Vault Management */}
-        <div className="glass-obsidian border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6">
-          <div className="space-y-1">
-            <h3 className="text-xl font-serif font-bold text-white italic">Bóveda Secreta 4K</h3>
+          <div className="glass-premium border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6">
+            <div className="space-y-1">
+              <h3 className="text-xl font-serif font-bold text-white italic">Bóveda Secreta 4K</h3>
             <p className="text-xs text-[#A1A1AA]">Precio por desbloqueo ilimitado a tu contenido privado.</p>
           </div>
 
@@ -505,7 +505,7 @@ export default function ModelStudioDashboard() {
         )}
         <button
           onClick={handleSaveSettings}
-          className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#D4A843] via-[#FFE088] to-[#AA7C11] text-brand-black font-black text-xs uppercase tracking-[0.25em] shadow-[0_0_30px_rgba(212,168,67,0.4)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="px-8 py-4 rounded-2xl btn-gold-premium text-xs font-black tracking-[0.25em] hover:scale-105 active:scale-95 transition-all cursor-pointer"
         >
           Guardar Configuración
         </button>

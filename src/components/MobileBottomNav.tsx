@@ -57,15 +57,7 @@ export default function MobileBottomNav() {
   return (
     <>
       <div
-        className="md:hidden fixed bottom-0 inset-x-0 z-[60] flex items-start px-2"
-        style={{
-          minHeight: 82,
-          paddingTop: 12,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          background: "rgba(10,10,13,.96)",
-          backdropFilter: "blur(20px)",
-          borderTop: "1px solid rgba(255,255,255,.08)",
-        }}
+        className="md:hidden mobile-bottom-nav"
       >
         {navItems.map(({ id, label, icon: Icon, onClick }) => {
           const isActive = activeTab === id;
@@ -74,23 +66,20 @@ export default function MobileBottomNav() {
               key={id}
               type="button"
               onClick={() => { setActiveTab(id); haptic(); onClick(); }}
-              className="flex-1 flex flex-col items-center justify-center gap-[5px] cursor-pointer"
-              style={{ minHeight: 44 }}
+              className={`nav-item ${isActive ? "active" : ""}`}
             >
-              <Icon size={20} color={isActive ? "#D4A843" : "rgba(240,240,236,.4)"} />
-              <span className="text-[11px] font-semibold" style={{ color: isActive ? "#D4A843" : "rgba(240,240,236,.4)" }}>
-                {label}
-              </span>
+              <Icon size={22} className="nav-icon" />
+              <span>{label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* FAB Concierge IA — fuera del bottom nav, para que el nav quede idéntico al mockup */}
+      {/* FAB Concierge IA — fuera del bottom nav */}
       <button
         type="button"
         onClick={() => window.dispatchEvent(new CustomEvent("open-ai-concierge"))}
-        className="md:hidden fixed z-[61] w-12 h-12 rounded-full flex items-center justify-center bg-brand-gold"
+        className="md:hidden fixed z-[61] w-12 h-12 rounded-full flex items-center justify-center btn-gold-premium text-[12px] font-black"
         style={{
           right: 16,
           bottom: "calc(96px + env(safe-area-inset-bottom, 16px))",

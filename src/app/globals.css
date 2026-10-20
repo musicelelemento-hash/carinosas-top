@@ -803,4 +803,240 @@ select::placeholder {
   opacity: 1 !important;
 }
 
+/* ===== GRADIENTES DORADOS DINÁMICOS ===== */
+@keyframes gold-gradient-move {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.bg-gold-gradient-animated {
+  background: linear-gradient(-45deg, #D4A843, #F2CC70, #AA7C11, #D4A843);
+  background-size: 400% 400%;
+  animation: gold-gradient-move 6s ease infinite;
+}
+
+.text-gold-gradient-animated {
+  background: linear-gradient(-45deg, #F2CC70 0%, #D4A843 40%, #9A7830 70%, #F2CC70 100%);
+  background-size: 300% 300%;
+  animation: gold-gradient-move 5s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.border-gold-gradient-animated {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(#0C0C10, #0C0C10) padding-box,
+              linear-gradient(-45deg, #D4A843, #F2CC70, #AA7C11, #D4A843) border-box;
+  background-size: 400% 400%;
+  animation: gold-gradient-move 6s ease infinite;
+}
+
+/* ===== MICROINTERACCIONES ===== */
+@keyframes scale-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.scale-pop-active {
+  animation: scale-pop 0.15s ease-out;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-12px); opacity: 0; }
+}
+
+.float-up {
+  animation: float-up 0.6s ease-out forwards;
+}
+
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-item {
+  animation: stagger-in 0.4s ease-out forwards;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.pulse-soft {
+  animation: pulse-soft 2.5s ease-in-out infinite;
+}
+
+/* ===== ESTADOS VACÍOS HONESTOS ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  color: rgba(240, 240, 236, 0.45);
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(212, 168, 67, 0.08);
+  border: 1px solid rgba(212, 168, 67, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: #D4A843;
+}
+
+.empty-state h3 {
+  font-family: var(--font-playfair), serif;
+  font-size: 1.25rem;
+  color: #F0F0EC;
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+/* ===== SKELETONS MEJORADOS ===== */
+.skeleton-img {
+  background: linear-gradient(90deg, #101014 0%, #1a1a22 50%, #101014 100%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 2s infinite ease-in-out;
+  border-radius: 16px;
+}
+
+.skeleton-text {
+  background: linear-gradient(90deg, #101014 0%, #1a1a22 50%, #101014 100%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 2s infinite ease-in-out;
+  border-radius: 4px;
+}
+
+.skeleton-circle {
+  background: linear-gradient(90deg, #101014 0%, #1a1a22 50%, #101014 100%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 2s infinite ease-in-out;
+  border-radius: 50%;
+}
+
+.skeleton-line {
+  height: 16px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.skeleton-title {
+  height: 20px;
+  width: 60%;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.skeleton-subtitle {
+  height: 14px;
+  width: 80%;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+/* ===== NAVEGACIÓN MÓVIL PEGAJOSA ===== */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: rgba(8, 8, 12, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  z-index: 60;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  padding-top: 8px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 60px;
+  padding: 6px 4px;
+  border-radius: 12px;
+  color: rgba(240, 240, 236, 0.35);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: #D4A843;
+  background: rgba(212, 168, 67, 0.06);
+  border: 1px solid rgba(212, 168, 67, 0.15);
+}
+
+.nav-item:hover {
+  color: #F0F0EC;
+}
+
+.nav-item.active:hover {
+  color: #D4A843;
+}
+
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  margin-bottom: 2px;
+}
+
+/* ===== BOTÓN GRADIENTE DORADO PREMIUM ===== */
+.btn-gold-premium {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(-45deg, #D4A843, #F2CC70, #AA7C11, #D4A843);
+  background-size: 400% 400%;
+  animation: gold-gradient-move 5s ease infinite;
+  color: #08080B;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 1rem;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 8px 32px rgba(212, 168, 67, 0.25);
+}
+
+.btn-gold-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(212, 168, 67, 0.35);
+}
+
+.btn-gold-premium:active {
+  transform: scale(0.97);
+}
+
+.btn-gold-premium:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 

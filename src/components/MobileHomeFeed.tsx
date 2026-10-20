@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Radar, ChevronRight, MessageCircle, BadgeCheck } from "lucide-react";
 import ProfileCard from "./ProfileCard";
+import { EmptyState } from "@/components/ui/VisualComponents";
 
 interface FeedModel {
   id: string;
@@ -39,6 +40,38 @@ export default function MobileHomeFeed({ models }: MobileHomeFeedProps) {
   const [chip, setChip] = useState<(typeof CHIPS)[number]["id"]>("cerca");
   const second = models[1];
 
+  if (models.length === 0) {
+    return (
+      <div className="lg:hidden flex flex-col">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar" style={{ padding: "0 20px 12px" }}>
+          {CHIPS.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setChip(c.id)}
+              className="shrink-0 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors scale-pop-active"
+              style={{
+                padding: "9px 14px",
+                background: chip === c.id ? "#D4A843" : "rgba(255,255,255,.05)",
+                color: chip === c.id ? "#08080B" : "rgba(240,240,236,.72)",
+                border: `1px solid ${chip === c.id ? "#D4A843" : "rgba(255,255,255,.1)"}`,
+              }}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+        <EmptyState
+          title="Sin perfiles disponibles aún"
+          subtitle="No hay modelos registrados en esta ciudad. Vuelve pronto o cambia de ciudad."
+          action={{
+            label: "Cambiar ciudad",
+            onClick: () => {},
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="lg:hidden flex flex-col">
       {/* Chips — calcado de chip() del mockup */}
@@ -69,7 +102,7 @@ export default function MobileHomeFeed({ models }: MobileHomeFeedProps) {
             {i === 0 && (
               <button
                 onClick={() => router.push("/radar")}
-                className="flex items-center gap-3 text-left rounded-2xl cursor-pointer"
+                className="flex items-center gap-3 text-left rounded-2xl cursor-pointer scale-pop-active"
                 style={{ padding: 14, border: "1px solid rgba(212,168,67,.24)", background: "rgba(212,168,67,.06)" }}
               >
                 <Radar size={20} className="text-brand-gold shrink-0" />
@@ -83,7 +116,7 @@ export default function MobileHomeFeed({ models }: MobileHomeFeedProps) {
 
             {i === 0 && second && (
               <div
-                className="flex items-center gap-3 rounded-2xl"
+                className="flex items-center gap-3 rounded-2xl scale-pop-active"
                 style={{ padding: 12, background: "#101014", border: "1px solid rgba(255,255,255,.07)" }}
               >
                 <div className="relative w-[54px] h-[54px] rounded-xl overflow-hidden shrink-0 bg-[#08080C]">

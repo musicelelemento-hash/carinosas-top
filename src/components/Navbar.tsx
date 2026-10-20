@@ -69,7 +69,7 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
           {/* Logo + ubicación */}
           <div className="flex items-center gap-7 shrink-0">
             <Link href="/" className="flex items-baseline shrink-0">
-              <span className="font-serif font-bold text-[22px] tracking-[0.04em] leading-none text-brand-gold">
+              <span className="font-serif font-bold text-[22px] tracking-[0.04em] leading-none text-gold-gradient-animated">
                 CARIÑOSAS
               </span>
               <span className="font-serif font-bold text-[22px] tracking-[0.04em] leading-none text-white">
@@ -139,7 +139,7 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
 
             <Link
               href="/publicar-anuncio"
-              className="px-[18px] py-2.5 rounded-[10px] bg-brand-gold text-brand-black text-[13px] font-bold hover:brightness-110 transition-all"
+              className="px-[18px] py-2.5 rounded-[10px] btn-gold-premium text-[13px] font-black"
             >
               Publicar anuncio
             </Link>
@@ -149,7 +149,7 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
         {/* ── MOBILE HEADER — 40px, logo Playfair + botón ciudad + búsqueda (spec) ── */}
         <div className="lg:hidden flex items-center justify-between px-5 py-2.5">
           <Link href="/" className="flex items-baseline shrink-0">
-            <span className="font-serif font-bold text-[21px] leading-none text-brand-gold">CARIÑOSAS</span>
+            <span className="font-serif font-bold text-[21px] leading-none text-gold-gradient-animated">CARIÑOSAS</span>
             <span className="font-serif font-bold text-[21px] leading-none text-white">.TOP</span>
           </Link>
 
