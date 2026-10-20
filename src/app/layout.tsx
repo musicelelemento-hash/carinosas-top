@@ -125,6 +125,8 @@ export const metadata: Metadata = {
 };
 
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { ToastLogicProvider } from "@/components/ui/useToast";
+import { ToastArea } from "@/components/ui/ToastArea";
 
 export default function RootLayout({
   children,
@@ -186,7 +188,10 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${playfair.variable} ${alexBrush.variable} ${jetbrainsMono.variable} antialiased bg-[#08080B] text-white selection:bg-brand-gold selection:text-brand-black pb-24 md:pb-0`}
       >
-        {children}
+        <ToastLogicProvider>
+          {children}
+          <ToastArea />
+        </ToastLogicProvider>
         <MobileBottomNav />
       </body>
     </html>

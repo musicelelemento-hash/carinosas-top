@@ -27,6 +27,7 @@ import {
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { useToast } from "@/components/ui/useToast";
 import { sound } from "@/lib/soundEngine";
 import { CONSENT_POINTS, CONSENT_SNAPSHOT } from "@/lib/consent";
 import { registerModelAction } from "@/app/actions/admin";
@@ -102,6 +103,7 @@ export default function AdPublishingPortal() {
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   const [turnstileToken, setTurnstileToken] = useState("");
+  const { toast } = useToast();
 
   // Form State
   const [formData, setFormData] = useState({
@@ -206,6 +208,12 @@ export default function AdPublishingPortal() {
 
       sound.playGoldChime();
       setIsSuccess(true);
+      toast({
+        type: "success",
+        title: "Anuncio publicado",
+        description: `Tu perfil "${formData.name || "Musa VIP"}" se ha registrado correctamente.`,
+        duration: 5000,
+      });
       if (typeof window !== "undefined") {
         confetti({
           particleCount: 130,
@@ -217,6 +225,12 @@ export default function AdPublishingPortal() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error al registrar anuncio.";
       setSubmitError(msg);
+      toast({
+        type: "error",
+        title: "Error al publicar",
+        description: msg,
+        duration: 6000,
+      });
     } finally {
       setIsSubmitting(false);
     }

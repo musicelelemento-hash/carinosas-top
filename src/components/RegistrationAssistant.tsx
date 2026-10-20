@@ -34,6 +34,7 @@ import {
 import PrivacyModal from "./PrivacyModal";
 import PhoneVerificationModal from "./PhoneVerificationModal";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { useToast } from "@/components/ui/useToast";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
 import { COUNTRIES, type Country } from "@/lib/countries";
 import { EmailValidator } from "@/lib/emailValidator";
@@ -45,6 +46,8 @@ export default function RegistrationAssistant() {
   const [plan, setPlan] = useState("VIP Elite");
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  const { toast } = useToast();
   
   // Registration Mode: Express (Phone OTP) vs Account (Email + Password)
   const [registrationMode, setRegistrationMode] = useState<'express' | 'account'>('express');
@@ -300,10 +303,21 @@ export default function RegistrationAssistant() {
         voice_greeting_url: audioUrl || undefined,
         hourly_rate: Number(hourlyRate) || 120
       });
+      toast({
+        type: "success",
+        title: "Perfil registrado",
+        description: `Tu perfil "${name}" ha sido enviado para verificación.`,
+        duration: 5000,
+      });
       setStep(5);
     } catch (err) {
       console.error("Error:", err);
-      alert("Error al registrar. Revisa los datos e intenta de nuevo.");
+      toast({
+        type: "error",
+        title: "Error al registrar",
+        description: "Revisa los datos e intenta de nuevo.",
+        duration: 6000,
+      });
     } finally {
       setLoading(false);
     }

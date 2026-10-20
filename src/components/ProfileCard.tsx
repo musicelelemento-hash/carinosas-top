@@ -7,6 +7,7 @@ import WhatsAppTransition from "./WhatsAppTransition";
 import { useRouter } from "next/navigation";
 import { sound } from "@/lib/soundEngine";
 import { trackEvent } from "@/lib/track";
+import WhatsAppConfirmDialog from "./WhatsAppConfirmDialog";
 
 interface ProfileCardProps {
   id?: string;
@@ -37,26 +38,17 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showWhatsAppConfirm, setShowWhatsAppConfirm] = useState(false);
   const isFeed = layout === "feed";
 
   const cover = images?.[0] || imageUrl || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800';
 
   const handleContact = (e: React.MouseEvent) => {
     e.stopPropagation();
-    sound.playGoldChime();
-    setIsTransitioning(true);
-    if (whatsapp) {
-      // Demanda: CTA de WhatsApp desde tarjeta (grid/feed).
-      trackEvent("whatsapp_cta_click", { modelId: id });
-      const phone = whatsapp.replace(/\D/g, '');
-      const fullPhone = phone.startsWith('593') ? phone : `593${phone.replace(/^0/, '')}`;
-      setTimeout(() => {
-        window.open(`https://wa.me/${fullPhone}?text=Hola%20${encodeURIComponent(name)}%2C%20vi%20tu%20perfil%20en%20Cari%C3%B1osas.top`, '_blank');
-        setIsTransitioning(false);
-      }, 1100);
-    } else {
-      setTimeout(() => setIsTransitioning(false), 1500);
-    }
+    setIsTransitioning(false);
+    if (!whatsapp) return;
+    trackEvent("whatsapp_cta_click", { modelId: id });
+    setShowWhatsAppConfirm(true);
   };
 
   return (
@@ -135,6 +127,20 @@ export default function ProfileCard({
         modelName={name}
         isOpen={isTransitioning}
         onComplete={() => setIsTransitioning(false)}
+      />
+
+      <WhatsAppConfirmDialog
+        isOpen={showWhatsAppConfirm}
+        onClose={() => setShowWhatsAppConfirm(false)}
+        phone={whatsapp ?? ""}
+        name={name}
+        city={location}
+        onConfirm={(fullPhone, modelName, modelCity) => {
+          const suffix = modelCity ? ` (${modelCity})` : "";
+          const text = encodeURIComponent(`Hola ${modelName}, vi tu perfil en Cariñosas.top${suffix}`);
+          window.open(`https://wa.me/${fullPhone}?text=${text}`, "_blank");
+          setShowWhatsAppConfirm(false);
+        }}
       />
     </>
   );
