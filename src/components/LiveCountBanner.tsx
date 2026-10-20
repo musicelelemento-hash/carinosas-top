@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getPopularCities } from "@/lib/cities";
+import { supabase } from "@/lib/supabase";
 
 const TICKER_ITEMS = [
   "✦ VERIFICACIÓN 4K ACTIVA",
@@ -15,17 +15,37 @@ const TICKER_ITEMS = [
 ];
 
 export default function LiveCountBanner() {
-  const [count, setCount] = useState(42);
+  const [count, setCount] = useState<number | null>(null);
   const [cityIndex, setCityIndex] = useState(0);
-  const [prevCount, setPrevCount] = useState(42);
   const [flip, setFlip] = useState(false);
-  const popularCities = getPopularCities();
+  const [prevCount, setPrevCount] = useState<number | null>(null);
+  const popularCities = [
+    { name: "Quito VIP" },
+    { name: "Guayaquil VIP" },
+    { name: "Cuenca VIP" },
+    { name: "Manta VIP" },
+  ];
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data, error } = await supabase
+        .from("models")
+        .select("id", { count: "exact", head: true })
+        .eq("is_online", true)
+        .not("id", "like", "a1000000-0000-0000-0000-0000000000%");
+      if (active && !error) {
+        setCount(data?.length ?? 0);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCount(prev => {
-        const delta = Math.floor(Math.random() * 3) - 1;
-        const next = Math.max(38, Math.min(prev + delta, 56));
+      setCount((prev) => {
+        if (prev === null) return prev;
+        const next = Math.max(0, prev + (Math.floor(Math.random() * 3) - 1));
         if (next !== prev) {
           setPrevCount(prev);
           setFlip(true);
@@ -34,14 +54,15 @@ export default function LiveCountBanner() {
         return next;
       });
       if (popularCities.length > 0) {
-        setCityIndex(prev => (prev + 1) % popularCities.length);
+        setCityIndex((prev) => (prev + 1) % popularCities.length);
       }
     }, 5000);
     return () => clearInterval(timer);
-  }, [popularCities.length]);
+  }, []);
 
-  const currentCity = popularCities[cityIndex]?.name || 'Quito VIP';
+  const currentCity = popularCities[cityIndex]?.name || "Quito VIP";
   const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  const displayCount = count === null ? "--" : count;
 
   return (
     <div className="w-full relative overflow-hidden z-40" style={{ background: 'linear-gradient(90deg, #060608 0%, #0E0E0A 50%, #060608 100%)', borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
@@ -67,7 +88,7 @@ export default function LiveCountBanner() {
           <span className={`text-base font-serif font-bold transition-all duration-300 gold-text-mask ${flip ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}
             style={{ transform: flip ? 'translateY(-6px)' : 'translateY(0)', transition: 'transform 0.3s ease, opacity 0.3s ease' }}
           >
-            {count}
+            {displayCount}
           </span>
           <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/40 whitespace-nowrap">
             Modelos en{' '}

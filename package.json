@@ -10,6 +10,8 @@
     "cloudflare:tunnel": "npx cloudflared tunnel --url http://localhost:3000"
   },
   "dependencies": {
+    "@sentry/nextjs": "^11.8.0",
+    "@sentry/react": "^11.8.0",
     "@supabase/supabase-js": "^2.99.1",
     "@types/leaflet": "^1.9.21",
     "@types/three": "^0.185.4",

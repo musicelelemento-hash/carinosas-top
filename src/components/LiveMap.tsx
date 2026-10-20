@@ -183,7 +183,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
     if (activeRadius === "all") return cityModels;
     // Filter by approx distance
     const maxKm = activeRadius === "1km" ? 1.5 : activeRadius === "3km" ? 3.5 : 6.0;
-    return cityModels.filter(m => (m.distanceKm ?? 1.0) <= maxKm);
+    return cityModels.filter(m => m.distanceKm !== undefined && m.distanceKm <= maxKm);
   }, [cityModels, activeRadius]);
 
   const handleCitySelect = (cityKey: string) => {
@@ -702,10 +702,10 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                         <span className="text-[8px] text-white/50 uppercase tracking-wider truncate block">
                           {model.sector || model.city}
                         </span>
-                        <span className="text-[8px] text-emerald-400 font-bold flex items-center gap-1">
-                          <Navigation size={8} />
-                          A ~ {model.distanceKm || 1.2} km
-                        </span>
+                          <span className="text-[8px] text-emerald-400 font-bold flex items-center gap-1">
+                            <Navigation size={8} />
+                            {model.distanceKm ? `A ~ ${model.distanceKm} km` : "Distancia n/d"}
+                          </span>
                       </div>
                     </div>
 
