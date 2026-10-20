@@ -1,6 +1,17 @@
 "use server";
 
+import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { trackEvent } from "@/lib/track";
+
+function safeEqual(left: string, right: string): boolean {
+  if (left.length !== right.length) return false;
+  let result = 0;
+  for (let i = 0; i < left.length; i++) {
+    result |= left.charCodeAt(i) ^ right.charCodeAt(i);
+  }
+  return result === 0;
+}
 
 export interface VIPPassData {
   pass_code?: string;
@@ -96,7 +107,7 @@ export async function registerVIPPassAction(passData: VIPPassData): Promise<{
           holder_name: cleanHolderName,
           tier_type: passData.tier_type,
           tier_level: passData.tier_level || "Diamante",
-          status: "active",
+          status: "pending",
           payment_method: passData.payment_method,
           payment_hash: cleanHash,
           user_id: passData.user_id || null,
@@ -114,5 +125,42 @@ export async function registerVIPPassAction(passData: VIPPassData): Promise<{
   } catch (err) {
     console.error("registerVIPPassAction Exception:", err);
     return { success: false, error: "Error interno del servidor al crear el pase." };
+  }
+}
+
+/**
+ * Activa un pase VIP pendiente (solo admin). Se usa tras verificar manualmente
+ * que el pago (transferencia bancaria, depósito, etc.) llegó realmente.
+ * Fail-closed: sin ADMIN_SECRET rechaza.
+ */
+export async function activateVIPPassAction(passCode: string, adminToken: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const ADMIN_SECRET = process.env.ADMIN_SECRET;
+    if (!ADMIN_SECRET) throw new Error("ADMIN_SECRET no está configurada.");
+
+    const expected = crypto.createHmac("sha256", ADMIN_SECRET).update("admin-activate-pass").digest("hex");
+    if (!safeEqual(adminToken, expected)) {
+      return { success: false, error: "Token de administrador inválido." };
+    }
+
+    const cleanCode = passCode.replace(/[^A-Z0-9-]/gi, "").toUpperCase().slice(0, 30);
+
+    const { error } = await supabaseAdmin
+      .from("vip_passes")
+      .update({ status: "active" })
+      .eq("pass_code", cleanCode)
+      .eq("status", "pending");
+
+    if (error) return { success: false, error: error.message };
+
+    await trackEvent("vip_payment_confirmed", { passCode: cleanCode, method: "manual_admin" });
+
+    return { success: true };
+  } catch (err) {
+    console.error("activateVIPPassAction error:", err);
+    return { success: false, error: "Error activando el pase." };
   }
 }

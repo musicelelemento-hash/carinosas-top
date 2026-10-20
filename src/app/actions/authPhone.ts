@@ -35,7 +35,7 @@ function isPhoneLocked(cleanPhone: string): { isLocked: boolean; remainingMinute
 export async function sendPhoneOtpAction(
   phoneNumber: string, 
   channel: 'whatsapp_otp' | 'sms_otp'
-): Promise<{ success: boolean; message: string; isLocked?: boolean; whatsAppLink?: string }> {
+): Promise<{ success: boolean; message: string; isLocked?: boolean; whatsAppLink?: string; smsSent?: boolean; smsError?: string | null }> {
   try {
     const cleanPhone = phoneNumber.replace(/[^0-9+]/g, "");
     if (cleanPhone.length < 8) {
@@ -89,18 +89,63 @@ export async function sendPhoneOtpAction(
     const channelName = channel === 'whatsapp_otp' ? 'WhatsApp' : 'SMS';
     console.log(`[OTP Engine] Code generated for ${cleanPhone} via ${channelName}`);
 
-    // TODO (P1): integración real de entrega del código (WhatsApp Business API / Twilio).
-    // P0 anti-fachada: el código ya NO se devuelve al cliente (antes viajaba en
-    // `debugOtp` y se mostraba en pantalla con autocompletar, simulando una
-    // verificación que no existía).
+    // --- Entrega real del código (P1) ---------------------------------------
+    // Intenta enviar por SMS via Twilio. Si no hay credenciales, el código
+    // queda almacenado en otpCache pero NO se entrega: no se simula entrega.
+    let smsSent = false;
+    let smsError: string | null = null;
 
-    const whatsAppMessage = encodeURIComponent(`Hola Cariñosas.top, mi código de verificación de seguridad es: [OTP]`);
-    const whatsAppLink = `https://wa.me/593987654321?text=${whatsAppMessage}`;
+    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+    const twilioFrom = process.env.TWILIO_FROM_NUMBER;
+
+    if (twilioAccountSid && twilioAuthToken && twilioFrom) {
+      try {
+        const smsBody = `Tu código de verificación de Cariñosas.top es: ${generatedOtp}. Válido por 5 minutos. No lo compartas.`;
+        const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
+        const auth = Buffer.from(`${twilioAccountSid}:${twilioAuthToken}`).toString("base64");
+        const formData = new URLSearchParams();
+        formData.append("From", twilioFrom);
+        formData.append("To", cleanPhone);
+        formData.append("Body", smsBody);
+
+        const twilioRes = await fetch(twilioUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${auth}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formData,
+        });
+
+        if (twilioRes.ok) {
+          smsSent = true;
+          console.log(`[OTP Twilio] SMS enviado a ${cleanPhone}`);
+        } else {
+          const errText = await twilioRes.text();
+          smsError = `Twilio HTTP ${twilioRes.status}: ${errText}`;
+          console.error("[OTP Twilio] Error enviando SMS:", smsError);
+        }
+      } catch (err) {
+        smsError = err instanceof Error ? err.message : "Error desconocido de Twilio";
+        console.error("[OTP Twilio] Excepción:", smsError);
+      }
+    } else {
+      smsError = "Credenciales de Twilio no configuradas (TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER).";
+      console.warn("[OTP] " + smsError);
+    }
+
+    const whatsAppMessage = encodeURIComponent(`Hola Cariñosas.top, mi código de verificación de seguridad es: ${generatedOtp}`);
+    const whatsAppLink = `https://wa.me/${cleanPhone.replace(/^\+/, "")}?text=${whatsAppMessage}`;
 
     return {
       success: true,
-      message: `Código de seguridad generado por ${channelName} para ${cleanPhone}`,
-      whatsAppLink
+      message: smsSent
+        ? `Código de seguridad enviado por SMS a ${cleanPhone}`
+        : `Código generado. ${smsError ? "Entrega pendiente: " + smsError : ""}`,
+      whatsAppLink,
+      smsSent,
+      smsError,
     };
   } catch (err) {
     console.error("sendPhoneOtpAction error:", err);

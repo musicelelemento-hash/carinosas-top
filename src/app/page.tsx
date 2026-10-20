@@ -24,8 +24,8 @@ interface DbModel {
   personal_note: string | null;
 }
 
-// Opt out of client caching for dynamic catalogs so updates are shown immediately
-export const revalidate = 0;
+// Caché ISR de 60s: el catálogo se actualiza cada minuto sin golpear Supabase en cada visita
+export const revalidate = 60;
 
 export default async function Home({ searchParams }: { searchParams?: Promise<{ city?: string }> }) {
   interface DisplayModel {

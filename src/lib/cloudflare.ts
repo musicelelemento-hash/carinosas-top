@@ -28,11 +28,10 @@ export class CloudflareService {
     token: string, 
     remoteIp?: string
   ): Promise<CloudflareTurnstileVerifyResult> {
-    const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || "0x4AAAAAAAxxxxxxSECRET_KEY";
+    const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
 
-    // In development or if test keys are used, return success to prevent local blocks
-    if (token === "DUMMY_DEV_TOKEN_PASS" || (process.env.NODE_ENV === "development" && !process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY)) {
-      return { success: true, hostname: "localhost" };
+    if (!secretKey) {
+      return { success: false, "error-codes": ["missing-secret-key"] };
     }
 
     try {

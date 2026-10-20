@@ -30,6 +30,7 @@ import {
   Star
 } from "lucide-react";
 import { COUNTRIES } from "@/lib/countries";
+import { getModelDashboardByNameAction, type ModelMetrics } from "@/app/actions/modelMetrics";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { sound } from "@/lib/soundEngine";
@@ -70,14 +71,52 @@ export default function ModelStudioDashboard() {
   const [newTourDates, setNewTourDates] = useState("10 - 15 Sep");
   const [isAddingTour, setIsAddingTour] = useState(false);
 
-  // Metrics
+  // Metricas reales del modelo (desde Supabase). Sin datos -> ceros honestos.
+  const [realMetrics, setRealMetrics] = useState<ModelMetrics | null>(null);
+  const [metricsLoading, setMetricsLoading] = useState(true);
+
+  React.useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const stored = localStorage.getItem("model_name");
+        if (!stored) {
+          setMetricsLoading(false);
+          return;
+        }
+        const { modelId, metrics } = await getModelDashboardByNameAction(stored);
+        if (active) {
+          setRealMetrics(metrics);
+          if (modelId) localStorage.setItem("model_id", modelId);
+        }
+      } catch (err) {
+        console.error("Model metrics load error:", err);
+      } finally {
+        if (active) setMetricsLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const m = realMetrics ?? {
+    weeklyViews: 0,
+    whatsappClicks: 0,
+    bookingRequests: 0,
+    vipUnlocks: 0,
+    estimatedEarningsUsd: 0,
+    verified4k: false,
+    isOnline: false,
+    hourlyRate: hourlyRate || 0,
+    vaultRate: vaultRate || 19,
+  };
+
   const stats = {
-    weeklyViews: 2480,
-    whatsappClicks: 142,
-    estimatedEarnings: 142 * 0.18 * hourlyRate, // ~25 bookings * $150 = $3,750
-    vaultUnlocks: 38,
-    vaultEarnings: 38 * vaultRate, // 38 * $35 = $1,330
-    rankingPosition: isBoosted ? "#1 Destacada 4K VIP" : "#3 en Catálogo Top"
+    weeklyViews: m.weeklyViews,
+    whatsappClicks: m.whatsappClicks,
+    estimatedEarnings: m.estimatedEarningsUsd,
+    vaultUnlocks: m.vipUnlocks,
+    vaultEarnings: m.vipUnlocks * vaultRate,
+    rankingPosition: m.verified4k && m.isOnline ? "#1 Destacada 4K VIP" : m.weeklyViews > 0 ? "#3 en Catálogo Top" : "Sin actividad aún",
   };
 
   const METRICS = [

@@ -65,6 +65,7 @@ interface MapModel {
   age?: number;
   rate?: number;
   distanceKm?: number;
+  is_online?: boolean;
 }
 
 interface LiveMapProps {
@@ -227,7 +228,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   if (variant === "panel") {
     const activityFeed = displayMapModels.slice(0, 5).map((m, i) => ({
       model: m,
-      action: i === 0 ? "se activó cerca" : i % 2 === 0 ? "está en línea" : "actualizó su ubicación",
+      action: i === 0 ? "se activó cerca" : m.is_online === true ? "está en línea" : "actualizó su ubicación",
       time: i === 0 ? "ahora" : `${(i + 1) * 4} min`,
     }));
 
@@ -495,7 +496,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                       <span className="text-white/30">·</span>
                       <span className="text-[#D4A843] flex items-center gap-1">
                         <Navigation size={9} />
-                        A ~ {model.distanceKm || 1.2} km
+                        {model.distanceKm ? `A ~ ${model.distanceKm} km` : "Distancia n/d"}
                       </span>
                     </div>
                   </div>
