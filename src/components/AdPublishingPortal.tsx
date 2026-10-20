@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { 
   Crown, 
@@ -22,13 +22,15 @@ import {
   ChevronRight, 
   RefreshCw, 
   MapPin,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { useToast } from "@/components/ui/useToast";
 import { sound } from "@/lib/soundEngine";
+import { StorageEngine } from "@/lib/storage";
 import { CONSENT_POINTS, CONSENT_SNAPSHOT } from "@/lib/consent";
 import { registerModelAction } from "@/app/actions/admin";
 
@@ -104,6 +106,9 @@ export default function AdPublishingPortal() {
 
   const [turnstileToken, setTurnstileToken] = useState("");
   const { toast } = useToast();
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -152,6 +157,32 @@ export default function AdPublishingPortal() {
     }, 1500);
   };
 
+  const handleFileSelectAndCompress = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploadingImages(true);
+    try {
+      const newUrls: string[] = [];
+      for (const file of files) {
+        const url = await StorageEngine.uploadToSupabaseDirect(file, file.name);
+        if (url) newUrls.push(url);
+      }
+
+      setUploadedImages((prev) => [...prev, ...newUrls].slice(0, 12));
+    } catch (err) {
+      console.error("Photo upload error:", err);
+      toast({
+        type: "error",
+        title: "Error subiendo fotos",
+        description: "No se pudieron subir las imágenes. Intenta de nuevo.",
+        duration: 5000,
+      });
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [consentAccepted, setConsentAccepted] = useState(false);
@@ -196,7 +227,8 @@ export default function AdPublishingPortal() {
         personal_note: "Cada encuentro es una historia que merece ser contada con elegancia.",
         consent_confirmed: true,
         consent_snapshot: CONSENT_SNAPSHOT,
-        turnstile_token: turnstileToken
+        turnstile_token: turnstileToken,
+        images: uploadedImages,
       });
 
       if (typeof window !== "undefined") {
@@ -741,13 +773,52 @@ export default function AdPublishingPortal() {
                   </span>
                 </div>
 
-                <div className="border-2 border-dashed border-white/15 hover:border-brand-gold/50 rounded-3xl p-8 text-center bg-white/[0.02] cursor-pointer transition-all space-y-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileSelectAndCompress}
+                  className="hidden"
+                />
+
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-white/15 hover:border-brand-gold/50 rounded-3xl p-8 text-center bg-white/[0.02] cursor-pointer transition-all space-y-2"
+                >
                   <div className="w-12 h-12 rounded-2xl glass-dark border border-brand-gold/40 text-brand-gold mx-auto flex items-center justify-center">
-                    <UploadCloud size={24} />
+                    {uploadingImages ? <Loader2 size={24} className="animate-spin" /> : <UploadCloud size={24} />}
                   </div>
-                  <span className="text-xs font-bold text-white block">Haz clic o arrastra fotos en alta resolución</span>
-                  <span className="text-[9px] text-white/40 block">Máximo 12 fotos 4K y 2 vídeos</span>
+                  <span className="text-xs font-bold text-white block">
+                    {uploadingImages ? "Subiendo fotos..." : "Haz clic o arrastra fotos en alta resolución"}
+                  </span>
+                  <span className="text-[9px] text-white/40 block">
+                    Máximo 12 fotos 4K · {uploadedImages.length} subidas
+                  </span>
                 </div>
+
+                {uploadedImages.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto no-scrollbar">
+                    {uploadedImages.map((url, i) => (
+                      <div key={i} className="relative group">
+                        <img
+                          src={url}
+                          alt={`Foto ${i + 1}`}
+                          className="object-cover rounded-xl w-full h-16"
+                          style={{ objectFit: "cover" }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setUploadedImages((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-500/90 flex items-center justify-center text-xs text-white hover:bg-rose-500 transition-colors"
+                          aria-label="Eliminar foto"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {submitError && (
