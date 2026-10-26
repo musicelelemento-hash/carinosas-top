@@ -231,7 +231,7 @@ export async function createModelAction(modelData: {
         sector: modelData.sector,
         voice_greeting_url: modelData.voice_greeting_url,
         hourly_rate: modelData.hourly_rate || 120,
-        is_verified: modelData.is_verified ?? true,
+        is_verified: modelData.is_verified ?? false,
         is_verified_4k: modelData.is_verified_4k ?? false,
         is_online: false,
         personal_note: modelData.personal_note || "Cada encuentro es una historia que merece ser contada con elegancia.",
@@ -399,6 +399,7 @@ export async function registerModelAction(modelData: {
   country_code?: string;
   is_phone_verified?: boolean;
   user_id?: string;
+  access_token?: string;
   voice_greeting_url?: string;
   hourly_rate?: number;
   personal_note?: string;
@@ -408,6 +409,23 @@ export async function registerModelAction(modelData: {
 }) {
   if (!modelData.name?.trim()) throw new Error("El nombre artístico es obligatorio.");
   if (!modelData.city?.trim()) throw new Error("La ciudad o cantón es obligatorio.");
+  if (modelData.ageConfirmed !== true) throw new Error("Debes confirmar que tienes al menos 18 años.");
+  const submittedAge = Number(modelData.age);
+  if (!Number.isInteger(submittedAge) || submittedAge < 18) {
+    throw new Error("La edad del perfil debe ser de 18 años o más.");
+  }
+
+  // Never trust a user_id supplied by the browser. Link an account only after
+  // Supabase Auth verifies its access token on the server.
+  let verifiedUserId: string | null = null;
+  if (modelData.access_token) {
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(modelData.access_token);
+    if (authError || !authData.user) throw new Error("La sesión de la cuenta no es válida. Inicia sesión e inténtalo de nuevo.");
+    verifiedUserId = authData.user.id;
+  }
+  if (modelData.user_id && modelData.user_id !== verifiedUserId) {
+    throw new Error("No se pudo verificar la propiedad de esta cuenta.");
+  }
 
   // P0 anti-spam: toda publicación pública exige un reto antibot válido. Sin
   // token, con token inválido o sin secret configurado se rechaza en frío.
@@ -440,7 +458,8 @@ export async function registerModelAction(modelData: {
     throw new Error("El número de WhatsApp debe tener al menos 7 dígitos.");
   }
 
-  const modelAge = modelData.age && modelData.age >= 18 ? modelData.age : 22;
+  const modelAge = submittedAge;
+  let createdModelId: string | undefined;
 
   try {
     const { data, error } = await supabaseAdmin
@@ -458,7 +477,7 @@ export async function registerModelAction(modelData: {
           age: modelAge,
           country_code: modelData.country_code || "EC",
           is_phone_verified: Boolean(modelData.is_phone_verified),
-          user_id: modelData.user_id || null,
+          user_id: verifiedUserId,
           is_verified: false,
           is_online: false,
           voice_greeting_url: modelData.voice_greeting_url,
@@ -471,18 +490,22 @@ export async function registerModelAction(modelData: {
       .select("id");
 
     if (error) {
-      console.warn("Supabase insert notice (fallback to memory/mock):", error.message);
+      console.error("Model registration failed:", error.message);
+      throw new Error("No se pudo guardar el perfil. Inténtalo de nuevo.");
     } else if (data?.[0]?.id) {
+      createdModelId = data[0].id;
       // Oferta: registro público de una nueva modelo.
       try {
         await trackEvent("model_registered", { modelId: data[0].id as string });
       } catch {}
     }
   } catch (err) {
-    console.warn("Database registration non-fatal error:", err);
+    console.error("Database registration error:", err);
+    throw err instanceof Error ? err : new Error("No se pudo guardar el perfil.");
   }
 
-  return { success: true, message: "¡Perfil registrado exitosamente!" };
+  if (!createdModelId) throw new Error("No se pudo confirmar el registro del perfil.");
+  return { success: true, modelId: createdModelId, message: "¡Perfil registrado exitosamente!" };
 }
 
 /**
@@ -838,7 +861,15 @@ export async function duplicateModelAction(modelId: string) {
 
   if (fetchErr || !original) throw new Error("No se encontró el perfil original a duplicar.");
 
-  const { id, created_at, updated_at, ...cloneData } = original;
+  const {
+    id,
+    created_at,
+    updated_at,
+    user_id,
+    consent_at,
+    consent_snapshot,
+    ...cloneData
+  } = original;
 
   const { data: created, error: createErr } = await supabaseAdmin
     .from("models")
@@ -846,6 +877,14 @@ export async function duplicateModelAction(modelId: string) {
       {
         ...cloneData,
         name: `${cloneData.name} (Copia)`,
+        user_id: null,
+        consent_at: null,
+        consent_snapshot: null,
+        is_verified: false,
+        is_verified_4k: false,
+        is_online: false,
+        is_boosted: false,
+        is_phone_verified: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }

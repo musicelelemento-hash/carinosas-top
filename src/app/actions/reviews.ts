@@ -22,6 +22,7 @@ export async function getVIPReviewsAction(modelId?: string): Promise<VIPReviewIt
     let query = supabaseAdmin
       .from("vip_reviews")
       .select("*")
+      .eq("is_verified_booking", true)
       .order("created_at", { ascending: false });
 
     if (modelId) {
@@ -62,7 +63,7 @@ export async function submitVIPReviewAction(reviewData: {
       return { success: false, error: "El comentario debe tener al menos 5 caracteres." };
     }
 
-    if (reviewData.rating < 1 || reviewData.rating > 5) {
+    if (!Number.isInteger(reviewData.rating) || reviewData.rating < 1 || reviewData.rating > 5) {
       return { success: false, error: "La calificación debe estar entre 1 y 5 estrellas." };
     }
 
@@ -76,16 +77,30 @@ export async function submitVIPReviewAction(reviewData: {
     if (reviewData.pass_code?.trim()) {
       const { data: pass } = await supabaseAdmin
         .from("vip_passes")
-        .select("tier_level, status")
+        .select("tier_level, status, expires_at")
         .eq("pass_code", reviewData.pass_code.trim().toUpperCase())
         .single();
 
-      if (pass && pass.status === "active") {
+      const { data: completedBooking } = await supabaseAdmin
+        .from("booking_requests")
+        .select("id")
+        .eq("model_id", reviewData.model_id)
+        .eq("client_pass_code", reviewData.pass_code.trim().toUpperCase())
+        .eq("status", "completed")
+        .limit(1)
+        .maybeSingle();
+
+      if (
+        pass
+        && pass.status === "active"
+        && (!pass.expires_at || new Date(pass.expires_at).getTime() > Date.now())
+        && completedBooking
+      ) {
         isVerified = true;
         assignedBadge = `${pass.tier_level || "Diamante"} VIP`;
       }
     }
-    // Sin pass_code válido → reseña pública pero NO marcada como "reserva verificada".
+    // Un pase activo por sí solo no demuestra que una cita se haya completado.
 
     // Sanitize user inputs against XSS and excessive payloads
     const cleanComment = reviewData.comment.replace(/<[^>]*>?/gm, "").trim().slice(0, 1000);

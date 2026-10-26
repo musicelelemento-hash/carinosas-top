@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft,
-  SlidersHorizontal,
   EyeOff,
   BadgeCheck,
   Compass,
@@ -14,33 +13,15 @@ import {
 import LiveMap from "@/components/LiveMap";
 import RadarVisual, { type RadarBlipData } from "@/components/RadarVisual";
 import { getCountryById } from "@/lib/countries";
-import { haversineKm, formatDistanceKm } from "@/lib/geo";
-import { supabase } from "@/lib/supabase";
 
 // P0 anti-fachada: sin perfiles geolocalizados reales mostramos el radar vacío,
 // en lugar de blips ficticios (Valentina/Camila/Elena) con distancias inventadas.
 const FALLBACK_BLIPS: RadarBlipData[] = [];
 
-/** Obtiene la posición del usuario; si no hay permiso, usa el centro de la ciudad. */
-function getUserPosition(fallback: [number, number]): Promise<[number, number]> {
-  return new Promise((resolve) => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      resolve(fallback);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve([pos.coords.latitude, pos.coords.longitude]),
-      () => resolve(fallback),
-      { timeout: 6000 }
-    );
-  });
-}
-
 export default function GeoRadarFullscreen() {
-  const [activeRadius, setActiveRadius] = useState<string>("5km");
   const [hidden, setHidden] = useState(false);
   const [vista, setVista] = useState<"radar" | "mapa">("radar");
-  const [blips, setBlips] = useState<RadarBlipData[]>(FALLBACK_BLIPS);
+  const blips = FALLBACK_BLIPS;
   const ecuador = getCountryById("ecuador");
   const nearest = blips[0];
 
@@ -49,47 +30,6 @@ export default function GeoRadarFullscreen() {
       setVista("mapa");
     }
   }, []);
-
-  useEffect(() => {
-    let active = true;
-    const fallbackCenter: [number, number] =
-      ecuador.mapPresets?.[ecuador.defaultCity]?.center ?? [-3.2581, -79.9161];
-
-    (async () => {
-      // P0: distancia REAL (Haversine) y estado "en línea" REAL (is_online),
-      // en lugar de `(i+1)*1.2 km` y `i%2===0`.
-      const [userLat, userLng] = await getUserPosition(fallbackCenter);
-
-      const { data } = await supabase
-        .from("models")
-        .select("id, name, images, lat, lng, is_online")
-        .not("lat", "is", null)
-        .not("lng", "is", null)
-        .limit(20);
-
-      if (!active || !data || data.length === 0) return;
-
-      const mapped = data
-        .map((m) => ({
-          id: m.id,
-          name: m.name,
-          km: formatDistanceKm(haversineKm(userLat, userLng, m.lat as number, m.lng as number)),
-          avatar: m.images?.[0],
-          live: m.is_online === true,
-        }))
-        .sort((a, b) => {
-          const ka = parseFloat(a.km.replace(",", "."));
-          const kb = parseFloat(b.km.replace(",", "."));
-          return ka - kb;
-        });
-
-      if (active) setBlips(mapped);
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [ecuador]);
 
   return (
     <div className="min-h-screen bg-[#08080B] text-white pt-20 pb-12 flex flex-col">
@@ -108,7 +48,7 @@ export default function GeoRadarFullscreen() {
             <div>
               <span className="font-serif text-xl sm:text-2xl font-bold text-white block">Cerca de ti</span>
               <span className="text-[12px] font-mono text-white/45 block mt-0.5">
-                {ecuador.mapPresets ? Object.keys(ecuador.mapPresets)[0] : "Machala"} · {activeRadius === "all" ? "toda la ciudad" : activeRadius}
+                {ecuador.mapPresets ? Object.keys(ecuador.mapPresets)[0] : "Ecuador"} · zonas generales
               </span>
             </div>
           </div>
@@ -131,16 +71,9 @@ export default function GeoRadarFullscreen() {
             </div>
 
             <button
-              onClick={() => setActiveRadius((r) => (r === "5km" ? "1km" : "5km"))}
-              className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white shrink-0"
-              title="Ajustar radio"
-            >
-              <SlidersHorizontal size={17} />
-            </button>
-            <button
               onClick={() => setHidden((v) => !v)}
               className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-colors ${hidden ? 'bg-brand-gold text-brand-black border-brand-gold' : 'bg-white/[0.06] border-white/[0.08] text-white'}`}
-              title={hidden ? "Volver a ser visible" : "Ocultarme del radar"}
+              title={hidden ? "Mostrar radar" : "Ocultar radar"}
             >
               <EyeOff size={17} />
             </button>
@@ -151,6 +84,11 @@ export default function GeoRadarFullscreen() {
           /* ── RADAR DECORATIVO (calcado del mockup screenRadar) ── */
           <div className="flex-1 rounded-3xl overflow-hidden border border-white/[0.1] min-h-[600px] relative">
             <RadarVisual size="full" blips={hidden ? [] : blips} />
+            {blips.length === 0 && !hidden && (
+              <p className="absolute inset-x-6 bottom-8 text-center text-sm text-white/60">
+                Por privacidad, mostramos ciudades y sectores, no puntos exactos de personas.
+              </p>
+            )}
 
             {nearest && !hidden && (
               <div className="absolute left-0 right-0 bottom-4 px-4">

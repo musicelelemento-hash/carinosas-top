@@ -5,6 +5,7 @@ import Image from "next/image";
 import { StitchEngine } from "@/lib/stitch";
 import { registerModelAction } from "@/app/actions/admin";
 import { signUpWithEmailAction } from "@/app/actions/authAccount";
+import { supabase } from "@/lib/supabase";
 import { ImageOptimizer } from "@/lib/imageOptimizer";
 import { StorageEngine } from "@/lib/storage";
 import { UploadDropzone } from "@/components/Uploadthing";
@@ -38,6 +39,7 @@ import { useToast } from "@/components/ui/useToast";
 import { getProvinces, getCitiesByProvince } from "@/lib/cities";
 import { COUNTRIES, type Country } from "@/lib/countries";
 import { EmailValidator } from "@/lib/emailValidator";
+import { buildConciergeWhatsAppUrl } from "@/lib/whatsapp";
 
 export default function RegistrationAssistant() {
   const [mounted, setMounted] = useState(false);
@@ -237,6 +239,8 @@ export default function RegistrationAssistant() {
 
   const handleRegister = async (forceProceed = false) => {
     let createdUserId: string | undefined;
+    let createdAccessToken: string | undefined;
+    let createdRefreshToken: string | undefined;
 
     // 1. Account Mode Validation & User Creation
     if (registrationMode === "account") {
@@ -262,6 +266,8 @@ export default function RegistrationAssistant() {
           return;
         }
         createdUserId = authRes.user?.id;
+        createdAccessToken = authRes.session?.access_token;
+        createdRefreshToken = authRes.session?.refresh_token;
       } catch (authErr) {
         console.error("Auth creation error:", authErr);
       }
@@ -285,7 +291,7 @@ export default function RegistrationAssistant() {
         ? whatsapp 
         : `${selectedCountry.dialCode}${whatsapp.replace(/^0+/, "")}`;
 
-      await registerModelAction({
+      const registrationResult = await registerModelAction({
         name,
         city: `${city}, ${selectedCountry.name}`,
         sector,
@@ -295,14 +301,19 @@ export default function RegistrationAssistant() {
         images,
         plan_type: plan,
         ageConfirmed,
-        age: Number(age) || 22,
+        age,
         country_code: selectedCountry.id,
         is_phone_verified: isPhoneVerified || forceProceed,
         turnstile_token: turnstileToken,
         user_id: createdUserId,
+        access_token: createdAccessToken,
         voice_greeting_url: audioUrl || undefined,
         hourly_rate: Number(hourlyRate) || 120
       });
+      if (registrationResult.success && registrationResult.modelId && createdAccessToken && createdRefreshToken) {
+        localStorage.setItem("model_id", registrationResult.modelId);
+        await supabase.auth.setSession({ access_token: createdAccessToken, refresh_token: createdRefreshToken });
+      }
       toast({
         type: "success",
         title: "Perfil registrado",
@@ -735,7 +746,7 @@ export default function RegistrationAssistant() {
 
               <div className="flex gap-4 pt-2">
                 <button onClick={() => setStep(1)} className="px-6 py-4 text-white/50 text-xs uppercase tracking-widest border border-white/10 rounded-2xl hover:text-white transition-colors">Volver</button>
-                <button onClick={handleTransform} disabled={!name || !whatsapp || !desc || !ageConfirmed} className="flex-1 bg-brand-gold hover:bg-white text-brand-black font-black py-4 rounded-2xl uppercase tracking-widest disabled:opacity-30 transition-all shadow-lg">Continuar a Galería Multimedia</button>
+                <button onClick={handleTransform} disabled={!name || !whatsapp || !desc || !ageConfirmed || !Number.isInteger(age) || age < 18} className="flex-1 bg-brand-gold hover:bg-white text-brand-black font-black py-4 rounded-2xl uppercase tracking-widest disabled:opacity-30 transition-all shadow-lg">Continuar a Galería Multimedia</button>
               </div>
             </div>
           </div>
@@ -1028,8 +1039,9 @@ export default function RegistrationAssistant() {
 
             <button
               onClick={() => {
-                const text = encodeURIComponent(`Hola, acabo de registrar mi perfil ${name} en Cariñosas.top con plan ${plan}. Deseo activar mi publicación.`);
-                window.open(`https://wa.me/593987654321?text=${text}`, '_blank');
+                const url = buildConciergeWhatsAppUrl(`Hola, acabo de registrar mi perfil ${name} en Cariñosas.top con plan ${plan}. Deseo consultar el estado de mi publicación.`);
+                if (url) window.open(url, "_blank", "noopener,noreferrer");
+                else toast({ type: "error", title: "Contacto no configurado", description: "El contacto de Concierge no está disponible ahora." });
               }}
               className="w-full py-4 bg-brand-gold hover:bg-white text-brand-black font-black rounded-2xl uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-2.5 transition-all text-xs"
             >

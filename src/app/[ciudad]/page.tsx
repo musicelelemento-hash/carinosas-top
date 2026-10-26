@@ -1,9 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { COUNTRIES } from "@/lib/countries";
-import { slugify, cityBaseName, humanizeSlug } from "@/lib/slug";
+import { slugify, cityBaseName } from "@/lib/slug";
 import ProfileCard from "@/components/ProfileCard";
 import ReferralTracker from "@/components/ReferralTracker";
 import CityViewTracker from "@/components/CityViewTracker";
@@ -52,11 +53,12 @@ export function generateMetadata({ params }: { params: Promise<{ ciudad: string 
   return params.then(({ ciudad }) => {
     const slug = ciudad.toLowerCase();
     const meta = CITY_MAP[slug];
-    const city = meta?.cityLabel || humanizeSlug(slug);
-    const country = meta?.country || "Ecuador";
+    if (!meta) return { title: "Página no encontrada" };
+    const city = meta.cityLabel;
+    const country = meta.country;
     const title = `Acompañantes VIP en ${city}`;
     const ogTitle = `Acompañantes VIP en ${city} | Cariñosas.top`;
-    const description = `Acompañantes VIP 4K verificadas en ${city}, ${country}. Citas discretas, reserva directa por WhatsApp y total privacidad. ${meta?.region ? `Zona: ${meta.region}.` : ""}`;
+    const description = `Perfiles publicados en ${city}, ${country}. Explora anuncios, disponibilidad y opciones de contacto. ${meta?.region ? `Zona: ${meta.region}.` : ""}`;
     const canonical = `https://carinosas.top/${slug}`;
     return {
       title,
@@ -93,8 +95,9 @@ export default async function CityPage({ params }: { params: Promise<{ ciudad: s
   const { ciudad } = await params;
   const slug = ciudad.toLowerCase();
   const meta = CITY_MAP[slug];
-  const city = meta?.cityLabel || humanizeSlug(slug);
-  const country = meta?.country || "Ecuador";
+  if (!meta) notFound();
+  const city = meta.cityLabel;
+  const country = meta.country;
 
   interface CityModel {
     id: string;
@@ -141,12 +144,11 @@ export default async function CityPage({ params }: { params: Promise<{ ciudad: s
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "LocalBusiness",
+        "@type": "CollectionPage",
         name: `Cariñosas.top — ${city}`,
-        description: `Directorio de acompañantes VIP verificadas en ${city}, ${country}.`,
+        description: `Directorio de perfiles publicados en ${city}, ${country}.`,
         url: `https://carinosas.top/${slug}`,
-        areaServed: { "@type": "City", name: city },
-        address: { "@type": "PostalAddress", addressLocality: city, addressCountry: country.toUpperCase().slice(0, 2) },
+        inLanguage: "es",
       },
       {
         "@type": "ItemList",
@@ -188,7 +190,7 @@ export default async function CityPage({ params }: { params: Promise<{ ciudad: s
             Acompañantes VIP en <span className="text-brand-gold">{city}</span>
           </h1>
           <p className="text-white/55 text-sm max-w-2xl leading-relaxed">
-            Perfiles VIP 4K verificados en {city}, {country}. Citas discretas, reserva directa por WhatsApp y total privacidad.
+            Perfiles publicados en {city}, {country}. Revisa cada anuncio y elige una opción de contacto.
             {models.length > 0 ? ` ${models.length} anuncio${models.length === 1 ? "" : "s"} disponibles ahora.` : ""}
           </p>
         </div>

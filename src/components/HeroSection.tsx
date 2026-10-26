@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
+import { haversineKm } from "@/lib/geo";
 
 const Hero3DCanvas = dynamic(() => import("./Hero3DCanvas"), {
   ssr: false,
@@ -58,6 +59,7 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [currentTag, setCurrentTag] = useState(activeTag || "");
   const [isLocatingGPS, setIsLocatingGPS] = useState(false);
+  const [gpsMessage, setGpsMessage] = useState("");
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -90,24 +92,38 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
   };
 
   const handleGPSDetect = () => {
-    setIsLocatingGPS(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setIsLocatingGPS(false);
-          // Default to Machala or detected zone
-          handleCityPick("Machala");
-        },
-        () => {
-          setIsLocatingGPS(false);
-          handleCityPick("Machala");
-        },
-        { timeout: 3000 }
-      );
-    } else {
-      setIsLocatingGPS(false);
-      handleCityPick("Machala");
+    setGpsMessage("");
+    if (!("geolocation" in navigator)) {
+      setGpsMessage("Este navegador no permite detectar la ubicación. Elige una ciudad de la lista.");
+      return;
     }
+
+    setIsLocatingGPS(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setIsLocatingGPS(false);
+        const presets = Object.entries(activeCountry.mapPresets);
+        const nearest = presets
+          .map(([city, preset]) => ({
+            city,
+            distance: haversineKm(position.coords.latitude, position.coords.longitude, preset.center[0], preset.center[1]),
+          }))
+          .sort((a, b) => a.distance - b.distance)[0];
+
+        if (!nearest || nearest.distance > 80) {
+          setGpsMessage(`No encontramos una ciudad de ${activeCountry.name} cerca. Elige una ciudad manualmente.`);
+          return;
+        }
+
+        setGpsMessage(`Ciudad aproximada: ${nearest.city}. Tu ubicación exacta no se comparte.`);
+        handleCityPick(nearest.city);
+      },
+      () => {
+        setIsLocatingGPS(false);
+        setGpsMessage("No pudimos acceder a la ubicación. Puedes elegir la ciudad manualmente.");
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
   };
 
   return (
@@ -147,10 +163,8 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
           >
             <Gem size={12} className="text-[#D4AF37] animate-pulse" />
             <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#D4AF37]">
-              Círculo Privado & Exclusivo · {activeCountry.name}
+              Perfiles por ciudad · {activeCountry.name}
             </span>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">En Vivo</span>
           </motion.div>
 
           <h1 className="font-serif font-bold text-2xl sm:text-4xl md:text-5xl tracking-tight select-none leading-tight">
@@ -158,12 +172,12 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
               Modelos & Acompañantes 
             </span>
             <span className="italic text-gold-shimmer ml-2 drop-shadow-[0_0_25px_rgba(212,168,67,0.45)]">
-              Élite 4K
+              Directorio selecto
             </span>
           </h1>
 
           <p className="text-[11px] sm:text-xs text-white/60 font-light max-w-md tracking-wide">
-            Verificación biométrica en tiempo real · Contacto directo y discreción total
+            Explora perfiles por ciudad y revisa cada anuncio antes de contactar.
           </p>
         </div>
 
@@ -232,6 +246,8 @@ export default function HeroSection({ currentCountry, onSelectLocation, onSelect
               </button>
             </div>
           </div>
+
+          {gpsMessage && <p role="status" className="mt-2 text-xs text-white/60">{gpsMessage}</p>}
 
           {/* ── LIVE SEARCH DROPDOWN SUGGESTIONS (ANIMATED) ── */}
           <AnimatePresence>

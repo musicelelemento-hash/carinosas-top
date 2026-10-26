@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Sparkles, X, Send, Loader2, MessageCircle, ShieldCheck, Bot, Star, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { sound } from "@/lib/soundEngine";
+import { buildConciergeWhatsAppUrl } from "@/lib/whatsapp";
 
 interface AssistantModel {
   id: string;
@@ -90,8 +91,12 @@ export default function AIAssistantOverlay() {
 
   const handleWhatsAppConcierge = () => {
     sound.playGoldChime();
-    const text = encodeURIComponent("Hola Concierge VIP de Cariñosas.top, deseo asistencia personalizada para una reserva exclusiva.");
-    window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
+    const url = buildConciergeWhatsAppUrl("Hola Concierge VIP de Cariñosas.top, deseo asistencia personalizada para una reserva.");
+    if (!url) {
+      setMessages((current) => [...current, { role: "assistant", content: "El contacto de Concierge no está configurado en este momento." }]);
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {

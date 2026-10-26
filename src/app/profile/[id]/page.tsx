@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ProfileClientView, { ProfileModel } from "./ProfileClientView";
 
@@ -62,17 +63,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!model) {
     return {
-      title: "Perfil VIP | Cariñosas.top Elite",
-      description: "Directorio de acompañantes de lujo y modelos 4K verificadas.",
+      title: "Perfil no encontrado | Cariñosas.top",
+      description: "No encontramos este perfil en el directorio.",
     };
   }
 
   const locationTitle = model.city || model.location;
   const title = `${model.name} · Acompañante VIP en ${locationTitle}`;
   const ogTitle = `${model.name} · Acompañante VIP en ${locationTitle} | Cariñosas.top`;
-  const cleanDescription = model.description 
-    ? `${model.description.slice(0, 150)}... Fotos 100% reales, verificación 4K y contacto directo en ${model.location}.`
-    : `Perfil exclusivo de ${model.name} en ${model.location}. Acompañante VIP 4K verificada en Cariñosas.top.`;
+  const cleanDescription = model.description
+    ? model.description.slice(0, 150)
+    : `Perfil de ${model.name} en ${model.location}. Consulta las opciones de contacto disponibles.`;
 
   const firstImage = model.images[0] || "";
   const primaryImage = firstImage && !firstImage.includes("images.unsplash.com")
@@ -102,7 +103,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           url: primaryImage,
           width: 800,
           height: 1000,
-          alt: `Foto 4K verificada de ${model.name} en ${model.location}`,
+          alt: `Perfil de ${model.name} en ${model.location}`,
         },
       ],
       type: "profile",
@@ -119,8 +120,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function DynamicProfilePage({ params }: PageProps) {
   const { id } = await params;
   const model = await getModelData(id);
+  if (!model) notFound();
 
-  const jsonLd = model ? {
+  const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     "mainEntity": {
@@ -135,18 +137,16 @@ export default async function DynamicProfilePage({ params }: PageProps) {
         "addressCountry": "EC"
       },
       "knowsAbout": model.tags,
-      "award": model.is_verified_4k ? "Sello de Verificación Biométrica 4K" : "Perfil Élite Verificado"
+      ...(model.is_verified_4k ? { "award": "Perfil verificado" } : {})
     }
-  } : null;
+  };
 
   return (
     <>
-      {jsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ProfileClientView id={id} initialModel={model} />
     </>
   );

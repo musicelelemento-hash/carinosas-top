@@ -9,82 +9,22 @@ import { getActiveStoriesAction, type StoryItem } from "@/app/actions/stories";
 
 interface StoryCardItem {
   id: string;
+  modelId: string;
   name: string;
   age: number;
   city: string;
   sector: string;
   avatar: string;
   story: string;
+  mediaType: "image" | "video";
   audioName?: string;
   whatsapp?: string;
   isOnline: boolean;
+  isVerified: boolean;
+  createdAt: string;
 }
-
-const FALLBACK_STORIES: StoryCardItem[] = [
-  { 
-    id: '1', 
-    name: 'Valentina S.', 
-    age: 24,
-    city: 'Quito', 
-    sector: 'Quito Norte (Hotel 5★)',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200', 
-    story: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200', 
-    audioName: 'Voz de Valentina',
-    whatsapp: '593987654321',
-    isOnline: true
-  },
-  { 
-    id: '2', 
-    name: 'Camila R.', 
-    age: 22,
-    city: 'Guayaquil', 
-    sector: 'Samborondón',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200', 
-    story: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200',
-    audioName: 'Voz de Camila',
-    whatsapp: '593987654322',
-    isOnline: true
-  },
-  { 
-    id: '3', 
-    name: 'Luciana M.', 
-    age: 25,
-    city: 'Cuenca', 
-    sector: 'Centro Histórico',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200', 
-    story: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1200',
-    audioName: 'Voz de Luciana',
-    whatsapp: '593987654323',
-    isOnline: true
-  },
-  { 
-    id: '4', 
-    name: 'Elena V.', 
-    age: 23,
-    city: 'Manta', 
-    sector: 'Plaza del Sol',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200', 
-    story: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1200',
-    audioName: 'Voz de Elena',
-    whatsapp: '593987654324',
-    isOnline: true
-  },
-  { 
-    id: '5', 
-    name: 'Sofía K.', 
-    age: 26,
-    city: 'Salinas', 
-    sector: 'Chipipe VIP',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200', 
-    story: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=1200',
-    audioName: 'Voz de Sofía',
-    whatsapp: '593987654325',
-    isOnline: true
-  },
-];
-
 export default function StoriesBar() {
-  const [storiesList, setStoriesList] = useState<StoryCardItem[]>(FALLBACK_STORIES);
+  const [storiesList, setStoriesList] = useState<StoryCardItem[]>([]);
   const [activeStory, setActiveStory] = useState<StoryCardItem | null>(null);
   const [isReelsOpen, setIsReelsOpen] = useState(false);
 
@@ -92,17 +32,21 @@ export default function StoriesBar() {
     async function loadLiveStories() {
       try {
         const liveStories = await getActiveStoriesAction();
-        if (liveStories && liveStories.length > 0) {
+        if (liveStories) {
           const mapped: StoryCardItem[] = liveStories.map((s: StoryItem) => ({
             id: s.id,
+            modelId: s.model_id,
             name: s.model_name || "Modelo VIP",
-            age: 22,
-            city: "Ecuador VIP",
-            sector: s.caption || "Disponible 4K",
+            age: s.model_age || 0,
+            city: s.model_city || "",
+            sector: s.model_sector || "",
             avatar: s.media_url,
             story: s.media_url,
-            audioName: `Historia de ${s.model_name || 'Modelo'}`,
-            isOnline: true
+            mediaType: s.media_type,
+            whatsapp: s.model_whatsapp,
+            isOnline: Boolean(s.model_is_online),
+            isVerified: Boolean(s.model_is_verified || s.model_is_verified_4k),
+            createdAt: s.created_at,
           }));
           setStoriesList(mapped);
         }
@@ -132,6 +76,10 @@ export default function StoriesBar() {
 
           {/* Vertical divider */}
           <div className="flex-shrink-0 h-12 w-[1px] bg-white/[0.1]" />
+
+          {storiesList.length === 0 && (
+            <span className="text-xs text-white/45">No hay historias activas por ahora.</span>
+          )}
 
           {/* Model Stories — bezel oro plano */}
           {storiesList.map((model) => (

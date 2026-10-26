@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShieldCheck, Lock, Gem, MapPin, Sparkles, Heart, Volume2, VolumeX } from "lucide-react";
 import { sound } from "@/lib/soundEngine";
+import { buildConciergeWhatsAppUrl } from "@/lib/whatsapp";
 
 export default function Footer() {
   const [isMuted, setIsMuted] = useState(false);
+  const conciergeUrl = buildConciergeWhatsAppUrl("Hola, necesito ayuda del Concierge de Cariñosas.top.");
 
   useEffect(() => {
     setIsMuted(sound.getMuted());
@@ -128,7 +130,11 @@ export default function Footer() {
             <Link href="/boveda-secreta" className="hover:text-brand-gold transition-colors">Bóveda 4K</Link>
             <Link href="/registro" className="hover:text-brand-gold transition-colors">Registro Modelo</Link>
             <Link href="/admin" className="hover:text-brand-gold transition-colors">Admin</Link>
-            <a href="https://wa.me/593987654321" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte Concierge</a>
+            {conciergeUrl ? (
+              <a href={conciergeUrl} target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">Soporte Concierge</a>
+            ) : (
+              <span className="text-white/40">Soporte Concierge no configurado</span>
+            )}
           </div>
         </div>
 

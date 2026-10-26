@@ -1,120 +1,54 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const TICKER_ITEMS = [
-  "✦ VERIFICACIÓN 4K ACTIVA",
-  "✦ 100% DISCRECIÓN GARANTIZADA",
-  "✦ PERFILES AUDITADOS EN TIEMPO REAL",
-  "✦ ACCESO ÉLITE · ECUADOR",
-  "✦ TIEMPO DE RESPUESTA MENOR A 5 MIN",
-  "✦ CERO RASTRO DIGITAL",
-  "✦ SELECCIÓN ESPECIAL · SOLO MIEMBROS",
-  "✦ QUITO · GUAYAQUIL · CUENCA · MANTA",
+const DIRECTORY_NOTES = [
+  "✦ BUSCA PERFILES POR CIUDAD Y SECTOR",
+  "✦ EL ESTADO EN LÍNEA SE ACTUALIZA AL ABRIR EL DIRECTORIO",
+  "✦ NO MOSTRAMOS UBICACIONES GPS EXACTAS",
+  "✦ CONTACTA DESDE LA INFORMACIÓN PUBLICADA EN CADA PERFIL",
 ];
 
 export default function LiveCountBanner() {
-  const [count, setCount] = useState<number | null>(null);
-  const [cityIndex, setCityIndex] = useState(0);
-  const [flip, setFlip] = useState(false);
-  const [prevCount, setPrevCount] = useState<number | null>(null);
-  const popularCities = [
-    { name: "Quito VIP" },
-    { name: "Guayaquil VIP" },
-    { name: "Cuenca VIP" },
-    { name: "Manta VIP" },
-  ];
+  const [onlineCount, setOnlineCount] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
-    (async () => {
-      const { data, error } = await supabase
-        .from("models")
-        .select("id", { count: "exact", head: true })
-        .eq("is_online", true)
-        .not("id", "like", "a1000000-0000-0000-0000-0000000000%");
-      if (active && !error) {
-        setCount(data?.length ?? 0);
-      }
-    })();
+    void supabase
+      .from("models")
+      .select("id", { count: "exact", head: true })
+      .eq("is_online", true)
+      .not("id", "like", "a1000000-0000-0000-0000-0000000000%")
+      .then(({ count, error }) => {
+        if (active && !error) setOnlineCount(count ?? 0);
+      });
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCount((prev) => {
-        if (prev === null) return prev;
-        const next = Math.max(0, prev + (Math.floor(Math.random() * 3) - 1));
-        if (next !== prev) {
-          setPrevCount(prev);
-          setFlip(true);
-          setTimeout(() => setFlip(false), 400);
-        }
-        return next;
-      });
-      if (popularCities.length > 0) {
-        setCityIndex((prev) => (prev + 1) % popularCities.length);
-      }
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const currentCity = popularCities[cityIndex]?.name || "Quito VIP";
-  const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS];
-  const displayCount = count === null ? "--" : count;
+  const tickerContent = [...DIRECTORY_NOTES, ...DIRECTORY_NOTES];
 
   return (
-    <div className="w-full relative overflow-hidden z-40" style={{ background: 'linear-gradient(90deg, #060608 0%, #0E0E0A 50%, #060608 100%)', borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
-
-      {/* Top shimmer line */}
-      <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.6), rgba(201,168,76,1), rgba(201,168,76,0.6), transparent)' }} />
-
-      {/* Moving shimmer overlay */}
-      <div className="absolute inset-0 animate-shimmer-gold pointer-events-none" />
-
+    <div className="w-full relative overflow-hidden z-40" style={{ background: "linear-gradient(90deg, #060608 0%, #0E0E0A 50%, #060608 100%)", borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), rgba(201,168,76,1), rgba(201,168,76,0.6), transparent)" }} />
       <div className="flex items-stretch h-[44px]">
-
-        {/* Left badge: LIVE */}
-        <div className="flex-shrink-0 flex items-center gap-3 px-6 border-r border-brand-gold/10"
-          style={{ background: 'linear-gradient(90deg, rgba(232,0,90,0.08), transparent)' }}
-        >
-          <div className="live-dot" />
-          <span className="text-[9px] font-black uppercase tracking-[0.5em] text-white/90 whitespace-nowrap">En Vivo</span>
-        </div>
-
-        {/* Center: count */}
         <div className="flex-shrink-0 flex items-center gap-3 px-6 border-r border-brand-gold/10">
-          <span className={`text-base font-serif font-bold transition-all duration-300 gold-text-mask ${flip ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}
-            style={{ transform: flip ? 'translateY(-6px)' : 'translateY(0)', transition: 'transform 0.3s ease, opacity 0.3s ease' }}
-          >
-            {displayCount}
-          </span>
-          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/40 whitespace-nowrap">
-            Modelos en{' '}
-            <span className="text-brand-gold/70 transition-all duration-500">{currentCity}</span>
-          </span>
+          <span className="text-[9px] font-black uppercase tracking-[0.35em] text-white/75 whitespace-nowrap">Directorio</span>
         </div>
-
-        {/* Ticker */}
+        <div className="flex-shrink-0 flex items-center gap-3 px-6 border-r border-brand-gold/10">
+          <span className="text-base font-serif font-bold gold-text-mask">{onlineCount ?? "—"}</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/45 whitespace-nowrap">Perfiles marcados en línea</span>
+        </div>
         <div className="flex-1 overflow-hidden flex items-center ticker-wrap">
-          <div className="ticker-inner flex items-center gap-12 text-[9px] font-black uppercase tracking-[0.35em] text-brand-gold/30 whitespace-nowrap">
-            {tickerContent.map((item, i) => (
-              <span key={i} className="hover:text-brand-gold/60 transition-colors cursor-default">{item}</span>
-            ))}
+          <div className="ticker-inner flex items-center gap-12 text-[9px] font-black uppercase tracking-[0.3em] text-brand-gold/35 whitespace-nowrap">
+            {tickerContent.map((item, index) => <span key={`${item}-${index}`}>{item}</span>)}
           </div>
         </div>
-
-        {/* Right badge: ALTA DEMANDA */}
-        <div className="flex-shrink-0 flex items-center gap-2 px-6 border-l border-brand-gold/10"
-          style={{ background: 'linear-gradient(270deg, rgba(232,0,90,0.06), transparent)' }}
-        >
-          <span className="text-[9px] font-black uppercase tracking-[0.35em] text-brand-pink/70">• Alta Demanda</span>
+        <div className="flex-shrink-0 flex items-center gap-2 px-6 border-l border-brand-gold/10">
+          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/40">Actualizado al cargar</span>
         </div>
       </div>
-
-      {/* Bottom shimmer line */}
-      <div className="absolute bottom-0 left-0 right-0 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent)' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent)" }} />
     </div>
   );
 }

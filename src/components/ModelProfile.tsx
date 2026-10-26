@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import VIPRatings from "@/components/VIPRatings";
+import AgendaView from "@/components/AgendaView";
 import { trackEvent } from "@/lib/track";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -666,7 +667,12 @@ export default function ModelProfile({ model }: ModelProfileProps) {
 
             {/* VIP Ratings & Verified Reputation */}
             <div className="border-t border-white/10 pt-8 pb-4">
-              <VIPRatings />
+              <VIPRatings modelId={model.id} />
+            </div>
+
+            {/* Agenda de Reservas Reales */}
+            <div className="border-t border-white/10 pt-8 pb-4">
+              <AgendaView modelId={model.id} />
             </div>
 
             {/* Services List */}

@@ -6,11 +6,8 @@ import {
   Users, 
   Crown, 
   ShieldCheck, 
-  Rocket, 
   Download, 
   Eye, 
-  Activity,
-  Flame,
   CheckCircle2,
   RefreshCw
 } from "lucide-react";
@@ -22,8 +19,16 @@ interface AdminDashboardHUDProps {
   onSelectTab?: (tab: string) => void;
 }
 
-export default function AdminDashboardHUD({ onSelectTab }: AdminDashboardHUDProps) {
-  const [stats, setStats] = useState<any>(null);
+interface DashboardStats {
+  totalModels: number;
+  verified4K: number;
+  onlineModels: number;
+  activePasses: number;
+  totalStoryViews: number;
+}
+
+export default function AdminDashboardHUD(_props: AdminDashboardHUDProps) {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [boostingCity, setBoostingCity] = useState<string | null>(null);
   const [boostSuccess, setBoostSuccess] = useState<string | null>(null);
@@ -66,8 +71,8 @@ export default function AdminDashboardHUD({ onSelectTab }: AdminDashboardHUDProp
       }
       fetchStats();
       setTimeout(() => setBoostSuccess(null), 3500);
-    } catch (err: any) {
-      alert(err.message || "Error al impulsar ciudad.");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error al impulsar ciudad.");
     } finally {
       setBoostingCity(null);
     }
@@ -89,11 +94,11 @@ export default function AdminDashboardHUD({ onSelectTab }: AdminDashboardHUDProp
     URL.revokeObjectURL(url);
   };
 
-  const totalModels = stats?.totalModels || 26;
-  const verified4K = stats?.verified4K || 24;
-  const onlineCount = stats?.onlineModels || 18;
-  const activePasses = stats?.activePasses || 4;
-  const estimatedPlatformVolume = totalModels * 140 * 18; // Est. $65,520 USD monthly volume
+  const totalModels = stats?.totalModels ?? 0;
+  const verified4K = stats?.verified4K ?? 0;
+  const onlineCount = stats?.onlineModels ?? 0;
+  const activePasses = stats?.activePasses ?? 0;
+  const totalStoryViews = stats?.totalStoryViews ?? 0;
 
   return (
     <div className="space-y-6">
@@ -333,23 +338,23 @@ export default function AdminDashboardHUD({ onSelectTab }: AdminDashboardHUDProp
         {/* Metric 3: Estimated Monthly Volume */}
         <div className="glass-obsidian border border-white/10 rounded-3xl p-5 space-y-2 relative overflow-hidden">
           <div className="flex items-center justify-between text-[#A1A1AA]">
-            <span className="text-[9px] uppercase font-black tracking-widest">Volumen Estimado</span>
-            <DollarSign size={16} className="text-emerald-400" />
+            <span className="text-[9px] uppercase font-black tracking-widest">Vistas de historias</span>
+            <Eye size={16} className="text-emerald-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-serif font-bold text-emerald-400">
-            ${estimatedPlatformVolume.toLocaleString()} USD
+            {totalStoryViews.toLocaleString()}
           </div>
-          <p className="text-[9px] text-[#A1A1AA] font-mono">Tráfico & Citas mensuales</p>
+          <p className="text-[9px] text-[#A1A1AA] font-mono">Acumulado registrado</p>
         </div>
 
         {/* Metric 4: Security Status */}
         <div className="glass-obsidian border border-white/10 rounded-3xl p-5 space-y-2 relative overflow-hidden">
           <div className="flex items-center justify-between text-[#A1A1AA]">
-            <span className="text-[9px] uppercase font-black tracking-widest">Seguridad Cripto</span>
+            <span className="text-[9px] uppercase font-black tracking-widest">Permisos de acceso</span>
             <ShieldCheck size={16} className="text-brand-gold" />
           </div>
-          <div className="text-2xl sm:text-3xl font-serif font-bold text-white">100%</div>
-          <p className="text-[9px] text-emerald-400 font-mono">Anti Fuerza Bruta + RLS</p>
+          <div className="text-lg sm:text-xl font-serif font-bold text-white">Revisar en Supabase</div>
+          <p className="text-[9px] text-white/50 font-mono">El estado real depende de la migración aplicada</p>
         </div>
 
       </div>

@@ -2,10 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MessageCircle, BadgeCheck, Navigation } from "lucide-react";
-import WhatsAppTransition from "./WhatsAppTransition";
-import { useRouter } from "next/navigation";
-import { sound } from "@/lib/soundEngine";
+import Link from "next/link";
+import { MessageCircle, BadgeCheck, UserRound } from "lucide-react";
 import { trackEvent } from "@/lib/track";
 import WhatsAppConfirmDialog from "./WhatsAppConfirmDialog";
 
@@ -24,28 +22,25 @@ interface ProfileCardProps {
   plan_type?: string;
   personal_note?: string;
   is_verified_4k?: boolean;
+  is_online?: boolean;
   /** 'grid' = tarjeta densa del Terminal desktop (aspect 4/5). 'feed' = tarjeta ancha del feed mobile (altura fija 296px), calcada de feedCard() del mockup. */
   layout?: "grid" | "feed";
-  status?: string;
 }
 
 export default function ProfileCard({
   id, name, age, location, imageUrl, images,
   isBoosted = false, whatsapp,
   is_verified_4k = false,
+  is_online = false,
   layout = "grid",
-  status = "En línea",
 }: ProfileCardProps) {
-  const router = useRouter();
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [showWhatsAppConfirm, setShowWhatsAppConfirm] = useState(false);
   const isFeed = layout === "feed";
 
-  const cover = images?.[0] || imageUrl || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800';
+  const cover = images?.[0] || imageUrl || "";
 
   const handleContact = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsTransitioning(false);
     if (!whatsapp) return;
     trackEvent("whatsapp_cta_click", { modelId: id });
     setShowWhatsAppConfirm(true);
@@ -53,81 +48,70 @@ export default function ProfileCard({
 
   return (
     <>
-      <div
-        onClick={() => router.push(`/profile/${id}`)}
-        className={`overflow-hidden border border-white/[0.07] bg-[#101014] cursor-pointer group relative ${isFeed ? "rounded-[20px]" : "rounded-2xl"} transition-all duration-300 hover:border-brand-gold/40 hover:shadow-[0_20px_60px_rgba(212,168,67,0.15)]`}
-      >
+      <article className={`overflow-hidden border border-white/[0.09] bg-[#101014] group relative ${isFeed ? "rounded-[20px]" : "rounded-2xl"} transition-[border-color,transform] duration-300 hover:border-brand-gold/35`}>
         <div
-          className={`relative overflow-hidden ${isFeed ? "" : "aspect-[4/5]"}`}
+          className={`relative overflow-hidden bg-[#17171B] ${isFeed ? "" : "aspect-[4/5]"}`}
           style={isFeed ? { height: 250 } : undefined}
         >
-          <Image
-            src={cover}
-            alt={name}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-          />
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: isFeed
-                ? "linear-gradient(to top, rgba(16,16,20,.94) 0%, rgba(16,16,20,.4) 28%, transparent 55%)"
-                : "linear-gradient(to top, rgba(10,10,13,.92) 0%, rgba(10,10,13,.45) 30%, transparent 60%)",
-            }}
-          />
+          {cover ? (
+            <Image
+              src={cover}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div aria-hidden="true" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[radial-gradient(ellipse_at_50%_35%,rgba(212,168,67,0.12),transparent_55%)] text-white/35">
+              <UserRound size={34} strokeWidth={1.2} />
+              <span className="text-xs">Foto no disponible</span>
+            </div>
+          )}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#101014] via-[#101014]/25 to-black/5" />
+
+          {id && (
+            <Link
+              href={`/profile/${id}`}
+              aria-label={`Ver perfil de ${name}, ${age} años`}
+              className="absolute inset-0 z-10 rounded-[inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-brand-gold"
+            >
+              <span className="sr-only">Ver perfil de {name}</span>
+            </Link>
+          )}
 
           {isBoosted && (
             <span
-              className={`absolute font-mono font-bold ${isFeed ? "top-3 left-3 px-2.5 py-[6px] rounded-lg text-xs" : "top-3 left-3 px-2.5 py-[5px] rounded-md text-[11px] tracking-[0.08em]"}`}
-              style={{ background: "#D4A843", color: "#08080B", boxShadow: "0 0 20px rgba(212,168,67,0.4)" }}
+              className={`pointer-events-none absolute z-20 ${isFeed ? "top-3 left-3 px-2.5 py-1.5 rounded-full text-xs" : "top-3 left-3 px-2.5 py-1 rounded-full text-[11px]"} bg-[#D4A843] font-semibold text-[#08080B]`}
             >
-              TOP 1
+              Destacado
             </span>
           )}
 
-          <span
-            className={`absolute flex items-center gap-1.5 font-mono text-white ${isFeed ? "top-3 right-3 px-2.5 py-[6px] rounded-lg text-xs backdrop-blur-md" : "top-3 right-3 px-2.5 py-[5px] rounded-md text-[11px] backdrop-blur-md"}`}
-            style={{ background: isFeed ? "rgba(8,8,11,.7)" : "rgba(10,10,13,.72)" }}
-          >
-            <Navigation size={isFeed ? 12 : 11} className="text-brand-gold" />
-            Cerca
-          </span>
+          {is_online && <span className="pointer-events-none absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-[#101014]/80 px-2.5 py-1.5 text-xs text-emerald-100 backdrop-blur-sm"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-emerald-400" />En línea</span>}
 
-          <div className={`absolute flex flex-col gap-1.5 ${isFeed ? "left-4 right-4 bottom-3.5" : "left-3.5 right-3.5 bottom-3"}`}>
+          <div className={`pointer-events-none absolute z-20 flex flex-col gap-1.5 ${isFeed ? "left-4 right-4 bottom-3.5" : "left-3.5 right-3.5 bottom-3"}`}>
             <div className="flex items-baseline gap-2">
-              <span className={`font-serif font-bold leading-none text-white ${isFeed ? "text-[28px]" : "text-[26px]"}`}>{name}</span>
-              <span className={isFeed ? "text-[15px] text-white/60" : "text-sm text-white/60"}>{age}</span>
-              {is_verified_4k && <BadgeCheck size={isFeed ? 17 : 15} className="text-brand-gold" />}
+              <h2 className={`min-w-0 truncate font-serif font-semibold leading-none text-white ${isFeed ? "text-[26px]" : "text-[24px]"}`}>{name}</h2>
+              <span className={isFeed ? "shrink-0 text-sm text-white/75" : "shrink-0 text-sm text-white/75"}>{age}</span>
+              {is_verified_4k && <span title="Verificación 4K" className="inline-flex shrink-0"><BadgeCheck size={16} aria-label="Verificación 4K" className="text-brand-gold" /></span>}
             </div>
-            <span className="text-[13px] text-white/[0.62]">{location}</span>
+            <span className="truncate text-[13px] text-white/75">{location}</span>
           </div>
         </div>
 
-        <div className="px-3.5 py-3 flex items-center justify-between border-t border-white/[0.06]">
-          <span className={`font-mono ${isFeed ? "text-xs text-white/45" : "text-[11px] text-white/[0.42]"}`}>{status}</span>
+        <div className="flex items-center justify-between gap-3 border-t border-white/[0.07] px-3.5 py-3">
+          <span className={`min-w-0 truncate ${isFeed ? "text-xs" : "text-[11px]"} ${is_online ? "text-emerald-200/80" : "text-white/55"}`}>{is_online ? "En línea" : "Consulta disponibilidad"}</span>
           <button
             onClick={handleContact}
-            className={`flex items-center font-bold transition-all scale-pop-active ${
-              isFeed ? "gap-2 px-4 py-[11px] rounded-xl text-sm" : "gap-[7px] px-3.5 py-[9px] rounded-[9px] text-[13px]"
-            } ${
-              isBoosted
-                ? "bg-brand-gold text-brand-black border border-brand-gold hover:brightness-110 hover:scale-105"
-                : "bg-transparent text-white border border-white/[0.14] hover:border-brand-gold/40 hover:bg-white/[0.05]"
-            }`}
-            style={isFeed ? { minHeight: 44 } : undefined}
+            disabled={!whatsapp}
+            aria-label={whatsapp ? `Contactar a ${name}` : `Contacto no publicado para ${name}`}
+            className={`z-20 flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold ${whatsapp ? "bg-brand-gold text-brand-black hover:bg-brand-gold-light" : "cursor-not-allowed border border-white/10 bg-white/5 text-white/40"}`}
           >
-            <MessageCircle size={isFeed ? 15 : 14} />
-            Escribir
+            <MessageCircle size={15} aria-hidden="true" />
+            {whatsapp ? "Contactar" : "Sin contacto"}
           </button>
         </div>
-      </div>
-
-      <WhatsAppTransition
-        modelName={name}
-        isOpen={isTransitioning}
-        onComplete={() => setIsTransitioning(false)}
-      />
+      </article>
 
       <WhatsAppConfirmDialog
         isOpen={showWhatsAppConfirm}

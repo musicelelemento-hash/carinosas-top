@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     default: "Cariñosas.top | Directorio VIP & Acompañantes Élite en Ecuador e Internacional",
     template: "%s | Cariñosas.top Elite"
   },
-  description: "El estándar de oro en discreción, sofisticación y exclusividad. Perfiles 4K verificados biométricamente, notas de voz auténticas y reservas directas en Quito, Guayaquil, Cuenca, Medellín, Lima, Panamá y Miami.",
+  description: "Directorio de perfiles y anuncios con búsqueda por ciudad y opciones de contacto directo en Ecuador y otros destinos.",
   keywords: [
     "Cariñosas Ecuador", 
     "Acompañantes VIP Quito", 
@@ -78,8 +78,8 @@ export const metadata: Metadata = {
     "content-language": "es",
   },
   openGraph: {
-    title: "Cariñosas.top | Experiencias de Alto Nivel & Modelos VIP 4K",
-    description: "Perfiles 4K verificados biométricamente con total privacidad, discreción absoluta y canal directo en Quito, Guayaquil, Cuenca y destinos internacionales.",
+    title: "Cariñosas.top | Directorio selecto",
+    description: "Explora perfiles por ciudad y consulta sus opciones de contacto en Ecuador y otros destinos.",
     url: "https://carinosas.top",
     siteName: "Cariñosas.top",
     images: [
@@ -95,8 +95,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cariñosas.top | Directorio Selecto VIP 4K",
-    description: "Modelos 4K verificadas con notas de voz y total privacidad en Ecuador e Internacional.",
+    title: "Cariñosas.top | Directorio selecto",
+    description: "Directorio de perfiles con búsqueda por ciudad en Ecuador y otros destinos.",
     images: ["/og-luxury.png"],
   },
   appleWebApp: {

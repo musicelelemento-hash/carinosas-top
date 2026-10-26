@@ -200,6 +200,12 @@ export default function AdPublishingPortal() {
     }
     setConsentError(false);
 
+    const submittedAge = Number(formData.age);
+    if (!Number.isInteger(submittedAge) || submittedAge < 18) {
+      setSubmitError("La edad debe ser un número entero de 18 años o más.");
+      return;
+    }
+
     if (!turnstileToken) {
       setSubmitError("Completa la verificación antibot para poder publicar tu anuncio.");
       return;
@@ -220,8 +226,8 @@ export default function AdPublishingPortal() {
         description: formData.description || `Acompañante de alta gama en ${formData.city}. Disponible para veladas exclusivas, cenas de gala y reservas VIP.`,
         tags: formData.tags || ["Trato VIP", "Hotel 5★", "Masaje Relax"],
         plan_type: currentPlan.name === "DIAMANTE" ? "Diamante" : currentPlan.name === "ORO" ? "VIP Elite" : "Anuncio Gratis",
-        ageConfirmed: true,
-        age: parseInt(formData.age, 10) || 22,
+        ageConfirmed: consentAccepted,
+        age: submittedAge,
         is_phone_verified: false,
         hourly_rate: parseInt(formData.rate, 10) || 120,
         personal_note: "Cada encuentro es una historia que merece ser contada con elegancia.",
@@ -707,6 +713,8 @@ export default function AdPublishingPortal() {
                   <input
                     type="number"
                     required
+                    min="18"
+                    max="100"
                     placeholder="22"
                     value={formData.age}
                     onChange={e => setFormData({ ...formData, age: e.target.value })}

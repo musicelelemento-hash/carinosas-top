@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Star, ShieldCheck, Crown, Award, ChevronRight, Sparkles, MessageCircle, CheckCircle2, Lock } from "lucide-react";
 import { getVIPReviewsAction, type VIPReviewItem } from "@/app/actions/reviews";
 import { sound } from "@/lib/soundEngine";
+import { buildConciergeWhatsAppUrl } from "@/lib/whatsapp";
 
 interface Rating {
   id: string;
@@ -15,36 +16,6 @@ interface Rating {
   date: string;
 }
 
-const MOCK_RATINGS: Rating[] = [
-  { 
-    id: '1', 
-    user: 'Socio Alpha #084', 
-    tier: 'Alpha Founder',
-    rating: 5, 
-    comment: 'La discreción es impecable. El pase Alpha abre un nivel completamente distinto de atención en Cumbayá y Quito Norte. 10/10.', 
-    city: 'Quito VIP',
-    date: 'Hace 2 días' 
-  },
-  { 
-    id: '2', 
-    user: 'Caballero Diamante #219', 
-    tier: 'Diamante VIP',
-    rating: 5, 
-    comment: 'Puntualidad, elegancia y trato de primer nivel en Samborondón. El saludo de voz me dio total confianza antes de agendar.', 
-    city: 'Samborondón',
-    date: 'Hace 5 días' 
-  },
-  { 
-    id: '3', 
-    user: 'Socio Oro #542', 
-    tier: 'Oro Member',
-    rating: 5, 
-    comment: 'Excelente catálogo. Todo 100% verificado y sin intermediarios molestos.', 
-    city: 'Cuenca',
-    date: 'Hace 1 semana' 
-  },
-];
-
 const TIERS = [
   { name: 'Socio Plata', badge: '🥈', perks: 'Catálogo Verificado + WhatsApp Directo', current: false },
   { name: 'Socio Oro', badge: '🥇', perks: 'Prioridad Radar GPS + Notificaciones Nuevas Modelos', current: false },
@@ -52,16 +23,23 @@ const TIERS = [
   { name: 'Alpha Founder', badge: '👑', perks: 'Círculo Secreto Total + Concierge Humano 24/7', current: false },
 ];
 
-export default function VIPRatings() {
+interface VIPRatingsProps {
+  modelId?: string;
+}
+
+export default function VIPRatings({ modelId }: VIPRatingsProps) {
   const [activeTierIndex, setActiveTierIndex] = useState(2); // Diamante
-  const [reviews, setReviews] = useState<Rating[]>(MOCK_RATINGS);
+  const [reviews, setReviews] = useState<Rating[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [conciergeUnavailable, setConciergeUnavailable] = useState(false);
 
   useEffect(() => {
     async function loadReviews() {
+      setReviewsLoading(true);
       try {
-        const data = await getVIPReviewsAction();
+        const data = await getVIPReviewsAction(modelId);
         if (data && data.length > 0) {
-          const mapped: Rating[] = data.slice(0, 6).map((r: VIPReviewItem) => ({
+          const mapped: Rating[] = data.slice(0, 6).map((r) => ({
             id: r.id,
             user: r.author_alias || "Caballero VIP",
             tier: r.tier_badge || "Diamante VIP",
@@ -74,15 +52,21 @@ export default function VIPRatings() {
         }
       } catch (err) {
         console.warn("VIP reviews live fetch notice:", err);
+      } finally {
+        setReviewsLoading(false);
       }
     }
     loadReviews();
-  }, []);
+  }, [modelId]);
 
   const handleUpgradeTier = (tierName: string) => {
     sound.playGoldChime();
-    const text = encodeURIComponent(`Hola Concierge de Cariñosas.top, deseo solicitar la subida de mi membresía al rango ${tierName}.`);
-    window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
+    const url = buildConciergeWhatsAppUrl(`Hola Concierge de Cariñosas.top, deseo solicitar la subida de mi membresía al rango ${tierName}.`);
+    if (!url) {
+      setConciergeUnavailable(true);
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -102,6 +86,9 @@ export default function VIPRatings() {
             Nivel: {TIERS[activeTierIndex].name}
           </div>
         </div>
+        {conciergeUnavailable && (
+          <p role="status" className="mt-3 text-center text-xs text-white/50">El contacto de Concierge no está configurado en este momento.</p>
+        )}
 
         {/* Tier Steps Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -144,43 +131,63 @@ export default function VIPRatings() {
       </div>
 
       {/* ── VERIFIED MEMBER REVIEWS ── */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-2xl font-serif text-white italic font-bold">Experiencias Verificadas</h3>
-            <p className="text-[9px] text-white/40 uppercase tracking-widest font-black mt-0.5">Reseñas de Miembros con Pase Activo</p>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 text-brand-gold text-[9px] font-black uppercase tracking-wider">
-            <ShieldCheck size={14} />
-            Auditado 100%
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {reviews.map((r) => (
-            <div key={r.id} className="glass-obsidian p-5 rounded-2xl border border-white/10 hover:border-brand-gold/30 transition-all space-y-3">
+        <div className="space-y-6">
+          {reviewsLoading ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-10 h-10 rounded-full border-2 border-brand-gold/10 rounded-full" />
+              <div className="absolute inset-0 border-t-2 border-brand-gold rounded-full animate-spin" />
+              <p className="mt-4 text-[10px] text-white/40 italic uppercase tracking-widest">Cargando reseñas verificadas...</p>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-12 h-12 rounded-full border border-brand-gold/30 bg-brand-gold/5 flex items-center justify-center mb-4">
+                <ShieldCheck size={24} className="text-brand-gold" />
+              </div>
+              <h4 className="text-lg font-serif text-white italic font-bold">Sin reseñas verificadas aún</h4>
+              <p className="text-[10px] text-white/50 max-w-sm mx-auto leading-relaxed">
+                Las reseñas aparecerán cuando exista una reserva completada que podamos comprobar.
+              </p>
+            </div>
+          ) : (
+            <>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-white block">{r.user}</span>
-                  <span className="text-[8px] text-brand-gold font-bold uppercase tracking-wider">{r.tier} · {r.city}</span>
+                  <h3 className="text-2xl font-serif text-white italic font-bold">Experiencias Verificadas</h3>
+                  <p className="text-[9px] text-white/40 uppercase tracking-widest font-black mt-0.5">Reseñas de citas completadas y comprobadas</p>
                 </div>
-                <div className="flex items-center gap-0.5 text-brand-gold">
-                  {[...Array(r.rating)].map((_, i) => (
-                    <Star key={i} size={11} fill="currentColor" />
-                  ))}
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full glass-obsidian border border-brand-gold/30 text-brand-gold text-[9px] font-black uppercase tracking-wider">
+                  <ShieldCheck size={14} />
+                  Cita comprobada
                 </div>
               </div>
 
-              <p className="text-xs text-white/70 italic leading-relaxed">&quot;{r.comment}&quot;</p>
-              
-              <div className="pt-2 border-t border-white/5 flex justify-between items-center text-[8px] text-white/30 uppercase font-black tracking-widest">
-                <span>Cita Verificada</span>
-                <span>{r.date}</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {reviews.map((r) => (
+                  <div key={r.id} className="glass-obsidian p-5 rounded-2xl border border-white/10 hover:border-brand-gold/30 transition-all space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-white block">{r.user}</span>
+                        <span className="text-[8px] text-brand-gold font-bold uppercase tracking-wider">{r.tier} · {r.city}</span>
+                      </div>
+                      <div className="flex items-center gap-0.5 text-brand-gold">
+                        {[...Array(r.rating)].map((_, i) => (
+                          <Star key={i} size={11} fill="currentColor" />
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-white/70 italic leading-relaxed">&quot;{r.comment}&quot;</p>
+
+                    <div className="pt-2 border-t border-white/5 flex justify-between items-center text-[8px] text-white/30 uppercase font-black tracking-widest">
+                      <span>Cita Verificada</span>
+                      <span>{r.date}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
+            </>
+          )}
         </div>
-      </div>
 
     </div>
   );

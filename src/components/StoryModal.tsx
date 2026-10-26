@@ -2,22 +2,26 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { X, Heart, Send, MessageCircle, Sparkles, Volume2, ShieldCheck, Flame, Wine, Gem } from "lucide-react";
+import { X, Send, MessageCircle, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementStoryViewAction } from "@/app/actions/stories";
 import { sound } from "@/lib/soundEngine";
 
 export interface StoryData {
   id: string;
+  modelId: string;
   name: string;
   age?: number;
   city: string;
   sector?: string;
   avatar: string;
   story: string;
+  mediaType?: "image" | "video";
+  createdAt?: string;
   audioName?: string;
   whatsapp?: string;
   isOnline?: boolean;
+  isVerified?: boolean;
 }
 
 interface StoryModalProps {
@@ -29,12 +33,26 @@ interface StoryModalProps {
 export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) {
   const router = useRouter();
   const [currentSegment, setCurrentSegment] = useState(0);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(true);
   const [reactionEffect, setReactionEffect] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [isPaused, setIsPaused] = useState(false);
+  const [renderTime, setRenderTime] = useState<number | null>(null);
 
-  const totalSegments = 3;
+  const totalSegments = 1;
+  const createdAt = story?.createdAt ? Date.parse(story.createdAt) : Number.NaN;
+  const minutesAgo = renderTime !== null && Number.isFinite(createdAt)
+    ? Math.max(1, Math.floor((renderTime - createdAt) / 60000))
+    : null;
+  const publishedLabel = minutesAgo === null
+    ? "Historia reciente"
+    : minutesAgo < 60
+      ? `Hace ${minutesAgo} min`
+      : `Hace ${Math.floor(minutesAgo / 60)} h`;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setRenderTime(Date.now()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const nextSegment = () => {
     setCurrentSegment((prev) => {
@@ -61,7 +79,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
 
       const interval = setInterval(() => {
         nextSegment();
-      }, 5000); // 5s per segment = 15s total
+      }, 15000);
 
       return () => {
         document.body.style.overflow = "unset";
@@ -80,7 +98,8 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
 
   const handleWhatsAppDirect = () => {
     sound.playGoldChime();
-    const rawPhone = story.whatsapp || "593987654321";
+    if (!story.whatsapp) return;
+    const rawPhone = story.whatsapp;
     const cleanPhone = rawPhone.replace(/\D/g, "");
     const fullPhone = cleanPhone.startsWith("593") ? cleanPhone : `593${cleanPhone.replace(/^0/, "")}`;
     const text = encodeURIComponent(`Hola ${story.name}, vi tu Historia 4K en Cariñosas.top y me gustaría coordinar una cita privada hoy. ¿Tienes disponibilidad?`);
@@ -89,8 +108,8 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
-    const rawPhone = story.whatsapp || "593987654321";
+    if (!message.trim() || !story.whatsapp) return;
+    const rawPhone = story.whatsapp;
     const cleanPhone = rawPhone.replace(/\D/g, "");
     const fullPhone = cleanPhone.startsWith("593") ? cleanPhone : `593${cleanPhone.replace(/^0/, "")}`;
     const text = encodeURIComponent(`Hola ${story.name}, vi tu Historia en Cariñosas.top: "${message.trim()}"`);
@@ -110,13 +129,11 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
         
         {/* Background Image / Canvas */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <Image
-            src={story.story}
-            alt={story.name}
-            fill
-            className="object-cover"
-            priority
-          />
+          {story.mediaType === "video" ? (
+            <video src={story.story} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <Image src={story.story} alt={story.name} fill className="object-cover" priority />
+          )}
           {/* Obsidian Luxury Vignette */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/10 to-black/95 z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#08080B] via-transparent to-transparent z-10" />
@@ -177,13 +194,15 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="text-white font-serif text-base leading-none font-bold">{story.name}</span>
-                  {story.age && <span className="text-white/60 text-xs font-light">, {story.age}</span>}
-                  <span className="text-[7px] px-1.5 py-0.5 rounded-full bg-brand-gold text-brand-black font-black uppercase tracking-wider flex items-center gap-0.5 ml-1">
-                    <ShieldCheck size={9} /> 4K
-                  </span>
+                  {story.age ? <span className="text-white/60 text-xs font-light">, {story.age}</span> : null}
+                  {story.isVerified && (
+                    <span className="text-[7px] px-1.5 py-0.5 rounded-full bg-brand-gold text-brand-black font-black uppercase tracking-wider flex items-center gap-0.5 ml-1">
+                      <ShieldCheck size={9} /> Verificada
+                    </span>
+                  )}
                 </div>
                 <span className="text-[9px] text-white/50 uppercase font-black tracking-widest mt-0.5">
-                  {story.sector || story.city} · Hace 15m
+                  {[story.sector, story.city, publishedLabel].filter(Boolean).join(" · ")}
                 </span>
               </div>
             </div>
@@ -196,34 +215,12 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
             </button>
           </div>
 
-          {/* Live Status & Audio Tag Badges */}
+          {/* Profile status from the live model record */}
           <div className="flex items-center gap-2 pt-1">
-            <div className="glass-obsidian px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+            {story.isOnline && <div className="glass-obsidian px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-wider">Disponible Ahora</span>
-            </div>
-
-            <button
-              onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-              className="glass-obsidian px-3 py-1 rounded-full border border-brand-gold/30 flex items-center gap-1.5 hover:border-brand-gold transition-all"
-            >
-              <Volume2 size={10} className="text-brand-gold animate-pulse" />
-              <span className="text-[8px] text-brand-gold font-bold uppercase tracking-wider">
-                {story.audioName || `Voz de ${story.name}`}
-              </span>
-              <div className="flex items-center gap-0.5 h-2 ml-0.5">
-                {[1, 2, 3].map((i) => (
-                  <span
-                    key={i}
-                    className="w-0.5 bg-brand-gold rounded-full"
-                    style={{
-                      height: isPlayingAudio ? `${i * 3 + 2}px` : "2px",
-                      animation: isPlayingAudio ? `soundWave 0.8s ease-in-out infinite alternate ${i * 0.2}s` : "none",
-                    }}
-                  />
-                ))}
-              </div>
-            </button>
+              <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-wider">Marcada en línea</span>
+            </div>}
           </div>
         </div>
 
@@ -231,7 +228,7 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
         <div className="relative z-20 pointer-events-none px-6 flex justify-end">
           <div className="text-right opacity-30">
             <span className="text-[8px] tracking-[0.4em] font-serif text-brand-gold uppercase font-bold block">Cariñosas.top</span>
-            <span className="text-[7px] tracking-[0.2em] text-white/50 uppercase">Ultra 4K Exclusive</span>
+            <span className="text-[7px] tracking-[0.2em] text-white/50 uppercase">Historia pública</span>
           </div>
         </div>
 
@@ -278,15 +275,16 @@ export default function StoryModal({ isOpen, onClose, story }: StoryModalProps) 
           <div className="flex items-center gap-2 pt-1">
             <button
               onClick={handleWhatsAppDirect}
+              disabled={!story.whatsapp}
               className="flex-1 py-3.5 bg-brand-gold hover:bg-white text-brand-black rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(212,168,67,0.3)] active:scale-95"
             >
               <MessageCircle size={15} fill="currentColor" />
-              WhatsApp Directo
+              {story.whatsapp ? "WhatsApp Directo" : "Contacto no disponible"}
             </button>
             <button
               onClick={() => {
                 onClose();
-                router.push(`/profile/${story.id}`);
+                router.push(`/profile/${story.modelId}`);
               }}
               className="px-5 py-3.5 rounded-2xl border border-white/20 glass-obsidian text-white hover:border-brand-gold hover:text-brand-gold text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
             >

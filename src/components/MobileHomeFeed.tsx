@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Radar, ChevronRight, MessageCircle, BadgeCheck } from "lucide-react";
+import { Radar, ChevronRight } from "lucide-react";
 import ProfileCard from "./ProfileCard";
 import { EmptyState } from "@/components/ui/VisualComponents";
 
@@ -16,6 +15,7 @@ interface FeedModel {
   images?: string[];
   isBoosted?: boolean;
   is_verified_4k?: boolean;
+  is_online?: boolean;
   whatsapp?: string;
   sector?: string | null;
   tags?: string[] | null;
@@ -25,76 +25,81 @@ interface FeedModel {
 
 interface MobileHomeFeedProps {
   models: FeedModel[];
+  onQuickFilter: (filter: "city" | "online" | "week") => void;
+  isLoading?: boolean;
+  error?: string;
+  onRetry?: () => void;
 }
 
 const CHIPS = [
-  { id: "cerca", label: "Cerca" },
+  { id: "city", label: "En tu ciudad" },
   { id: "online", label: "En línea" },
-  { id: "nuevas", label: "Nuevas" },
-  { id: "hoy", label: "Hoy" },
+  { id: "week", label: "Esta semana" },
 ] as const;
 
-/** Recreación mobile-first exacta de screenHome del mockup: chips + feed de tarjetas anchas + teaser de radar + fila de contacto. */
-export default function MobileHomeFeed({ models }: MobileHomeFeedProps) {
+export default function MobileHomeFeed({ models, onQuickFilter, isLoading = false, error = "", onRetry }: MobileHomeFeedProps) {
   const router = useRouter();
-  const [chip, setChip] = useState<(typeof CHIPS)[number]["id"]>("cerca");
-  const second = models[1];
+  const [chip, setChip] = useState<(typeof CHIPS)[number]["id"]>("city");
+  const applyQuickFilter = (id: (typeof CHIPS)[number]["id"]) => {
+    setChip(id);
+    onQuickFilter(id);
+  };
 
   if (models.length === 0) {
     return (
       <div className="lg:hidden flex flex-col">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar" style={{ padding: "0 20px 12px" }}>
+        <div className="flex items-center gap-2 overflow-x-auto px-4 pb-4 no-scrollbar sm:px-6">
           {CHIPS.map((c) => (
             <button
               key={c.id}
-              onClick={() => setChip(c.id)}
-              className="shrink-0 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors scale-pop-active"
-              style={{
-                padding: "9px 14px",
-                background: chip === c.id ? "#D4A843" : "rgba(255,255,255,.05)",
-                color: chip === c.id ? "#08080B" : "rgba(240,240,236,.72)",
-                border: `1px solid ${chip === c.id ? "#D4A843" : "rgba(255,255,255,.1)"}`,
-              }}
+              onClick={() => applyQuickFilter(c.id)}
+              aria-pressed={chip === c.id}
+              className={`min-h-11 shrink-0 rounded-full border px-4 text-[13px] font-medium whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold ${chip === c.id ? "border-brand-gold bg-brand-gold text-brand-black" : "border-white/10 bg-white/[0.04] text-white/75 hover:border-white/25 hover:text-white"}`}
             >
               {c.label}
             </button>
           ))}
         </div>
-        <EmptyState
-          title="Sin perfiles disponibles aún"
-          subtitle="No hay modelos registrados en esta ciudad. Vuelve pronto o cambia de ciudad."
-          action={{
-            label: "Cambiar ciudad",
-            onClick: () => {},
-          }}
-        />
+        {isLoading ? (
+          <p role="status" className="px-4 py-10 text-center text-sm text-white/60">Cargando perfiles…</p>
+        ) : error ? (
+          <div className="mx-4 rounded-2xl border border-red-300/20 bg-red-400/[0.06] px-5 py-6 text-center sm:mx-6">
+            <p role="alert" className="text-sm text-red-100">{error}</p>
+            {onRetry && <button type="button" onClick={onRetry} className="mt-4 min-h-11 rounded-xl border border-white/15 px-4 text-sm text-white hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-gold">Reintentar</button>}
+          </div>
+        ) : (
+          <EmptyState
+            title="No hay perfiles para mostrar"
+            subtitle="Prueba otro filtro o cambia la ciudad seleccionada."
+          />
+        )}
       </div>
     );
   }
 
   return (
     <div className="lg:hidden flex flex-col">
-      {/* Chips — calcado de chip() del mockup */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar" style={{ padding: "0 20px 12px" }}>
+      {isLoading && <p role="status" className="px-4 pb-3 text-sm text-white/55 sm:px-6">Actualizando perfiles…</p>}
+      {error && models.length > 0 && (
+        <div className="mx-4 mb-3 flex items-center justify-between gap-3 rounded-xl border border-red-300/20 bg-red-400/[0.06] px-4 py-3 sm:mx-6">
+          <p role="alert" className="text-sm text-red-100">{error}</p>
+          {onRetry && <button type="button" onClick={onRetry} className="min-h-11 shrink-0 rounded-lg border border-white/15 px-3 text-sm text-white hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-gold">Reintentar</button>}
+        </div>
+      )}
+      <div className="flex items-center gap-2 overflow-x-auto px-4 pb-4 no-scrollbar sm:px-6">
         {CHIPS.map((c) => (
           <button
             key={c.id}
-            onClick={() => setChip(c.id)}
-            className="shrink-0 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors"
-            style={{
-              padding: "9px 14px",
-              background: chip === c.id ? "#D4A843" : "rgba(255,255,255,.05)",
-              color: chip === c.id ? "#08080B" : "rgba(240,240,236,.72)",
-              border: `1px solid ${chip === c.id ? "#D4A843" : "rgba(255,255,255,.1)"}`,
-            }}
+            onClick={() => applyQuickFilter(c.id)}
+            aria-pressed={chip === c.id}
+            className={`min-h-11 shrink-0 rounded-full border px-4 text-[13px] font-medium whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold ${chip === c.id ? "border-brand-gold bg-brand-gold text-brand-black" : "border-white/10 bg-white/[0.04] text-white/75 hover:border-white/25 hover:text-white"}`}
           >
             {c.label}
           </button>
         ))}
       </div>
 
-      {/* Feed — calcado de feedCard() del mockup, con teaser de radar y fila de contacto rápido tras la primera tarjeta */}
-      <div className="flex flex-col gap-3.5" style={{ padding: "0 20px 24px" }}>
+      <div className="flex flex-col gap-3.5 px-4 pb-6 sm:px-6">
         {models.map((m, i) => (
           <React.Fragment key={m.id}>
             <ProfileCard {...m} layout="feed" />
@@ -102,48 +107,15 @@ export default function MobileHomeFeed({ models }: MobileHomeFeedProps) {
             {i === 0 && (
               <button
                 onClick={() => router.push("/radar")}
-                className="flex items-center gap-3 text-left rounded-2xl cursor-pointer scale-pop-active"
-                style={{ padding: 14, border: "1px solid rgba(212,168,67,.24)", background: "rgba(212,168,67,.06)" }}
+                className="flex min-h-16 items-center gap-3 rounded-2xl border border-brand-gold/20 bg-brand-gold/[0.045] p-3.5 text-left transition-colors hover:bg-brand-gold/[0.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
               >
                 <Radar size={20} className="text-brand-gold shrink-0" />
                 <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                  <span className="text-sm font-bold text-white">{models.length} perfiles disponibles ahora</span>
-                  <span className="text-xs text-white/50">Abrir el radar</span>
+                  <span className="text-sm font-semibold text-white">Explora el mapa de perfiles</span>
+                  <span className="text-xs text-white/55">Consulta la ubicación aproximada</span>
                 </div>
-                <ChevronRight size={18} className="text-white/40 shrink-0" />
+                <ChevronRight size={18} aria-hidden="true" className="text-white/45 shrink-0" />
               </button>
-            )}
-
-            {i === 0 && second && (
-              <div
-                className="flex items-center gap-3 rounded-2xl scale-pop-active"
-                style={{ padding: 12, background: "#101014", border: "1px solid rgba(255,255,255,.07)" }}
-              >
-                <div className="relative w-[54px] h-[54px] rounded-xl overflow-hidden shrink-0 bg-[#08080C]">
-                  <Image
-                    src={second.images?.[0] || second.imageUrl || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400"}
-                    alt={second.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[15px] font-bold text-white truncate">{second.name}, {second.age}</span>
-                    {second.is_verified_4k && <BadgeCheck size={15} className="text-brand-gold shrink-0" />}
-                  </div>
-                  <span className="text-xs text-white/50 truncate">{second.sector || second.location} · en línea</span>
-                </div>
-                <a
-                  href={second.whatsapp ? `https://wa.me/${second.whatsapp.replace(/\D/g, "")}` : "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-11 h-11 rounded-xl border border-white/[0.14] flex items-center justify-center shrink-0"
-                >
-                  <MessageCircle size={17} className="text-white" />
-                </a>
-              </div>
             )}
           </React.Fragment>
         ))}

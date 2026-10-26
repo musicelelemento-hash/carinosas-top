@@ -34,6 +34,7 @@ import { getModelDashboardByNameAction, type ModelMetrics } from "@/app/actions/
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { sound } from "@/lib/soundEngine";
+import { supabase } from "@/lib/supabase";
 
 type AvailabilityState = "online" | "in_appointment" | "hotel_vip" | "offline";
 
@@ -79,15 +80,15 @@ export default function ModelStudioDashboard() {
     let active = true;
     (async () => {
       try {
-        const stored = localStorage.getItem("model_name");
-        if (!stored) {
+        const modelId = localStorage.getItem("model_id");
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!modelId || !session?.access_token) {
           setMetricsLoading(false);
           return;
         }
-        const { modelId, metrics } = await getModelDashboardByNameAction(stored);
+        const result = await getModelDashboardByNameAction(modelId, session.access_token);
         if (active) {
-          setRealMetrics(metrics);
-          if (modelId) localStorage.setItem("model_id", modelId);
+          setRealMetrics(result.metrics);
         }
       } catch (err) {
         console.error("Model metrics load error:", err);

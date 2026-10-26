@@ -8,6 +8,7 @@ import {
   EyeOff, 
   Crown
 } from "lucide-react";
+import { buildConciergeWhatsAppUrl } from "@/lib/whatsapp";
 
 export default function MobileSpeedDial() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,8 +18,8 @@ export default function MobileSpeedDial() {
   };
 
   const handleConcierge = () => {
-    const text = encodeURIComponent("Hola Concierge de Cariñosas.top, requiero atención personalizada prioritaria para una reserva VIP.");
-    window.open(`https://wa.me/593987654321?text=${text}`, "_blank");
+    const url = buildConciergeWhatsAppUrl("Hola Concierge de Cariñosas.top, requiero atención personalizada para una reserva.");
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (

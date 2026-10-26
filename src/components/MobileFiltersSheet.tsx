@@ -38,7 +38,7 @@ export default function MobileFiltersSheet({
 }: MobileFiltersSheetProps) {
   const [maxRate, setMaxRate] = useState<number>(initialFilters?.maxRate ?? 200);
   const [onlyOnline, setOnlyOnline] = useState<boolean>(initialFilters?.onlyOnline ?? false);
-  const [only4K, setOnly4K] = useState<boolean>(initialFilters?.only4K ?? true);
+  const [only4K, setOnly4K] = useState<boolean>(initialFilters?.only4K ?? false);
   const [onlyVIP, setOnlyVIP] = useState<boolean>(initialFilters?.onlyVIP ?? false);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialFilters?.category ?? "Todas");
 
@@ -155,6 +155,16 @@ export default function MobileFiltersSheet({
             >
               <span className="text-[10px] font-bold">✨ Verificación 4K</span>
               {only4K && <Check size={12} />}
+            </button>
+
+            <button
+              onClick={() => setOnlyVIP(!onlyVIP)}
+              className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer ${
+                onlyVIP ? 'border-brand-gold bg-brand-gold/15 text-brand-gold' : 'border-white/10 glass-dark text-white/60'
+              }`}
+            >
+              <span className="text-[10px] font-bold">👑 Plan VIP</span>
+              {onlyVIP && <Check size={12} />}
             </button>
           </div>
         </div>

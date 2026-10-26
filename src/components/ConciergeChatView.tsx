@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { sound } from "@/lib/soundEngine";
 import { trackEvent } from "@/lib/track";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 interface AssistantModel {
   id: string;
@@ -261,13 +262,15 @@ export default function ConciergeChatView() {
                               Ver Perfil
                             </Link>
                             <a
-                              href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi recomendada por el Concierge VIP de Cariñosas.top y deseo coordinar una reserva.`)}`}
+                              href={buildWhatsAppUrl(model.whatsapp, `Hola ${model.name}, te vi recomendada por el Concierge VIP de Cariñosas.top y deseo coordinar una reserva.`) || "#"}
+                              aria-disabled={!model.whatsapp}
+                              onClick={(event) => { if (!model.whatsapp) event.preventDefault(); }}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex-1 py-1.5 rounded-lg bg-brand-gold hover:bg-white text-brand-black text-[9px] font-bold text-center flex items-center justify-center gap-1 transition-colors"
                             >
                               <MessageCircle size={10} fill="currentColor" />
-                              <span>WhatsApp</span>
+                              <span>{model.whatsapp ? "WhatsApp" : "Contacto no disponible"}</span>
                             </a>
                           </div>
                         </div>

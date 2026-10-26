@@ -21,7 +21,7 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    setIsMuted(sound.getMuted());
+    const muteTimer = window.setTimeout(() => setIsMuted(sound.getMuted()), 0);
 
     const checkLogins = () => {
       try {
@@ -39,6 +39,7 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
     const openAuth = () => setIsAuthOpen(true);
     window.addEventListener("open-auth-modal", openAuth);
     return () => {
+      window.clearTimeout(muteTimer);
       window.removeEventListener("storage", checkLogins);
       window.removeEventListener("vip_pass_updated", checkLogins);
       window.removeEventListener("open-auth-modal", openAuth);
@@ -54,9 +55,7 @@ export default function Navbar({ currentCountry, onChangeLocation, onSearch }: N
   };
 
   const submitSearch = () => {
-    if (searchTerm.trim()) {
-      onSearch?.(searchTerm.trim());
-    }
+    onSearch?.(searchTerm.trim());
     const el = document.getElementById("collection");
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };

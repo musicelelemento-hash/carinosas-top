@@ -29,6 +29,10 @@ export async function signUpWithEmailAction(
   role: 'model' | 'client' = 'client'
 ): Promise<AuthResponse> {
   try {
+    if (role !== "model" && role !== "client") {
+      return { success: false, message: "El tipo de cuenta solicitado no es válido." };
+    }
+
     // 1. Strict Email Validation (Blocks 120+ disposable email providers)
     const emailRes = EmailValidator.validate(email);
     if (!emailRes.isValid) {

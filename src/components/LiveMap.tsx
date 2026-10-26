@@ -4,22 +4,11 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { 
   ChevronRight, 
-  Zap, 
   Radar, 
-  ShieldCheck, 
   MessageCircle, 
-  X, 
   MapPin, 
-  Star, 
-  Navigation, 
-  LocateFixed, 
-  Sparkles, 
   Lock, 
   Unlock,
-  Crosshair,
-  Volume2,
-  CheckCircle2,
-  Compass
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
@@ -28,7 +17,6 @@ import LiveMapAnimator from "./LiveMapAnimator";
 import RadarVisual from "./RadarVisual";
 import { sound } from "@/lib/soundEngine";
 import { type Country, getCountryById } from "@/lib/countries";
-import { haversineKm } from "@/lib/geo";
 
 // Dynamic imports for leaflet (SSR-safe)
 const MapContainer = dynamic(
@@ -39,59 +27,26 @@ const TileLayer = dynamic(
   () => import("react-leaflet").then((m) => m.TileLayer),
   { ssr: false }
 );
-const Marker = dynamic(
-  () => import("react-leaflet").then((m) => m.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import("react-leaflet").then((m) => m.Popup),
-  { ssr: false }
-);
-const Circle = dynamic(
-  () => import("react-leaflet").then((m) => m.Circle),
-  { ssr: false }
-);
 
 interface MapModel {
   id: string;
   name: string;
   city: string;
-  lat: number;
-  lng: number;
-  plan_type: string;
   images: string[];
   sector?: string;
   whatsapp?: string;
   age?: number;
-  rate?: number;
-  distanceKm?: number;
+  hourly_rate?: number;
   is_online?: boolean;
 }
 
 interface LiveMapProps {
   currentCountry?: Country;
-  userLocation?: { countryId: string; provinceId: string | null; cantonId: string | null; cantonName: string | null } | null;
   /** 'full' = sección cockpit completa (comportamiento original). 'panel' = versión compacta para vivir como sidebar fijo junto al grid. */
   variant?: "full" | "panel";
 }
 
-function NotifyToggle() {
-  const [on, setOn] = useState(false);
-  return (
-    <button
-      onClick={() => setOn((v) => !v)}
-      className="relative w-[38px] h-[22px] rounded-full shrink-0 transition-colors"
-      style={{ background: on ? "#D4A843" : "rgba(255,255,255,.14)" }}
-    >
-      <div
-        className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-[#F0F0EC] transition-all"
-        style={{ left: on ? "18px" : "2px" }}
-      />
-    </button>
-  );
-}
-
-export default function LiveMap({ currentCountry, userLocation, variant = "full" }: LiveMapProps = {}) {
+export default function LiveMap({ currentCountry, variant = "full" }: LiveMapProps = {}) {
   const activeCountry = currentCountry || getCountryById("ecuador");
   const cityPresets = activeCountry.mapPresets || getCountryById("ecuador").mapPresets;
   const initialCityKey = Object.keys(cityPresets)[0] || "Quito";
@@ -100,9 +55,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string>(initialCityKey);
   const [selectedModel, setSelectedModel] = useState<MapModel | null>(null);
-  const [L, setL] = useState<typeof import("leaflet") | null>(null);
   const [mapTarget, setMapTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
-  const [activeRadius, setActiveRadius] = useState<"1km" | "3km" | "5km" | "all">("5km");
   
   // Mobile touch lock state: on small screens, default to false so page scroll is unhindered
   const [isMapInteractive, setIsMapInteractive] = useState<boolean>(true);
@@ -129,15 +82,10 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   }, [activeCountry.id]);
 
   useEffect(() => {
-    import("leaflet").then((leaflet) => setL(leaflet.default || leaflet));
-  }, []);
-
-  useEffect(() => {
     async function fetchLocations() {
       const { data, error } = await supabase
         .from("models")
-        .select("id, name, city, lat, lng, plan_type, images, sector, whatsapp, age")
-        .not("lat", "is", null);
+        .select("id, name, city, images, sector, whatsapp, age, hourly_rate, is_online");
       if (data && !error) setModels(data);
       setLoading(false);
     }
@@ -150,41 +98,16 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   }, []);
 
   // Fallback realistic models per city with coordinates
-  const fallbackPreset = cityPresets[selectedCity] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] as [number, number], zoom: 13, label: selectedCity };
-
   const cityModels: MapModel[] = useMemo(() => {
-    // P0 anti-fachada: ANTES, si no había modelos reales en la ciudad, se mostraban
-    // 4 perfiles FICTICIOS (Valentina S., Camila R., Luciana M., Elena V.) con fotos
-    // de stock, WhatsApp inventado y distancia hardcodeada. Eso destruía la confianza.
-    // Ahora, sin datos reales → mapa vacío (honesto). Y la distancia se calcula REAL
-    // con Haversine desde el centro de la ciudad hacia las coordenadas de cada modelo.
-    const center = fallbackPreset.center;
+    // Public discovery stays at city level; precise coordinates remain private.
     const dbCityModels = models.filter(
       (m) => m.city?.toLowerCase().includes(selectedCity?.toLowerCase()) || (m.sector && m.sector.toLowerCase().includes(selectedCity?.toLowerCase()))
     );
 
-    return dbCityModels.map((m) => ({
-      ...m,
-      distanceKm: haversineKm(center[0], center[1], m.lat, m.lng),
-    }));
-  }, [models, selectedCity, fallbackPreset]);
+    return dbCityModels;
+  }, [models, selectedCity]);
 
-  // Radius filtering (meters)
-  const radiusMeters = useMemo(() => {
-    switch (activeRadius) {
-      case "1km": return 1200;
-      case "3km": return 3200;
-      case "5km": return 5500;
-      case "all": return 18000;
-    }
-  }, [activeRadius]);
-
-  const displayMapModels = useMemo(() => {
-    if (activeRadius === "all") return cityModels;
-    // Filter by approx distance
-    const maxKm = activeRadius === "1km" ? 1.5 : activeRadius === "3km" ? 3.5 : 6.0;
-    return cityModels.filter(m => m.distanceKm !== undefined && m.distanceKm <= maxKm);
-  }, [cityModels, activeRadius]);
+  const displayMapModels = cityModels;
 
   const handleCitySelect = (cityKey: string) => {
     sound.playSonarPing();
@@ -199,58 +122,24 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
   const handleModelSelect = (model: MapModel) => {
     sound.playSubtleClick();
     setSelectedModel(model);
-    if (model.lat && model.lng) {
-      const coords: [number, number] = [model.lat, model.lng];
-      setMapTarget({ center: coords, zoom: 16 });
-    }
-  };
-
-  // Custom Avatar Marker Icon Factory
-  const createAvatarIcon = (imgUrl: string, isSelected: boolean) => {
-    if (!L) return undefined;
-    return new L.DivIcon({
-      html: `<div class="relative group cursor-pointer">
-        <div class="absolute -inset-2 rounded-full ${isSelected ? 'bg-[#FF0062]/50 animate-ping' : 'bg-[#D4A843]/35 animate-pulse'} blur-sm"></div>
-        <div class="relative w-11 h-11 rounded-full p-[2px] ${isSelected ? 'bg-gradient-to-tr from-[#FF0062] to-[#FF80A0] scale-110 shadow-[0_0_25px_rgba(255,0,98,0.8)]' : 'bg-gradient-to-tr from-[#D4A843] via-[#FFF1C2] to-[#AA7C11] shadow-[0_0_18px_rgba(212,175,55,0.65)]'} transition-transform duration-300">
-          <img src="${imgUrl}" alt="VIP" class="w-full h-full object-cover rounded-full" />
-          <div class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-black"></div>
-        </div>
-      </div>`,
-      className: "custom-avatar-pin",
-      iconSize: [44, 44],
-      iconAnchor: [22, 22],
-    });
   };
 
   const initialCenter = (cityPresets[initialCityKey] || Object.values(cityPresets)[0] || { center: [-0.1807, -78.4678] }).center;
-  const fallbackAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800";
 
   if (variant === "panel") {
-    const activityFeed = displayMapModels.slice(0, 5).map((m, i) => ({
-      model: m,
-      action: i === 0 ? "se activó cerca" : m.is_online === true ? "está en línea" : "actualizó su ubicación",
-      time: i === 0 ? "ahora" : `${(i + 1) * 4} min`,
-    }));
-
-    const tours = [
-      { city: "Manta", who: "3 días", when: "Mar 24" },
-      { city: "Salinas", who: "Fin de semana", when: "Vie 27" },
-      { city: "Cuenca", who: "2 días", when: "Lun 30" },
-    ];
-
     return (
       <div className="w-full lg:w-[372px] shrink-0 flex flex-col bg-[#0C0C10] lg:border-l border-white/[0.07]">
         {/* Header */}
         <div className="px-5 py-[18px] border-b border-white/[0.07] flex items-center justify-between">
           <div className="flex flex-col gap-[3px]">
-            <span className="text-sm font-bold text-white">Radar en vivo</span>
+            <span className="text-sm font-bold text-white">Explorar por ciudad</span>
             <span className="font-mono text-[11px] text-white/40">
-              {selectedCity} · radio {activeRadius === "all" ? "todo" : activeRadius}
+              {selectedCity} · ubicaciones del perfil
             </span>
           </div>
-          <span className="flex items-center gap-1.5 font-mono text-[11px] text-brand-pink">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-pink om-breathe" />
-            LIVE
+          <span className="flex items-center gap-1.5 font-mono text-[11px] text-white/45">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/35" />
+            CATÁLOGO
           </span>
         </div>
 
@@ -261,9 +150,8 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
             blips={displayMapModels.slice(0, 6).map((m, i) => ({
               id: m.id,
               name: m.name,
-              km: m.distanceKm ? `${m.distanceKm} km` : undefined,
               avatar: m.images?.[0],
-              live: i % 2 === 0,
+              live: m.is_online === true,
             }))}
             onSelect={(b) => {
               const model = displayMapModels.find((m) => m.id === b.id);
@@ -272,48 +160,8 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
           />
         </div>
 
-        {/* Movimiento reciente */}
-        <div className="px-5 py-4 flex flex-col gap-3 border-t border-white/[0.07]">
-          <span className="font-mono text-[11px] tracking-[0.18em] uppercase text-white/[0.34]">Movimiento reciente</span>
-          {activityFeed.map(({ model, action, time }) => (
-            <button
-              key={model.id}
-              onClick={() => handleModelSelect(model)}
-              className="flex items-center gap-3 text-left cursor-pointer"
-            >
-              <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden shrink-0">
-                <Image src={model.images?.[0] || fallbackAvatar} alt={model.name} fill className="object-cover" />
-              </div>
-              <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                <span className="text-[13px] font-semibold text-white truncate">{model.name}</span>
-                <span className="text-[12px] text-white/45 truncate">{action}</span>
-              </div>
-              <span className="font-mono text-[11px] text-white/[0.32] shrink-0">{time}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Giras esta semana */}
-        <div className="px-5 py-4 flex flex-col gap-3 border-t border-white/[0.07]">
-          <span className="font-mono text-[11px] tracking-[0.18em] uppercase text-white/[0.34]">Giras esta semana</span>
-          {tours.map((t) => (
-            <div key={t.city} className="flex items-center justify-between px-3 py-[11px] rounded-[10px] bg-white/[0.03] border border-white/[0.06]">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[13px] font-semibold text-white">{t.city}</span>
-                <span className="text-[12px] text-white/45">{t.who}</span>
-              </div>
-              <span className="font-mono text-[11px] text-brand-gold">{t.when}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Avísame de nuevas cerca */}
-        <div className="mt-auto px-5 py-5 border-t border-white/[0.07] flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[13px] font-semibold text-white">Avísame de nuevas cerca</span>
-            <span className="text-[12px] text-white/45">Radio de 5 km · sin notificaciones visibles</span>
-          </div>
-          <NotifyToggle />
+        <div className="mt-auto px-5 py-5 border-t border-white/[0.07] text-xs leading-relaxed text-white/45">
+          El mapa muestra zonas generales. No publicamos la ubicación exacta de los perfiles.
         </div>
 
         {/* Links al radar / mapa de pantalla completa */}
@@ -346,20 +194,17 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
           
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#D4A843]/15 border border-[#D4A843]/40 flex items-center justify-center text-[#D4A843] shadow-[0_0_20px_rgba(212,168,67,0.3)]">
-              <Radar size={20} className="animate-spin-slow text-[#D4A843]" />
+              <Radar size={20} className="text-[#D4A843]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-[#D4A843] font-black uppercase tracking-[0.3em] block">
-                  Geo-Radar 4K Táctico
+                  Directorio por zona
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[8px] font-black uppercase tracking-wider flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Live GPS
-                </span>
+                <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/55 text-[8px] font-black uppercase tracking-wider">Catálogo</span>
               </div>
               <span className="text-xs text-white/60 font-light">
-                Detección de suites y acompañantes verificadas en {activeCountry.name}
+                Perfiles disponibles por ciudad en {activeCountry.name}
               </span>
             </div>
           </div>
@@ -400,42 +245,21 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                 </span>
               </div>
               <span className="text-[9px] px-2.5 py-1 rounded-full bg-[#D4A843]/15 text-[#D4A843] font-bold border border-[#D4A843]/35 shadow-sm">
-                {displayMapModels.length} Modelos en Rango
+                {displayMapModels.length} perfiles en {selectedCity}
               </span>
             </div>
 
-            {/* Range Selector Buttons in Sidebar */}
-            <div className="space-y-1.5">
-              <span className="text-[8px] text-white/40 uppercase font-black tracking-widest block">Radio de Proximidad:</span>
-              <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl glass-dark border border-white/10">
-                {(["1km", "3km", "5km", "all"] as const).map((rad) => (
-                  <button
-                    key={rad}
-                    onClick={() => {
-                      sound.playSubtleClick();
-                      setActiveRadius(rad);
-                    }}
-                    className={`py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer text-center ${
-                      activeRadius === rad
-                        ? "bg-[#D4A843] text-black shadow-md font-black"
-                        : "text-white/40 hover:text-white"
-                    }`}
-                  >
-                    {rad === "all" ? "Todo" : rad}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <p className="text-xs text-white/50">El mapa usa la ciudad y el sector. No muestra puntos exactos de personas.</p>
 
             {/* Micro HUD Telemetry */}
             <div className="grid grid-cols-2 gap-2 text-[10px] p-3 rounded-2xl glass-dark border border-white/5">
               <div>
-                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Discreción</span>
-                <span className="text-emerald-400 font-mono font-bold">100% Blindada</span>
+                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Ubicación</span>
+                <span className="text-emerald-400 font-mono font-bold">Zona aproximada</span>
               </div>
               <div>
-                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Llegada a Suite</span>
-                <span className="text-[#D4A843] font-bold">5-12 min</span>
+                <span className="text-white/40 block text-[8px] uppercase tracking-wider">Distancia</span>
+                <span className="text-[#D4A843] font-bold">No se muestra</span>
               </div>
             </div>
           </div>
@@ -445,13 +269,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
             {displayMapModels.length === 0 ? (
               <div className="p-10 text-center space-y-2 text-white/40 text-xs">
                 <MapPin size={24} className="mx-auto text-[#D4A843]/40" />
-                <p>No hay modelos en el radio de {activeRadius} en {selectedCity}.</p>
-                <button
-                  onClick={() => setActiveRadius("all")}
-                  className="text-[10px] text-[#D4A843] hover:underline block mx-auto mt-2 cursor-pointer"
-                >
-                  Ampliar a toda la ciudad
-                </button>
+                <p>No hay perfiles en {selectedCity}.</p>
               </div>
             ) : (
               displayMapModels.map((model) => (
@@ -480,7 +298,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                         {model.name}
                       </h4>
                       <span className="text-[10px] font-mono font-bold text-[#D4A843]">
-                        ${model.rate || 130}/h
+                        {model.hourly_rate ? `$${model.hourly_rate}/h` : "Consultar tarifa"}
                       </span>
                     </div>
                     
@@ -489,14 +307,14 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                     </p>
 
                     <div className="flex items-center gap-2 text-[9px] text-emerald-400 font-bold">
-                      <span className="flex items-center gap-1">
+                      {model.is_online && <span className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                        En Línea
-                      </span>
+                        En línea
+                      </span>}
                       <span className="text-white/30">·</span>
                       <span className="text-[#D4A843] flex items-center gap-1">
-                        <Navigation size={9} />
-                        {model.distanceKm ? `A ~ ${model.distanceKm} km` : "Distancia n/d"}
+                        <MapPin size={9} />
+                        {model.city}
                       </span>
                     </div>
                   </div>
@@ -511,7 +329,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
           <div className="p-3.5 border-t border-white/10 bg-black/40 text-center flex items-center justify-center gap-1.5">
             <Lock size={10} className="text-white/40" />
             <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] block font-mono">
-              Privacidad & Discreción 100% Blindada
+              Mapa por ciudad y sector
             </span>
           </div>
         </div>
@@ -545,65 +363,6 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
               
               {mapTarget && <LiveMapAnimator target={mapTarget} />}
 
-              {/* Dynamic Range Circle Halo */}
-              {fallbackPreset && activeRadius !== "all" && (
-                <Circle
-                  center={fallbackPreset.center}
-                  radius={radiusMeters}
-                  pathOptions={{
-                    color: "#D4A843",
-                    fillColor: "#D4A843",
-                    fillOpacity: 0.05,
-                    weight: 1.5,
-                    dashArray: "6 10"
-                  }}
-                />
-              )}
-
-              {/* Verified Models Avatar Pins with Sonar Pulse */}
-              {displayMapModels.map((model) => (
-                model.lat && model.lng && (
-                  <Marker
-                    key={model.id}
-                    position={[model.lat, model.lng]}
-                    icon={createAvatarIcon(
-                      model.images?.[0] || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
-                      selectedModel?.id === model.id
-                    )}
-                    eventHandlers={{ click: () => handleModelSelect(model) }}
-                  >
-                    <Popup className="premium-map-popup">
-                       <div className="p-4 w-60 space-y-3 bg-[#0c0c10] text-white rounded-2xl border border-[#D4A843]/35 shadow-2xl">
-                           <div className="aspect-[4/3] rounded-xl overflow-hidden bg-black relative">
-                              <Image 
-                                src={model.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800'} 
-                                alt={model.name} 
-                                fill 
-                                className="object-cover" 
-                              />
-                              <div className="absolute top-2 right-2 bg-[#D4A843] text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase shadow-md">
-                                4K VIP
-                              </div>
-                           </div>
-                          <div>
-                             <h5 className="text-white font-serif text-lg italic font-bold">{model.name}</h5>
-                             <p className="text-[9px] text-white/50 uppercase tracking-wider font-bold mt-0.5">
-                               {model.age ? `${model.age} Años · ` : ''}{model.sector || model.city}
-                             </p>
-                          </div>
-                          <a 
-                             href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi en el Radar GPS de Cariñosas.top (${model.city}). Deseo consultar tu disponibilidad hoy.`)}`}
-                             target="_blank"
-                             rel="noopener noreferrer"
-                             className="block w-full py-2.5 bg-gradient-to-r from-[#D4A843] to-[#FFE088] text-black text-[10px] font-black uppercase text-center rounded-xl tracking-wider hover:brightness-110 transition-all shadow-lg"
-                          >
-                             Contactar WhatsApp
-                          </a>
-                       </div>
-                    </Popup>
-                  </Marker>
-                )
-              ))}
             </MapContainer>
           )}
 
@@ -641,25 +400,7 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
               <span>{isMapInteractive ? "Navegación Mapa: ON" : "Scroll Libre: ON"}</span>
             </button>
 
-            {/* Range Selector Pills for Mobile & Fullscreen */}
-            <div className="flex items-center gap-1 p-1 rounded-full glass-obsidian border border-white/10 shadow-xl backdrop-blur-xl">
-              {(["1km", "3km", "5km", "all"] as const).map((rad) => (
-                <button
-                  key={rad}
-                  onClick={() => {
-                    sound.playSubtleClick();
-                    setActiveRadius(rad);
-                  }}
-                  className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                    activeRadius === rad
-                      ? "bg-[#D4A843] text-black shadow-md"
-                      : "text-white/50 hover:text-white"
-                  }`}
-                >
-                  {rad === "all" ? "Todo" : rad}
-                </button>
-              ))}
-            </div>
+            <span className="px-3 py-1.5 rounded-full bg-black/70 text-[9px] text-white/70">Zona aproximada</span>
           </div>
 
           {/* Touch Notice Toast when locked */}
@@ -692,33 +433,28 @@ export default function LiveMap({ currentCountry, userLocation, variant = "full"
                           fill
                           className="object-cover"
                         />
-                        <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-black" />
+                        <div className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full border border-black ${model.is_online ? "bg-emerald-400" : "bg-white/30"}`} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
                           <h4 className="text-white font-serif font-bold text-sm truncate">{model.name}</h4>
-                          <span className="text-[9px] font-mono font-bold text-[#D4A843]">${model.rate || 130}/h</span>
+                          <span className="text-[9px] font-mono font-bold text-[#D4A843]">{model.hourly_rate ? `$${model.hourly_rate}/h` : "Consultar tarifa"}</span>
                         </div>
                         <span className="text-[8px] text-white/50 uppercase tracking-wider truncate block">
                           {model.sector || model.city}
                         </span>
-                          <span className="text-[8px] text-emerald-400 font-bold flex items-center gap-1">
-                            <Navigation size={8} />
-                            {model.distanceKm ? `A ~ ${model.distanceKm} km` : "Distancia n/d"}
+                          <span className="text-[8px] text-white/60 font-bold flex items-center gap-1">
+                            <MapPin size={8} />
+                            Ubicación aproximada
                           </span>
                       </div>
                     </div>
 
-                    <a
-                      href={`https://wa.me/${model.whatsapp || '593987654321'}?text=${encodeURIComponent(`Hola ${model.name}, te vi en el Radar GPS de Cariñosas.top (${model.city}). Deseo consultar tu disponibilidad hoy.`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                    {model.whatsapp && <a
+                      href={`https://wa.me/${model.whatsapp.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hola ${model.name}, vi tu perfil en Cariñosas.top (${model.city}). ¿Tienes disponibilidad?`)}`}
+                      target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
                       className="w-full py-1.5 rounded-lg bg-gradient-to-r from-[#D4A843] to-[#FFE088] text-black font-black text-[9px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:brightness-110 transition-all"
-                    >
-                      <MessageCircle size={11} fill="currentColor" />
-                      <span>WhatsApp VIP</span>
-                    </a>
+                    ><MessageCircle size={11} fill="currentColor" /><span>WhatsApp</span></a>}
                   </div>
                 );
               })}

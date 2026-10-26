@@ -1,6 +1,7 @@
 "use server";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isModelOwner } from "@/lib/modelAuth";
 
 export interface ModelMetrics {
   weeklyViews: number;
@@ -18,7 +19,22 @@ export interface ModelMetrics {
  * Obtiene métricas reales de un modelo desde tablas de Supabase.
  * Sin datos reales → devuelve cero/null honesto, nunca números inventados.
  */
-export async function getModelMetricsAction(modelId: string): Promise<ModelMetrics> {
+export async function getModelMetricsAction(modelId: string, accessToken: string): Promise<ModelMetrics> {
+  const authorized = await isModelOwner(modelId, accessToken);
+  if (!authorized) {
+    return {
+      weeklyViews: 0,
+      whatsappClicks: 0,
+      bookingRequests: 0,
+      vipUnlocks: 0,
+      estimatedEarningsUsd: 0,
+      verified4k: false,
+      isOnline: false,
+      hourlyRate: 0,
+      vaultRate: 19,
+    };
+  }
+
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -88,12 +104,29 @@ export async function getModelMetricsAction(modelId: string): Promise<ModelMetri
  * sus métricas reales. Si no existe el modelo, devuelve métricas en cero.
  */
 export async function getModelDashboardByNameAction(
-  modelName: string
+  modelId: string,
+  accessToken: string
 ): Promise<{ modelId?: string; metrics: ModelMetrics }> {
+  if (!await isModelOwner(modelId, accessToken)) {
+    return {
+      metrics: {
+        weeklyViews: 0,
+        whatsappClicks: 0,
+        bookingRequests: 0,
+        vipUnlocks: 0,
+        estimatedEarningsUsd: 0,
+        verified4k: false,
+        isOnline: false,
+        hourlyRate: 0,
+        vaultRate: 19,
+      },
+    };
+  }
+
   const { data: model } = await supabaseAdmin
     .from("models")
     .select("id")
-    .ilike("name", modelName)
+    .eq("id", modelId)
     .single();
 
   if (!model) {
@@ -112,6 +145,6 @@ export async function getModelDashboardByNameAction(
     };
   }
 
-  const metrics = await getModelMetricsAction(model.id);
+  const metrics = await getModelMetricsAction(model.id, accessToken);
   return { modelId: model.id, metrics };
 }
