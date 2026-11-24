@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Link from "next/link";
 import { RefreshCw, ShieldAlert, Home, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -50,13 +51,13 @@ export default function Error({
             Reintentar Conexión
           </button>
 
-          <a
+          <Link
             href="/"
             className="flex items-center justify-center gap-2 w-full py-3 px-6 rounded-xl bg-white/5 border border-white/10 hover:border-brand-gold/30 text-white font-medium text-xs tracking-wider hover:bg-white/10 transition-all"
           >
             <Home size={15} className="text-brand-gold" />
             Volver al Inicio
-          </a>
+          </Link>
         </div>
       </motion.div>
     </div>

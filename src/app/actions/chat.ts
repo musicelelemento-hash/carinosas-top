@@ -99,23 +99,31 @@ export async function sendMessageAction(
 export async function createBookingFromChatAction(input: {
   modelId: string;
   sessionKey: string;
-  city: string;
   serviceDuration?: string;
   meetingType?: string;
   day?: string;
   time?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    if (!input.modelId || !input.sessionKey || !input.city) {
+    if (!input.modelId || !input.sessionKey) {
       return { success: false, error: "Faltan datos de la reserva." };
     }
     const hilo = await getOrCreateThreadAction(input.modelId, input.sessionKey);
     if (!hilo.threadId) return { success: false, error: hilo.error || "No se pudo vincular la reserva." };
 
+    // La ciudad de la reserva es la del perfil que se está agendando, no un
+    // valor que decida el cliente (antes quedaba hardcodeada a "Machala").
+    const { data: modelRow } = await supabase
+      .from("models")
+      .select("city")
+      .eq("id", input.modelId)
+      .maybeSingle();
+    const city = modelRow?.city || "Sin especificar";
+
     const { error } = await supabase.from("booking_requests").insert([
       {
         model_id: input.modelId,
-        requested_city: input.city,
+        requested_city: city,
         service_duration: `1h`, // MVP; se puede extender con duración real.
         status: "pending",
       },
@@ -124,9 +132,9 @@ export async function createBookingFromChatAction(input: {
     if (error) return { success: false, error: error.message };
 
     // Trackea la conversión clave del embudo y notifica por Telegram.
-    await trackEvent("booking_requested", { modelId: input.modelId, city: input.city });
+    await trackEvent("booking_requested", { modelId: input.modelId, city });
     await sendTelegram(
-      `📅 <b>Nueva reserva solicitada</b>\nModelo: ${input.modelId}\nCiudad: ${input.city}\n${input.day || ""} ${input.time || ""} ${input.meetingType || ""}`
+      `📅 <b>Nueva reserva solicitada</b>\nModelo: ${input.modelId}\nCiudad: ${city}\n${input.day || ""} ${input.time || ""} ${input.meetingType || ""}`
     );
 
     return { success: true };

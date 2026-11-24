@@ -229,9 +229,9 @@ export default function AdminQuickUpload() {
         setRawDesc("");
         setImages([]);
       }, 3500);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert(err.message || "Error al registrar perfil.");
+      alert(err instanceof Error ? err.message : "Error al registrar perfil.");
     } finally {
       setLoading(false);
     }

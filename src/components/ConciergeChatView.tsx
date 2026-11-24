@@ -25,6 +25,12 @@ import { sound } from "@/lib/soundEngine";
 import { trackEvent } from "@/lib/track";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
+let messageIdCounter = 0;
+function nextMessageId(prefix: string): string {
+  messageIdCounter += 1;
+  return `${prefix}-${messageIdCounter}`;
+}
+
 interface AssistantModel {
   id: string;
   name: string;
@@ -90,7 +96,7 @@ export default function ConciergeChatView() {
     } catch {}
 
     const userMsg: Message = {
-      id: `usr-${Date.now()}`,
+      id: nextMessageId("usr"),
       sender: "user",
       text: text.trim(),
       timestamp: "Ahora"
@@ -113,7 +119,7 @@ export default function ConciergeChatView() {
       setIsTyping(false);
 
       const botMsg: Message = {
-        id: `bot-${Date.now()}`,
+        id: nextMessageId("bot"),
         sender: "concierge",
         text: data.reply || "He procesado su solicitud con máxima discreción.",
         timestamp: "Ahora",
@@ -126,7 +132,7 @@ export default function ConciergeChatView() {
       setMessages(prev => [
         ...prev,
         {
-          id: `bot-${Date.now()}`,
+          id: nextMessageId("bot"),
           sender: "concierge",
           text: "He tenido una pequeña demora en la conexión satelital segura. Cuénteme su preferencia y con gusto le asistiré de inmediato.",
           timestamp: "Ahora"

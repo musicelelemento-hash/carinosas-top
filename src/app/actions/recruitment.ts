@@ -46,7 +46,7 @@ function normalizeWhatsapp(raw: string): string {
   return `+${cleaned}`;
 }
 
-function mapLead(row: any): RecruitmentLead {
+function mapLead(row: RecruitmentLead): RecruitmentLead {
   return {
     id: row.id,
     name: row.name,

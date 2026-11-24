@@ -11,6 +11,8 @@ export default function Footer() {
   const conciergeUrl = buildConciergeWhatsAppUrl("Hola, necesito ayuda del Concierge de Cariñosas.top.");
 
   useEffect(() => {
+    // Preferencia de sonido solo existe en cliente (localStorage).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMuted(sound.getMuted());
   }, []);
 

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
+import Link from "next/link";
+import {
   Plus, 
   X, 
   MessageCircle, 
@@ -57,7 +58,7 @@ export default function MobileSpeedDial() {
           </button>
 
           {/* Action 3: Club Alpha 3D */}
-          <a
+          <Link
             href="/#vip-lounge"
             onClick={() => setIsOpen(false)}
             className="flex items-center gap-2.5 px-3.5 py-2 rounded-full glass-obsidian border border-[#D4AF37]/40 text-[#D4AF37] shadow-xl active:scale-95 transition-all"
@@ -66,7 +67,7 @@ export default function MobileSpeedDial() {
             <div className="w-6 h-6 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37]">
               <Crown size={13} />
             </div>
-          </a>
+          </Link>
 
         </div>
       )}

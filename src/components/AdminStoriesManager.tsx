@@ -17,9 +17,23 @@ import {
 import { getAdminStoriesAction, createAdminStoryAction, deleteAdminStoryAction, getAdminModelsAction } from "@/app/actions/admin";
 import { sound } from "@/lib/soundEngine";
 
+interface StoryRow {
+  id: string;
+  media_url: string | null;
+  caption: string | null;
+  views_count: number | null;
+  models?: { name?: string; city?: string } | null;
+}
+
+interface ModelOption {
+  id: string;
+  name: string;
+  city: string;
+}
+
 export default function AdminStoriesManager() {
-  const [stories, setStories] = useState<any[]>([]);
-  const [models, setModels] = useState<any[]>([]);
+  const [stories, setStories] = useState<StoryRow[]>([]);
+  const [models, setModels] = useState<ModelOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -68,8 +82,8 @@ export default function AdminStoriesManager() {
       setMediaUrl("");
       setCaption("");
       fetchStoriesAndModels();
-    } catch (err: any) {
-      alert(err.message || "Error al crear historia.");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al crear historia.");
     } finally {
       setSaving(false);
     }
@@ -81,8 +95,8 @@ export default function AdminStoriesManager() {
       await deleteAdminStoryAction(id);
       sound.playSubtleClick();
       setStories(prev => prev.filter(s => s.id !== id));
-    } catch (err: any) {
-      alert(err.message || "Error al eliminar historia.");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al eliminar historia.");
     }
   };
 

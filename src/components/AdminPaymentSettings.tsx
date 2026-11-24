@@ -237,7 +237,7 @@ export default function AdminPaymentSettings() {
               <label className="text-[10px] font-black uppercase text-white/70">Tipo de Método</label>
               <select
                 value={newType}
-                onChange={e => setNewType(e.target.value as any)}
+                onChange={e => setNewType(e.target.value as "crypto" | "bank" | "app" | "card")}
                 className="w-full px-4 py-3 rounded-xl bg-[#141419] border border-white/10 text-white text-xs"
               >
                 <option value="bank">🏦 Transferencia Bancaria Ecuador</option>

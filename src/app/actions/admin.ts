@@ -729,7 +729,22 @@ export async function getAdminAuditLogsAction() {
 /**
  * Fetches all 4K ephemeral stories with model details.
  */
-export async function getAdminStoriesAction() {
+interface AdminStoryRow {
+  id: string;
+  model_id: string;
+  media_url: string | null;
+  media_type: string | null;
+  caption: string | null;
+  views_count: number | null;
+  expires_at: string | null;
+  created_at: string | null;
+  // `model_id` referencia a un único registro de `models` (relación N:1);
+  // Supabase tipa el embed como array sin un schema generado, pero en
+  // tiempo de ejecución PostgREST devuelve un solo objeto.
+  models: { name: string; city: string } | null;
+}
+
+export async function getAdminStoriesAction(): Promise<AdminStoryRow[]> {
   await assertAdmin();
   try {
     const { data, error } = await supabaseAdmin
@@ -738,7 +753,7 @@ export async function getAdminStoriesAction() {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data as unknown as AdminStoryRow[]) || [];
   } catch (err) {
     console.error("Stories fetch error:", err);
     return [];

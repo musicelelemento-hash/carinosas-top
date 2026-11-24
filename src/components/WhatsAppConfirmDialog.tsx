@@ -21,14 +21,14 @@ export default function WhatsAppConfirmDialog({
   name,
   city,
 }: WhatsAppConfirmDialogProps) {
-  if (!isOpen) return null;
-
   const handleConfirm = useCallback(() => {
     sound.playGoldChime();
     const cleanPhone = phone.replace(/\D/g, "");
     const fullPhone = cleanPhone.startsWith("593") ? cleanPhone : `593${cleanPhone.replace(/^0/, "")}`;
     onConfirm(fullPhone, name, city);
   }, [phone, name, city, onConfirm]);
+
+  if (!isOpen) return null;
 
   return (
     <div

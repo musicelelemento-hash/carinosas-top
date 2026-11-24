@@ -1,39 +1,46 @@
 "use server";
 
-import { headers } from "next/headers";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-// In-memory OTP storage cache
-const otpCache = new Map<string, { code: string; expiresAt: number; attempts: number }>();
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX_REQUESTS = 3;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_VERIFY_ATTEMPTS = 3;
 
-// 15-Minute Anti-Abuse Lockout Storage: Phone -> Lockout Expiration Timestamp
-const lockoutCache = new Map<string, number>();
+interface OtpRow {
+  phone: string;
+  code: string | null;
+  code_expires_at: string | null;
+  attempts: number;
+  locked_until: string | null;
+  request_count: number;
+  request_reset_at: string | null;
+}
 
-// Rate limit request counter: Phone -> { count: number, resetAt: number }
-const requestCounter = new Map<string, { count: number; resetAt: number }>();
+async function getOtpRow(cleanPhone: string): Promise<OtpRow | null> {
+  const { data } = await supabaseAdmin
+    .from("otp_verifications")
+    .select("*")
+    .eq("phone", cleanPhone)
+    .maybeSingle();
+  return (data as OtpRow | null) ?? null;
+}
 
-/**
- * Checks if a phone number is currently in 15-minute lockout.
- */
-function isPhoneLocked(cleanPhone: string): { isLocked: boolean; remainingMinutes?: number } {
-  const lockedUntil = lockoutCache.get(cleanPhone);
-  if (!lockedUntil) return { isLocked: false };
-
-  const now = Date.now();
+function isLocked(row: OtpRow | null, now: number): { locked: boolean; remainingMinutes?: number } {
+  if (!row?.locked_until) return { locked: false };
+  const lockedUntil = new Date(row.locked_until).getTime();
   if (now < lockedUntil) {
-    const remainingMinutes = Math.ceil((lockedUntil - now) / (60 * 1000));
-    return { isLocked: true, remainingMinutes };
+    return { locked: true, remainingMinutes: Math.ceil((lockedUntil - now) / (60 * 1000)) };
   }
-
-  // Lockout expired: remove from cache
-  lockoutCache.delete(cleanPhone);
-  return { isLocked: false };
+  return { locked: false };
 }
 
 /**
  * Generates and sends a 6-digit verification code via WhatsApp or SMS.
  */
 export async function sendPhoneOtpAction(
-  phoneNumber: string, 
+  phoneNumber: string,
   channel: 'whatsapp_otp' | 'sms_otp'
 ): Promise<{ success: boolean; message: string; isLocked?: boolean; whatsAppLink?: string; smsSent?: boolean; smsError?: string | null }> {
   try {
@@ -42,9 +49,12 @@ export async function sendPhoneOtpAction(
       return { success: false, message: "El número de teléfono no es válido." };
     }
 
+    const now = Date.now();
+    const existing = await getOtpRow(cleanPhone);
+
     // 1. Check if locked out
-    const { isLocked, remainingMinutes } = isPhoneLocked(cleanPhone);
-    if (isLocked) {
+    const { locked, remainingMinutes } = isLocked(existing, now);
+    if (locked) {
       return {
         success: false,
         isLocked: true,
@@ -53,21 +63,23 @@ export async function sendPhoneOtpAction(
     }
 
     // 2. Anti-Spam Rate Limit (Max 3 OTP requests per 10 minutes)
-    const now = Date.now();
-    const reqData = requestCounter.get(cleanPhone) || { count: 0, resetAt: now + 10 * 60 * 1000 };
-    if (now > reqData.resetAt) {
-      reqData.count = 0;
-      reqData.resetAt = now + 10 * 60 * 1000;
-    }
+    const resetAt = existing?.request_reset_at ? new Date(existing.request_reset_at).getTime() : 0;
+    let requestCount = existing && now <= resetAt ? existing.request_count : 0;
+    const requestResetAt = existing && now <= resetAt ? resetAt : now + RATE_LIMIT_WINDOW_MS;
+    requestCount += 1;
 
-    reqData.count += 1;
-    requestCounter.set(cleanPhone, reqData);
-
-    if (reqData.count > 3) {
-      // Trigger 15-minute lockout
-      const lockUntil = now + 15 * 60 * 1000;
-      lockoutCache.set(cleanPhone, lockUntil);
-      otpCache.delete(cleanPhone);
+    if (requestCount > RATE_LIMIT_MAX_REQUESTS) {
+      const lockUntil = new Date(now + LOCKOUT_MS).toISOString();
+      await supabaseAdmin.from("otp_verifications").upsert({
+        phone: cleanPhone,
+        code: null,
+        code_expires_at: null,
+        attempts: 0,
+        locked_until: lockUntil,
+        request_count: requestCount,
+        request_reset_at: new Date(requestResetAt).toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       return {
         success: false,
         isLocked: true,
@@ -77,21 +89,31 @@ export async function sendPhoneOtpAction(
 
     // 3. Generate secure 6-digit code
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = now + 5 * 60 * 1000; // 5 minutes TTL
+    const expiresAt = now + OTP_TTL_MS;
 
-    // Store in OTP cache
-    otpCache.set(cleanPhone, {
+    // Store (upsert) — shared across every serverless instance, not just this one.
+    const { error: upsertError } = await supabaseAdmin.from("otp_verifications").upsert({
+      phone: cleanPhone,
       code: generatedOtp,
-      expiresAt,
-      attempts: 0
+      code_expires_at: new Date(expiresAt).toISOString(),
+      attempts: 0,
+      locked_until: null,
+      request_count: requestCount,
+      request_reset_at: new Date(requestResetAt).toISOString(),
+      updated_at: new Date().toISOString(),
     });
+
+    if (upsertError) {
+      console.error("[OTP] Error guardando código en Supabase:", upsertError);
+      return { success: false, message: "Error interno al generar el código." };
+    }
 
     const channelName = channel === 'whatsapp_otp' ? 'WhatsApp' : 'SMS';
     console.log(`[OTP Engine] Code generated for ${cleanPhone} via ${channelName}`);
 
     // --- Entrega real del código (P1) ---------------------------------------
     // Intenta enviar por SMS via Twilio. Si no hay credenciales, el código
-    // queda almacenado en otpCache pero NO se entrega: no se simula entrega.
+    // queda almacenado pero NO se entrega: no se simula entrega.
     let smsSent = false;
     let smsError: string | null = null;
 
@@ -157,15 +179,17 @@ export async function sendPhoneOtpAction(
  * Validates the entered 6-digit OTP code with strict 3-attempt lock.
  */
 export async function verifyPhoneOtpAction(
-  phoneNumber: string, 
+  phoneNumber: string,
   enteredOtp: string
 ): Promise<{ success: boolean; message: string; isLocked?: boolean }> {
   try {
     const cleanPhone = phoneNumber.replace(/[^0-9+]/g, "");
+    const now = Date.now();
+    const row = await getOtpRow(cleanPhone);
 
     // 1. Check if locked out
-    const { isLocked, remainingMinutes } = isPhoneLocked(cleanPhone);
-    if (isLocked) {
+    const { locked, remainingMinutes } = isLocked(row, now);
+    if (locked) {
       return {
         success: false,
         isLocked: true,
@@ -173,27 +197,29 @@ export async function verifyPhoneOtpAction(
       };
     }
 
-    const record = otpCache.get(cleanPhone);
-
-    if (!record) {
+    if (!row || !row.code || !row.code_expires_at) {
       // P0 anti-fachada: se eliminaron los códigos demo ("123456"/"849201")
       // que permitían verificar cualquier número sin código real.
       return { success: false, message: "Código no encontrado o expirado. Solicita uno nuevo." };
     }
 
-    if (Date.now() > record.expiresAt) {
-      otpCache.delete(cleanPhone);
+    if (now > new Date(row.code_expires_at).getTime()) {
+      await supabaseAdmin.from("otp_verifications").update({ code: null, code_expires_at: null }).eq("phone", cleanPhone);
       return { success: false, message: "El código ha expirado (5 min). Solicita uno nuevo." };
     }
 
     // Strict 3 attempts limit
-    record.attempts += 1;
+    const attempts = row.attempts + 1;
 
-    if (record.attempts >= 3 && record.code !== enteredOtp.trim()) {
+    if (attempts >= MAX_VERIFY_ATTEMPTS && row.code !== enteredOtp.trim()) {
       // Lock out for 15 minutes!
-      const lockUntil = Date.now() + 15 * 60 * 1000;
-      lockoutCache.set(cleanPhone, lockUntil);
-      otpCache.delete(cleanPhone);
+      const lockUntil = new Date(now + LOCKOUT_MS).toISOString();
+      await supabaseAdmin.from("otp_verifications").update({
+        attempts,
+        locked_until: lockUntil,
+        code: null,
+        code_expires_at: null,
+      }).eq("phone", cleanPhone);
       return {
         success: false,
         isLocked: true,
@@ -201,16 +227,21 @@ export async function verifyPhoneOtpAction(
       };
     }
 
-    if (record.code !== enteredOtp.trim()) {
-      const remaining = 3 - record.attempts;
+    if (row.code !== enteredOtp.trim()) {
+      await supabaseAdmin.from("otp_verifications").update({ attempts }).eq("phone", cleanPhone);
+      const remaining = MAX_VERIFY_ATTEMPTS - attempts;
       return {
         success: false,
         message: `Código incorrecto. Te quedan ${remaining} ${remaining === 1 ? 'intento' : 'intentos'} antes de bloqueo.`
       };
     }
 
-    // Success: clean OTP cache
-    otpCache.delete(cleanPhone);
+    // Success: clear the code so it can't be reused.
+    await supabaseAdmin.from("otp_verifications").update({
+      code: null,
+      code_expires_at: null,
+      attempts: 0,
+    }).eq("phone", cleanPhone);
 
     return { success: true, message: "¡Número autenticado exitosamente!" };
   } catch (err) {

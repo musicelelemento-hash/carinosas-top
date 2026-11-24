@@ -30,6 +30,8 @@ export default function VerificacionPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const m = new URLSearchParams(window.location.search).get("model");
+    // window.location solo existe en cliente; se lee una vez al montar.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (m) setModelId(m);
   }, []);
 

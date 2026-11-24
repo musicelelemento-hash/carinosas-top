@@ -798,6 +798,8 @@ export default function LocationGateway({ onEnter }: LocationGatewayProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Flag de hidratación: evita animaciones de entrada antes de montar en cliente.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -1019,6 +1021,8 @@ export function useLocationGateway() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
+        // localStorage solo existe en cliente; se lee una vez al montar.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLocation(JSON.parse(saved));
       } else {
         const defaultLoc = {

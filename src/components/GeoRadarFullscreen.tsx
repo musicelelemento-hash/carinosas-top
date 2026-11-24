@@ -27,6 +27,8 @@ export default function GeoRadarFullscreen() {
 
   useEffect(() => {
     if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("vista") === "mapa") {
+      // Lee el query param en cliente; no existe durante el render en servidor.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVista("mapa");
     }
   }, []);

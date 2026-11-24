@@ -25,6 +25,9 @@ export default function ChatsPage() {
     try {
       sk = localStorage.getItem("carinosas_session") || "";
     } catch {}
+    // localStorage solo existe en cliente; se lee una vez al montar para
+    // evitar mismatch de hidratación con el render del servidor.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSessionKey(sk);
     if (!sk) { setLoading(false); return; }
 

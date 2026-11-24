@@ -34,6 +34,8 @@ export default function CuentaPage() {
       const storedPass = localStorage.getItem("vip_pass_code") || localStorage.getItem("carinosas_vip_pass");
       const storedModel = localStorage.getItem("model_token") || localStorage.getItem("model_authenticated");
       const storedModelName = localStorage.getItem("model_name");
+      // localStorage solo existe en cliente; se lee una vez al montar.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVipPass(storedPass);
       setModelAuth(storedModel);
       setModelName(storedModelName);

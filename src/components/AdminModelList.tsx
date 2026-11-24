@@ -284,8 +284,8 @@ export default function AdminModelList() {
                         try {
                           await quickChangeCityAction(model.id, newCity);
                           fetchModels();
-                        } catch (err: any) {
-                          alert(err.message || "Error al rotar ciudad");
+                        } catch (err) {
+                          alert(err instanceof Error ? err.message : "Error al rotar ciudad");
                         }
                       }}
                       className="bg-transparent text-[9px] font-black text-brand-gold uppercase tracking-wider outline-none cursor-pointer"
@@ -311,8 +311,8 @@ export default function AdminModelList() {
                       try {
                         await duplicateModelAction(model.id);
                         fetchModels();
-                      } catch (err: any) {
-                        alert(err.message || "Error al duplicar perfil");
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "Error al duplicar perfil");
                       }
                     }
                   }}

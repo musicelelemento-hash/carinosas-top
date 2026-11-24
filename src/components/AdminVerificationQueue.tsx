@@ -33,6 +33,8 @@ export default function AdminVerificationQueue() {
   };
 
   useEffect(() => {
+    // Carga inicial de datos desde el servidor al montar.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, []);
 

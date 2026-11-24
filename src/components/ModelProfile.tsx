@@ -122,13 +122,11 @@ export default function ModelProfile({ model }: ModelProfileProps) {
           return prev + 4;
         });
       }, 300);
-    } else if (voiceProgress >= 100) {
-      setVoiceProgress(0);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlayingVoice, voiceProgress]);
+  }, [isPlayingVoice]);
 
   const toggleVoiceAudio = () => {
     if (typeof window !== "undefined" && "vibrate" in navigator) {
@@ -517,7 +515,7 @@ export default function ModelProfile({ model }: ModelProfileProps) {
                     <div
                       key={key}
                       onClick={() => {
-                        setSelectedRate(key as any);
+                        setSelectedRate(key as '1h' | '2h' | 'night' | 'weekend');
                         if (typeof window !== "undefined" && "vibrate" in navigator) {
                           try { navigator.vibrate(10); } catch {}
                         }

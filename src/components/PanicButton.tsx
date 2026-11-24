@@ -7,6 +7,8 @@ export default function PanicButton() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Flag de hidratación: evita renderizar el botón antes de montar en cliente.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
 
     // Double Escape key to quickly exit

@@ -33,6 +33,8 @@ export default function PushPrompt() {
   useEffect(() => {
     // Detect iOS
     const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as unknown as { MSStream: unknown }).MSStream;
+    // navigator solo existe en cliente; se detecta una vez al montar.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsIOS(isIosDevice);
 
     // Listen for PWA install event

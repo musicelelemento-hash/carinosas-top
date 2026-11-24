@@ -92,7 +92,13 @@ export default function AdminGentlemenPasses() {
       try {
         const dbPasses = await getAdminVIPPassesAction();
         if (dbPasses && dbPasses.length > 0) {
-          const mapped: VIPPass[] = dbPasses.map((p: any) => ({
+          const mapped: VIPPass[] = dbPasses.map((p: {
+            id: string;
+            pass_code: string;
+            holder_name: string | null;
+            created_at: string | null;
+            status: string;
+          }) => ({
             id: p.id,
             code: p.pass_code,
             targetCity: p.holder_name || "Nacional",

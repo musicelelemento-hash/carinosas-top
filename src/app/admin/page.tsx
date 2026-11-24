@@ -149,13 +149,13 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-8">
         
         {/* Master Executive HUD */}
-        <AdminDashboardHUD onSelectTab={(t) => setActiveTab(t as any)} />
+        <AdminDashboardHUD onSelectTab={(t) => setActiveTab(t as typeof activeTab)} />
 
         {/* Active Tab View */}
         <div className="pt-2">
           {activeTab === 'control' && (
             <div className="animate-in slide-in-from-bottom-5 duration-500">
-              <AdminControlRoom onSelectTab={(t) => setActiveTab(t as any)} />
+              <AdminControlRoom onSelectTab={(t) => setActiveTab(t as typeof activeTab)} />
             </div>
           )}
           {activeTab === 'upload' && (

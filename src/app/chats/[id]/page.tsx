@@ -56,6 +56,10 @@ export default function ChatConversationPage() {
   // Inicializa la sesión y crea/carga el hilo de conversación real.
   useEffect(() => {
     const sk = getSessionKey();
+    // localStorage no existe durante el render en servidor; se lee en el
+    // efecto para evitar un mismatch de hidratación, no para sincronizar
+    // estado reactivo con un sistema externo.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSessionKey(sk);
     (async () => {
       const thread = await getOrCreateThreadAction(modelId, sk);
@@ -89,7 +93,6 @@ export default function ChatConversationPage() {
     const res = await createBookingFromChatAction({
       modelId,
       sessionKey,
-      city: "Machala", // TODO: usar ciudad real detectada del usuario.
       serviceDuration: "1h",
       meetingType,
       day,

@@ -17,8 +17,15 @@ import {
 import { getAdminAuditLogsAction } from "@/app/actions/admin";
 import { sound } from "@/lib/soundEngine";
 
+interface AuditLog {
+  id: string;
+  event_type: string;
+  created_at: string | null;
+  metadata: { ip_key?: string; pass_code?: string; count?: number } | null;
+}
+
 export default function AdminSecurityLogs() {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchLogs = async () => {

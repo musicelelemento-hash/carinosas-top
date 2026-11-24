@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { 
   ChevronRight, 
   Radar, 
@@ -13,6 +14,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
+import type { Map as LeafletMap } from "leaflet";
 import LiveMapAnimator from "./LiveMapAnimator";
 import RadarVisual from "./RadarVisual";
 import { sound } from "@/lib/soundEngine";
@@ -60,12 +62,14 @@ export default function LiveMap({ currentCountry, variant = "full" }: LiveMapPro
   // Mobile touch lock state: on small screens, default to false so page scroll is unhindered
   const [isMapInteractive, setIsMapInteractive] = useState<boolean>(true);
   const [showTouchNotice, setShowTouchNotice] = useState<boolean>(false);
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
 
   useEffect(() => {
     // Detect if on mobile on mount to default touch lock
     if (typeof window !== "undefined") {
       const isMobile = window.innerWidth < 1024;
+      // window.innerWidth solo existe en cliente; se lee una vez al montar.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsMapInteractive(!isMobile);
     }
   }, []);
@@ -74,6 +78,9 @@ export default function LiveMap({ currentCountry, variant = "full" }: LiveMapPro
   useEffect(() => {
     const presets = activeCountry.mapPresets || getCountryById("ecuador").mapPresets;
     const firstKey = Object.keys(presets)[0] || "Quito";
+    // Reinicializa la selección al cambiar de país; no reacciona a un
+    // sistema externo, es un valor derivado de activeCountry.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedCity(firstKey);
     const targetPreset = presets[firstKey];
     if (targetPreset) {
@@ -93,6 +100,8 @@ export default function LiveMap({ currentCountry, variant = "full" }: LiveMapPro
 
     const currentPreset = cityPresets[selectedCity] || Object.values(cityPresets)[0];
     if (currentPreset) {
+      // Centra el mapa una sola vez al montar, antes de que el usuario interactúe.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMapTarget({ center: currentPreset.center, zoom: currentPreset.zoom });
     }
   }, []);
@@ -166,20 +175,20 @@ export default function LiveMap({ currentCountry, variant = "full" }: LiveMapPro
 
         {/* Links al radar / mapa de pantalla completa */}
         <div className="border-t border-white/[0.07] flex divide-x divide-white/[0.07]">
-          <a
+          <Link
             href="/radar"
             className="flex-1 px-5 py-3.5 flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
           >
             <span>Radar completo</span>
             <ChevronRight size={14} />
-          </a>
-          <a
+          </Link>
+          <Link
             href="/radar?vista=mapa"
             className="flex-1 px-5 py-3.5 flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/50 hover:text-brand-gold transition-colors"
           >
             <span>Ver mapa</span>
             <ChevronRight size={14} />
-          </a>
+          </Link>
         </div>
       </div>
     );

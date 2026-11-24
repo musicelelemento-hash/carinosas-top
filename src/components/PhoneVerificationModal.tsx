@@ -39,27 +39,22 @@ export default function PhoneVerificationModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [cooldown, setCooldown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
+  const canResend = hasSentCode && cooldown === 0;
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
   const [whatsAppLink, setWhatsAppLink] = useState<string | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (hasSentCode && cooldown > 0 && !canResend) {
-      timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
-    } else if (hasSentCode && cooldown === 0) {
-      setCanResend(true);
-    }
+    if (!hasSentCode || cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((prev) => prev - 1), 1000);
     return () => clearTimeout(timer);
-  }, [cooldown, canResend, hasSentCode]);
+  }, [cooldown, hasSentCode]);
 
   if (!isOpen) return null;
 
   const startCooldown = () => {
     setCooldown(60);
-    setCanResend(false);
   };
 
   const handleSendCode = async () => {
