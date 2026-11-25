@@ -31,6 +31,7 @@ import TurnstileWidget from "@/components/TurnstileWidget";
 import { useToast } from "@/components/ui/useToast";
 import { sound } from "@/lib/soundEngine";
 import { StorageEngine } from "@/lib/storage";
+import { MediaOptimizer } from "@/lib/mediaOptimizer";
 import { CONSENT_POINTS, CONSENT_SNAPSHOT } from "@/lib/consent";
 import { registerModelAction } from "@/app/actions/admin";
 
@@ -165,7 +166,16 @@ export default function AdPublishingPortal() {
     try {
       const newUrls: string[] = [];
       for (const file of files) {
-        const url = await StorageEngine.uploadToSupabaseDirect(file, file.name);
+        let toUpload: File | Blob = file;
+        let uploadName = file.name;
+        try {
+          const optimized = await MediaOptimizer.compressImage(file);
+          toUpload = optimized.file;
+          uploadName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+        } catch (compressErr) {
+          console.error("Image compression failed, uploading original:", compressErr);
+        }
+        const url = await StorageEngine.uploadToSupabaseDirect(toUpload, uploadName);
         if (url) newUrls.push(url);
       }
 

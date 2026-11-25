@@ -3,6 +3,7 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendTelegram } from "@/lib/telegram";
 import { trackEvent } from "@/lib/track";
+import { checkAdminSessionAction } from "./admin";
 
 interface SubmitVerificationInput {
   model_id?: string;
@@ -69,6 +70,11 @@ export async function reviewVerificationAction(
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const isAdmin = await checkAdminSessionAction();
+    if (!isAdmin) {
+      return { success: false, error: "No autorizado." };
+    }
+
     const { data: request, error: fetchErr } = await supabaseAdmin
       .from("verification_requests")
       .select("id, model_id")
@@ -126,6 +132,11 @@ export async function listPendingVerificationsAction(): Promise<{
   error?: string;
 }> {
   try {
+    const isAdmin = await checkAdminSessionAction();
+    if (!isAdmin) {
+      return { success: false, error: "No autorizado." };
+    }
+
     const { data, error } = await supabaseAdmin
       .from("verification_requests")
       .select("id, model_id, phone, selfie_url, gesture_url, status, created_at, model:models(name, city)")

@@ -89,7 +89,6 @@ export default function ChatConversationPage() {
     const res = await createBookingFromChatAction({
       modelId,
       sessionKey,
-      city: "Machala", // TODO: usar ciudad real detectada del usuario.
       serviceDuration: "1h",
       meetingType,
       day,
