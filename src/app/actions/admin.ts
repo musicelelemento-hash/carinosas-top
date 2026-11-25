@@ -66,7 +66,7 @@ export async function loginAdminAction(passkey: string): Promise<{ success: bool
     const clientKey = getClientKey(reqHeaders, "admin-login");
 
     // 1. Strict Brute-Force Rate Limiting (5 attempts per 15 minutes)
-    if (isRateLimited(clientKey, 5, 15 * 60 * 1000)) {
+    if (await isRateLimited(clientKey, 5, 15 * 60 * 1000)) {
       try {
         await supabaseAdmin.from("audit_logs").insert([
           {
