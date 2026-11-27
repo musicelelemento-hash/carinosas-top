@@ -46,7 +46,7 @@ interface ChatModel {
 
 export async function POST(req: Request) {
   try {
-    if (isRateLimited(getClientKey(req.headers, "chat"), 20, 60 * 1000)) {
+    if (await isRateLimited(getClientKey(req.headers, "chat"), 20, 60 * 1000)) {
       return NextResponse.json({ reply: "Has realizado muchas consultas. Espera un momento e inténtalo de nuevo.", models: [] }, { status: 429 });
     }
     const { message } = await req.json();

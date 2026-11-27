@@ -10,6 +10,7 @@
     "cloudflare:tunnel": "npx cloudflared tunnel --url http://localhost:3000"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.18",
     "@sentry/nextjs": "^11.8.0",
     "@sentry/react": "^11.8.0",
     "@supabase/supabase-js": "^2.99.1",
@@ -20,7 +21,7 @@
     "framer-motion": "^13.1.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.577.0",
-    "next": "16.1.6",
+    "next": "16.4.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-leaflet": "^5.0.0",
@@ -36,7 +37,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

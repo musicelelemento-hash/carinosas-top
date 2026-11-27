@@ -13,6 +13,15 @@
   "placement": {
     "mode": "smart"
   },
+  // Rate limiting compartido entre instancias (login admin, anti-spam del chat).
+  // Crear el namespace real con `npx wrangler kv namespace create RATE_LIMIT_KV`
+  // y reemplazar el id de abajo por el que devuelva ese comando.
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "REEMPLAZAR_CON_ID_REAL_DE_WRANGLER_KV_NAMESPACE_CREATE"
+    }
+  ],
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://carinosas.top",
     "NODE_ENV": "production"
