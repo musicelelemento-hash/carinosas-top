@@ -1,0 +1,91 @@
+name: ci
+
+# Gate basico de calidad: lint, chequeo de tipos y build en cada push/PR.
+# No depende de secretos reales -usa valores ficticios solo para que el build
+# no falle al importar modulos que exigen variables de entorno (p. ej.
+# src/lib/supabaseAdmin.ts)-, asi que corre igual en forks y PRs externos.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-typecheck-build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy_anon_key"
+      SUPABASE_SERVICE_ROLE_KEY: "dummy_service_role_key"
+      ADMIN_SECRET: "dummy_admin_secret"
+      ADMIN_PASSKEY: "dummy_admin_passkey"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # No bloqueante por ahora: hay deuda de lint preexistente (imports sin
+      # usar, algunos hooks mal usados) que el upgrade de eslint-config-next
+      # revelo como errores. tsc y build si bloquean el pipeline.
+      - name: Lint (informativo, no bloquea)
+        continue-on-error: true
+        run: npx eslint .
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+  # Pruebas E2E con Playwright contra una base de datos Supabase real de
+  # pruebas. Solo corre si el repo tiene configurados los secretos
+  # necesarios (Settings -> Secrets and variables -> Actions); si faltan, el
+  # job se salta en vez de fallar, para no bloquear el resto del pipeline.
+  e2e:
+    runs-on: ubuntu-latest
+    needs: lint-typecheck-build
+    if: ${{ vars.RUN_E2E == 'true' }}
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+      ADMIN_PASSKEY: ${{ secrets.ADMIN_PASSKEY }}
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
